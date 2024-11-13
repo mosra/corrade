@@ -27,11 +27,13 @@
 
 # Oldest known CMake version in use is 3.5 on ancient Ubuntu 16.04, all other
 # distributions have a newer version. Additionally, CMake 3.27+ warns if
-# anything older than 3.5 is used in cmake_minimum_required().
+# anything older than 3.5 is used in cmake_minimum_required(). CMake 3.31+
+# warns if anything older than 3.10 is used, so it's used as the policy max
+# version.
 #
 # Next minimal version will probably need to be 3.6 for Android NDK
 # compatibility.
-cmake_minimum_required(VERSION 3.5)
+cmake_minimum_required(VERSION 3.5...3.10)
 
 # As reported in https://github.com/mosra/corrade/issues/52 and then tracked
 # down to https://gitlab.kitware.com/cmake/cmake/issues/18099, CMake < 3.12 has
@@ -42,6 +44,13 @@ cmake_minimum_required(VERSION 3.5)
 if(APPLE AND CMAKE_GENERATOR STREQUAL Xcode AND NOT XCODE_VERSION VERSION_LESS 10.0 AND CMAKE_VERSION VERSION_LESS 3.12.0)
     message(FATAL_ERROR "CMake < 3.12 and Xcode 10 have various compatibility issues, breaking the Corrade build. Please upgrade to CMake 3.12 to use Xcode 10.")
 endif()
+
+# CMake 3.12+ uses the policy max version specified in
+# cmake_minimum_required(), meaning that with ...3.10, everything until CMP0071
+# gets set to NEW implicitly. We however want to keep compatibility with
+# versions before 3.12, so the NEW policies are still being hand-picked. Also
+# don't want to do a blanket cmake_policy(VERSION) because that may break
+# behavior for existing projects that rely on the OLD behavior.
 
 # Don't restrict INTERPROCEDURAL_OPTIMIZATION only for icc on Linux
 if(POLICY CMP0069)
