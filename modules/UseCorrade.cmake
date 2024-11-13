@@ -738,7 +738,14 @@ function(corrade_add_plugin plugin_name debug_install_dirs release_install_dirs 
     # Plugins don't have any prefix (e.g. 'lib' on Linux)
     set_target_properties(${plugin_name} PROPERTIES PREFIX "")
 
-    # Enable incremental linking on the Mac macOS
+    # On Apple platforms, it's by default not allowed to have plugins with
+    # undefined (i.e., runtime-resolved) symbols. This flag enables them,
+    # however when targeting macOS 12+ / iOS 15+, it produces
+    #   ld: warning: -undefined dynamic_lookup may not work with chained fixups
+    # One solution would be to use the Windows-specific codepath on Apple as
+    # well, i.e. explicitly linking all dependencies, but that's just horrible.
+    # TODO Python has the same issue, so far (2024-11-11) with no solution yet,
+    #   retry when they do: https://github.com/python/cpython/issues/97524
     if(CORRADE_TARGET_APPLE)
         set_target_properties(${plugin_name} PROPERTIES
             LINK_FLAGS "-undefined dynamic_lookup")
