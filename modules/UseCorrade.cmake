@@ -532,6 +532,9 @@ function(corrade_add_test test_name)
             # the target is imported before prepending the emulator. Using the
             # actual filename stops CMAKE_CROSSCOMPILING_EMULATOR from being
             # added second time.
+            # TODO Use https://cmake.org/cmake/help/latest/prop_tgt/TEST_LAUNCHER.html
+            #   since 3.29 to deduplicate the add_test() invocations for
+            #   Emscripten/Android
             add_test(NAME ${test_name} COMMAND $<TARGET_FILE:NodeJs::NodeJs> ${extra_flags} $<TARGET_FILE:${test_name}> ${arguments})
 
             # Embed all files
@@ -570,6 +573,9 @@ function(corrade_add_test test_name)
             # arguments are passed together with the filename, at the moment it
             # will fail for arguments with spaces
             string(REPLACE ";" " " arguments_str "${arguments}")
+            # TODO Use https://cmake.org/cmake/help/latest/prop_tgt/TEST_LAUNCHER.html
+            #   since 3.29 to deduplicate the add_test() invocations for
+            #   Emscripten/Android
             add_test(NAME ${test_name} COMMAND ${CORRADE_TESTSUITE_ADB_RUNNER} $<TARGET_FILE_DIR:${test_name}> "$<TARGET_FILE_NAME:${test_name}> ${arguments_str}" ${files})
 
         # Run tests natively elsewhere
