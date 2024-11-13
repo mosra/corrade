@@ -751,19 +751,21 @@ function(corrade_add_plugin plugin_name debug_install_dirs release_install_dirs 
             LINK_FLAGS "-undefined dynamic_lookup")
     endif()
 
-    # Force IDEs display also the resource files in project view
     if(metadata_file)
         get_filename_component(metadata_file_suffix ${metadata_file} EXT)
+        # Force IDEs display also the resource files in project view
         add_custom_target(${plugin_name}-metadata SOURCES ${metadata_file})
 
         # Copy metadata next to the binary so tests and CMake subprojects can
-        # use it as well
+        # use it as well.
+        # TODO Ideally this would be done not just when the plugin is rebuilt,
+        #   but also when the metadata file changes. Not sure how to do that,
+        #   add_custom_command(TARGET) doesn't support the DEPENDS option.
         add_custom_command(TARGET ${plugin_name} POST_BUILD
             # This would be nice to Ninja, but BYPRODUCTS don't support generator
             # expressions right now (last checked: CMake 3.16)
             #BYPRODUCTS $<TARGET_FILE_DIR:${plugin_name}>/${plugin_name}${metadata_file_suffix}
             COMMAND ${CMAKE_COMMAND} -E copy ${metadata_file} $<TARGET_FILE_DIR:${plugin_name}>/${plugin_name}${metadata_file_suffix}
-            DEPENDS ${metadata_file} ${name}-metadata
             WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR})
     endif()
 
