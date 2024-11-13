@@ -592,6 +592,8 @@ namespace Corrade {
     [mosra/corrade#186](https://github.com/mosra/corrade/pull/186))
 -   Clarified a warning for a Git version fetch failure to make it look less
     like a fatal error (see [mosra/corrade#187](https://github.com/mosra/corrade/issues/187))
+-   Adapted @ref Corrade/Utility/StlForwardVector.h to work with libc++ 19.1+.
+    See also [mosra/corrade#190](https://github.com/mosra/corrade/pull/190).
 
 @subsection corrade-changelog-latest-bugfixes Bug fixes
 

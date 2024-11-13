@@ -55,7 +55,11 @@ forward declaration is not possible or is unknown is equivalent to
 
 #include "Corrade/configure.h"
 
-#if defined(CORRADE_TARGET_LIBCXX) && _LIBCPP_VERSION >= 3900
+#if defined(CORRADE_TARGET_LIBCXX) && _LIBCPP_VERSION >= 190100
+/* https://github.com/llvm/llvm-project/commit/316634ff5925481201a7b27d5f806cc2361cf4f2,
+   moved from <iosfwd>, released in libc++ 19.1.0. */
+#include <__fwd/vector.h>
+#elif defined(CORRADE_TARGET_LIBCXX) && _LIBCPP_VERSION >= 3900
 /* https://github.com/llvm-mirror/libcxx/blob/8c58c2293739d3d090c721827e4217c113ced89f/include/iosfwd#L199-L200.
    Present since b3792285ed48c8ee0e877b763b983093d656913a, which was released
    in libc++ 3.9.0. */
