@@ -1347,16 +1347,15 @@ static_cast<void>(b);
 
 {
 /* [arrayCast-StridedArrayView] */
-struct Pixel {
-    std::uint8_t r, g, b, a;
+Containers::StridedArrayView2D<std::uint32_t> pixels;
+
+/* View on the first three bytes in each fout-byte pixel */
+struct Rgb {
+    std::uint8_t r, g, b;
 };
-
-Pixel pixels[]{{0x33, 0xff, 0x99, 0x66}, {0x11, 0xab, 0x33, 0xff}};
-
-auto red = Containers::StridedArrayView1D<std::uint8_t>{pixels, &pixels[0].r, 2, 4};
-auto rgba = Containers::arrayCast<Pixel>(red);
+auto rgb = Containers::arrayCast<Rgb>(pixels);
 /* [arrayCast-StridedArrayView] */
-static_cast<void>(rgba);
+static_cast<void>(rgb);
 }
 
 {
