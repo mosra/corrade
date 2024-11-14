@@ -1733,6 +1733,7 @@ template<class T, class U = decltype(stridedArrayView(Implementation::ErasedArra
 
 /** @relatesalso StridedArrayView
 @brief Reinterpret-cast a strided array view
+@tparam U Type to cast to
 
 Size of the new array is the same as original. Expects that both types are
 [standard layout](http://en.cppreference.com/w/cpp/concept/StandardLayoutType)
@@ -1759,6 +1760,7 @@ template<class U, unsigned dimensions, class T> StridedArrayView<dimensions, U> 
 
 /** @relatesalso StridedArrayView
 @brief Reinterpret-cast a void strided array view
+@tparam U Type to cast to
 @m_since{2020,06}
 
 Size of the new array is the same as original. Expects that the target type is
@@ -1872,6 +1874,8 @@ template<> struct ArrayCastFlattenOrInflate<+1> {
 
 /** @relatesalso StridedArrayView
 @brief Reinterpret-cast and inflate or flatten a strided array view
+@tparam newDimensions   New dimension count
+@tparam U               Type to cast to
 @m_since{2019,10}
 
 If @cpp newDimensions > dimensions @ce, inflates the last dimension into the
@@ -1920,6 +1924,8 @@ template<unsigned newDimensions, class U, class T> inline StridedArrayView<newDi
 
 /** @relatesalso StridedArrayView
 @brief Reinterpret-cast and inflate a void strided array view
+@tparam newDimensions   New dimension count
+@tparam U               Type to cast to
 @m_since{2020,06}
 
 Inflates the last dimension into the new type @p U, its element count being
