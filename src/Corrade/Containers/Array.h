@@ -199,9 +199,9 @@ elements to an array of exactly the size needed.
 @m_class{m-block m-success}
 
 @par Tip
-    To save typing, you can make use of ADL and call the @ref arrayAppend()
-    etc. functions unqualified, without having them explicitly prefixed with
-    @cpp Containers:: @ce.
+    As shown in the snippet above, thanks to [ADL](https://en.wikipedia.org/wiki/Argument-dependent_name_lookup)
+    the @ref arrayAppend() etc. functions can be called unqualified, without
+    having to explicitly prefix them with @cpp Containers:: @ce.
 
 @subsection Containers-Array-growable-allocators Growable allocators
 
