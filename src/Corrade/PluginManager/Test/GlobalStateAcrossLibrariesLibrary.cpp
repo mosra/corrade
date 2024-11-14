@@ -25,7 +25,10 @@
 */
 
 #include "Corrade/Containers/GrowableArray.h"
-#include "Corrade/PluginManager/Manager.h"
+#include "Corrade/Containers/String.h"
+/* The hpp is needed by a static build with CORRADE_BUILD_DEPRECATED disabled,
+   otherwise it gets pulled in by Manager.h for backwards compat  */
+#include "Corrade/PluginManager/Manager.hpp"
 
 #include "AbstractAnimal.h"
 

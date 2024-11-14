@@ -26,6 +26,7 @@
 
 #include "GlobalStateAcrossLibrariesLibrary.h"
 
+#include "Corrade/Containers/StringView.h"
 #include "Corrade/Utility/Debug.h"
 #include "Corrade/Utility/Resource.h"
 

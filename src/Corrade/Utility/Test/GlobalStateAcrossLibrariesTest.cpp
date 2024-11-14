@@ -26,6 +26,7 @@
 
 #include <sstream>
 
+#include "Corrade/Containers/StringView.h"
 #include "Corrade/TestSuite/Tester.h"
 #include "Corrade/Utility/Resource.h"
 

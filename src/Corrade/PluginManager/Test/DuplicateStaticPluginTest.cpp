@@ -26,7 +26,11 @@
 
 #include <sstream>
 
-#include "Corrade/PluginManager/Manager.h"
+#include "Corrade/Containers/Array.h"
+#include "Corrade/Containers/StringView.h"
+/* The hpp is needed by a static build with CORRADE_BUILD_DEPRECATED disabled,
+   otherwise it gets pulled in by Manager.h for backwards compat  */
+#include "Corrade/PluginManager/Manager.hpp"
 #include "Corrade/TestSuite/Tester.h"
 #include "Corrade/TestSuite/Compare/Container.h"
 #include "Corrade/Utility/DebugStl.h"
