@@ -450,6 +450,7 @@ namespace Corrade {
     on GCC 13+, which should lead to [better optimization opportunities](https://wg21.link/p1774r8)
     compared to @cpp if(!(condition)) __builtin_unreachable() @ce
 -   Minor exception guarantee improvements (see [mosra/corrade#148](https://github.com/mosra/corrade/pull/148))
+-   Minor optimizations to @ref Utility::Sha1 (see [mosra/corrade#137](https://github.com/mosra/corrade/pull/137))
 
 @subsection corrade-changelog-latest-buildsystem Build system
 
