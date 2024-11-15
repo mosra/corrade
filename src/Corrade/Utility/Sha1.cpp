@@ -32,6 +32,7 @@
 
 #include "Corrade/Containers/ArrayView.h"
 #include "Corrade/Utility/Endianness.h"
+#include "Corrade/Utility/Macros.h" /* CORRADE_ALWAYS_INLINE */
 
 namespace Corrade { namespace Utility {
 
