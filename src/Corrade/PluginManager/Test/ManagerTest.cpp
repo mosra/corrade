@@ -55,6 +55,10 @@
 #include "configure.h"
 #endif
 
+#ifdef CORRADE_TARGET_UNIX
+#include <unistd.h> /* geteuid() */
+#endif
+
 static void importPlugin() {
     CORRADE_PLUGIN_IMPORT(Canary)
     CORRADE_PLUGIN_IMPORT(CustomSuffixStatic)
@@ -266,8 +270,11 @@ void ManagerTest::pluginDirectoryNotReadable() {
     Containers::StringView directory = "/var/root";
     #elif defined(CORRADE_TARGET_UNIX)
     Containers::StringView directory = "/root";
-    if(Utility::Path::homeDirectory() == "/root")
-        CORRADE_SKIP("Running under root, can't test for permissions.");
+    /* The user might be a root but can have the home directory put elsewhere,
+       or it can be a sudoed user for some reason, so check the effective UID
+       as well (0 is root). */
+    if(Utility::Path::homeDirectory() == "/root" || geteuid() == 0)
+        CORRADE_SKIP("Running under root (effective UID" << geteuid() << Debug::nospace << "), can't test for permissions.");
     #else
     /* On Windows, C:/Program Files/WindowsApps apparently can be listed even
        though only the TrustedInstaller system user is supposed to have access
