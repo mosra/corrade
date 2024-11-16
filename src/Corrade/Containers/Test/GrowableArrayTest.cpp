@@ -2144,14 +2144,47 @@ template<class T> void GrowableArrayTest::removeAllNonGrowable() {
     setTestCaseTemplateName(TypeName<T>::name());
 
     {
-        Array<T> a{2};
+        /* With just two 32-bit elements (in case T is int) and a sufficiently
+           smart allocator that has specialized handling for 64-bit allocations
+           it could happen that the new, zero-capacity growable allocation
+           (which is 64 bits as well, just the capacity value alone basically)
+           is placed right before the old allocation, resulting in the
+           CORRADE_VERIFY(a.data() != prev) check below to fail:
+
+            new alloc   old alloc
+            v           v
+            +-----------+-----+-----+
+            | capacity  |  0  |  1  |
+            +-----------+-----+-----+
+                       ^
+                       new data pointer == old data pointer
+
+           Which is completely okay and not a bug at all, but it makes the test
+           fail, and ignoring this failure could mean that actual bugs get
+           silently ignored later. Instead making the old allocation >2x larger
+           than the new one in a hope that the new allocation either gets put
+           into a different bucket or, if the two end up being in the same size
+           bucket, there will be enough space between the two to not have the
+           old and new data pointer alias:
+
+            new alloc  old alloc
+            v          v
+            +-----------+-----------------+-----+-----+-----+-----+-----+
+            | capacity  | (unused space)  |  0  |  1  |  2  |  3  |  4  |
+            +-----------+-----------------+-----+-----+-----+-----+-----+
+                        ^                 ^
+                        new data pointer  old data pointer                  */
+        Array<T> a{5};
         T* prev = a.data();
         a[0] = 2;
-        a[1] = 7;
+        a[1] = 3;
+        a[2] = 4;
+        a[3] = 7;
+        a[4] = 1;
 
         /* Gets converted to growable as otherwise we can't ensure the
            destructors won't be called on removed elements */
-        arrayRemove(a, 0, 2);
+        arrayRemove(a, 0, 5);
         CORRADE_VERIFY(arrayIsGrowable(a));
         CORRADE_COMPARE(a.size(), 0);
         CORRADE_COMPARE(arrayCapacity(a), 0);
@@ -2161,19 +2194,19 @@ template<class T> void GrowableArrayTest::removeAllNonGrowable() {
         /* The two items are constructed in-place, then a new empty growable
            array is constructed, originals destructed */
         if(std::is_same<T, Movable>::value) {
-            CORRADE_COMPARE(Movable::constructed, 2);
+            CORRADE_COMPARE(Movable::constructed, 5);
             CORRADE_COMPARE(Movable::moved, 0);
             CORRADE_COMPARE(Movable::assigned, 0);
-            CORRADE_COMPARE(Movable::destructed, 2);
+            CORRADE_COMPARE(Movable::destructed, 5);
         }
     }
 
     /* No change after the array goes out of scope */
     if(std::is_same<T, Movable>::value) {
-        CORRADE_COMPARE(Movable::constructed, 2);
+        CORRADE_COMPARE(Movable::constructed, 5);
         CORRADE_COMPARE(Movable::moved, 0);
         CORRADE_COMPARE(Movable::assigned, 0);
-        CORRADE_COMPARE(Movable::destructed, 2);
+        CORRADE_COMPARE(Movable::destructed, 5);
     }
 }
 
@@ -2181,16 +2214,23 @@ template<class T> void GrowableArrayTest::removeUnorderedAllNonGrowable() {
     setTestCaseTemplateName(TypeName<T>::name());
 
     {
-        Array<T> a{2};
+        /* With just two 32-bit elements it could happen that the new,
+           zero-capacity growable allocation is placed right before the old
+           allocation, resulting in a.data() == prev. See the comment in
+           removeAllNonGrowable() for details. */
+        Array<T> a{5};
         T* prev = a.data();
         a[0] = 2;
-        a[1] = 7;
+        a[1] = 3;
+        a[2] = 4;
+        a[3] = 7;
+        a[4] = 1;
 
         /* Gets converted to growable as otherwise we can't ensure the
            destructors won't be called on removed elements. The observable
            behavior is again the same as with arrayRemove(), as the copy has to
            be done anyway and so there's no reason to differ. */
-        arrayRemoveUnordered(a, 0, 2);
+        arrayRemoveUnordered(a, 0, 5);
         CORRADE_VERIFY(arrayIsGrowable(a));
         CORRADE_COMPARE(a.size(), 0);
         CORRADE_COMPARE(arrayCapacity(a), 0);
@@ -2200,19 +2240,19 @@ template<class T> void GrowableArrayTest::removeUnorderedAllNonGrowable() {
         /* The two items are constructed in-place, then a new empty growable
            array is constructed, originals destructed */
         if(std::is_same<T, Movable>::value) {
-            CORRADE_COMPARE(Movable::constructed, 2);
+            CORRADE_COMPARE(Movable::constructed, 5);
             CORRADE_COMPARE(Movable::moved, 0);
             CORRADE_COMPARE(Movable::assigned, 0);
-            CORRADE_COMPARE(Movable::destructed, 2);
+            CORRADE_COMPARE(Movable::destructed, 5);
         }
     }
 
     /* No change after the array goes out of scope */
     if(std::is_same<T, Movable>::value) {
-        CORRADE_COMPARE(Movable::constructed, 2);
+        CORRADE_COMPARE(Movable::constructed, 5);
         CORRADE_COMPARE(Movable::moved, 0);
         CORRADE_COMPARE(Movable::assigned, 0);
-        CORRADE_COMPARE(Movable::destructed, 2);
+        CORRADE_COMPARE(Movable::destructed, 5);
     }
 }
 
@@ -2220,14 +2260,21 @@ template<class T> void GrowableArrayTest::removeSuffixAllNonGrowable() {
     setTestCaseTemplateName(TypeName<T>::name());
 
     {
-        Array<T> a{2};
+        /* With just two 32-bit elements it could happen that the new,
+           zero-capacity growable allocation is placed right before the old
+           allocation, resulting in a.data() == prev. See the comment in
+           removeAllNonGrowable() for details. */
+        Array<T> a{5};
         T* prev = a.data();
         a[0] = 2;
-        a[1] = 7;
+        a[1] = 3;
+        a[2] = 4;
+        a[3] = 7;
+        a[4] = 1;
 
         /* Gets converted to growable as otherwise we can't ensure the
            destructors won't be called on removed elements */
-        arrayRemoveSuffix(a, 2);
+        arrayRemoveSuffix(a, 5);
         CORRADE_VERIFY(arrayIsGrowable(a));
         CORRADE_COMPARE(a.size(), 0);
         CORRADE_COMPARE(arrayCapacity(a), 0);
@@ -2237,19 +2284,19 @@ template<class T> void GrowableArrayTest::removeSuffixAllNonGrowable() {
         /* The two items are constructed in-place, then a new empty growable
            array is constructed, originals destructed */
         if(std::is_same<T, Movable>::value) {
-            CORRADE_COMPARE(Movable::constructed, 2);
+            CORRADE_COMPARE(Movable::constructed, 5);
             CORRADE_COMPARE(Movable::moved, 0);
             CORRADE_COMPARE(Movable::assigned, 0);
-            CORRADE_COMPARE(Movable::destructed, 2);
+            CORRADE_COMPARE(Movable::destructed, 5);
         }
     }
 
     /* No change after the array goes out of scope */
     if(std::is_same<T, Movable>::value) {
-        CORRADE_COMPARE(Movable::constructed, 2);
+        CORRADE_COMPARE(Movable::constructed, 5);
         CORRADE_COMPARE(Movable::moved, 0);
         CORRADE_COMPARE(Movable::assigned, 0);
-        CORRADE_COMPARE(Movable::destructed, 2);
+        CORRADE_COMPARE(Movable::destructed, 5);
     }
 }
 
