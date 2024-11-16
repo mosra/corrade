@@ -1373,8 +1373,10 @@ void PathTest::currentDirectory() {
     /* Clean up after ourselves */
     CORRADE_VERIFY(Path::remove("currentPathTestDir.mark"));
 
-    /* It shouldn't contain null bytes anywhere, especially not at the end */
+    /* It shouldn't contain null bytes anywhere, especially not at the end. But
+       the final \0 should be there, not overwritten by some garbage. */
     CORRADE_COMPARE_AS(*current, "\0"_s, TestSuite::Compare::StringNotContains);
+    CORRADE_COMPARE(*current->end(), '\0');
 
     /* On Windows it shouldn't contain backslashes */
     #ifdef CORRADE_TARGET_WINDOWS
@@ -1468,8 +1470,10 @@ void PathTest::libraryLocation() {
         CORRADE_VERIFY(Path::exists(Path::join(Path::split(*libraryLocation).first(), testSuiteLibraryName)));
     }
 
-    /* It shouldn't contain null bytes anywhere, especially not at the end */
+    /* It shouldn't contain null bytes anywhere, especially not at the end. But
+       the final \0 should be there, not overwritten by some garbage. */
     CORRADE_COMPARE_AS(*libraryLocation, "\0"_s, TestSuite::Compare::StringNotContains);
+    CORRADE_COMPARE(*libraryLocation->end(), '\0');
 
     /* On Windows it shouldn't contain backslashes */
     #ifdef CORRADE_TARGET_WINDOWS
@@ -1591,8 +1595,10 @@ void PathTest::executableLocation() {
     }
     #endif
 
-    /* It shouldn't contain null bytes anywhere, especially not at the end */
+    /* It shouldn't contain null bytes anywhere, especially not at the end. But
+       the final \0 should be there, not overwritten by some garbage. */
     CORRADE_COMPARE_AS(*executableLocation, "\0"_s, TestSuite::Compare::StringNotContains);
+    CORRADE_COMPARE(*executableLocation->end(), '\0');
 
     /* On Windows it shouldn't contain backslashes */
     #ifdef CORRADE_TARGET_WINDOWS
@@ -1644,8 +1650,10 @@ void PathTest::homeDirectory() {
     }
     #endif
 
-    /* It shouldn't contain null bytes anywhere, especially not at the end */
+    /* It shouldn't contain null bytes anywhere, especially not at the end. But
+       the final \0 should be there, not overwritten by some garbage. */
     CORRADE_COMPARE_AS(*homeDirectory, "\0"_s, TestSuite::Compare::StringNotContains);
+    CORRADE_COMPARE(*homeDirectory->end(), '\0');
 
     /* On Windows it shouldn't contain backslashes */
     #ifdef CORRADE_TARGET_WINDOWS
@@ -1715,8 +1723,10 @@ void PathTest::configurationDirectory() {
     }
     #endif
 
-    /* It shouldn't contain null bytes anywhere, especially not at the end */
+    /* It shouldn't contain null bytes anywhere, especially not at the end. But
+       the final \0 should be there, not overwritten by some garbage. */
     CORRADE_COMPARE_AS(*configurationDirectory, "\0"_s, TestSuite::Compare::StringNotContains);
+    CORRADE_COMPARE(*configurationDirectory->end(), '\0');
 
     /* On Windows it shouldn't contain backslashes */
     #ifdef CORRADE_TARGET_WINDOWS
@@ -1780,8 +1790,10 @@ void PathTest::temporaryDirectory() {
     }
     #endif
 
-    /* It shouldn't contain null bytes anywhere, especially not at the end */
+    /* It shouldn't contain null bytes anywhere, especially not at the end. But
+       the final \0 should be there, not overwritten by some garbage. */
     CORRADE_COMPARE_AS(*temporaryDirectory, "\0"_s, TestSuite::Compare::StringNotContains);
+    CORRADE_COMPARE(*temporaryDirectory->end(), '\0');
 
     /* On Windows it shouldn't contain backslashes */
     #ifdef CORRADE_TARGET_WINDOWS
@@ -2542,13 +2554,10 @@ void PathTest::readNonSeekableString() {
     /* The array is growable and the deleter should be preserved in the string
        as well */
     CORRADE_VERIFY(string->deleter());
-    /* There should be a null terminator at the end. With assertions enabled
-       the String constructor checks for this on its own, but let's double
-       check here as well. */
-    CORRADE_COMPARE(*string->end(), '\0');
-    /* But it shouldn't contain null bytes anywhere else (which would point to
-       issues with adding the extra null terminator byte) */
+    /* It shouldn't contain null bytes anywhere, especially not at the end. But
+       the final \0 should be there, not overwritten by some garbage. */
     CORRADE_COMPARE_AS(*string, "\0"_s, TestSuite::Compare::StringNotContains);
+    CORRADE_COMPARE(*string->end(), '\0');
     #else
     CORRADE_SKIP("Not implemented on this platform.");
     #endif
@@ -2573,10 +2582,11 @@ void PathTest::readEarlyEofString() {
     Containers::Optional<Containers::String> string = Path::readString("/sys/devices/system/cpu/cpu0/cpufreq/scaling_governor");
     CORRADE_VERIFY(string);
     CORRADE_VERIFY(*string);
-    /* There should be a null terminator at the end in this case as well, not
-       just when the array is growable or when we know the correct size in
-       advance. With assertions enabled the String constructor checks for this
-       on its own, but let's double check here as well. */
+    /* It shouldn't contain null bytes anywhere, especially not at the end. But
+       the final \0 should be there and not overwritten by some garbage in this
+       case as well, not just when the array is growable or when we know the
+       correct size in advance. */
+    CORRADE_COMPARE_AS(*string, "\0"_s, TestSuite::Compare::StringNotContains);
     CORRADE_COMPARE(*string->end(), '\0');
     #else
     CORRADE_SKIP("Not sure how to test on this platform.");
