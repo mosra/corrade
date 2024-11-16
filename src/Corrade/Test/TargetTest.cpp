@@ -175,11 +175,11 @@ void TargetTest::compiler() {
     std::ostringstream out;
 
     #ifdef CORRADE_TARGET_GCC
-    Debug{&out} << "CORRADE_TARGET_GCC";
+    Debug{&out, Debug::Flag::NoSpace} << "CORRADE_TARGET_GCC " << __GNUC__ << "." << __GNUC_MINOR__ << "." << __GNUC_PATCHLEVEL__;
     #endif
 
     #ifdef CORRADE_TARGET_CLANG
-    Debug{&out} << "CORRADE_TARGET_CLANG";
+    Debug{&out, Debug::Flag::NoSpace} << "CORRADE_TARGET_CLANG " << __clang_major__ << "." << __clang_minor__ << "." << __clang_patchlevel__;
     #endif
 
     #ifdef CORRADE_TARGET_APPLE_CLANG
@@ -191,7 +191,7 @@ void TargetTest::compiler() {
     #endif
 
     #ifdef CORRADE_TARGET_MSVC
-    Debug{&out} << "CORRADE_TARGET_MSVC";
+    Debug{&out} << "CORRADE_TARGET_MSVC" << _MSC_VER;
     #endif
 
     #ifdef CORRADE_TARGET_MINGW
@@ -257,17 +257,21 @@ void TargetTest::stl() {
 
     #ifdef CORRADE_TARGET_LIBSTDCXX
     ++unique;
-    Debug{&out} << "CORRADE_TARGET_LIBSTDCXX";
+    Debug{&out} << "CORRADE_TARGET_LIBSTDCXX"
+        #ifdef _GLIBCXX_RELEASE
+        << _GLIBCXX_RELEASE
+        #endif
+        ;
     #endif
 
     #ifdef CORRADE_TARGET_LIBCXX
     ++unique;
-    Debug{&out} << "CORRADE_TARGET_LIBCXX";
+    Debug{&out} << "CORRADE_TARGET_LIBCXX" << _LIBCPP_VERSION;
     #endif
 
     #ifdef CORRADE_TARGET_DINKUMWARE
     ++unique;
-    Debug{&out} << "CORRADE_TARGET_DINKUMWARE";
+    Debug{&out} << "CORRADE_TARGET_DINKUMWARE" << _MSC_VER;
     #endif
 
     Debug{Debug::Flag::NoNewlineAtTheEnd} << out.str();
