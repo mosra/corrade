@@ -2216,12 +2216,12 @@ namespace Implementation {
             return StridedArrayView<dimensions - 1, T>{
                 Size<dimensions - 1>(size._data + 1, typename Implementation::GenerateSequence<dimensions - 1>::Type{}),
                 Stride<dimensions - 1>(stride._data + 1, typename Implementation::GenerateSequence<dimensions - 1>::Type{}),
-                static_cast<typename std::conditional<std::is_const<T>::value, const char, char>::type*>(data) + i*stride._data[0]};
+                static_cast<typename std::conditional<std::is_const<T>::value, const char, char>::type*>(data) + static_cast<std::ptrdiff_t>(i)*stride._data[0]};
         }
     };
     template<class T> struct StridedElement<1, T> {
         static T& get(typename std::conditional<std::is_const<T>::value, const void, void>::type* data, const Size1D&, const Stride1D& stride, std::size_t i) {
-            return *reinterpret_cast<T*>(static_cast<typename std::conditional<std::is_const<T>::value, const char, char>::type*>(data) + i*stride._data[0]);
+            return *reinterpret_cast<T*>(static_cast<typename std::conditional<std::is_const<T>::value, const char, char>::type*>(data) + static_cast<std::ptrdiff_t>(i)*stride._data[0]);
         }
     };
 }
@@ -2246,7 +2246,7 @@ template<unsigned dimensions, class T> T& StridedArrayView<dimensions, T>::opera
     for(std::size_t j = 0; j != dimensions; ++j) {
         CORRADE_DEBUG_ASSERT(i._data[j] < _size._data[j],
             "Containers::StridedArrayView::operator[](): index" << i << "out of range for" << _size << "elements", *reinterpret_cast<T*>(static_cast<ArithmeticType*>(_data)));
-        data += i._data[j]*_stride._data[j];
+        data += static_cast<std::ptrdiff_t>(i._data[j])*_stride._data[j];
     }
 
     return *reinterpret_cast<T*>(data);
@@ -2261,7 +2261,7 @@ template<unsigned dimensions, class T> StridedArrayView<dimensions, T> StridedAr
     Containers::Size<dimensions> size = _size;
     size._data[0] = std::size_t(end - begin);
     return StridedArrayView<dimensions, T>{size, _stride,
-        static_cast<ArithmeticType*>(_data) + begin*_stride._data[0]};
+        static_cast<ArithmeticType*>(_data) + static_cast<std::ptrdiff_t>(begin)*_stride._data[0]};
 }
 
 template<unsigned dimensions, class T> template<unsigned newDimensions> StridedArrayView<newDimensions, T> StridedArrayView<dimensions, T>::slice(const Containers::Size<dimensions>& begin, const Containers::Size<dimensions>& end) const {
