@@ -2175,7 +2175,8 @@ template<unsigned dimensions, class T> template<unsigned dimension> bool Strided
     static_assert(dimension < dimensions, "dimension out of range");
     std::size_t nextDimensionSize = sizeof(T);
     for(std::size_t i = dimensions; i != dimension; --i) {
-        if(std::size_t(_stride._data[i - 1]) != nextDimensionSize) return false;
+        if(std::size_t(_stride._data[i - 1]) != nextDimensionSize)
+            return false;
         nextDimensionSize *= _size._data[i - 1];
     }
 
