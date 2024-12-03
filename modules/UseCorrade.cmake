@@ -104,7 +104,8 @@ if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU" OR (CMAKE_CXX_COMPILER_ID MATCHES "(Appl
         "-Wall" "-Wextra"
         "$<$<STREQUAL:$<TARGET_PROPERTY:LINKER_LANGUAGE>,CXX>:-Wold-style-cast>"
         "-Winit-self"
-        "-Werror=return-type"
+        # -Werror=return-type doesn't work on nvcc, use it just for C and C++
+        "$<$<OR:$<STREQUAL:$<TARGET_PROPERTY:LINKER_LANGUAGE>,C>,$<STREQUAL:$<TARGET_PROPERTY:LINKER_LANGUAGE>,CXX>>:-Werror=return-type>"
         "-Wmissing-declarations"
         # -Wpedantic is since 4.8, until then only -pedantic (which doesn't
         # have any -Wno-pedantic or a way to disable it for a particular line)
