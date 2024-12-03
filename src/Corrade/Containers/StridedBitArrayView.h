@@ -969,7 +969,10 @@ template<unsigned dimensions, class T> constexpr BasicStridedBitArrayView<dimens
 template<unsigned dimensions, class T> template<unsigned lessDimensions, class> BasicStridedBitArrayView<dimensions, T>::BasicStridedBitArrayView(const BasicStridedBitArrayView<lessDimensions, T>& other) noexcept: _data{other._data}, _sizeOffset{Corrade::NoInit}, _stride{Corrade::NoInit} {
     /* Set size and stride in the extra dimensions */
     constexpr std::size_t extraDimensions = dimensions - lessDimensions;
-    const std::size_t stride = (other._sizeOffset._data[0] >> 3)*other._stride._data[0];
+    /* See StridedBitElement::get() for why a ptrdiff_t cast is needed. Tho in
+       this particular case we're saving back to a signed value so no crazy
+       overflow like with `data + i*stride` should happen? */
+    const std::ptrdiff_t stride = std::ptrdiff_t(other._sizeOffset._data[0] >> 3)*other._stride._data[0];
     for(std::size_t i = 0; i != extraDimensions; ++i) {
         _sizeOffset._data[i] = 1 << 3;
         _stride._data[i] = stride;
@@ -1032,7 +1035,8 @@ template<unsigned dimensions, class T> template<unsigned dimension> BasicStrided
 namespace Implementation {
     template<unsigned dimensions, class T> struct StridedBitElement {
         static BasicStridedBitArrayView<dimensions - 1, T> get(T* data, const Size<dimensions>& sizeOffset, const Stride<dimensions>& stride, std::size_t i) {
-            const std::ptrdiff_t offsetInBits = (sizeOffset._data[0] & 0x07) + i*stride._data[0];
+            /* See the overload below for why a ptrdiff_t cast is needed */
+            const std::ptrdiff_t offsetInBits = (sizeOffset._data[0] & 0x07) + std::ptrdiff_t(i)*stride._data[0];
             Size<dimensions - 1> outputSizeOffset{Corrade::NoInit};
             Stride<dimensions - 1> outputStride{Corrade::NoInit};
             outputSizeOffset._data[0] = sizeOffset._data[1]|(offsetInBits & 0x07);
@@ -1045,7 +1049,14 @@ namespace Implementation {
     };
     template<class T> struct StridedBitElement<1, T> {
         static bool get(T* data, const Size1D& sizeOffset, const Stride1D& stride, std::size_t i) {
-            const std::ptrdiff_t offsetInBits = (sizeOffset._data[0] & 0x07) + i*stride._data[0];
+            /* Without the ptrdiff_t cast the stride gets cast to unsigned and
+               in case of a negative stride it then relies on the whole
+               expression correctly wrapping around. Which unfortunately wasn't
+               always the case with StridedArrayView on (32-bit) Emscripten
+               3.1.66+, as noted in its StridedElement::get() implementation.
+               StridedBitArrayView doesn't seem to exhibit the same issue, but
+               doing the equivalent change in all places just in case. */
+            const std::ptrdiff_t offsetInBits = (sizeOffset._data[0] & 0x07) + std::ptrdiff_t(i)*stride._data[0];
             return static_cast<T*>(data)[offsetInBits >> 3] & (1 << (offsetInBits & 0x07));
         }
     };
@@ -1062,7 +1073,10 @@ template<unsigned dimensions, class T> bool BasicStridedBitArrayView<dimensions,
     for(std::size_t j = 0; j != dimensions; ++j) {
         CORRADE_DEBUG_ASSERT(i._data[j] < _sizeOffset._data[j] >> 3,
             "Containers::StridedBitArrayView::operator[](): index" << i << "out of range for" << sizeInternal() << "bits", {});
-        offsetInBits += i._data[j]*_stride._data[j];
+        /* See StridedBitElement::get() for why a ptrdiff_t cast is needed. Tho
+           in this particular case we're saving back to a signed value so no
+           crazy overflow like with `data + i*stride` should happen? */
+        offsetInBits += std::ptrdiff_t(i._data[j])*_stride._data[j];
     }
 
     return static_cast<T*>(_data)[offsetInBits >> 3] & (1 << (offsetInBits & 0x07));
@@ -1071,7 +1085,10 @@ template<unsigned dimensions, class T> bool BasicStridedBitArrayView<dimensions,
 template<unsigned dimensions, class T> template<class U, class> inline void BasicStridedBitArrayView<dimensions, T>::set(std::size_t i) const {
     CORRADE_DEBUG_ASSERT(i < _sizeOffset._data[0] >> 3,
         "Containers::StridedBitArrayView::set(): index" << i << "out of range for" << (_sizeOffset._data[0] >> 3) << "bits", );
-    const std::ptrdiff_t offsetInBits = (_sizeOffset._data[0] & 0x07) + i*_stride._data[0];
+    /* See StridedBitElement::get() for why a ptrdiff_t cast is needed. Tho in
+       this particular case we're saving back to a signed value so no crazy
+       overflow like with `data + i*stride` should happen? */
+    const std::ptrdiff_t offsetInBits = (_sizeOffset._data[0] & 0x07) + std::ptrdiff_t(i)*_stride._data[0];
     static_cast<T*>(_data)[offsetInBits >> 3] |= (1 << (offsetInBits & 0x07));
 }
 
@@ -1080,7 +1097,10 @@ template<unsigned dimensions, class T> template<class U, class> void BasicStride
     for(std::size_t j = 0; j != dimensions; ++j) {
         CORRADE_DEBUG_ASSERT(i._data[j] < _sizeOffset._data[j] >> 3,
             "Containers::StridedBitArrayView::set(): index" << i << "out of range for" << size() << "bits", );
-        offsetInBits += i._data[j]*_stride._data[j];
+        /* See StridedBitElement::get() for why a ptrdiff_t cast is needed. Tho
+           in this particular case we're saving back to a signed value so no
+           crazy overflow like with `data + i*stride` should happen? */
+        offsetInBits += std::ptrdiff_t(i._data[j])*_stride._data[j];
     }
 
     static_cast<T*>(_data)[offsetInBits >> 3] |= (1 << (offsetInBits & 0x07));
@@ -1089,7 +1109,10 @@ template<unsigned dimensions, class T> template<class U, class> void BasicStride
 template<unsigned dimensions, class T> template<class U, class> inline void BasicStridedBitArrayView<dimensions, T>::reset(std::size_t i) const {
     CORRADE_DEBUG_ASSERT(i < _sizeOffset._data[0] >> 3,
         "Containers::StridedBitArrayView::reset(): index" << i << "out of range for" << (_sizeOffset._data[0] >> 3) << "bits", );
-    const std::ptrdiff_t offsetInBits = (_sizeOffset._data[0] & 0x07) + i*_stride._data[0];
+    /* See StridedBitElement::get() for why a ptrdiff_t cast is needed. Tho in
+       this particular case we're saving back to a signed value so no crazy
+       overflow like with `data + i*stride` should happen? */
+    const std::ptrdiff_t offsetInBits = (_sizeOffset._data[0] & 0x07) + std::ptrdiff_t(i)*_stride._data[0];
     static_cast<T*>(_data)[offsetInBits >> 3] &= ~(1 << (offsetInBits & 0x07));
 }
 
@@ -1098,7 +1121,10 @@ template<unsigned dimensions, class T> template<class U, class> void BasicStride
     for(std::size_t j = 0; j != dimensions; ++j) {
         CORRADE_DEBUG_ASSERT(i._data[j] < _sizeOffset._data[j] >> 3,
             "Containers::StridedBitArrayView::reset(): index" << i << "out of range for" << size() << "bits", );
-        offsetInBits += i._data[j]*_stride._data[j];
+        /* See StridedBitElement::get() for why a ptrdiff_t cast is needed. Tho
+           in this particular case we're saving back to a signed value so no
+           crazy overflow like with `data + i*stride` should happen? */
+        offsetInBits += std::ptrdiff_t(i._data[j])*_stride._data[j];
     }
 
     static_cast<T*>(_data)[offsetInBits >> 3] &= ~(1 << (offsetInBits & 0x07));
@@ -1107,7 +1133,10 @@ template<unsigned dimensions, class T> template<class U, class> void BasicStride
 template<unsigned dimensions, class T> template<class U, class> inline void BasicStridedBitArrayView<dimensions, T>::set(std::size_t i, bool value) const {
     CORRADE_DEBUG_ASSERT(i < _sizeOffset._data[0] >> 3,
         "Containers::StridedBitArrayView::set(): index" << i << "out of range for" << (_sizeOffset._data[0] >> 3) << "bits", );
-    const std::ptrdiff_t offsetInBits = (_sizeOffset._data[0] & 0x07) + i*_stride._data[0];
+    /* See StridedBitElement::get() for why a ptrdiff_t cast is needed. Tho in
+       this particular case we're saving back to a signed value so no crazy
+       overflow like with `data + i*stride` should happen? */
+    const std::ptrdiff_t offsetInBits = (_sizeOffset._data[0] & 0x07) + std::ptrdiff_t(i)*_stride._data[0];
     /* http://graphics.stanford.edu/~seander/bithacks.html#ConditionalSetOrClearBitsWithoutBranching */
     char& byte = static_cast<T*>(_data)[offsetInBits >> 3];
     byte ^= (-char(value) ^ byte) & (1 << (offsetInBits & 0x07));
@@ -1118,7 +1147,10 @@ template<unsigned dimensions, class T> template<class U, class> void BasicStride
     for(std::size_t j = 0; j != dimensions; ++j) {
         CORRADE_DEBUG_ASSERT(i._data[j] < _sizeOffset._data[j] >> 3,
             "Containers::StridedBitArrayView::set(): index" << i << "out of range for" << size() << "bits", );
-        offsetInBits += i._data[j]*_stride._data[j];
+        /* See StridedBitElement::get() for why a ptrdiff_t cast is needed. Tho
+           in this particular case we're saving back to a signed value so no
+           crazy overflow like with `data + i*stride` should happen? */
+        offsetInBits += std::ptrdiff_t(i._data[j])*_stride._data[j];
     }
 
     /* http://graphics.stanford.edu/~seander/bithacks.html#ConditionalSetOrClearBitsWithoutBranching */
@@ -1133,7 +1165,10 @@ template<unsigned dimensions, class T> BasicStridedBitArrayView<dimensions, T> B
         << Utility::Debug::nospace << end << Utility::Debug::nospace
         << "] out of range for" << (_sizeOffset._data[0] >> 3) << "elements", {});
 
-    const std::ptrdiff_t offsetInBits = (_sizeOffset._data[0] & 0x07) + begin*_stride._data[0];
+    /* See StridedBitElement::get() for why a ptrdiff_t cast is needed. Tho in
+       this particular case we're saving back to a signed value so no crazy
+       overflow like with `data + i*stride` should happen? */
+    const std::ptrdiff_t offsetInBits = (_sizeOffset._data[0] & 0x07) + std::ptrdiff_t(begin)*_stride._data[0];
 
     /* Data pointer is whole bytes */
     T* const data = static_cast<T*>(_data) + (offsetInBits >> 3);
@@ -1164,7 +1199,10 @@ template<unsigned dimensions, class T> BasicStridedBitArrayView<dimensions, T> B
             << "] out of range for" << sizeInternal() << "elements in dimension" << i,
             {});
         sizeOffset._data[i] = std::size_t(end._data[i] - begin._data[i]) << 3;
-        offsetInBits += begin._data[i]*_stride._data[i];
+        /* See StridedBitElement::get() for why a ptrdiff_t cast is needed. Tho
+           in this particular case we're saving back to a signed value so no
+           crazy overflow like with `data + i*stride` should happen? */
+        offsetInBits += std::ptrdiff_t(begin._data[i])*_stride._data[i];
     }
 
     /* Data pointer is whole bytes */
@@ -1224,6 +1262,8 @@ template<unsigned dimensions, class T> BasicStridedBitArrayView<dimensions, T> B
            elements. This operation also clears the offset from the first 3
            bits. */
         sizeOffset._data[dimension] = (((_sizeOffset._data[dimension] >> 3) + step._data[dimension] - 1)/step._data[dimension]) << 3;
+        /* Unlike other cases, ptrdiff_t cast should happen here implicitly as
+           it's saving back to a ptrdiff_t value */
         stride._data[dimension] *= step._data[dimension];
     }
 
@@ -1255,7 +1295,10 @@ template<unsigned dimensions, class T> template<unsigned dimension> BasicStrided
 
     /* Calculate offset of the last bit in this dimension */
     const std::ptrdiff_t sizeInDimension = _sizeOffset._data[dimension] >> 3;
-    const std::ptrdiff_t offsetInBits =  (_sizeOffset._data[0] & 0x07) + _stride._data[dimension]*(sizeInDimension ? sizeInDimension - 1 : 0);
+    /* See StridedBitElement::get() for why a ptrdiff_t cast is needed. Tho in
+       this particular case we're saving back to a signed value so no crazy
+       overflow like with `data + i*stride` should happen? */
+    const std::ptrdiff_t offsetInBits =  (_sizeOffset._data[0] & 0x07) + _stride._data[dimension]*std::ptrdiff_t(sizeInDimension ? sizeInDimension - 1 : 0);
 
     /* Data pointer is whole bytes */
     T* const data = static_cast<T*>(_data) + (offsetInBits >> 3);
@@ -1317,7 +1360,10 @@ template<unsigned dimensions, class T> template<unsigned dimension, unsigned cou
     const std::ptrdiff_t baseStride = _stride._data[dimension];
     for(std::size_t i = count; i != 0; --i) {
         sizeOffset_._data[dimension + i - 1] = size._data[i - 1] << 3;
-        stride_._data[dimension + i - 1] = baseStride*totalSize;
+        /* See StridedBitElement::get() for why a ptrdiff_t cast is needed. Tho
+           in this particular case we're saving back to a signed value so no
+           crazy overflow like with `data + i*stride` should happen? */
+        stride_._data[dimension + i - 1] = baseStride*std::ptrdiff_t(totalSize);
         totalSize *= size._data[i - 1];
     }
     CORRADE_ASSERT(totalSize == _sizeOffset._data[dimension] >> 3,

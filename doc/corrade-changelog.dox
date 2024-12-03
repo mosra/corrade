@@ -683,6 +683,10 @@ namespace Corrade {
     copy-initialization" C++ featurebug when using growable
     @ref Containers::Array APIs and @ref Containers::StaticArray with
     a struct that has a member with an explicit default constructor.
+-   Fixed / worked around an issue where negative @ref Containers::StridedArrayView
+    / @ref Containers::BasicStridedBitArrayView "Containers::StridedBitArrayView"
+    strides would sometimes result in out-of-bounds memory reads on Emscripten
+    3.1.66+.
 
 @subsection corrade-changelog-latest-deprecated Deprecated APIs
 

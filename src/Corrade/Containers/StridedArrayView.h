@@ -6,6 +6,7 @@
     Copyright © 2007, 2008, 2009, 2010, 2011, 2012, 2013, 2014, 2015, 2016,
                 2017, 2018, 2019, 2020, 2021, 2022, 2023, 2024
               Vladimír Vondruš <mosra@centrum.cz>
+    Copyright © 2024 Will Usher <will@willusher.io>
 
     Permission is hereby granted, free of charge, to any person obtaining a
     copy of this software and associated documentation files (the "Software"),
@@ -2158,7 +2159,10 @@ template<unsigned dimensions> constexpr StridedArrayView<dimensions, const void>
 template<unsigned dimensions, class T> template<unsigned lessDimensions, class> StridedArrayView<dimensions, T>::StridedArrayView(const StridedArrayView<lessDimensions, T>& other) noexcept: _data{other._data}, _size{Corrade::NoInit}, _stride{Corrade::NoInit} {
     /* Set size and stride in the extra dimensions */
     constexpr std::size_t extraDimensions = dimensions - lessDimensions;
-    const std::size_t stride = other._size._data[0]*other._stride._data[0];
+    /* See StridedElement::get() for why a ptrdiff_t cast is needed. Tho in
+       this particular case we're saving back to a signed value so no crazy
+       overflow like with `data + i*stride` should happen? */
+    const std::ptrdiff_t stride = std::ptrdiff_t(other._size._data[0])*other._stride._data[0];
     for(std::size_t i = 0; i != extraDimensions; ++i) {
         _size._data[i] = 1;
         _stride._data[i] = stride;
@@ -2217,12 +2221,25 @@ namespace Implementation {
             return StridedArrayView<dimensions - 1, T>{
                 Size<dimensions - 1>(size._data + 1, typename Implementation::GenerateSequence<dimensions - 1>::Type{}),
                 Stride<dimensions - 1>(stride._data + 1, typename Implementation::GenerateSequence<dimensions - 1>::Type{}),
-                static_cast<typename std::conditional<std::is_const<T>::value, const char, char>::type*>(data) + i*stride._data[0]};
+                /* See the overload below for why a ptrdiff_t cast is needed */
+                static_cast<typename std::conditional<std::is_const<T>::value, const char, char>::type*>(data) + std::ptrdiff_t(i)*stride._data[0]};
         }
     };
     template<class T> struct StridedElement<1, T> {
         static T& get(typename std::conditional<std::is_const<T>::value, const void, void>::type* data, const Size1D&, const Stride1D& stride, std::size_t i) {
-            return *reinterpret_cast<T*>(static_cast<typename std::conditional<std::is_const<T>::value, const char, char>::type*>(data) + i*stride._data[0]);
+            /* Without the ptrdiff_t cast the stride gets cast to unsigned and
+               in case of a negative stride it then relies on the whole
+               expression correctly wrapping around. Which unfortunately isn't
+               always the case on (32-bit) Emscripten 3.1.66+ when *some*
+               optimizations kick in, in particular Magnum's GltfImporter
+               crashes when executing std::stable_sort() on a flipped() view.
+               Same cast is done in (hopefully) all other cases of multiplying
+               stride with an (unsigned) index or size, although those don't
+               seem to exhibit the same issue, and there's unfortunately no way
+               to actually regression-test this. Further details here:
+                https://github.com/mosra/corrade/pull/192
+                https://github.com/emscripten-core/emscripten/issues/22794 */
+            return *reinterpret_cast<T*>(static_cast<typename std::conditional<std::is_const<T>::value, const char, char>::type*>(data) + std::ptrdiff_t(i)*stride._data[0]);
         }
     };
 }
@@ -2247,7 +2264,8 @@ template<unsigned dimensions, class T> T& StridedArrayView<dimensions, T>::opera
     for(std::size_t j = 0; j != dimensions; ++j) {
         CORRADE_DEBUG_ASSERT(i._data[j] < _size._data[j],
             "Containers::StridedArrayView::operator[](): index" << i << "out of range for" << _size << "elements", *reinterpret_cast<T*>(static_cast<ArithmeticType*>(_data)));
-        data += i._data[j]*_stride._data[j];
+        /* See StridedElement::get() for why a ptrdiff_t cast is needed */
+        data += std::ptrdiff_t(i._data[j])*_stride._data[j];
     }
 
     return *reinterpret_cast<T*>(data);
@@ -2262,7 +2280,8 @@ template<unsigned dimensions, class T> StridedArrayView<dimensions, T> StridedAr
     Containers::Size<dimensions> size = _size;
     size._data[0] = std::size_t(end - begin);
     return StridedArrayView<dimensions, T>{size, _stride,
-        static_cast<ArithmeticType*>(_data) + begin*_stride._data[0]};
+        /* See StridedElement::get() for why a ptrdiff_t cast is needed */
+        static_cast<ArithmeticType*>(_data) + std::ptrdiff_t(begin)*_stride._data[0]};
 }
 
 template<unsigned dimensions, class T> template<unsigned newDimensions> StridedArrayView<newDimensions, T> StridedArrayView<dimensions, T>::slice(const Containers::Size<dimensions>& begin, const Containers::Size<dimensions>& end) const {
@@ -2282,7 +2301,8 @@ template<unsigned dimensions, class T> template<unsigned newDimensions> StridedA
             << Utility::Debug::nospace << end << Utility::Debug::nospace
             << "] out of range for" << _size << "elements in dimension" << i,
             {});
-        data += begin._data[i]*_stride._data[i];
+        /* See StridedElement::get() for why a ptrdiff_t cast is needed */
+        data += std::ptrdiff_t(begin._data[i])*_stride._data[i];
     }
 
     /* Set size and stride values for all destination dimensions that are in
@@ -2445,7 +2465,8 @@ template<unsigned dimensions, class T> StridedArrayView<dimensions, T> StridedAr
         /* If step is negative, adjust also data pointer */
         std::size_t divisor;
         if(step._data[dimension] < 0) {
-            data = static_cast<ArithmeticType*>(data) + _stride._data[dimension]*(_size._data[dimension] ? _size._data[dimension] - 1 : 0);
+            /* See StridedElement::get() for why a ptrdiff_t cast is needed */
+            data = static_cast<ArithmeticType*>(data) + _stride._data[dimension]*std::ptrdiff_t(_size._data[dimension] ? _size._data[dimension] - 1 : 0);
             divisor = -step._data[dimension];
         } else divisor = step._data[dimension];
 
@@ -2472,7 +2493,8 @@ template<unsigned dimensions, class T> template<unsigned dimensionA, unsigned di
 template<unsigned dimensions, class T> template<unsigned dimension> StridedArrayView<dimensions, T> StridedArrayView<dimensions, T>::flipped() const {
     static_assert(dimension < dimensions, "dimension out of range");
 
-    ErasedType* data = static_cast<ArithmeticType*>(_data) + _stride._data[dimension]*(_size._data[dimension] ? _size._data[dimension] - 1 : 0);
+    /* See StridedElement::get() for why a ptrdiff_t cast is needed */
+    ErasedType* data = static_cast<ArithmeticType*>(_data) + _stride._data[dimension]*std::ptrdiff_t(_size._data[dimension] ? _size._data[dimension] - 1 : 0);
     Containers::Stride<dimensions> stride = _stride;
     stride._data[dimension] *= -1;
     return StridedArrayView<dimensions, T>{_size, stride, data};
@@ -2516,7 +2538,10 @@ template<unsigned dimensions, class T> template<unsigned dimension, unsigned cou
     const std::ptrdiff_t baseStride = _stride._data[dimension];
     for(std::size_t i = count; i != 0; --i) {
         size_._data[dimension + i - 1] = size._data[i - 1];
-        stride_._data[dimension + i - 1] = baseStride*totalSize;
+        /* See StridedElement::get() for why a ptrdiff_t cast is needed. Tho in
+           this particular case we're saving back to a signed value so no crazy
+           overflow like with `data + i*stride` should happen? */
+        stride_._data[dimension + i - 1] = baseStride*std::ptrdiff_t(totalSize);
         totalSize *= size._data[i - 1];
     }
     CORRADE_ASSERT(totalSize == _size._data[dimension],
