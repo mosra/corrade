@@ -4175,7 +4175,9 @@ void StridedArrayViewTest::expandedCollapsedInvalid() {
 
     /* These are fine */
     b0.collapsed<0, 3>();
+    b0.flipped<0>().flipped<1>().flipped<2>().collapsed<0, 3>();
     b1.collapsed<1, 2>();
+    b1.flipped<1>().flipped<2>().collapsed<1, 2>();
 
     std::ostringstream out;
     Error redirectError{&out};
@@ -4183,13 +4185,17 @@ void StridedArrayViewTest::expandedCollapsedInvalid() {
     a.expanded<1>(Size2D{2, 6});
     a.expanded<1>(Size3D{2, 3, 2});
     b1.collapsed<0, 3>();
+    b1.flipped<0>().flipped<1>().flipped<2>().collapsed<0, 3>();
     b2.collapsed<0, 3>();
+    b2.flipped<0>().flipped<1>().flipped<2>().collapsed<0, 3>();
     CORRADE_COMPARE(out.str(),
         "Containers::StridedArrayView::expanded(): product of {14} doesn't match 13 elements in dimension 1\n"
         "Containers::StridedArrayView::expanded(): product of {2, 6} doesn't match 13 elements in dimension 1\n"
         "Containers::StridedArrayView::expanded(): product of {2, 3, 2} doesn't match 13 elements in dimension 1\n"
         "Containers::StridedArrayView::collapsed(): expected dimension 0 stride to be 24 but got 36\n"
-        "Containers::StridedArrayView::collapsed(): expected dimension 1 stride to be 8 but got 12\n");
+        "Containers::StridedArrayView::collapsed(): expected dimension 0 stride to be -24 but got -36\n"
+        "Containers::StridedArrayView::collapsed(): expected dimension 1 stride to be 8 but got 12\n"
+        "Containers::StridedArrayView::collapsed(): expected dimension 1 stride to be -8 but got -12\n");
 }
 
 void StridedArrayViewTest::cast() {

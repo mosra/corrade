@@ -1399,7 +1399,7 @@ template<unsigned dimensions, class T> template<unsigned dimension, unsigned cou
     const std::ptrdiff_t baseStride = _stride._data[dimension + count - 1];
     for(std::size_t i = dimension + count; i != dimension; --i) {
         CORRADE_ASSERT(_stride._data[i - 1] == std::ptrdiff_t(totalSize)*baseStride,
-            "Containers::StridedBitArrayView::collapsed(): expected dimension" << i - 1 << "stride to be" << totalSize*baseStride << "but got" << _stride._data[i - 1], {});
+            "Containers::StridedBitArrayView::collapsed(): expected dimension" << i - 1 << "stride to be" << std::ptrdiff_t(totalSize)*baseStride << "but got" << _stride._data[i - 1], {});
         totalSize *= _sizeOffset._data[i - 1] >> 3;
     }
     sizeOffset_._data[dimension] = totalSize << 3;
