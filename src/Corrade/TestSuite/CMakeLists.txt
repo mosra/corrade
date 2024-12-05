@@ -32,6 +32,7 @@ set(CorradeTestSuite_SRCS
     Comparator.cpp
     Tester.cpp
 
+    Compare/Container.cpp
     Compare/File.cpp
     Compare/FileToString.cpp
     Compare/FloatingPoint.cpp
