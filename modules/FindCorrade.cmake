@@ -446,8 +446,6 @@ foreach(_component ${Corrade_FIND_COMPONENTS})
 
         # Library (and not header-only) components
         if(_component IN_LIST _CORRADE_LIBRARY_COMPONENTS AND NOT _component IN_LIST _CORRADE_HEADER_ONLY_COMPONENTS)
-            add_library(Corrade::${_component} UNKNOWN IMPORTED)
-
             # Try to find both debug and release version
             find_library(CORRADE_${_COMPONENT}_LIBRARY_DEBUG Corrade${_component}-d)
             find_library(CORRADE_${_COMPONENT}_LIBRARY_RELEASE Corrade${_component})
@@ -455,15 +453,8 @@ foreach(_component ${Corrade_FIND_COMPONENTS})
                 CORRADE_${_COMPONENT}_LIBRARY_RELEASE)
         endif()
 
-        # Header-only library components
-        if(_component IN_LIST _CORRADE_HEADER_ONLY_COMPONENTS)
-            add_library(Corrade::${_component} INTERFACE IMPORTED)
-        endif()
-
         # Executable components
         if(_component IN_LIST _CORRADE_EXECUTABLE_COMPONENTS)
-            add_executable(Corrade::${_component} IMPORTED)
-
             find_program(CORRADE_${_COMPONENT}_EXECUTABLE corrade-${_component})
             mark_as_advanced(CORRADE_${_COMPONENT}_EXECUTABLE)
 
@@ -491,11 +482,6 @@ foreach(_component ${Corrade_FIND_COMPONENTS})
                     mark_as_advanced(CORRADE_${_COMPONENT}_EXECUTABLE_EMULATOR)
                 endif()
             endif()
-
-            if(CORRADE_${_COMPONENT}_EXECUTABLE)
-                set_property(TARGET Corrade::${_component} PROPERTY
-                    IMPORTED_LOCATION ${CORRADE_${_COMPONENT}_EXECUTABLE})
-            endif()
         endif()
 
         # Find library includes
@@ -507,8 +493,8 @@ foreach(_component ${Corrade_FIND_COMPONENTS})
         endif()
 
         # Decide if the component was found. If not, skip the rest, which
-        # populates the target properties and finds additional dependencies. If
-        # found, the _FOUND variable may still get reset by something below.
+        # creates and populates the target and finds additional dependencies.
+        # If found, the _FOUND variable may still get reset by something below.
         if((_component IN_LIST _CORRADE_LIBRARY_COMPONENTS AND _CORRADE_${_COMPONENT}_INCLUDE_DIR AND (_component IN_LIST _CORRADE_HEADER_ONLY_COMPONENTS OR CORRADE_${_COMPONENT}_LIBRARY_RELEASE OR CORRADE_${_COMPONENT}_LIBRARY_DEBUG)) OR (_component IN_LIST _CORRADE_EXECUTABLE_COMPONENTS AND CORRADE_${_COMPONENT}_EXECUTABLE))
             set(Corrade_${_component}_FOUND TRUE)
         else()
@@ -516,8 +502,14 @@ foreach(_component ${Corrade_FIND_COMPONENTS})
             continue()
         endif()
 
-        # Library location for (non-header-only) libraries
-        if(_component IN_LIST _CORRADE_LIBRARY_COMPONENTS AND NOT _component IN_LIST _CORRADE_HEADER_ONLY_COMPONENTS)
+        # Target for header-only library components
+        if(_component IN_LIST _CORRADE_HEADER_ONLY_COMPONENTS)
+            add_library(Corrade::${_component} INTERFACE IMPORTED)
+
+        # Target and location for (non-header-only) libraries
+        elseif(_component IN_LIST _CORRADE_LIBRARY_COMPONENTS)
+            add_library(Corrade::${_component} UNKNOWN IMPORTED)
+
             if(CORRADE_${_COMPONENT}_LIBRARY_RELEASE)
                 set_property(TARGET Corrade::${_component} APPEND PROPERTY
                     IMPORTED_CONFIGURATIONS RELEASE)
@@ -531,6 +523,13 @@ foreach(_component ${Corrade_FIND_COMPONENTS})
                 set_property(TARGET Corrade::${_component} PROPERTY
                     IMPORTED_LOCATION_DEBUG ${CORRADE_${_COMPONENT}_LIBRARY_DEBUG})
             endif()
+
+        # Target and location for executable components
+        elseif(_component IN_LIST _CORRADE_EXECUTABLE_COMPONENTS)
+            add_executable(Corrade::${_component} IMPORTED)
+
+            set_property(TARGET Corrade::${_component} PROPERTY
+                IMPORTED_LOCATION ${CORRADE_${_COMPONENT}_EXECUTABLE})
         endif()
 
         # No special setup for Containers library
