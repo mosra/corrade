@@ -102,10 +102,10 @@ endif()
 if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU" OR (CMAKE_CXX_COMPILER_ID MATCHES "(Apple)?Clang" AND NOT CMAKE_CXX_SIMULATE_ID STREQUAL "MSVC") OR CORRADE_TARGET_EMSCRIPTEN)
     set(CORRADE_PEDANTIC_COMPILER_OPTIONS
         "-Wall" "-Wextra"
-        "$<$<STREQUAL:$<TARGET_PROPERTY:LINKER_LANGUAGE>,CXX>:-Wold-style-cast>"
+        "$<$<COMPILE_LANGUAGE:CXX>:-Wold-style-cast>"
         "-Winit-self"
         # -Werror=return-type doesn't work on nvcc, use it just for C and C++
-        "$<$<OR:$<STREQUAL:$<TARGET_PROPERTY:LINKER_LANGUAGE>,C>,$<STREQUAL:$<TARGET_PROPERTY:LINKER_LANGUAGE>,CXX>>:-Werror=return-type>"
+        "$<$<OR:$<COMPILE_LANGUAGE:C>,$<COMPILE_LANGUAGE:CXX>>:-Werror=return-type>"
         "-Wmissing-declarations"
         # -Wpedantic is since 4.8, until then only -pedantic (which doesn't
         # have any -Wno-pedantic or a way to disable it for a particular line)
@@ -139,7 +139,7 @@ if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU" OR (CMAKE_CXX_COMPILER_ID MATCHES "(Appl
     # TODO: do this with check_c_compiler_flags()
     if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
         list(APPEND CORRADE_PEDANTIC_COMPILER_OPTIONS
-            "$<$<STREQUAL:$<TARGET_PROPERTY:LINKER_LANGUAGE>,CXX>:-Wzero-as-null-pointer-constant>"
+            "$<$<COMPILE_LANGUAGE:CXX>:-Wzero-as-null-pointer-constant>"
 
             # TODO: enable when this gets to Clang (not in 3.9, but in master
             # since https://github.com/llvm-mirror/clang/commit/0a022661c797356e9c28e4999b6ec3881361371e)
@@ -330,7 +330,7 @@ endif()
 # COMPILE_FEATURES is present either. It doesn't cover adding flags using
 # target_compile_options(), though.
 set(_CORRADE_CXX_STANDARD_ONLY_IF_NOT_ALREADY_SET
-    "$<STREQUAL:$<TARGET_PROPERTY:LINKER_LANGUAGE>,CXX>,$<NOT:$<BOOL:$<TARGET_PROPERTY:CXX_STANDARD>>>,$<NOT:$<BOOL:$<TARGET_PROPERTY:COMPILE_FEATURES>>>")
+    "$<COMPILE_LANGUAGE:CXX>,$<NOT:$<BOOL:$<TARGET_PROPERTY:CXX_STANDARD>>>,$<NOT:$<BOOL:$<TARGET_PROPERTY:COMPILE_FEATURES>>>")
 foreach(_standard 11 14 17 20)
     if(CORRADE_CXX${_standard}_STANDARD_FLAG)
         set_property(DIRECTORY APPEND PROPERTY COMPILE_OPTIONS
