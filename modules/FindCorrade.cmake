@@ -374,6 +374,9 @@ set(CORRADE_LIB_SUFFIX_MODULE ${_CORRADE_MODULE_DIR}/CorradeLibSuffix.cmake)
 # unknown components)
 set(_CORRADE_LIBRARY_COMPONENTS
     Containers Interconnect Main PluginManager TestSuite Utility)
+# These libraries are excluded from DLL detection if Corrade is built as shared
+set(_CORRADE_LIBRARY_COMPONENTS_ALWAYS_STATIC
+    Main)
 set(_CORRADE_HEADER_ONLY_COMPONENTS Containers)
 if(NOT CORRADE_TARGET_WINDOWS)
     # CorradeMain is a real library only on windows, a dummy target elsewhere
@@ -451,10 +454,25 @@ foreach(_component ${Corrade_FIND_COMPONENTS})
             find_library(CORRADE_${_COMPONENT}_LIBRARY_RELEASE Corrade${_component})
             mark_as_advanced(CORRADE_${_COMPONENT}_LIBRARY_DEBUG
                 CORRADE_${_COMPONENT}_LIBRARY_RELEASE)
-        endif()
+
+            # On Windows, if we have a dynamic build of given library, find the
+            # DLLs as well. Abuse find_program() since the DLLs should be
+            # alongside usual executables. On MinGW they however have a lib
+            # prefix.
+            if(CORRADE_TARGET_WINDOWS AND NOT CORRADE_BUILD_STATIC AND NOT _component IN_LIST _CORRADE_LIBRARY_COMPONENTS_ALWAYS_STATIC)
+                find_program(CORRADE_${_COMPONENT}_DLL_DEBUG ${CMAKE_SHARED_LIBRARY_PREFIX}Corrade${_component}-d.dll)
+                find_program(CORRADE_${_COMPONENT}_DLL_RELEASE ${CMAKE_SHARED_LIBRARY_PREFIX}Corrade${_component}.dll)
+                mark_as_advanced(CORRADE_${_COMPONENT}_DLL_DEBUG
+                    CORRADE_${_COMPONENT}_DLL_RELEASE)
+            # If not on Windows or on a static build, unset the DLL variables
+            # to avoid leaks when switching shared and static builds
+            else()
+                unset(CORRADE_${_COMPONENT}_DLL_DEBUG CACHE)
+                unset(CORRADE_${_COMPONENT}_DLL_RELEASE CACHE)
+            endif()
 
         # Executable components
-        if(_component IN_LIST _CORRADE_EXECUTABLE_COMPONENTS)
+        elseif(_component IN_LIST _CORRADE_EXECUTABLE_COMPONENTS)
             find_program(CORRADE_${_COMPONENT}_EXECUTABLE corrade-${_component})
             mark_as_advanced(CORRADE_${_COMPONENT}_EXECUTABLE)
 
@@ -482,6 +500,11 @@ foreach(_component ${Corrade_FIND_COMPONENTS})
                     mark_as_advanced(CORRADE_${_COMPONENT}_EXECUTABLE_EMULATOR)
                 endif()
             endif()
+
+        # If not a header-only component it's something unknown, skip. FPHSA
+        # will take care of handling this below.
+        elseif(NOT _component IN_LIST _CORRADE_HEADER_ONLY_COMPONENTS)
+            continue()
         endif()
 
         # Find library includes
@@ -495,7 +518,23 @@ foreach(_component ${Corrade_FIND_COMPONENTS})
         # Decide if the component was found. If not, skip the rest, which
         # creates and populates the target and finds additional dependencies.
         # If found, the _FOUND variable may still get reset by something below.
-        if((_component IN_LIST _CORRADE_LIBRARY_COMPONENTS AND _CORRADE_${_COMPONENT}_INCLUDE_DIR AND (_component IN_LIST _CORRADE_HEADER_ONLY_COMPONENTS OR CORRADE_${_COMPONENT}_LIBRARY_RELEASE OR CORRADE_${_COMPONENT}_LIBRARY_DEBUG)) OR (_component IN_LIST _CORRADE_EXECUTABLE_COMPONENTS AND CORRADE_${_COMPONENT}_EXECUTABLE))
+        if(
+            # If the component is a library, it should have the include dir
+            (_component IN_LIST _CORRADE_LIBRARY_COMPONENTS AND _CORRADE_${_COMPONENT}_INCLUDE_DIR AND (
+                # And it should be either header-only
+                _component IN_LIST _CORRADE_HEADER_ONLY_COMPONENTS OR
+                # Or have a debug library, and a DLL found if expected
+                (CORRADE_${_COMPONENT}_LIBRARY_DEBUG AND (
+                    NOT DEFINED CORRADE_${_COMPONENT}_DLL_DEBUG OR
+                    CORRADE_${_COMPONENT}_DLL_DEBUG)) OR
+                # Or have a release library, and a DLL found if expected
+                (CORRADE_${_COMPONENT}_LIBRARY_RELEASE AND (
+                    NOT DEFINED CORRADE_${_COMPONENT}_DLL_RELEASE OR
+                    CORRADE_${_COMPONENT}_DLL_RELEASE)))) OR
+            # If the component is an executable, it should have just the
+            # location
+            (_component IN_LIST _CORRADE_EXECUTABLE_COMPONENTS AND CORRADE_${_COMPONENT}_EXECUTABLE)
+        )
             set(Corrade_${_component}_FOUND TRUE)
         else()
             set(Corrade_${_component}_FOUND FALSE)
@@ -508,21 +547,31 @@ foreach(_component ${Corrade_FIND_COMPONENTS})
 
         # Target and location for (non-header-only) libraries
         elseif(_component IN_LIST _CORRADE_LIBRARY_COMPONENTS)
-            add_library(Corrade::${_component} UNKNOWN IMPORTED)
-
-            if(CORRADE_${_COMPONENT}_LIBRARY_RELEASE)
-                set_property(TARGET Corrade::${_component} APPEND PROPERTY
-                    IMPORTED_CONFIGURATIONS RELEASE)
-                set_property(TARGET Corrade::${_component} PROPERTY
-                    IMPORTED_LOCATION_RELEASE ${CORRADE_${_COMPONENT}_LIBRARY_RELEASE})
+            if(CORRADE_BUILD_STATIC OR _component IN_LIST _CORRADE_LIBRARY_COMPONENTS_ALWAYS_STATIC)
+                add_library(Corrade::${_component} STATIC IMPORTED)
+            else()
+                add_library(Corrade::${_component} SHARED IMPORTED)
             endif()
 
-            if(CORRADE_${_COMPONENT}_LIBRARY_DEBUG)
+            foreach(_CONFIG DEBUG RELEASE)
+                if(NOT CORRADE_${_COMPONENT}_LIBRARY_${_CONFIG})
+                    continue()
+                endif()
+
                 set_property(TARGET Corrade::${_component} APPEND PROPERTY
-                    IMPORTED_CONFIGURATIONS DEBUG)
-                set_property(TARGET Corrade::${_component} PROPERTY
-                    IMPORTED_LOCATION_DEBUG ${CORRADE_${_COMPONENT}_LIBRARY_DEBUG})
-            endif()
+                    IMPORTED_CONFIGURATIONS ${_CONFIG})
+                # Unfortunately for a DLL the two properties are swapped out,
+                # *.lib goes to IMPLIB, so it's duplicated like this
+                if(DEFINED CORRADE_${_COMPONENT}_DLL_${_CONFIG})
+                    # Quotes to "fix" KDE's higlighter
+                    set_target_properties("Corrade::${_component}" PROPERTIES
+                        IMPORTED_LOCATION_${_CONFIG} ${CORRADE_${_COMPONENT}_DLL_${_CONFIG}}
+                        IMPORTED_IMPLIB_${_CONFIG} ${CORRADE_${_COMPONENT}_LIBRARY_${_CONFIG}})
+                else()
+                    set_property(TARGET Corrade::${_component} PROPERTY
+                        IMPORTED_LOCATION_${_CONFIG} ${CORRADE_${_COMPONENT}_LIBRARY_${_CONFIG}})
+                endif()
+            endforeach()
 
         # Target and location for executable components
         elseif(_component IN_LIST _CORRADE_EXECUTABLE_COMPONENTS)
