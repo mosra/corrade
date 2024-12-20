@@ -41,8 +41,11 @@ cmake --build . || exit /b
 
 rem Coverage upload
 cd %APPVEYOR_BUILD_FOLDER%/build
-set PATH=C:\msys64\usr\bin;%PATH%
-bash %APPVEYOR_BUILD_FOLDER%\package\ci\appveyor-lcov.sh || exit /b
+rem  set PATH=C:\msys64\usr\bin;%PATH%
+rem  bash %APPVEYOR_BUILD_FOLDER%\package\ci\appveyor-lcov.sh || exit /b
+set GCOV=C:/mingw-w64/x86_64-7.2.0-posix-seh-rt_v5-rev1/mingw64/bin/gcov.exe
+C:/mingw-w64/x86_64-7.2.0-posix-seh-rt_v5-rev1/mingw64/bin/gcov.exe --version
+%APPVEYOR_BUILD_FOLDER%\grcov . -t lcov --keep-only "*/src/Corrade/*" --ignore "*/Test/*" --ignore "*/build/src/Corrade/*" -o coverage.info --excl-line LCOV_EXCL_LINE --excl-start LCOV_EXCL_START --excl-stop LCOV_EXCL_STOP
 rem The damn new codecov binary is apparently unable to work with
 rem subdirectories on Windows. Nobody cares.
 rem https://github.com/codecov/codecov-action/issues/862
