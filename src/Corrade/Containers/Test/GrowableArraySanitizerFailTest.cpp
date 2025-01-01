@@ -32,6 +32,8 @@
 #include <vector>
 
 #include "Corrade/Containers/GrowableArray.h"
+#include "Corrade/Containers/Pair.h"
+#include "Corrade/Containers/Reference.h"
 #include "Corrade/TestSuite/Tester.h"
 #include "Corrade/TestSuite/Compare/Numeric.h"
 #include "Corrade/Utility/Arguments.h"
@@ -65,7 +67,7 @@ GrowableArraySanitizerFailTest::GrowableArraySanitizerFailTest(): TestSuite::Tes
 
     Utility::Arguments args{"test-stl"};
     args.addOption("container", "").setHelp("container", "test behavior on a specific STL container instead", "vector|string")
-        .parse(arguments().first, arguments().second);
+        .parse(arguments().first(), arguments().second());
 
     if(args.value("container") == "vector")
         addTests({&GrowableArraySanitizerFailTest::testVector});

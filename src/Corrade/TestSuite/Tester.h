@@ -870,9 +870,7 @@ class CORRADE_TESTSUITE_EXPORT Tester {
          * however exposed as just @cpp char** @ce to make passing to 3rd party
          * APIs easier.
          */
-        std::pair<int&, char**> arguments() {
-            return {*_argc, const_cast<char**>(_argv)};
-        }
+        Containers::Pair<Containers::Reference<int>, char**> arguments();
 
         /**
          * @brief Add test cases

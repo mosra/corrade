@@ -948,6 +948,10 @@ namespace Corrade {
     @ref PluginManager::implicitPluginSearchPaths() is changed to match that.
     As the change was done to avoid including a heavy @ref std::vector, no
     backwards compatibility is done.
+-   As part of the ongoing STL usage cleanup, @ref TestSuite::Tester::arguments()
+    now returns a @ref Containers::Pair containing a @ref Containers::Reference
+    instead of a @ref std::pair. As this is a breaking change requiring source
+    changes, @ref Corrade/Containers/PairStl.h is not included.
 -   Due to changes to @ref CORRADE_SKIP() internals, passing a @ref std::string
     to it now requires an explicit @cpp #include <Corrade/Utility/DebugStl.h> @ce.
     Alternatively, if string concatenation was used, you can compose the

@@ -37,6 +37,7 @@
 #include "Corrade/Containers/GrowableArray.h"
 #include "Corrade/Containers/Optional.h"
 #include "Corrade/Containers/Pair.h"
+#include "Corrade/Containers/Reference.h"
 #include "Corrade/Containers/ScopeGuard.h"
 #include "Corrade/Containers/StringIterable.h"
 #include "Corrade/Containers/StringStl.h" /** @todo remove once Debug is stream-free */
@@ -222,6 +223,10 @@ namespace {
 
 Tester::Tester(const TesterConfiguration& configuration): _state{new TesterState{configuration}} {
     CORRADE_ASSERT(_argc, "TestSuite::Tester: command-line arguments not available", );
+}
+
+Containers::Pair<Containers::Reference<int>, char**> Tester::arguments() {
+    return {*_argc, const_cast<char**>(_argv)};
 }
 
 Tester::~Tester() {

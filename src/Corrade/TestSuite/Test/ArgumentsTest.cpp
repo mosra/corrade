@@ -24,6 +24,8 @@
     DEALINGS IN THE SOFTWARE.
 */
 
+#include "Corrade/Containers/Pair.h"
+#include "Corrade/Containers/Reference.h"
 #include "Corrade/Containers/StringStl.h" /** @todo drop once Arguments is <string>-free */
 #include "Corrade/TestSuite/Tester.h"
 #include "Corrade/Utility/Arguments.h"
@@ -44,7 +46,7 @@ ArgumentsTest::ArgumentsTest(): TestSuite::Tester{TesterConfiguration{}.setSkipp
 
     Utility::Arguments args{"arguments"};
     args.addOption("value").setHelp("value", "value to pass to the test")
-        .parse(arguments().first, arguments().second);
+        .parse(arguments().first(), arguments().second());
 
     _value = args.value("value");
 }

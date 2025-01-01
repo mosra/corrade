@@ -25,6 +25,8 @@
 */
 
 #include "Corrade/Containers/Array.h"
+#include "Corrade/Containers/Pair.h"
+#include "Corrade/Containers/Reference.h"
 #include "Corrade/Containers/StringView.h"
 #include "Corrade/Containers/StringIterable.h"
 #include "Corrade/TestSuite/Tester.h"
@@ -72,7 +74,7 @@ void MainTest::arguments() {
     #ifdef CORRADE_TESTSUITE_TARGET_XCTEST
     CORRADE_SKIP("Command-line arguments are currently ignored under XCTest.");
     #endif
-    auto args = Containers::arrayView(Tester::arguments().second, Tester::arguments().first).exceptPrefix(1);
+    auto args = Containers::arrayView(Tester::arguments().second(), Tester::arguments().first()).exceptPrefix(1);
     Debug{} << "Arguments expected: {--arg-utf, hýždě, --arg-another, šňůra}";
     Debug{} << "Arguments passed:  " << args;
 

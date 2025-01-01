@@ -44,6 +44,8 @@
 #define CORRADE_IS_DEBUG_BUILD
 #endif
 
+#include "Corrade/Containers/Pair.h"
+#include "Corrade/Containers/Reference.h"
 #include "Corrade/TestSuite/Tester.h"
 #include "Corrade/Utility/Arguments.h"
 #include "Corrade/Utility/DebugStl.h" /** @todo remove when <sstream> is gone */
@@ -159,7 +161,7 @@ AssertTest::AssertTest(): TestSuite::Tester{TesterConfiguration{}.setSkippedArgu
             "CORRADE_INTERNAL_ASSERT_UNREACHABLE()"
             #endif
             , "BOOL")
-        .parse(arguments().first, arguments().second);
+        .parse(arguments().first(), arguments().second());
 
     _failAssert = args.value<bool>("assert");
     _failInternalAssert = args.value<bool>("internal-assert");
