@@ -27,7 +27,7 @@
 */
 
 /** @file
- * @brief Class @ref Corrade::Utility::Resource
+ * @brief Class @ref Corrade::Utility::Resource, macro @ref CORRADE_RESOURCE_INITIALIZE(), @ref CORRADE_RESOURCE_FINALIZE()
  */
 
 #include "Corrade/Containers/Containers.h"
