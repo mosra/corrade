@@ -2199,7 +2199,7 @@ template<class T> void GrowableArrayTest::removeAllNonGrowable() {
         CORRADE_VERIFY(a.data() != prev);
         VERIFY_SANITIZED_PROPERLY(a, ArrayAllocator<T>);
 
-        /* The two items are constructed in-place, then a new empty growable
+        /* The five items are constructed in-place, then a new empty growable
            array is constructed, originals destructed */
         if(std::is_same<T, Movable>::value) {
             CORRADE_COMPARE(Movable::constructed, 5);
@@ -2245,7 +2245,7 @@ template<class T> void GrowableArrayTest::removeUnorderedAllNonGrowable() {
         CORRADE_VERIFY(a.data() != prev);
         VERIFY_SANITIZED_PROPERLY(a, ArrayAllocator<T>);
 
-        /* The two items are constructed in-place, then a new empty growable
+        /* The five items are constructed in-place, then a new empty growable
            array is constructed, originals destructed */
         if(std::is_same<T, Movable>::value) {
             CORRADE_COMPARE(Movable::constructed, 5);
@@ -2289,7 +2289,7 @@ template<class T> void GrowableArrayTest::removeSuffixAllNonGrowable() {
         CORRADE_VERIFY(a.data() != prev);
         VERIFY_SANITIZED_PROPERLY(a, ArrayAllocator<T>);
 
-        /* The two items are constructed in-place, then a new empty growable
+        /* The five items are constructed in-place, then a new empty growable
            array is constructed, originals destructed */
         if(std::is_same<T, Movable>::value) {
             CORRADE_COMPARE(Movable::constructed, 5);
