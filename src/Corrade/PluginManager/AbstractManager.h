@@ -594,13 +594,13 @@ See @ref plugin-management for more information about plugin compilation.
         Corrade::PluginManager::Implementation::StaticPlugin staticPlugin_##name; \
     }                                                                       \
     int pluginImporter_##name();                                            \
-    extern const unsigned char resourceData_##name[];                       \
-    extern const unsigned int resourceSize_##name;                          \
+    extern const unsigned char corradeResourceData_##name[];                \
+    extern const unsigned int corradeResourceSize_##name;                   \
     int pluginImporter_##name() {                                           \
         staticPlugin_##name.plugin = #name;                                 \
         staticPlugin_##name.interface = interface_;                         \
-        staticPlugin_##name.metadataData = resourceData_##name;             \
-        staticPlugin_##name.metadataSize = resourceSize_##name;             \
+        staticPlugin_##name.metadataData = corradeResourceData_##name;      \
+        staticPlugin_##name.metadataSize = corradeResourceSize_##name;      \
         staticPlugin_##name.instancer =                                     \
             [](Corrade::PluginManager::AbstractManager& manager, const Corrade::Containers::StringView& plugin) -> void* { \
                 return new className{manager, plugin};                      \

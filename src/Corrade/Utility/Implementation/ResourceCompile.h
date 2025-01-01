@@ -165,8 +165,8 @@ Corrade::Utility::Implementation::ResourceGroup resource;
 
 }}
 
-int resourceInitializer_{0}();
-int resourceInitializer_{0}() {{
+int corradeResourceInitializer_{0}();
+int corradeResourceInitializer_{0}() {{
     resource.name = "{1}";
     resource.count = 0;
     resource.positions = nullptr;
@@ -174,13 +174,13 @@ int resourceInitializer_{0}() {{
     resource.data = nullptr;
     Corrade::Utility::Resource::registerData(resource);
     return 1;
-}} CORRADE_AUTOMATIC_INITIALIZER(resourceInitializer_{0})
+}} CORRADE_AUTOMATIC_INITIALIZER(corradeResourceInitializer_{0})
 
-int resourceFinalizer_{0}();
-int resourceFinalizer_{0}() {{
+int corradeResourceFinalizer_{0}();
+int corradeResourceFinalizer_{0}() {{
     Corrade::Utility::Resource::unregisterData(resource);
     return 1;
-}} CORRADE_AUTOMATIC_FINALIZER(resourceFinalizer_{0})
+}} CORRADE_AUTOMATIC_FINALIZER(corradeResourceFinalizer_{0})
 )", name, group);
     }
 
@@ -279,8 +279,8 @@ Corrade::Utility::Implementation::ResourceGroup resource;
 
 }}
 
-int resourceInitializer_{5}();
-int resourceInitializer_{5}() {{
+int corradeResourceInitializer_{5}();
+int corradeResourceInitializer_{5}() {{
     resource.name = "{6}";
     resource.count = {7};
     resource.positions = resourcePositions;
@@ -288,13 +288,13 @@ int resourceInitializer_{5}() {{
     resource.data = {8};
     Corrade::Utility::Resource::registerData(resource);
     return 1;
-}} CORRADE_AUTOMATIC_INITIALIZER(resourceInitializer_{5})
+}} CORRADE_AUTOMATIC_INITIALIZER(corradeResourceInitializer_{5})
 
-int resourceFinalizer_{5}();
-int resourceFinalizer_{5}() {{
+int corradeResourceFinalizer_{5}();
+int corradeResourceFinalizer_{5}() {{
     Corrade::Utility::Resource::unregisterData(resource);
     return 1;
-}} CORRADE_AUTOMATIC_FINALIZER(resourceFinalizer_{5})
+}} CORRADE_AUTOMATIC_FINALIZER(corradeResourceFinalizer_{5})
 )",
         /* Casts to prevent ambiguity with std::format() when compiling as
            C++20 */
@@ -411,8 +411,8 @@ Containers::String resourceCompileSingle(const Containers::StringView name, cons
 
 )" _CORRADE_RESOURCE_VERSION_CHECK R"(
 
-extern const unsigned int resourceSize_{0} = {1};
-extern const unsigned char resourceData_{0}[] = {{
+extern const unsigned int corradeResourceSize_{0} = {1};
+extern const unsigned char corradeResourceData_{0}[] = {{
 {2}
 }};
 )", name, data->size(),

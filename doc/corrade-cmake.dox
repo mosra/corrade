@@ -328,8 +328,8 @@ add_executable(app source1 source2 ... ${app_resources})
 
 Alternatively, the `SINGLE` signature can be used to directly compile a single
 file into a C++ source file containing its binary representation, exposing the
-data under @cpp extern const unsigned char resourceData_name[] @ce and
-@cpp extern const unsigned int resourceSize_name @ce symbols, with no
+data under @cpp extern const unsigned char corradeResourceData_name[] @ce and
+@cpp extern const unsigned int corradeResourceSize_name @ce symbols, with no
 dependency on @ref Utility::Resource or any other header.
 
 @code{.cmake}

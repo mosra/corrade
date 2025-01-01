@@ -65,9 +65,10 @@ By default expects that `input` is a resource configuration file containing a
 @cb{.ini} group @ce name and zero or more @cb{.ini} [file] @ce groups with
 input filenames. If `--single` is specified, the `input` file is read and
 directly compiled into a C++ source file, exposing the data under
-@cpp extern const unsigned char resourceData_name[] @ce and
-@cpp extern const unsigned int resourceSize_name @ce symbols, with no
-dependency on @ref Utility::Resource or any other header.
+@cpp extern const unsigned char corradeResourceData_name[] @ce and
+@cpp extern const unsigned int corradeResourceSize_name @ce symbols, with only
+a preprocessor dependency on the @ref Corrade/Utility/Resource.h header for a
+version compatibility check.
 
 Arguments:
 
@@ -97,9 +98,11 @@ int main(int argc, char** argv) {
 By default expects that input is a resource configuration file containing a
 group name and zero or more [file] groups with input filenames. If --single
 is specified, the input file is read and directly compiled into a C++ source
-file, exposing the data under `extern const unsigned char resourceData_<name>[]`
-and `extern const std::size_t resourceSize_<name>` symbols, with no dependency
-on Corrade's resource system or any other header.)")
+file, exposing the data under
+`extern const unsigned char corradeResourceData_<name>[]` and
+`extern const unsigned int corradeResourceSize_<name>` symbols, with only a
+preprocessor dependency on the Corrade/Utility/Resource.h header for a version
+compatibility check.)")
         .parse(argc, argv);
 
     /* Remove previous output file. Only if it exists, to not print an error

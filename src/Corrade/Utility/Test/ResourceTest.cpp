@@ -59,10 +59,10 @@
 
 /* Compiled using corrade_add_resource(... SINGLE), tested with
    single() and singleEmpty() */
-extern const unsigned int resourceSize_ResourceTestSingleData;
-extern const unsigned int resourceSize_ResourceTestSingleEmptyData;
-extern const unsigned char resourceData_ResourceTestSingleData[];
-extern const unsigned char resourceData_ResourceTestSingleEmptyData[];
+extern const unsigned int corradeResourceSize_ResourceTestSingleData;
+extern const unsigned int corradeResourceSize_ResourceTestSingleEmptyData;
+extern const unsigned char corradeResourceData_ResourceTestSingleData[];
+extern const unsigned char corradeResourceData_ResourceTestSingleEmptyData[];
 
 namespace Corrade { namespace Utility { namespace Test { namespace {
 
@@ -697,7 +697,7 @@ void ResourceTest::overrideGroupFileFallbackReadError() {
 }
 
 void ResourceTest::single() {
-    CORRADE_COMPARE_AS((Containers::StringView{reinterpret_cast<const char*>(resourceData_ResourceTestSingleData), resourceSize_ResourceTestSingleData}),
+    CORRADE_COMPARE_AS((Containers::StringView{reinterpret_cast<const char*>(corradeResourceData_ResourceTestSingleData), corradeResourceSize_ResourceTestSingleData}),
         Path::join(RESOURCE_TEST_DIR, "consequence.bin"),
         TestSuite::Compare::StringToFile);
 }
@@ -720,7 +720,7 @@ void ResourceTest::singleEmpty() {
     CORRADE_EXPECT_FAIL_IF(nodeJsVersionLess(18),
         "Emscripten 2.0.26 to 3.1.3 with Node.js < 18 reports empty files as having 3 bytes.");
     #endif
-    CORRADE_COMPARE_AS((Containers::StringView{reinterpret_cast<const char*>(resourceData_ResourceTestSingleEmptyData), resourceSize_ResourceTestSingleEmptyData}),
+    CORRADE_COMPARE_AS((Containers::StringView{reinterpret_cast<const char*>(corradeResourceData_ResourceTestSingleEmptyData), corradeResourceSize_ResourceTestSingleEmptyData}),
         Path::join(RESOURCE_TEST_DIR, "empty.bin"),
         TestSuite::Compare::StringToFile);
 }

@@ -4,11 +4,11 @@
 #include "Corrade/Utility/Macros.h"
 #include "Corrade/Utility/Resource.h"
 
-#if CORRADE_RESOURCE_VERSION != 1
+#if CORRADE_RESOURCE_VERSION != 2
 #ifdef CORRADE_TARGET_CLANG
-#pragma GCC error "resource file compiled in version 1 but version " _CORRADE_HELPER_STR2(CORRADE_RESOURCE_VERSION) " expected, update your corrade-rc binary"
+#pragma GCC error "resource file compiled in version 2 but version " _CORRADE_HELPER_STR2(CORRADE_RESOURCE_VERSION) " expected, update your corrade-rc binary"
 #else
-#error resource file compiled in unexpected version 1, update your corrade-rc binary
+#error resource file compiled in unexpected version 2, update your corrade-rc binary
 #if defined(CORRADE_TARGET_GCC) || defined(CORRADE_TARGET_MSVC)
 #pragma message("resource file version " _CORRADE_HELPER_STR2(CORRADE_RESOURCE_VERSION) " expected instead")
 #endif
@@ -61,8 +61,8 @@ Corrade::Utility::Implementation::ResourceGroup resource;
 
 }
 
-int resourceInitializer_ResourceTestAlignmentLargerThanDataSizeData();
-int resourceInitializer_ResourceTestAlignmentLargerThanDataSizeData() {
+int corradeResourceInitializer_ResourceTestAlignmentLargerThanDataSizeData();
+int corradeResourceInitializer_ResourceTestAlignmentLargerThanDataSizeData() {
     resource.name = "alignmentLargerThanDataSize";
     resource.count = 3;
     resource.positions = resourcePositions;
@@ -70,10 +70,10 @@ int resourceInitializer_ResourceTestAlignmentLargerThanDataSizeData() {
     resource.data = resourceData;
     Corrade::Utility::Resource::registerData(resource);
     return 1;
-} CORRADE_AUTOMATIC_INITIALIZER(resourceInitializer_ResourceTestAlignmentLargerThanDataSizeData)
+} CORRADE_AUTOMATIC_INITIALIZER(corradeResourceInitializer_ResourceTestAlignmentLargerThanDataSizeData)
 
-int resourceFinalizer_ResourceTestAlignmentLargerThanDataSizeData();
-int resourceFinalizer_ResourceTestAlignmentLargerThanDataSizeData() {
+int corradeResourceFinalizer_ResourceTestAlignmentLargerThanDataSizeData();
+int corradeResourceFinalizer_ResourceTestAlignmentLargerThanDataSizeData() {
     Corrade::Utility::Resource::unregisterData(resource);
     return 1;
-} CORRADE_AUTOMATIC_FINALIZER(resourceFinalizer_ResourceTestAlignmentLargerThanDataSizeData)
+} CORRADE_AUTOMATIC_FINALIZER(corradeResourceFinalizer_ResourceTestAlignmentLargerThanDataSizeData)
