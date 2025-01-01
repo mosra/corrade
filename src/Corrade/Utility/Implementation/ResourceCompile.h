@@ -43,6 +43,7 @@
 #include "Corrade/Utility/FormatStl.h"
 #include "Corrade/Utility/Math.h"
 #include "Corrade/Utility/Path.h"
+#include "Corrade/Utility/Resource.h" /* CORRADE_RESOURCE_VERSION */
 
 /* Functionality here is used only by corrade-rc and ResourceCompileTest, thus
    it makes no sense for it to live inside CorradeUtility. It's put into an
@@ -100,6 +101,38 @@ inline bool lessFilename(const FileData& a, const FileData& b) {
     return a.filename < b.filename;
 }
 
+/* Yeah, I know, macro hell, but I really want to turn this into a single
+   compile-time literal in all three cases below instead of doing a ton of
+   useless runtime concatenation and formatting. Tried copying it thrice before
+   but that was even worse. Raw string literal was quite bad as well,
+   especially in combination with automatic line wrapping.
+
+   Clang can concatenate with stringified literals directly in a
+   `#pragma GCC error`, making it a single message, which is preferrable. GCC
+   cannot (neither it can in e.g. CORRADE_DEPRECATED_FILE()), only in
+   `#pragma message`, and MSVC doesn't have an equivalent of
+   `#pragma GCC errror`, so on those two it's a standard (unformatted) #error
+   plus a note. On compilers other than Clang, GCC and MSVC it's just the
+   #error alone.
+
+   However, ultimately, MSVC's stupidity results in just the error being
+   printed, and the message after not. I give up. Maybe they fix this in
+   version 2036, so I'm just leaving that there. */
+#define _CORRADE_RESOURCE_VERSION_CHECK \
+    "#if CORRADE_RESOURCE_VERSION != " _CORRADE_HELPER_STR2(CORRADE_RESOURCE_VERSION) "\n" \
+    "#ifdef CORRADE_TARGET_CLANG\n" \
+    /* The first is replaced directly inside the corrade-rc binary and gets put
+       into the generated file, the second is replaced when compiling the
+       generated file */ \
+    "#pragma GCC error \"resource file compiled in version " _CORRADE_HELPER_STR2(CORRADE_RESOURCE_VERSION) " but version \" _CORRADE_HELPER_STR2(CORRADE_RESOURCE_VERSION) \" expected, update your corrade-rc binary\"\n" \
+    "#else\n" \
+    "#error resource file compiled in unexpected version " _CORRADE_HELPER_STR2(CORRADE_RESOURCE_VERSION) ", update your corrade-rc binary\n" \
+    "#if defined(CORRADE_TARGET_GCC) || defined(CORRADE_TARGET_MSVC)\n" \
+    "#pragma message(\"resource file version \" _CORRADE_HELPER_STR2(CORRADE_RESOURCE_VERSION) \" expected instead\")\n" \
+    "#endif\n" \
+    "#endif\n" \
+    "#endif"
+
 /* Compile data resource file. Resource name is the one to use in
    CORRADE_RESOURCE_INITIALIZE(), group name is the one to load the resources
    from. Output is a C++ file with hexadecimal data representation. */
@@ -123,6 +156,8 @@ Containers::String resourceCompile(const Containers::StringView name, const Cont
 #include "Corrade/Corrade.h"
 #include "Corrade/Utility/Macros.h"
 #include "Corrade/Utility/Resource.h"
+
+)" _CORRADE_RESOURCE_VERSION_CHECK R"(
 
 namespace {{
 
@@ -222,6 +257,8 @@ int resourceFinalizer_{0}() {{
 #include "Corrade/Corrade.h"
 #include "Corrade/Utility/Macros.h"
 #include "Corrade/Utility/Resource.h"
+
+)" _CORRADE_RESOURCE_VERSION_CHECK R"(
 
 namespace {{
 
@@ -368,6 +405,11 @@ Containers::String resourceCompileSingle(const Containers::StringView name, cons
     }
 
     return format(R"(/* Compiled resource file. DO NOT EDIT! */
+
+#include "Corrade/Utility/Macros.h"
+#include "Corrade/Utility/Resource.h"
+
+)" _CORRADE_RESOURCE_VERSION_CHECK R"(
 
 extern const unsigned int resourceSize_{0} = {1};
 extern const unsigned char resourceData_{0}[] = {{
