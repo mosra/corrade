@@ -192,7 +192,7 @@ the annotation, but ignores it for both enums and enum values.
 @brief File deprecation mark
 
 Putting this in a file will emit deprecation warning when given file is
-included or compiled (GCC 4.8, Clang, MSVC):
+included or compiled (GCC, Clang, MSVC):
 
 @code{.cpp}
 CORRADE_DEPRECATED_FILE("use Bar.h instead") // yes, no semicolon at the end
@@ -212,9 +212,9 @@ in any way.
     @ref CORRADE_DEPRECATED_MACRO()
 */
 #if !defined(CORRADE_DEPRECATED_FILE) || defined(DOXYGEN_GENERATING_OUTPUT)
-#if defined(CORRADE_TARGET_CLANG)
+#ifdef CORRADE_TARGET_CLANG
 #define CORRADE_DEPRECATED_FILE(message) _Pragma(_CORRADE_HELPER_STR(GCC warning ("this file is deprecated: " message)))
-#elif defined(CORRADE_TARGET_GCC) && __GNUC__*100 + __GNUC_MINOR__ >= 408
+#elif defined(CORRADE_TARGET_GCC)
 #define CORRADE_DEPRECATED_FILE(message) _Pragma(_CORRADE_HELPER_STR(GCC warning message))
 #elif defined(CORRADE_TARGET_MSVC)
 #define CORRADE_DEPRECATED_FILE(_message) __pragma(message ("warning: " __FILE__ " is deprecated: " _message))
@@ -227,7 +227,7 @@ in any way.
 @brief Macro deprecation mark
 
 Putting this in a macro definition will emit deprecation warning when given
-macro is used (GCC 4.8, Clang, MSVC):
+macro is used (GCC, Clang, MSVC):
 
 @code{.cpp}
 #define MAKE_FOO(args) \
@@ -247,9 +247,9 @@ contribute to the warning log or warning count in any way.
     @ref CORRADE_DEPRECATED_FILE()
 */
 #ifndef CORRADE_DEPRECATED_MACRO
-#if defined(CORRADE_TARGET_CLANG)
+#ifdef CORRADE_TARGET_CLANG
 #define CORRADE_DEPRECATED_MACRO(macro,message) _Pragma(_CORRADE_HELPER_STR(GCC warning ("this macro is deprecated: " message)))
-#elif defined(CORRADE_TARGET_GCC) && __GNUC__*100 + __GNUC_MINOR__ >= 408
+#elif defined(CORRADE_TARGET_GCC)
 #define CORRADE_DEPRECATED_MACRO(macro,message) _Pragma(_CORRADE_HELPER_STR(GCC warning message))
 #elif defined(CORRADE_TARGET_MSVC)
 #define CORRADE_DEPRECATED_MACRO(macro,_message) __pragma(message (__FILE__ ": warning: " _CORRADE_HELPER_STR(macro) " is deprecated: " _message))
