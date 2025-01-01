@@ -30,6 +30,7 @@
 #include "Corrade/Containers/Pair.h" /* need a template that isn't in Utility or std */
 #include "Corrade/TestSuite/Tester.h"
 #include "Corrade/Utility/AbstractHash.h" /* need just *some* type from Utility */
+#include "Corrade/Utility/DebugStl.h" /* for std::pair */
 #include "Corrade/Utility/Move.h"
 
 namespace Corrade { namespace Utility { namespace Test { namespace {

@@ -972,6 +972,9 @@ namespace Corrade {
     @ref Containers::MutableStringView instead of @ref Containers::ArrayView.
     The types are however implicitly convertible and thus breakages are not
     expected in majority of existing code.
+-   As part of the ongoing STL usage cleanup, printing a @ref std::pair with
+    @ref Utility::Debug now requires the @ref Corrade/Utility/DebugStl.h
+    include.
 -   Printing a C++17 @ref std::string_view with @ref Utility::Debug now
     requires the @ref Corrade/Utility/DebugStlStringView.h include. Before it
     was printed as a numeric container due to @ref Utility::IsStringLike not

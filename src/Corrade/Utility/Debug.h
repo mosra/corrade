@@ -33,7 +33,6 @@
 
 #include <iosfwd>
 #include <type_traits>
-#include <utility> /** @todo consider putting this away as well (900 LOC) */
 
 #include "Corrade/Containers/EnumSet.h"
 #include "Corrade/Utility/TypeTraits.h" /* IsIterable, IsStringLike, CORRADE_SOURCE_LOCATION_BUILTINS_SUPPORTED */
@@ -947,28 +946,6 @@ template<class Iterable
         debug << *it;
     }
     debug << Debug::nospace << end;
-
-    /* Reset the original flags back */
-    debug.setFlags(prevFlags);
-
-    return debug;
-}
-
-/** @relatesalso Debug
-@brief Print a @ref std::pair to debug output
-
-Prints the value as @cb{.shell-session} (first, second) @ce. Unlike
-@ref operator<<(Debug& debug, const Iterable& value), the output is not
-affected by @ref Debug::Flag::Packed / @ref Debug::packed.
-*/
-template<class T, class U> Debug& operator<<(Debug& debug, const std::pair<T, U>& value) {
-    /* Nested values should get printed with the same flags, so make all
-       immediate flags temporarily global -- except NoSpace, unless it's also
-       set globally */
-    const Debug::Flags prevFlags = debug.flags();
-    debug.setFlags(prevFlags | (debug.immediateFlags() & ~Debug::Flag::NoSpace));
-
-    debug << "(" << Debug::nospace << value.first << Debug::nospace << "," << value.second << Debug::nospace << ")";
 
     /* Reset the original flags back */
     debug.setFlags(prevFlags);

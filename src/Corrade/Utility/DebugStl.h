@@ -44,6 +44,7 @@ for more information.
 /* this one doesn't add much on top of <string>, so it doesn't need to be
    separate */
 #include <tuple>
+#include <utility> /* std::pair */
 
 #include "Corrade/Containers/ArrayView.h"
 #include "Corrade/Containers/sequenceHelpers.h"
@@ -55,6 +56,28 @@ namespace Implementation {
     CORRADE_HAS_TYPE(HasOstreamOutput, decltype(std::declval<std::ostream&>() << std::declval<T>()));
 
     CORRADE_UTILITY_EXPORT Debug& debugPrintStlString(Debug& debug, const std::string& value);
+}
+
+/** @relatesalso Debug
+@brief Print a @ref std::pair to debug output
+
+Prints the value as @cb{.shell-session} (first, second) @ce. Unlike
+@ref operator<<(Debug& debug, const Iterable& value), the output is not
+affected by @ref Debug::Flag::Packed / @ref Debug::packed.
+*/
+template<class T, class U> Debug& operator<<(Debug& debug, const std::pair<T, U>& value) {
+    /* Nested values should get printed with the same flags, so make all
+       immediate flags temporarily global -- except NoSpace, unless it's also
+       set globally */
+    const Debug::Flags prevFlags = debug.flags();
+    debug.setFlags(prevFlags | (debug.immediateFlags() & ~Debug::Flag::NoSpace));
+
+    debug << "(" << Debug::nospace << value.first << Debug::nospace << "," << value.second << Debug::nospace << ")";
+
+    /* Reset the original flags back */
+    debug.setFlags(prevFlags);
+
+    return debug;
 }
 
 /** @relatesalso Debug
