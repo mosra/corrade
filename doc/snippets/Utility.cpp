@@ -1221,12 +1221,12 @@ Utility::Debug{} << Utility::Sha1::digest("corrade");
 }
 }
 
-typedef std::pair<int, int> T;
+typedef Containers::Pair<int, int> T;
 /* [TweakableParser] */
 namespace Corrade { namespace Utility { // namespace is important
 
 template<> struct TweakableParser<T> {
-    static std::pair<TweakableState, T> parse(Containers::ArrayView<const char> value);
+    static Containers::Pair<TweakableState, T> parse(Containers::ArrayView<const char> value);
 };
 
 }}
