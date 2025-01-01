@@ -160,6 +160,9 @@ struct GrowableArrayTest: TestSuite::Tester {
     void removeUnorderedShiftOperationOrderNoOverlap();
     void removeInvalid();
 
+    template<class T> void clearNonGrowable();
+    template<class T> void clearGrowable();
+
     void mallocFailed();
     void reallocFailed();
 
@@ -476,6 +479,11 @@ GrowableArrayTest::GrowableArrayTest() {
               &GrowableArrayTest::removeUnorderedShiftOperationOrderNoOp,
               &GrowableArrayTest::removeUnorderedShiftOperationOrderNoOverlap,
               &GrowableArrayTest::removeInvalid,
+
+              &GrowableArrayTest::clearNonGrowable<int>,
+              &GrowableArrayTest::clearNonGrowable<Movable>,
+              &GrowableArrayTest::clearGrowable<int>,
+              &GrowableArrayTest::clearGrowable<Movable>,
 
               &GrowableArrayTest::mallocFailed,
               &GrowableArrayTest::reallocFailed,
@@ -2738,6 +2746,76 @@ void GrowableArrayTest::removeInvalid() {
         "Containers::arrayRemoveSuffix(): can't remove 5 elements from an array of size 4\n");
 }
 
+template<class T> void GrowableArrayTest::clearNonGrowable() {
+    setTestCaseTemplateName(TypeName<T>::name());
+
+    {
+        Array<T> a{2};
+        a[0] = 2;
+        a[1] = 3;
+
+        /* Compared to arrayRemove() etc gets just deallocated, with no new
+           growable allocation */
+        arrayClear(a);
+        CORRADE_VERIFY(!a.data());
+        CORRADE_VERIFY(!a.deleter());
+        CORRADE_COMPARE(a.size(), 0);
+        CORRADE_COMPARE(arrayCapacity(a), 0);
+
+        /* The two items are constructed in-place, then destructed */
+        if(std::is_same<T, Movable>::value) {
+            CORRADE_COMPARE(Movable::constructed, 2);
+            CORRADE_COMPARE(Movable::moved, 0);
+            CORRADE_COMPARE(Movable::assigned, 0);
+            CORRADE_COMPARE(Movable::destructed, 2);
+        }
+    }
+
+    /* No change after the array goes out of scope */
+    if(std::is_same<T, Movable>::value) {
+        CORRADE_COMPARE(Movable::constructed, 2);
+        CORRADE_COMPARE(Movable::moved, 0);
+        CORRADE_COMPARE(Movable::assigned, 0);
+        CORRADE_COMPARE(Movable::destructed, 2);
+    }
+}
+
+template<class T> void GrowableArrayTest::clearGrowable() {
+    setTestCaseTemplateName(TypeName<T>::name());
+
+    {
+        Array<T> a;
+        arrayReserve(a, 10);
+        T* prev = a.data();
+        arrayAppend(a, Corrade::InPlaceInit, 2);
+        arrayAppend(a, Corrade::InPlaceInit, 7);
+        VERIFY_SANITIZED_PROPERLY(a, ArrayAllocator<T>);
+
+        arrayClear(a);
+        CORRADE_VERIFY(arrayIsGrowable(a));
+        CORRADE_COMPARE(a.size(), 0);
+        CORRADE_COMPARE(arrayCapacity(a), 10);
+        CORRADE_VERIFY(a.data() == prev);
+        VERIFY_SANITIZED_PROPERLY(a, ArrayAllocator<T>);
+
+        /* The two items are constructed in-place. Then, all are destructed. */
+        if(std::is_same<T, Movable>::value) {
+            CORRADE_COMPARE(Movable::constructed, 2);
+            CORRADE_COMPARE(Movable::moved, 0);
+            CORRADE_COMPARE(Movable::assigned, 0);
+            CORRADE_COMPARE(Movable::destructed, 2);
+        }
+    }
+
+    /* No change after the array goes out of scope */
+    if(std::is_same<T, Movable>::value) {
+        CORRADE_COMPARE(Movable::constructed, 2);
+        CORRADE_COMPARE(Movable::moved, 0);
+        CORRADE_COMPARE(Movable::assigned, 0);
+        CORRADE_COMPARE(Movable::destructed, 2);
+    }
+}
+
 void GrowableArrayTest::mallocFailed() {
     CORRADE_SKIP_IF_NO_ASSERT();
     #if defined(_CORRADE_CONTAINERS_SANITIZER_ENABLED) || defined(_CORRADE_CONTAINERS_THREAD_SANITIZER_ENABLED)
@@ -3115,6 +3193,11 @@ void GrowableArrayTest::explicitAllocatorParameter() {
     arrayReserve<ArrayNewAllocator>(a, 10);
     /* Calling it again should be a no-op if it correctly checks for capacity */
     arrayReserve<ArrayNewAllocator>(a, 8);
+    CORRADE_VERIFY(!arrayIsGrowable(a));
+    CORRADE_VERIFY(arrayIsGrowable<ArrayNewAllocator>(a));
+    CORRADE_COMPARE(arrayCapacity<ArrayNewAllocator>(a), 10);
+
+    arrayClear<ArrayNewAllocator>(a);
     CORRADE_VERIFY(!arrayIsGrowable(a));
     CORRADE_VERIFY(arrayIsGrowable<ArrayNewAllocator>(a));
     CORRADE_COMPARE(arrayCapacity<ArrayNewAllocator>(a), 10);

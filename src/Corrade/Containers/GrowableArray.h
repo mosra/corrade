@@ -27,7 +27,7 @@
 */
 
 /** @file
- * @brief Class @ref Corrade::Containers::ArrayAllocator, @ref Corrade::Containers::ArrayNewAllocator, @ref Corrade::Containers::ArrayMallocAllocator, function @ref Corrade::Containers::arrayAllocatorCast(), @ref Corrade::Containers::arrayIsGrowable(), @ref Corrade::Containers::arrayCapacity(), @ref Corrade::Containers::arrayReserve(), @ref Corrade::Containers::arrayResize(), @ref Corrade::Containers::arrayAppend(), @ref Corrade::Containers::arrayInsert(), @ref Corrade::Containers::arrayRemove(), @ref Corrade::Containers::arrayRemoveUnordered(), @ref Corrade::Containers::arrayRemoveSuffix(), @ref Corrade::Containers::arrayShrink()
+ * @brief Class @ref Corrade::Containers::ArrayAllocator, @ref Corrade::Containers::ArrayNewAllocator, @ref Corrade::Containers::ArrayMallocAllocator, function @ref Corrade::Containers::arrayAllocatorCast(), @ref Corrade::Containers::arrayIsGrowable(), @ref Corrade::Containers::arrayCapacity(), @ref Corrade::Containers::arrayReserve(), @ref Corrade::Containers::arrayResize(), @ref Corrade::Containers::arrayAppend(), @ref Corrade::Containers::arrayInsert(), @ref Corrade::Containers::arrayRemove(), @ref Corrade::Containers::arrayRemoveUnordered(), @ref Corrade::Containers::arrayRemoveSuffix(), @ref Corrade::Containers::arrayClear(), @ref Corrade::Containers::arrayShrink()
  * @m_since{2020,06}
  *
  * See @ref Containers-Array-growable for more information.
@@ -1347,7 +1347,7 @@ This function is equivalent to calling @relativeref{std::vector,erase()} on a
 @ref std::vector.
 @m_keywords{erase()}
 @see @ref arrayIsGrowable(), @ref arrayRemoveUnordered(),
-    @ref arrayRemoveSuffix()
+    @ref arrayRemoveSuffix(), @ref arrayClear()
 */
 template<class T, class Allocator = ArrayAllocator<T>> void arrayRemove(Array<T>& array, std::size_t index, std::size_t count = 1);
 
@@ -1383,7 +1383,7 @@ Amortized complexity is @f$ \mathcal{O}(m) @f$ where @f$ m @f$ is the number of
 items being removed. On top of what the @p Allocator (or the default
 @ref ArrayAllocator) itself needs, @p T is required to be nothrow
 move-constructible and nothrow move-assignable.
-@see @ref arrayIsGrowable(), @ref arrayRemoveSuffix()
+@see @ref arrayIsGrowable(), @ref arrayRemoveSuffix(), @ref arrayClear()
 */
 template<class T, class Allocator = ArrayAllocator<T>> void arrayRemoveUnordered(Array<T>& array, std::size_t index, std::size_t count = 1);
 
@@ -1421,7 +1421,7 @@ With @p count set to @cpp 1 @ce, this function is equivalent to calling
 @relativeref{std::vector,pop_back()} on a @ref std::vector.
 @m_keywords{pop_back()}
 @see @ref arrayIsGrowable(), @ref arrayRemove(), @ref arrayRemoveUnordered(),
-    @ref arrayResize()
+    @ref arrayClear(), @ref arrayResize()
 */
 template<class T, class Allocator = ArrayAllocator<T>> void arrayRemoveSuffix(Array<T>& array, std::size_t count = 1);
 
@@ -1438,6 +1438,44 @@ array type being inferred.
 */
 template<template<class> class Allocator, class T> inline void arrayRemoveSuffix(Array<T>& array, std::size_t count = 1) {
     arrayRemoveSuffix<T, Allocator<T>>(array, count);
+}
+#endif
+
+/**
+@brief Clear an array
+@m_since_latest
+
+If the array is not growable, it's replaced by an empty instance, freeing its
+contents as a whole. Otherwise a destructor is called on all existing elements
+and the @ref Array::size() is set to @cpp 0 @ce, with @ref arrayCapacity()
+staying the same as before.
+
+Amortized complexity is @f$ \mathcal{O}(n) @f$ where @f$ n @f$ is the number of
+items in the array. On top of what the @p Allocator (or the default
+@ref ArrayAllocator) itself needs, @p T is required to be nothrow
+move-constructible.
+
+This function is equivalent to calling @relativeref{std::vector,clear()} on a
+@ref std::vector.
+@m_keywords{clear()}
+@see @ref arrayIsGrowable(), @ref arrayRemove(), @ref arrayRemoveUnordered(),
+    @ref arrayRemoveSuffix(), @ref arrayResize()
+*/
+template<class T, class Allocator = ArrayAllocator<T>> void arrayClear(Array<T>& array);
+
+/* This crap tool can't distinguish between this and above overload, showing
+   just one with the docs melted together. More useless than showing nothing
+   at all, so hiding this one from it until it improves. */
+#ifndef DOXYGEN_GENERATING_OUTPUT
+/**
+@overload
+@m_since_latest
+
+Convenience overload allowing to specify just the allocator template, with
+array type being inferred.
+*/
+template<template<class> class Allocator, class T> inline void arrayClear(Array<T>& array) {
+    arrayClear<T, Allocator<T>>(array);
 }
 #endif
 
@@ -2304,6 +2342,29 @@ template<class T, class Allocator> void arrayRemoveSuffix(Array<T>& array, const
             arrayGuts.data + arrayGuts.size - count);
         #endif
         arrayGuts.size -= count;
+    }
+}
+
+template<class T, class Allocator> void arrayClear(Array<T>& array) {
+    /* Direct access to speed up debug builds */
+    auto& arrayGuts = reinterpret_cast<Implementation::ArrayGuts<T>&>(array);
+
+    /* If not using our growing allocator, simply free the existing contents */
+    if(arrayGuts.deleter != Allocator::deleter) {
+        array = {};
+
+    /* Otherwise call the destructor on the excessive elements and update the
+       size */
+    } else {
+        Implementation::arrayDestruct<T>(arrayGuts.data, arrayGuts.data + arrayGuts.size);
+        #ifdef _CORRADE_CONTAINERS_SANITIZER_ENABLED
+        __sanitizer_annotate_contiguous_container(
+            Allocator::base(arrayGuts.data),
+            arrayGuts.data + Allocator::capacity(arrayGuts.data),
+            arrayGuts.data + arrayGuts.size,
+            arrayGuts.data);
+        #endif
+        arrayGuts.size = 0;
     }
 }
 
