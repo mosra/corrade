@@ -15,6 +15,9 @@ executors:
   ubuntu-18_04:
     docker:
     - image: ubuntu:bionic-20220427
+  ubuntu-20_04:
+    docker:
+    - image: ubuntu:focal-20241011
   # Anything below 13.4.1 (and all x86 variants) are deprecated as of June 28th
   # 2024
   xcode-13_4:
@@ -192,6 +195,33 @@ commands:
           echo 'export CXX=clang++' >> $BASH_ENV
           ls -l /usr/bin/llvm-symbolizer-6.0
           ln -s /usr/bin/llvm-symbolizer{-6.0,}
+
+  # Used only by the linux-threadsanitizer job, see the comment there
+  install-new-clang:
+    parameters:
+      version:
+        type: string
+    steps:
+    - run:
+        name: Install software-properties-common, which pulls in all of python3 for some reason
+        # Installing the tzdata package ASKS FOR TIMEZONE IN THE CONSOLE?! WHO
+        # DESIGNED THIS CRAP?! https://stackoverflow.com/a/58264927
+        command: |
+          DEBIAN_FRONTEND=noninteractive apt install -y software-properties-common wget
+    - run:
+        # For some reason, CMake needs a working C compiler, so provice CC as
+        # well for the case when default gcc isn't installed.
+        #
+        # Guts from https://apt.llvm.org/llvm.sh because it doesn't feel right
+        # to just pipe curl into shell in a CI script.
+        name: Install Clang << parameters.version >>
+        command: |
+          wget -qO- https://apt.llvm.org/llvm-snapshot.gpg.key | tee /etc/apt/trusted.gpg.d/apt.llvm.org.asc
+          add-apt-repository -y "deb http://apt.llvm.org/focal/ llvm-toolchain-focal-<< parameters.version >> main"
+          apt update
+          apt install -y clang-<< parameters.version >>
+          echo 'export CC=clang-<< parameters.version >>' >> $BASH_ENV
+          echo 'export CXX=clang++-<< parameters.version >>' >> $BASH_ENV
 
   install-cmake:
     parameters:
@@ -393,14 +423,26 @@ jobs:
     - build:
         script: unix-desktop.sh
 
+  # https://github.com/google/sanitizers/issues/1716 ; started happening on
+  # 2024-11-08 as CircleCI uses a base system with kernel 6.5 instead of 5.15:
+  #   https://discuss.circleci.com/t/docker-executor-infrastructure-upgrade/52282
+  # This manifests when running corrade-rc already:
+  #   ThreadSanitizer: unexpected memory mapping 0x7e2f226ae000-0x7e2f22b00000
+  # Unfortunately none of the suggested
+  #   sysctl vm.mmap_rnd_bits=28
+  #   echo 0 | tee /proc/sys/kernel/randomize_va_space
+  # works, complaining about read-only filesystem. Installing Clang 18, which
+  # should have this fixed, instead. Unfortunately that also means we can no
+  # longer test on 18.04, as it's no longer supported by LLVM releases.
   linux-threadsanitizer:
-    executor: ubuntu-18_04
+    executor: ubuntu-20_04
     environment:
       CMAKE_CXX_FLAGS: -fsanitize=thread
       CONFIGURATION: Debug
     steps:
     - install-base-linux
-    - install-clang
+    - install-new-clang:
+        version: "18"
     - install-cmake:
         version: "3.5.2"
     - make-expected-linux-dirs
