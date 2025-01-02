@@ -32,14 +32,62 @@ namespace Corrade { namespace Containers { namespace Test { namespace {
 struct PairStlTest: TestSuite::Tester {
     explicit PairStlTest();
 
+    #ifndef CORRADE_NO_STD_IS_TRIVIALLY_TRAITS
+    void triviallyCopyable();
+    void triviallyMovable();
+    #endif
+
     void convertCopy();
     void convertMove();
 };
 
 PairStlTest::PairStlTest() {
+    #ifndef CORRADE_NO_STD_IS_TRIVIALLY_TRAITS
+    addTests({&PairStlTest::triviallyCopyable,
+              &PairStlTest::triviallyMovable});
+    #endif
+
     addTests({&PairStlTest::convertCopy,
               &PairStlTest::convertMove});
 }
+
+#ifndef CORRADE_NO_STD_IS_TRIVIALLY_TRAITS
+void PairStlTest::triviallyCopyable() {
+    /* Part of PairTest::copy() expanded to compare with std::pair */
+
+    CORRADE_VERIFY(std::is_trivially_copy_constructible<Pair<float, int>>::value);
+    CORRADE_VERIFY(std::is_trivially_copy_assignable<Pair<float, int>>::value);
+    CORRADE_VERIFY(std::is_trivially_copyable<Pair<float, int>>::value);
+
+    CORRADE_VERIFY(std::is_trivially_copy_constructible<std::pair<float, int>>::value);
+    {
+        CORRADE_EXPECT_FAIL("std::pair is not trivially copy assignable.");
+        CORRADE_VERIFY(std::is_trivially_copy_assignable<std::pair<float, int>>::value);
+    } {
+        #if !(defined(CORRADE_TARGET_MSVC) && !defined(CORRADE_TARGET_CLANG) && _MSC_VER >= 1920) && !(defined(CORRADE_TARGET_CLANG_CL) && __clang_major__ >= 15)
+        /* MSVC 2019 says this is copyable but not copy assignable, older
+           versions are consistent with libc++ and libstdc++. Bug? Clang-cl 15
+           *also* seems to think it's trivially copyable (but not assignable),
+           so I guess it's something fishy inside MSVC STL? */
+        CORRADE_EXPECT_FAIL("std::pair is not trivially copyable except for MSVC 2019 and newer.");
+        #endif
+        CORRADE_VERIFY(std::is_trivially_copyable<std::pair<float, int>>::value);
+    }
+}
+
+void PairStlTest::triviallyMovable() {
+    /* Part of PairTest::move() expanded to compare with std::pair */
+
+    CORRADE_VERIFY(std::is_trivially_move_constructible<Pair<float, int>>::value);
+    CORRADE_VERIFY(std::is_trivially_move_assignable<Pair<float, int>>::value);
+
+    CORRADE_VERIFY(std::is_trivially_move_constructible<std::pair<float, int>>::value);
+    {
+        CORRADE_EXPECT_FAIL("std::pair is not trivially move assignable.");
+        CORRADE_VERIFY(std::is_trivially_move_assignable<std::pair<float, int>>::value);
+    }
+}
+#endif
 
 void PairStlTest::convertCopy() {
     std::pair<float, int> a{35.0f, 4};

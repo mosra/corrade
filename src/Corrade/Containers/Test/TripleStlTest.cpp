@@ -32,14 +32,66 @@ namespace Corrade { namespace Containers { namespace Test { namespace {
 struct TripleStlTest: TestSuite::Tester {
     explicit TripleStlTest();
 
+    #ifndef CORRADE_NO_STD_IS_TRIVIALLY_TRAITS
+    void triviallyCopyable();
+    void triviallyMovable();
+    #endif
+
     void convertCopy();
     void convertMove();
 };
 
 TripleStlTest::TripleStlTest() {
+    #ifndef CORRADE_NO_STD_IS_TRIVIALLY_TRAITS
+    addTests({&TripleStlTest::triviallyCopyable,
+              &TripleStlTest::triviallyMovable});
+    #endif
+
     addTests({&TripleStlTest::convertCopy,
               &TripleStlTest::convertMove});
 }
+
+#ifndef CORRADE_NO_STD_IS_TRIVIALLY_TRAITS
+void TripleStlTest::triviallyCopyable() {
+    /* Part of TripleTest::copy() expanded to compare with std::tuple */
+
+    CORRADE_VERIFY(std::is_trivially_copy_constructible<Triple<float, int, bool>>::value);
+    CORRADE_VERIFY(std::is_trivially_copy_assignable<Triple<float, int, bool>>::value);
+    CORRADE_VERIFY(std::is_trivially_copyable<Triple<float, int, bool>>::value);
+
+    {
+        #ifdef CORRADE_TARGET_DINKUMWARE
+        CORRADE_EXPECT_FAIL("MSVC std::tuple is not trivially copy constructible.");
+        #endif
+        CORRADE_VERIFY(std::is_trivially_copy_constructible<std::tuple<float, int, bool>>::value);
+    } {
+        #if defined(CORRADE_TARGET_LIBSTDCXX) || defined(CORRADE_TARGET_LIBCXX) || defined(CORRADE_TARGET_DINKUMWARE)
+        CORRADE_EXPECT_FAIL("libstdc++, libc++ and MSVC std::tuple is not trivially copy assignable.");
+        #endif
+        CORRADE_VERIFY(std::is_trivially_copy_assignable<std::tuple<float, int, bool>>::value);
+        CORRADE_VERIFY(std::is_trivially_copyable<std::tuple<float, int, bool>>::value);
+    }
+}
+
+void TripleStlTest::triviallyMovable() {
+    /* Part of TripleTest::move() expanded to compare with std::tuple */
+
+    CORRADE_VERIFY(std::is_trivially_move_constructible<Triple<float, int, bool>>::value);
+    CORRADE_VERIFY(std::is_trivially_move_assignable<Triple<float, int, bool>>::value);
+    {
+        #if defined(CORRADE_TARGET_LIBSTDCXX) || defined(CORRADE_TARGET_DINKUMWARE)
+        CORRADE_EXPECT_FAIL("libstdc++ and MSVC std::tuple is not trivially move constructible.");
+        #endif
+        CORRADE_VERIFY(std::is_trivially_move_constructible<std::tuple<float, int, bool>>::value);
+    }
+    {
+        #if defined(CORRADE_TARGET_LIBSTDCXX) || defined(CORRADE_TARGET_LIBCXX) || defined(CORRADE_TARGET_DINKUMWARE)
+        CORRADE_EXPECT_FAIL("libstdc++, libc++ and MSVC std::tuple is not trivially move assignable.");
+        #endif
+        CORRADE_VERIFY(std::is_trivially_move_assignable<std::tuple<float, int, bool>>::value);
+    }
+}
+#endif
 
 void TripleStlTest::convertCopy() {
     std::tuple<float, int, bool> a{35.0f, 4, true};

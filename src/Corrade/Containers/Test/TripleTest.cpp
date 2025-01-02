@@ -1201,18 +1201,7 @@ void TripleTest::copy() {
     CORRADE_VERIFY(std::is_trivially_copy_constructible<Triple<float, int, bool>>::value);
     CORRADE_VERIFY(std::is_trivially_copy_assignable<Triple<float, int, bool>>::value);
     CORRADE_VERIFY(std::is_trivially_copyable<Triple<float, int, bool>>::value);
-    {
-        #ifdef CORRADE_TARGET_DINKUMWARE
-        CORRADE_EXPECT_FAIL("MSVC std::tuple is not trivially copy constructible.");
-        #endif
-        CORRADE_VERIFY(std::is_trivially_copy_constructible<std::tuple<float, int, bool>>::value);
-    } {
-        #if defined(CORRADE_TARGET_LIBSTDCXX) || defined(CORRADE_TARGET_LIBCXX) || defined(CORRADE_TARGET_DINKUMWARE)
-        CORRADE_EXPECT_FAIL("libstdc++, libc++ and MSVC std::tuple is not trivially copy assignable.");
-        #endif
-        CORRADE_VERIFY(std::is_trivially_copy_assignable<std::tuple<float, int, bool>>::value);
-        CORRADE_VERIFY(std::is_trivially_copyable<std::tuple<float, int, bool>>::value);
-    }
+    /* Comparison with std::tuple is in TripleStlTest::triviallyCopyable() */
     #endif
 }
 
@@ -1252,18 +1241,7 @@ void TripleTest::move() {
     #ifndef CORRADE_NO_STD_IS_TRIVIALLY_TRAITS
     CORRADE_VERIFY(std::is_trivially_move_constructible<Triple<float, int, bool>>::value);
     CORRADE_VERIFY(std::is_trivially_move_assignable<Triple<float, int, bool>>::value);
-    {
-        #if defined(CORRADE_TARGET_LIBSTDCXX) || defined(CORRADE_TARGET_DINKUMWARE)
-        CORRADE_EXPECT_FAIL("libstdc++ and MSVC std::tuple is not trivially move constructible.");
-        #endif
-        CORRADE_VERIFY(std::is_trivially_move_constructible<std::tuple<float, int, bool>>::value);
-    }
-    {
-        #if defined(CORRADE_TARGET_LIBSTDCXX) || defined(CORRADE_TARGET_LIBCXX) || defined(CORRADE_TARGET_DINKUMWARE)
-        CORRADE_EXPECT_FAIL("libstdc++, libc++ and MSVC std::tuple is not trivially move assignable.");
-        #endif
-        CORRADE_VERIFY(std::is_trivially_move_assignable<std::tuple<float, int, bool>>::value);
-    }
+    /* Comparison with std::tuple is in TripleStlTest::triviallyMovable() */
     #endif
 }
 
