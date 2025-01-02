@@ -598,7 +598,7 @@ Debug& Debug::operator<<(unsigned char value) {
     const int v = value;
 
     /* Print the value as a shade of gray */
-    if(immediateFlags() & Flag::Color) {
+    if((_immediateFlags|_flags) & Flag::Color) {
         const char* shade;
         if(value < 51)       shade = "  ";
         else if(value < 102) shade = "░░";
@@ -607,22 +607,22 @@ Debug& Debug::operator<<(unsigned char value) {
         else                 shade = "██";
 
         /* If ANSI colors are disabled, use just the shade */
-        if(immediateFlags() & Flag::DisableColors)
+        if((_immediateFlags|_flags) & Flag::DisableColors)
             return print(shade);
         else {
             print("\033[38;2;");
 
             /* Disable space between values for everything after the initial
                value */
-            const Flags previousFlags = flags();
-            setFlags(previousFlags|Flag::NoSpace);
+            const Flags previousFlags = _flags;
+            _flags = previousFlags|Flag::NoSpace;
 
             /* Set both background and foreground, reset back after */
             *this << v << ";" << v << ";" << v << "m\033[48;2;"
                 << v << ";" << v << ";" << v << "m" << shade << "\033[0m";
 
             /* Reset original flags */
-            setFlags(previousFlags);
+            _flags = previousFlags;
             return *this;
         }
 
