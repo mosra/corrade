@@ -54,6 +54,7 @@
 #endif
 #endif
 
+#include "Corrade/Containers/GrowableArray.h"
 #include "Corrade/Containers/EnumSet.hpp"
 #include "Corrade/Containers/String.h"
 #include "Corrade/Containers/StringView.h"
@@ -224,12 +225,126 @@ DebugGlobals& windowsDebugGlobals() {
 #define debugGlobals windowsDebugGlobals()
 #endif
 
+/* Used by the Debug(Containers::String*) constructors */
+class StringStream: public std::ostream, std::streambuf {
+    public:
+        /* Not doing anything on construction -- in 99% cases, _out will be
+           empty initially, so overflow() has to be called anyway, and there it
+           takes care of everything */
+        explicit StringStream(Containers::String& out): std::ostream{static_cast<std::streambuf*>(this)}, _out(out) {}
+
+        /* When destructing the stream, be sure to sync. Without this, debug
+           output with NoNewlineAtTheEnd wouldn't use std::endl and would never
+           sync on its own. */
+        ~StringStream() override {
+            sync();
+        }
+
+    private:
+        int sync() override {
+            /* If sync() gets called multiple times without any overflow() in
+               between, the data are owned by the string, not the array, and
+               the remaining capacity is artificially set to 0 in a setp() call
+               to prevent it from being appended to. Exit early in that case as
+               there's nothing left to be done. */
+            if(!_data)
+                return 0;
+
+            /* Resize to just what had been written, add a null terminator at
+               the end */
+            /** @todo clean up once the string is capable of growing */
+            arrayResize(_data, NoInit, _initialSize + pptr() - pbase());
+            arrayAppend(_data, '\0');
+
+            /* The above might have reallocated, for example when the _data had
+               no space for the null terminator. Call setp() to update the
+               pointers, but don't leave any extra capacity to force overflow()
+               to be called for next append, which then adopts the string back
+               to the array. Otherwise it would be impossible to distinguish
+               whether the string was modified by the stream (causing pptr() to
+               change) or from outside (causing pptr() to point to an outdated
+               location). */
+            _initialSize = _data.size() - 1;
+            setp(_data.end() - 1, _data.end() - 1);
+
+            /* Move the array guts back to the string, making it one byte
+               smaller as the last byte is the null terminator */
+            const Containers::Array<char>::Deleter deleter = _data.deleter();
+            _out = Containers::String{_data.release(), _initialSize, deleter};
+
+            return 0;
+        }
+
+        std::streambuf::int_type overflow(std::streambuf::int_type ch) override {
+            /* Not sure when this could happen, and the STL docs aren't helpful
+               either. Plus, which madman did this comparison?! */
+            CORRADE_INTERNAL_DEBUG_ASSERT(!std::char_traits<char>::eq_int_type(ch, std::char_traits<char>::eof()));
+
+            /* If overflow() was not called yet or sync() got called right
+               before (for example from a Debug instance being destructed in
+               nested scope), the data are owned by the string. Transfer them
+               to the array. */
+            if(!_data) {
+                /* If the string is a SSO (i.e., or also empty), the conversion
+                   would allocate, which we would immediately replace with a
+                   growing allocation, so just put it into a growing allocation
+                   already. It's next to impossible to verify that the
+                   unnecessary extra allocation indeed wasn't done, though, so
+                   the test for this branch relies on `operator Array&&`
+                   clearing the contents.
+
+                   The string can also become a SSO subsequently, not only for
+                   the very first time, for example when it's emptied /
+                   replaced by the caller. */
+                if(_out.isSmall())
+                    arrayAppend(_data, _out);
+                else
+                    _data = Utility::move(_out);
+
+                /* All that's in the array should now be preserved, appending
+                   only after. Call setp() to update the pointer to reflect
+                   the data array. If this is called after sync() with the
+                   string not being touched in meanwhile, the setp() sets the
+                   same values as before. */
+                _initialSize = _data.size();
+                setp(_data.begin() + _initialSize, _data.end());
+            }
+
+            /* Append the overflowing char, which in turn may grow the capacity
+               in some way. */
+            arrayAppend(_data, char(ch));
+            /* ASan container annotations would complain if the stream would
+               write to the capacity, so resize it to match the capacity. The
+               actual end pointer is then queried only when converting to a
+               string at the end. */
+            arrayResize(_data, NoInit, arrayCapacity(_data));
+
+            /* The above might have reallocated, call setp() to update the
+               pointer for next insertion. Again, all that has been written so
+               far including the one overflowing char, is meant to be
+               preserved, appending only after. */
+            _initialSize += pptr() - pbase() + 1;
+            setp(_data.begin() + _initialSize, _data.end());
+
+            /* The docs say it should return a non-EOF value on success. Is 0 a
+               non-EOF value?! I have no idea. I'll just return what I
+               received, so if that's an EOF, so be it. */
+            return ch;
+        }
+
+        /** @todo use just the string once it's capable of growing */
+        Containers::Array<char> _data;
+        Containers::String& _out;
+        std::size_t _initialSize;
+};
+
 enum class Debug::InternalFlag: unsigned char {
-    ValueWritten = 1 << 0,
-    ColorWritten = 1 << 1,
+    OwnedStream = 1 << 0,
+    ValueWritten = 1 << 1,
+    ColorWritten = 1 << 2,
     #if !defined(CORRADE_TARGET_WINDOWS) || defined(CORRADE_UTILITY_USE_ANSI_COLORS)
-    PreviousColorBold = 1 << 2,
-    PreviousColorInverted = 1 << 3
+    PreviousColorBold = 1 << 3,
+    PreviousColorInverted = 1 << 4
     #endif
 };
 
@@ -464,6 +579,12 @@ Debug::Debug(std::ostream* const output, const Flags flags): _flags{flags}, _imm
     #endif
 }
 
+/* Yeah, this is a naked allocation, I know. Debug::cleanupOnDestruction() then
+   frees it. Fingers crossed that this is exception safe. */
+Debug::Debug(Containers::String* const output, const Flags flags): Debug{output ? new StringStream{*output} : nullptr, flags} {
+    _internalFlags |= InternalFlag::OwnedStream;
+}
+
 #if !defined(DOXYGEN_GENERATING_OUTPUT) && defined(CORRADE_SOURCE_LOCATION_BUILTINS_SUPPORTED)
 namespace Implementation {
 DebugSourceLocation::DebugSourceLocation(Debug&& debug, const char* file, int line): debug{&debug} {
@@ -479,10 +600,28 @@ Warning::Warning(std::ostream* const output, const Flags flags): Debug{flags} {
     debugGlobals.warningOutput = _output = output;
 }
 
+Warning::Warning(Containers::String* const output, const Flags flags): Debug{flags} {
+    /* Save previous global output and replace it with current one */
+    _previousGlobalWarningOutput = debugGlobals.warningOutput;
+    /** @todo any better idea how to do these two lines without duplicating
+        them in Debug, Warning and Error? */
+    debugGlobals.warningOutput = _output = output ? new StringStream{*output} : nullptr;
+    _internalFlags |= InternalFlag::OwnedStream;
+}
+
 Error::Error(std::ostream* const output, const Flags flags): Debug{flags} {
     /* Save previous global output and replace it with current one */
     _previousGlobalErrorOutput = debugGlobals.errorOutput;
     debugGlobals.errorOutput = _output = output;
+}
+
+Error::Error(Containers::String* const output, const Flags flags): Debug{flags} {
+    /* Save previous global output and replace it with current one */
+    _previousGlobalErrorOutput = debugGlobals.errorOutput;
+    /** @todo any better idea how to do these two lines without duplicating
+        them in Debug, Warning and Error? */
+    debugGlobals.errorOutput = _output = output ? new StringStream{*output} : nullptr;
+    _internalFlags |= InternalFlag::OwnedStream;
 }
 
 Debug::Debug(const Flags flags): Debug{debugGlobals.output, flags} {}
@@ -509,6 +648,10 @@ void Debug::cleanupOnDestruction() {
 
     /* Reset previous global output */
     debugGlobals.output = _previousGlobalOutput;
+
+    /* If the stream was owned (i.e., a StringStream), delete it */
+    if(_internalFlags >= InternalFlag::OwnedStream)
+        delete _output;
 }
 
 Debug::~Debug() {

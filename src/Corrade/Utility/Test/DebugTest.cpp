@@ -27,7 +27,7 @@
 #include <iostream>
 #include <map>
 #include <set>
-#include <sstream>
+#include <sstream> /** @todo move to dedicated test file once Debug is fully stream-free */
 #include <string>
 
 #include "Corrade/Containers/Pair.h"
@@ -35,8 +35,8 @@
 #include "Corrade/Containers/StringView.h"
 #include "Corrade/TestSuite/Tester.h"
 #include "Corrade/Utility/Debug.h"
-#include "Corrade/Utility/DebugStl.h"
-#include "Corrade/Utility/FormatStl.h" /** @todo remove once Debug is stream-free */
+#include "Corrade/Utility/DebugStl.h" /** @todo move to dedicated test file once Debug is fully stream-free */
+#include "Corrade/Utility/FormatStl.h" /** @todo remove once Debug is fully stream-free */
 
 #ifndef CORRADE_TARGET_EMSCRIPTEN
 #include <thread>
@@ -97,6 +97,15 @@ struct DebugTest: TestSuite::Tester {
     void ostreamFallbackPriority();
 
     void scopedOutput();
+
+    void stringOutput();
+    void stringOutputNonEmpty();
+    void stringOutputNonEmptySmall();
+    void stringOutputScopedFlush();
+    void stringOutputReuseGrowable();
+    void stringOutputReuseCleared();
+    void stringOutputReuseModified();
+    void stringOutputReuseModifiedUnsynced();
 
     void debugColor();
     void debugFlag();
@@ -172,6 +181,15 @@ DebugTest::DebugTest() {
         &DebugTest::ostreamFallbackPriority,
 
         &DebugTest::scopedOutput,
+
+        &DebugTest::stringOutput,
+        &DebugTest::stringOutputNonEmpty,
+        &DebugTest::stringOutputNonEmptySmall,
+        &DebugTest::stringOutputScopedFlush,
+        &DebugTest::stringOutputReuseGrowable,
+        &DebugTest::stringOutputReuseCleared,
+        &DebugTest::stringOutputReuseModified,
+        &DebugTest::stringOutputReuseModifiedUnsynced,
 
         &DebugTest::debugColor,
         &DebugTest::debugFlag,
@@ -1142,6 +1160,138 @@ void DebugTest::scopedOutput() {
     CORRADE_COMPARE(debug2.str(), "well\n");
     CORRADE_COMPARE(warning2.str(), "that\n");
     CORRADE_COMPARE(error2.str(), "smells\n");
+}
+
+void DebugTest::stringOutput() {
+    Containers::String debug, warning, error;
+
+    Debug{&debug} << "a" << 33 << 0.567f;
+    Warning{&warning} << "wow" << 42 << "oh" << "hi";
+    Error{&error} << "hello hello hello hello hello";
+
+    CORRADE_COMPARE(debug, "a 33 0.567\n");
+    CORRADE_COMPARE(warning, "wow 42 oh hi\n");
+    CORRADE_COMPARE(error, "hello hello hello hello hello\n");
+}
+
+void DebugTest::stringOutputNonEmpty() {
+    Containers::String out{"this should be long enough to not be SSOd;"};
+    CORRADE_VERIFY(!out.isSmall());
+
+    Debug{&out} << "hey";
+    CORRADE_COMPARE(out, "this should be long enough to not be SSOd;hey\n");
+}
+
+void DebugTest::stringOutputNonEmptySmall() {
+    Containers::String out{"hey;"};
+    CORRADE_VERIFY(out.isSmall());
+
+    {
+        /* Right after printing the original SSO string stays as it was before
+           (isn't cleared, isn't appended to) */
+        Debug d{&out};
+        d << "hey";
+        CORRADE_VERIFY(out.isSmall());
+        CORRADE_COMPARE(out, "hey;");
+    }
+
+    /* Only on destruction it's replaced */
+    CORRADE_COMPARE(out, "hey;hey\n");
+    CORRADE_VERIFY(!out.isSmall());
+}
+
+void DebugTest::stringOutputScopedFlush() {
+    /* A temporary instance populates the string right upon destruction, even
+       with no newline at the end */
+    {
+        Containers::String out;
+        Debug{&out, Debug::Flag::NoNewlineAtTheEnd} << "yello";
+        CORRADE_COMPARE(out, "yello");
+    }
+
+    Containers::String out;
+    {
+        Debug redirectOutput{&out};
+
+        /* Without a newline at the end, nothing is flushed */
+        Debug{Debug::Flag::NoNewlineAtTheEnd} << "hi";
+        CORRADE_COMPARE(out, "");
+
+        /* With a newline it is */
+        Debug{} << "hey!";
+        CORRADE_COMPARE(out, "hihey!\n");
+
+        /* This one will get flushed only once the Debug instance is
+           destructed. Until then, the string storage is moved out to a
+           growable array internally. */
+        /** @todo clean up once the string is capable of growing */
+        Debug{Debug::Flag::NoNewlineAtTheEnd} << "?!";
+        CORRADE_COMPARE(out, "");
+    }
+    CORRADE_COMPARE(out, "hihey!\n?!");
+}
+
+void DebugTest::stringOutputReuseGrowable() {
+    Containers::String out;
+
+    Debug{&out} << "a";
+    const void* pointer = out.data();
+    CORRADE_COMPARE(out, "a\n");
+
+    /* Assuming the growable allocator allocates at least a size of a single
+       pointer, three characters + \0 should fit without another reallocation.
+       Cannot verify any other way as currently if arrayReserve() would be
+       called from the test, it's not guaranteed that the Debug class
+       internally would use the same allocator. */
+    Debug{&out, Debug::Flag::NoNewlineAtTheEnd} << "b";
+    CORRADE_COMPARE(out, "a\nb");
+    CORRADE_COMPARE(out.data(), pointer);
+}
+
+void DebugTest::stringOutputReuseCleared() {
+    Containers::String out;
+
+    Debug{&out} << "hey";
+    CORRADE_COMPARE(out, "hey\n");
+
+    /* Emptying the string (and thus freeing the existing growable storage)
+       shouldn't cause the stream to write to a garbage location */
+    out = {};
+
+    Debug{&out} << "hello";
+    CORRADE_COMPARE(out, "hello\n");
+}
+
+void DebugTest::stringOutputReuseModified() {
+    Containers::String out;
+
+    Debug{&out} << "a";
+    CORRADE_COMPARE(out, "a\n");
+
+    /* Modifying the string (and thus also replacing the existing growable
+       storage) shouldn't cause the contents to be discarded after */
+    out = out + "heh;";
+
+    Debug{&out} << "hello";
+    CORRADE_COMPARE(out, "a\nheh;hello\n");
+}
+
+void DebugTest::stringOutputReuseModifiedUnsynced() {
+    Containers::String out;
+
+    {
+        /* This doesn't sync so the output is empty */
+        Debug debug{&out, Debug::Flag::NoNewlineAtTheEnd};
+        debug << "hey";
+        CORRADE_COMPARE(out, "");
+
+        /* In this case, modifying the string would cause the modification to be
+        lost on next write */
+        out = "voila";
+
+        debug << "hello";
+    }
+    CORRADE_COMPARE(out, "hey hello");
 }
 
 void DebugTest::debugColor() {

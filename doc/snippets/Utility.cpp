@@ -517,7 +517,8 @@ else
 
 {
 /* [Debug-scoped-output] */
-std::ostringstream debugOut, errorOut;
+Containers::String debugOut;
+std::fstream errorOut{DOXYGEN_ELLIPSIS()};
 
 Utility::Error{} << "this is printed into std::cerr";
 

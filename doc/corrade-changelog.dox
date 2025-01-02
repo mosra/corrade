@@ -395,6 +395,8 @@ namespace Corrade {
     compilers
 -   @ref Utility::Debug now accepts also a C++17 @ref std::string_view if
     you include @ref Corrade/Utility/DebugStlStringView.h
+-   @ref Utility::Debug can now be redirected to a @ref Containers::String in
+    addition to a @ref std::ostream
 -   Improved error handling in @ref Utility::Path APIs where all APIs now
     consistently print an error code and message coming from the system on
     failure instead of a generic message or nothing at all. See also

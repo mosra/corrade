@@ -570,7 +570,7 @@ class CORRADE_UTILITY_EXPORT Debug {
         explicit Debug(Flags flags = {});
 
         /**
-         * @brief Constructor
+         * @brief Construct with redirection to a stream
          * @param output        Stream where to put debug output. If set to
          *      @cpp nullptr @ce, no debug output will be written anywhere.
          * @param flags         Output flags
@@ -580,6 +580,27 @@ class CORRADE_UTILITY_EXPORT Debug {
          * @p output.
          */
         explicit Debug(std::ostream* output, Flags flags = {});
+
+        /** @overload */
+        explicit Debug(std::nullptr_t, Flags flags = {}): Debug{static_cast<std::ostream*>(nullptr), flags} {}
+
+        /**
+         * @brief Construct with redirection to a string
+         * @param output        String where to put debug output. If set to
+         *      @cpp nullptr @ce, no debug output will be written anywhere.
+         * @param flags         Output flags
+         * @m_since_latest
+         *
+         * If @p output is not @cpp nullptr @ce, its existing contents (if any)
+         * are appended to. Internally the function allocates a custom
+         * @ref std::ostream and frees it again during its own destruction.
+         *
+         * @attention Note that contents of @p output are undefined during the
+         *      instance lifetime, it's guaranteed to be populated only once
+         *      the instance is destructed or when another instance in a nested
+         *      scope is destructed with a newline at the end.
+         */
+        explicit Debug(Containers::String* output, Flags flags = {});
 
         /** @brief Copying is not allowed */
         Debug(const Debug&) = delete;
@@ -788,9 +809,14 @@ class CORRADE_UTILITY_EXPORT Debug {
     #else
     private:
     #endif
+        enum class InternalFlag: unsigned char;
+        typedef Containers::EnumSet<InternalFlag> InternalFlags;
+        CORRADE_ENUMSET_FRIEND_OPERATORS(InternalFlags)
+
         std::ostream* _output;
         Flags _flags;
         Flags _immediateFlags;
+        InternalFlags _internalFlags;
 
         CORRADE_UTILITY_LOCAL void cleanupOnDestruction(); /* Needed for Fatal */
 
@@ -799,10 +825,6 @@ class CORRADE_UTILITY_EXPORT Debug {
         friend Implementation::DebugSourceLocation;
         #endif
 
-        enum class InternalFlag: unsigned char;
-        typedef Containers::EnumSet<InternalFlag> InternalFlags;
-        CORRADE_ENUMSET_FRIEND_OPERATORS(InternalFlags)
-
         template<Color c, bool bold> CORRADE_UTILITY_LOCAL static Modifier colorInternal();
         #if !defined(CORRADE_TARGET_WINDOWS) || defined(CORRADE_UTILITY_USE_ANSI_COLORS)
         template<Color c> CORRADE_UTILITY_LOCAL static Modifier invertedColorInternal();
@@ -810,7 +832,6 @@ class CORRADE_UTILITY_EXPORT Debug {
 
         CORRADE_UTILITY_LOCAL void resetColorInternal();
 
-        InternalFlags _internalFlags;
         #if defined(CORRADE_TARGET_WINDOWS) && !defined(CORRADE_UTILITY_USE_ANSI_COLORS)
         /* With this, there's extra 7 bytes of padding. Windows builds without
            CORRADE_UTILITY_USE_ANSI_COLORS should however be very rare so it's
@@ -987,7 +1008,7 @@ class CORRADE_UTILITY_EXPORT Warning: public Debug {
         explicit Warning(Flags flags = {});
 
         /**
-         * @brief Constructor
+         * @brief Construct with redirection to a stream
          * @param output        Stream where to put warning output. If set to
          *      @cpp nullptr @ce, no warning output will be written anywhere.
          * @param flags         Output flags
@@ -997,6 +1018,27 @@ class CORRADE_UTILITY_EXPORT Warning: public Debug {
          * set in @p output.
          */
         explicit Warning(std::ostream* output, Flags flags = {});
+
+        /** @overload */
+        explicit Warning(std::nullptr_t output, Flags flags = {}): Warning{static_cast<std::ostream*>(output), flags} {}
+
+        /**
+         * @brief Construct with redirection to a string
+         * @param output        String where to put debug output. If set to
+         *      @cpp nullptr @ce, no debug output will be written anywhere.
+         * @param flags         Output flags
+         * @m_since_latest
+         *
+         * If @p output is not @cpp nullptr @ce, its existing contents (if any)
+         * are appended to. Internally the function allocates a custom
+         * @ref std::ostream and frees it again during its own destruction.
+         *
+         * @attention Note that contents of @p output are undefined during the
+         *      instance lifetime, it's guaranteed to be populated only once
+         *      the instance is destructed or when another instance in a nested
+         *      scope is destructed with a newline at the end.
+         */
+        explicit Warning(Containers::String* output, Flags flags = {});
 
         /** @brief Copying is not allowed */
         Warning(const Warning&) = delete;
@@ -1074,7 +1116,7 @@ class CORRADE_UTILITY_EXPORT Error: public Debug {
         explicit Error(Flags flags = {});
 
         /**
-         * @brief Constructor
+         * @brief Construct with redirection to a stream
          * @param output        Stream where to put error output. If set to
          *      @cpp nullptr @ce, no error output will be written anywhere.
          * @param flags         Output flags
@@ -1084,6 +1126,27 @@ class CORRADE_UTILITY_EXPORT Error: public Debug {
          * set in @p output.
          */
         explicit Error(std::ostream* output, Flags flags = {});
+
+        /** @overload */
+        explicit Error(std::nullptr_t output, Flags flags = {}): Error{static_cast<std::ostream*>(output), flags} {}
+
+        /**
+         * @brief Construct with redirection to a string
+         * @param output        String where to put debug output. If set to
+         *      @cpp nullptr @ce, no debug output will be written anywhere.
+         * @param flags         Output flags
+         * @m_since_latest
+         *
+         * If @p output is not @cpp nullptr @ce, its existing contents (if any)
+         * are appended to. Internally the function allocates a custom
+         * @ref std::ostream and frees it again during its own destruction.
+         *
+         * @attention Note that contents of @p output are undefined during the
+         *      instance lifetime, it's guaranteed to be populated only once
+         *      the instance is destructed or when another instance in a nested
+         *      scope is destructed with a newline at the end.
+         */
+        explicit Error(Containers::String* output, Flags flags = {});
 
         /** @brief Copying is not allowed */
         Error(const Error&) = delete;
@@ -1146,7 +1209,7 @@ class CORRADE_UTILITY_EXPORT Fatal: public Error {
         explicit Fatal(Flags flags): Fatal{1, flags} {}
 
         /**
-         * @brief Constructor
+         * @brief Construct with redirection to a stream
          * @param output        Stream where to put debug output. If set to
          *      @cpp nullptr @ce, no debug output will be written anywhere.
          * @param exitCode      Application exit code to be used on destruction
@@ -1156,6 +1219,34 @@ class CORRADE_UTILITY_EXPORT Fatal: public Error {
 
         /** @overload */
         explicit Fatal(std::ostream* output, Flags flags = {}): Fatal{output, 1, flags} {}
+
+        /** @overload */
+        explicit Fatal(std::nullptr_t output, int exitCode = 1, Flags flags = {}): Fatal{static_cast<std::ostream*>(output), exitCode, flags} {}
+
+        /** @overload */
+        explicit Fatal(std::nullptr_t output, Flags flags = {}): Fatal{static_cast<std::ostream*>(output), flags} {}
+
+        /**
+         * @brief Construct with redirection to a string
+         * @param output        String where to put debug output. If set to
+         *      @cpp nullptr @ce, no debug output will be written anywhere.
+         * @param exitCode      Application exit code to be used on destruction
+         * @param flags         Output flags
+         * @m_since_latest
+         *
+         * If @p output is not @cpp nullptr @ce, its existing contents (if any)
+         * are appended to. Internally the function allocates a custom
+         * @ref std::ostream and frees it again during its own destruction.
+         *
+         * @attention Note that contents of @p output are undefined during the
+         *      instance lifetime, it's guaranteed to be populated only once
+         *      the instance is destructed or when another instance in a nested
+         *      scope is destructed with a newline at the end.
+         */
+        explicit Fatal(Containers::String* output, int exitCode = 1, Flags flags = {}): Error{output, flags}, _exitCode{exitCode} {}
+
+        /** @overload */
+        explicit Fatal(Containers::String* output, Flags flags = {}): Fatal{output, 1, flags} {}
 
         /**
          * @brief Destructor
