@@ -28,7 +28,6 @@
 #include <sstream>
 
 #include "Corrade/Containers/Pair.h"
-#include "Corrade/Containers/StructuredBindings.h"
 #include "Corrade/TestSuite/Tester.h"
 #include "Corrade/Utility/DebugStl.h"
 
