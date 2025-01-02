@@ -224,11 +224,21 @@ DebugGlobals& windowsDebugGlobals() {
 #define debugGlobals windowsDebugGlobals()
 #endif
 
+enum class Debug::InternalFlag: unsigned char {
+    ValueWritten = 1 << 0,
+    ColorWritten = 1 << 1,
+    #if !defined(CORRADE_TARGET_WINDOWS) || defined(CORRADE_UTILITY_USE_ANSI_COLORS)
+    PreviousColorBold = 1 << 2,
+    PreviousColorInverted = 1 << 3
+    #endif
+};
+
 template<Debug::Color c, bool bold> Debug::Modifier Debug::colorInternal() {
     return [](Debug& debug) {
-        if(!debug._output || (debug._flags & InternalFlag::DisableColors)) return;
+        if(!debug._output || (debug._flags & Flag::DisableColors))
+            return;
 
-        debug._flags |= InternalFlag::ColorWritten|InternalFlag::ValueWritten;
+        debug._internalFlags |= InternalFlag::ColorWritten|InternalFlag::ValueWritten;
         #if defined(CORRADE_TARGET_WINDOWS) && !defined(CORRADE_UTILITY_USE_ANSI_COLORS)
         HANDLE h = streamOutputHandle(debug._output);
         if(h != INVALID_HANDLE_VALUE) SetConsoleTextAttribute(h,
@@ -256,9 +266,10 @@ template<Debug::Color c, bool bold> Debug::Modifier Debug::colorInternal() {
 #if !defined(CORRADE_TARGET_WINDOWS) || defined(CORRADE_UTILITY_USE_ANSI_COLORS)
 template<Debug::Color c> Debug::Modifier Debug::invertedColorInternal() {
     return [](Debug& debug) {
-        if(!debug._output || (debug._flags & InternalFlag::DisableColors)) return;
+        if(!debug._output || (debug._flags & Flag::DisableColors))
+            return;
 
-        debug._flags |= InternalFlag::ColorWritten|InternalFlag::ValueWritten;
+        debug._internalFlags |= InternalFlag::ColorWritten|InternalFlag::ValueWritten;
         debugGlobals.color = c;
         debugGlobals.colorBold = false;
         debugGlobals.colorInverted = true;
@@ -270,19 +281,20 @@ template<Debug::Color c> Debug::Modifier Debug::invertedColorInternal() {
 #endif
 
 inline void Debug::resetColorInternal() {
-    if(!_output || !(_flags & InternalFlag::ColorWritten)) return;
+    if(!_output || !(_internalFlags & InternalFlag::ColorWritten))
+        return;
 
-    _flags &= ~InternalFlag::ColorWritten;
-    _flags |= InternalFlag::ValueWritten;
+    _internalFlags &= ~InternalFlag::ColorWritten;
+    _internalFlags |= InternalFlag::ValueWritten;
     #if defined(CORRADE_TARGET_WINDOWS) && !defined(CORRADE_UTILITY_USE_ANSI_COLORS)
     HANDLE h = streamOutputHandle(_output);
     if(h != INVALID_HANDLE_VALUE)
         SetConsoleTextAttribute(h, _previousColorAttributes);
     #else
-    if(_previousColorBold || _previousColorInverted) {
+    if(_internalFlags >= InternalFlag::PreviousColorBold || _internalFlags >= InternalFlag::PreviousColorInverted) {
         /* Only one of the two should be set by our code */
-        CORRADE_INTERNAL_ASSERT(!_previousColorBold || !_previousColorInverted);
-        const char code[]{'\033', '[', '0', ';', _previousColorBold ? '1' : '7', ';', '3', char('0' + char(_previousColor)), 'm', '\0'};
+        CORRADE_INTERNAL_ASSERT(!(_internalFlags >= InternalFlag::PreviousColorBold) || !(_internalFlags >= InternalFlag::PreviousColorInverted));
+        const char code[]{'\033', '[', '0', ';', _internalFlags >= InternalFlag::PreviousColorBold ? '1' : '7', ';', '3', char('0' + char(_previousColor)), 'm', '\0'};
         *_output << code;
     } else if(_previousColor != Color::Default) {
         const char code[]{'\033', '[', '0', ';', '3', char('0' + char(_previousColor)), 'm', '\0'};
@@ -290,8 +302,8 @@ inline void Debug::resetColorInternal() {
     } else *_output << "\033[0m";
 
     debugGlobals.color = _previousColor;
-    debugGlobals.colorBold = _previousColorBold;
-    debugGlobals.colorInverted = _previousColorInverted;
+    debugGlobals.colorBold = _internalFlags >= InternalFlag::PreviousColorBold;
+    debugGlobals.colorInverted = _internalFlags >= InternalFlag::PreviousColorInverted;
     #endif
 }
 
@@ -365,28 +377,6 @@ void Debug::resetColor(Debug& debug) {
     debug.resetColorInternal();
 }
 
-namespace { enum: unsigned short { PublicFlagMask = 0x00ff }; }
-
-auto Debug::flags() const -> Flags {
-    return Flag(static_cast<unsigned short>(_flags) & PublicFlagMask);
-}
-
-void Debug::setFlags(Flags flags) {
-    _flags = InternalFlag(static_cast<unsigned short>(flags)) |
-        InternalFlag(static_cast<unsigned short>(_flags) & ~PublicFlagMask);
-}
-
-auto Debug::immediateFlags() const -> Flags {
-    return Flag(static_cast<unsigned short>(_immediateFlags) & PublicFlagMask) |
-        Flag(static_cast<unsigned short>(_flags) & PublicFlagMask);
-}
-
-void Debug::setImmediateFlags(Flags flags) {
-    /* unlike _flags, _immediateFlags doesn't contain any internal flags so
-       no need to preserve these */
-    _immediateFlags = InternalFlag(static_cast<unsigned short>(flags));
-}
-
 std::ostream* Debug::defaultOutput() { return &std::cout; }
 std::ostream* Warning::defaultOutput() { return &std::cerr; }
 std::ostream* Error::defaultOutput() { return &std::cerr; }
@@ -452,7 +442,7 @@ bool Debug::isTty() { return isTty(debugGlobals.output); }
 bool Warning::isTty() { return Debug::isTty(debugGlobals.warningOutput); }
 bool Error::isTty() { return Debug::isTty(debugGlobals.errorOutput); }
 
-Debug::Debug(std::ostream* const output, const Flags flags): _flags{InternalFlag(static_cast<unsigned short>(flags))}, _immediateFlags{InternalFlag::NoSpace} {
+Debug::Debug(std::ostream* const output, const Flags flags): _flags{flags}, _immediateFlags{Flag::NoSpace} {
     /* Save previous global output and replace it with current one */
     _previousGlobalOutput = debugGlobals.output;
     debugGlobals.output = _output = output;
@@ -467,8 +457,10 @@ Debug::Debug(std::ostream* const output, const Flags flags): _flags{InternalFlag
     }
     #else
     _previousColor = debugGlobals.color;
-    _previousColorBold = debugGlobals.colorBold;
-    _previousColorInverted = debugGlobals.colorInverted;
+    if(debugGlobals.colorBold)
+        _internalFlags |= InternalFlag::PreviousColorBold;
+    if(debugGlobals.colorInverted)
+        _internalFlags |= InternalFlag::PreviousColorInverted;
     #endif
 }
 
@@ -502,9 +494,9 @@ void Debug::cleanupOnDestruction() {
     /* Print source location if not printed yet -- this means saying a
        !Debug{}; will print just that, while Debug{}; is a no-op */
     if(_output && _sourceLocationFile) {
-        CORRADE_INTERNAL_ASSERT(_immediateFlags & InternalFlag::NoSpace);
+        CORRADE_INTERNAL_ASSERT(_immediateFlags & Flag::NoSpace);
         *_output << _sourceLocationFile << ":" << _sourceLocationLine;
-        _flags |= InternalFlag::ValueWritten;
+        _internalFlags |= InternalFlag::ValueWritten;
     }
     #endif
 
@@ -512,7 +504,7 @@ void Debug::cleanupOnDestruction() {
     resetColorInternal();
 
     /* Newline at the end */
-    if(_output && (_flags & InternalFlag::ValueWritten) && !(_flags & InternalFlag::NoNewlineAtTheEnd))
+    if(_output && (_internalFlags & InternalFlag::ValueWritten) && !(_flags & Flag::NoNewlineAtTheEnd))
         *_output << std::endl;
 
     /* Reset previous global output */
@@ -559,31 +551,31 @@ template<class T> Debug& Debug::print(const T& value) {
     #ifdef CORRADE_SOURCE_LOCATION_BUILTINS_SUPPORTED
     /* Print source location, if not printed yet */
     if(_sourceLocationFile) {
-        CORRADE_INTERNAL_ASSERT(_immediateFlags & InternalFlag::NoSpace);
+        CORRADE_INTERNAL_ASSERT(_immediateFlags & Flag::NoSpace);
         *_output << _sourceLocationFile << ":" << _sourceLocationLine << ": ";
         _sourceLocationFile = nullptr;
     }
     #endif
 
     /* Separate values with spaces if enabled */
-    if(!((_immediateFlags|_flags) & InternalFlag::NoSpace))
+    if(!((_immediateFlags|_flags) & Flag::NoSpace))
         *_output << ' ';
     /* Print the next value as hexadecimal if enabled */
     /** @todo this does strange crap for negative values (printing them as
         unsigned), revisit once iostreams are not used anymore */
-    if(((_immediateFlags|_flags) & InternalFlag::Hex) && std::is_integral<T>::value)
+    if(((_immediateFlags|_flags) & Flag::Hex) && std::is_integral<T>::value)
         *_output << "0x" << std::hex;
 
     toStream(*_output, value);
 
     /* Reset the hexadecimal printing back if it was enabled */
-    if(((_immediateFlags|_flags) & InternalFlag::Hex) && std::is_integral<T>::value)
+    if(((_immediateFlags|_flags) & Flag::Hex) && std::is_integral<T>::value)
         *_output << std::dec;
 
-    /* Reset all internal flags after */
+    /* Reset all immediate flags after */
     _immediateFlags = {};
 
-    _flags |= InternalFlag::ValueWritten;
+    _internalFlags |= InternalFlag::ValueWritten;
     return *this;
 }
 
@@ -713,7 +705,7 @@ Debug& operator<<(Debug& debug, Debug::Flag value) {
         /* LCOV_EXCL_STOP */
     }
 
-    return debug << "Utility::Debug::Flag(" << Debug::nospace << Debug::hex << static_cast<unsigned short>(value) << Debug::nospace << ")";
+    return debug << "Utility::Debug::Flag(" << Debug::nospace << Debug::hex << static_cast<unsigned char>(value) << Debug::nospace << ")";
 }
 
 Debug& operator<<(Debug& debug, Debug::Flags value) {

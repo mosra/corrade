@@ -214,7 +214,7 @@ class CORRADE_UTILITY_EXPORT Debug {
          *
          * @see @ref Flags, @ref Debug(Flags)
          */
-        enum class Flag: unsigned short {
+        enum class Flag: unsigned char {
             /** Don't put newline at the end on destruction */
             NoNewlineAtTheEnd = 1 << 0,
 
@@ -362,7 +362,7 @@ class CORRADE_UTILITY_EXPORT Debug {
          * @see @ref Flag::NoSpace, @ref space, @ref newline
          */
         static void nospace(Debug& debug) {
-            debug._immediateFlags |= InternalFlag::NoSpace;
+            debug._immediateFlags |= Flag::NoSpace;
         }
 
         /**
@@ -467,7 +467,7 @@ class CORRADE_UTILITY_EXPORT Debug {
          * @see @ref Flag::Packed, @ref operator<<(Debug&, const Iterable&)
          */
         static void packed(Debug& debug) {
-            debug._immediateFlags |= InternalFlag::Packed;
+            debug._immediateFlags |= Flag::Packed;
         }
 
         /**
@@ -478,7 +478,7 @@ class CORRADE_UTILITY_EXPORT Debug {
          * @see @ref Flag::Color, @ref operator<<(unsigned char)
          */
         static void color(Debug& debug) {
-            debug._immediateFlags |= InternalFlag::Color;
+            debug._immediateFlags |= Flag::Color;
         }
 
         /**
@@ -491,7 +491,7 @@ class CORRADE_UTILITY_EXPORT Debug {
          * @see @ref Flag::Hex, @ref operator<<(const void*)
          */
         static void hex(Debug& debug) {
-            debug._immediateFlags |= InternalFlag::Hex;
+            debug._immediateFlags |= Flag::Hex;
         }
 
         /**
@@ -609,7 +609,7 @@ class CORRADE_UTILITY_EXPORT Debug {
          *
          * @see @ref Utility-Debug-modifiers, @ref immediateFlags()
          */
-        Flags flags() const;
+        Flags flags() const { return _flags; }
 
         /**
          * @brief Set flags applied for all following values
@@ -617,7 +617,7 @@ class CORRADE_UTILITY_EXPORT Debug {
          *
          * @see @ref Utility-Debug-modifiers, @ref setImmediateFlags()
          */
-        void setFlags(Flags flags);
+        void setFlags(Flags flags) { _flags = flags; }
 
         /**
          * @brief Flags applied for the immediately following value
@@ -627,7 +627,7 @@ class CORRADE_UTILITY_EXPORT Debug {
          * The immediate part gets reset after a value is printed.
          * @see @ref Utility-Debug-modifiers
          */
-        Flags immediateFlags() const;
+        Flags immediateFlags() const { return _flags|_immediateFlags; }
 
         /**
          * @brief Set flags to be applied for the immediately following value
@@ -637,7 +637,7 @@ class CORRADE_UTILITY_EXPORT Debug {
          * immediately following value and reset after.
          * @see @ref Utility-Debug-modifiers, @ref nospace
          */
-        void setImmediateFlags(Flags flags);
+        void setImmediateFlags(Flags flags) { _immediateFlags = flags; }
 
         /**
          * @brief Print string to debug output
@@ -789,35 +789,19 @@ class CORRADE_UTILITY_EXPORT Debug {
     private:
     #endif
         std::ostream* _output;
-
-        enum class InternalFlag: unsigned short {
-            /* Values matching the Flag enum */
-            NoNewlineAtTheEnd = 1 << 0,
-            DisableColors = 1 << 1,
-            NoSpace = 1 << 2,
-            Packed = 1 << 3,
-            Color = 1 << 4,
-            /* Bit 5 and 6 reserved for Bin and Oct */
-            Hex = 1 << 7,
-
-            ValueWritten = 1 << 8,
-            ColorWritten = 1 << 9
-        };
-        typedef Containers::EnumSet<InternalFlag> InternalFlags;
-
-        CORRADE_ENUMSET_FRIEND_OPERATORS(InternalFlags)
+        Flags _flags;
+        Flags _immediateFlags;
 
         CORRADE_UTILITY_LOCAL void cleanupOnDestruction(); /* Needed for Fatal */
-
-        InternalFlags _flags;
-        InternalFlags _immediateFlags;
-
-        /* 0 / 4 bytes free */
 
     private:
         #ifdef CORRADE_SOURCE_LOCATION_BUILTINS_SUPPORTED
         friend Implementation::DebugSourceLocation;
         #endif
+
+        enum class InternalFlag: unsigned char;
+        typedef Containers::EnumSet<InternalFlag> InternalFlags;
+        CORRADE_ENUMSET_FRIEND_OPERATORS(InternalFlags)
 
         template<Color c, bool bold> CORRADE_UTILITY_LOCAL static Modifier colorInternal();
         #if !defined(CORRADE_TARGET_WINDOWS) || defined(CORRADE_UTILITY_USE_ANSI_COLORS)
@@ -826,18 +810,20 @@ class CORRADE_UTILITY_EXPORT Debug {
 
         CORRADE_UTILITY_LOCAL void resetColorInternal();
 
-        std::ostream* _previousGlobalOutput;
+        InternalFlags _internalFlags;
         #if defined(CORRADE_TARGET_WINDOWS) && !defined(CORRADE_UTILITY_USE_ANSI_COLORS)
+        /* With this, there's extra 7 bytes of padding. Windows builds without
+           CORRADE_UTILITY_USE_ANSI_COLORS should however be very rare so it's
+           not too much of a problem. */
         unsigned short _previousColorAttributes = 0xffff;
         #else
         Color _previousColor;
-        bool _previousColorBold, _previousColorInverted;
         #endif
-        /* 1 byte free */
         #ifdef CORRADE_SOURCE_LOCATION_BUILTINS_SUPPORTED
         int _sourceLocationLine{};
         const char* _sourceLocationFile{};
         #endif
+        std::ostream* _previousGlobalOutput;
 };
 
 /** @debugoperatorclassenum{Debug,Debug::Color} */

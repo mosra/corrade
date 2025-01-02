@@ -1157,15 +1157,16 @@ void DebugTest::debugColor() {
 void DebugTest::debugFlag() {
     std::ostringstream out;
 
-    Debug(&out) << Debug::Flag::NoNewlineAtTheEnd << Debug::Flag(0xcafe);
-    CORRADE_COMPARE(out.str(), "Utility::Debug::Flag::NoNewlineAtTheEnd Utility::Debug::Flag(0xcafe)\n");
+    Debug(&out) << Debug::Flag::NoNewlineAtTheEnd << Debug::Flag(0xfe);
+    CORRADE_COMPARE(out.str(), "Utility::Debug::Flag::NoNewlineAtTheEnd Utility::Debug::Flag(0xfe)\n");
 }
 
 void DebugTest::debugFlags() {
     std::ostringstream out;
 
-    Debug(&out) << (Debug::Flag::NoNewlineAtTheEnd|Debug::Flag::Packed|Debug::Flag(0xb000)) << Debug::Flags{};
-    CORRADE_COMPARE(out.str(), "Utility::Debug::Flag::NoNewlineAtTheEnd|Utility::Debug::Flag::Packed|Utility::Debug::Flag(0xb000) Utility::Debug::Flags{}\n");
+    /* Only bit 5 and 6 is currently unused */
+    Debug(&out) << (Debug::Flag::NoNewlineAtTheEnd|Debug::Flag::Packed|Debug::Flag(0x60)) << Debug::Flags{};
+    CORRADE_COMPARE(out.str(), "Utility::Debug::Flag::NoNewlineAtTheEnd|Utility::Debug::Flag::Packed|Utility::Debug::Flag(0x60) Utility::Debug::Flags{}\n");
 }
 
 #ifndef CORRADE_TARGET_EMSCRIPTEN
