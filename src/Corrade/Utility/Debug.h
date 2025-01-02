@@ -1140,10 +1140,10 @@ class CORRADE_UTILITY_EXPORT Fatal: public Error {
          * Sets output to @ref std::cerr. The @p exitCode is passed to
          * @ref std::exit() on destruction.
          */
-        Fatal(int exitCode = 1, Flags flags = {}): Error{flags}, _exitCode{exitCode} {}
+        explicit Fatal(int exitCode = 1, Flags flags = {}): Error{flags}, _exitCode{exitCode} {}
 
         /** @overload */
-        Fatal(Flags flags): Fatal{1, flags} {}
+        explicit Fatal(Flags flags): Fatal{1, flags} {}
 
         /**
          * @brief Constructor
@@ -1152,10 +1152,10 @@ class CORRADE_UTILITY_EXPORT Fatal: public Error {
          * @param exitCode      Application exit code to be used on destruction
          * @param flags         Output flags
          */
-        Fatal(std::ostream* output, int exitCode = 1, Flags flags = {}): Error{output, flags}, _exitCode{exitCode} {}
+        explicit Fatal(std::ostream* output, int exitCode = 1, Flags flags = {}): Error{output, flags}, _exitCode{exitCode} {}
 
         /** @overload */
-        Fatal(std::ostream* output, Flags flags = {}): Fatal{output, 1, flags} {}
+        explicit Fatal(std::ostream* output, Flags flags = {}): Fatal{output, 1, flags} {}
 
         /**
          * @brief Destructor
