@@ -50,7 +50,7 @@ cmake --build . || exit /b
 cd %APPVEYOR_BUILD_FOLDER%
 
 rem Gather and upload coverage on the clang-cl MSVC 2022 build. Keep in sync
-rem with circleci.yml, appveyor-desktop-mingw.sh and PKBUILD-coverage, please.
+rem with circleci.yml, appveyor-desktop-mingw.bat and PKBUILD-coverage, please.
 if "%COMPILER%" == "msvc-clang" if "%APPVEYOR_BUILD_WORKER_IMAGE%" == "Visual Studio 2022" grcov build -t lcov --keep-only "*/src/Corrade/*" --ignore "*/Test/*" --ignore "*/build/src/Corrade/*" -o coverage.info --excl-line LCOV_EXCL_LINE --excl-start LCOV_EXCL_START --excl-stop LCOV_EXCL_STOP || exit /b
 rem Official docs say "not needed for public repos", in reality not using the
 rem token is "extremely flakey". What's best is that if the upload fails, the
