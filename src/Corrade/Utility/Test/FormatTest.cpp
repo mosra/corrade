@@ -37,7 +37,6 @@
 #include "Corrade/TestSuite/Tester.h"
 #include "Corrade/TestSuite/Compare/FileToString.h"
 #include "Corrade/Utility/DebugStl.h"
-#include "Corrade/Utility/FormatStl.h"
 #include "Corrade/Utility/Path.h"
 
 #include "configure.h"
@@ -117,23 +116,6 @@ struct FormatTest: TestSuite::Tester {
     void invalidPrecision();
     void typeForString();
     void invalidType();
-
-    /** @todo once we get rid of iostreams, move this and other STL stuff to
-        dedicated FormatStlTest */
-    void stlString();
-    void stlStringEmpty();
-    void stlStringIntoAppend();
-    void stlStringIntoInsert();
-
-    void benchmarkFormat();
-    void benchmarkSnprintf();
-    void benchmarkSstream();
-    void benchmarkDebug();
-
-    void benchmarkFloatFormat();
-    void benchmarkFloatSnprintf();
-    void benchmarkFloatSstream();
-    void benchmarkFloatDebug();
 };
 
 FormatTest::FormatTest() {
@@ -208,22 +190,7 @@ FormatTest::FormatTest() {
               &FormatTest::unknownPlaceholderContent,
               &FormatTest::invalidPrecision,
               &FormatTest::typeForString,
-              &FormatTest::invalidType,
-
-              &FormatTest::stlString,
-              &FormatTest::stlStringEmpty,
-              &FormatTest::stlStringIntoAppend,
-              &FormatTest::stlStringIntoInsert});
-
-    addBenchmarks({&FormatTest::benchmarkFormat,
-                   &FormatTest::benchmarkSnprintf,
-                   &FormatTest::benchmarkSstream,
-                   &FormatTest::benchmarkDebug,
-
-                   &FormatTest::benchmarkFloatFormat,
-                   &FormatTest::benchmarkFloatSnprintf,
-                   &FormatTest::benchmarkFloatSstream,
-                   &FormatTest::benchmarkFloatDebug}, 50);
+              &FormatTest::invalidType});
 }
 
 void FormatTest::empty() {
@@ -727,7 +694,7 @@ void FormatTest::toBuffer() {
     char buffer[15]{};
     buffer[13] = '?'; /* to verify that a null terminator wasn't printed */
     CORRADE_COMPARE(formatInto(buffer, "hello, {}!", "world"), 13);
-    CORRADE_COMPARE(std::string{buffer}, "hello, world!?");
+    CORRADE_COMPARE(Containers::StringView{buffer}, "hello, world!?");
 }
 
 void FormatTest::toBufferNullTerminatorFromSnprintfAtTheEnd() {
@@ -735,19 +702,19 @@ void FormatTest::toBufferNullTerminatorFromSnprintfAtTheEnd() {
     CORRADE_COMPARE(formatInto(buffer, "hello {}", 42), 8);
     {
         CORRADE_EXPECT_FAIL("snprintf() really wants to print a null terminator so the last character gets cut off. Need a better solution.");
-        CORRADE_COMPARE((std::string{buffer, 8}), "hello 42");
+        CORRADE_COMPARE((Containers::StringView{buffer, 8}), "hello 42");
     }
-    CORRADE_COMPARE(std::string{buffer}, "hello 4");
+    CORRADE_COMPARE(Containers::StringView{buffer}, "hello 4");
 }
 
 void FormatTest::array() {
     Containers::Array<char> array = format("hello, {}!", "world");
-    CORRADE_COMPARE((std::string{array, array.size()}), "hello, world!");
+    CORRADE_COMPARE((Containers::StringView{array, array.size()}), "hello, world!");
 }
 
 void FormatTest::arrayNullTerminatorFromSnprintfAtTheEnd() {
     Containers::Array<char> array = format("hello {}", 42);
-    CORRADE_COMPARE((std::string{array, array.size()}), "hello 42");
+    CORRADE_COMPARE((Containers::StringView{array, array.size()}), "hello 42");
 }
 
 void FormatTest::file() {
@@ -761,7 +728,7 @@ void FormatTest::file() {
         CORRADE_VERIFY(f);
         Containers::ScopeGuard e{f, fclose};
         formatInto(f, "A {} {} {} {} {} {} + ({}) {}",
-            "string", std::string{"file"}, -2000123, 4025136u, -12345678901234ll, 24568780984912ull, 12.3404f, 1.52);
+            "string", Containers::StringView{"file"}, -2000123, 4025136u, -12345678901234ll, 24568780984912ull, 12.3404f, 1.52);
     }
     CORRADE_COMPARE_AS(filename,
         "A string file -2000123 4025136 -12345678901234 24568780984912 + (12.3404) 1.52",
@@ -907,123 +874,6 @@ void FormatTest::invalidType() {
 
     CORRADE_COMPARE(out.str(),
         "Utility::format(): invalid type specifier: H\n");
-}
-
-void FormatTest::stlString() {
-    /* This tests both string input and string output, yes, lazy */
-    CORRADE_COMPARE(formatString("hello {}", std::string{"worlds", 5}),
-        "hello world");
-    CORRADE_COMPARE(formatString("hello {}", std::string{"world\0, i guess?", 16}),
-        (std::string{"hello world\0, i guess?", 22}));
-}
-
-void FormatTest::stlStringEmpty() {
-    /* Empty string should not cause any issues with data access */
-    CORRADE_COMPARE(formatString("hello{}!", std::string{}), "hello!");
-}
-
-void FormatTest::stlStringIntoAppend() {
-    /* Returned size should be including start offset */
-    std::string hello = "hello";
-    CORRADE_COMPARE(formatInto(hello, hello.size(), ", {}!", "world"), 13);
-    CORRADE_COMPARE(hello, "hello, world!");
-}
-
-void FormatTest::stlStringIntoInsert() {
-    /* Returned size should be including start offset but be less than string size */
-    std::string hello = "hello, __________! Happy to see you!";
-    CORRADE_COMPARE(hello.size(), 36);
-    CORRADE_COMPARE(formatInto(hello, 8, "Frank"), 13);
-    CORRADE_COMPARE(hello, "hello, _Frank____! Happy to see you!");
-    CORRADE_COMPARE(hello.size(), 36);
-}
-
-void FormatTest::benchmarkFormat() {
-    char buffer[1024];
-
-    CORRADE_BENCHMARK(1000)
-        formatInto(buffer, "hello, {}! {1} + {2} = {} = {2} + {1}", "people", 42, 1337, 42 + 1337);
-
-    CORRADE_COMPARE(std::string{buffer}, "hello, people! 42 + 1337 = 1379 = 1337 + 42");
-}
-
-void FormatTest::benchmarkSnprintf() {
-    char buffer[1024];
-
-    CORRADE_BENCHMARK(1000)
-        snprintf(buffer, 1024, "hello, %s! %i + %i = %i = %i + %i",
-            "people", 42, 1337, 42 + 1337, 1337, 42);
-
-    CORRADE_COMPARE(std::string{buffer}, "hello, people! 42 + 1337 = 1379 = 1337 + 42");
-}
-
-void FormatTest::benchmarkSstream() {
-    std::ostringstream out;
-
-    CORRADE_BENCHMARK(1000) {
-        out.str({});
-        out << "hello, " << "people" << "! " << 42 << " + " << 1337 << " = "
-            << 42 + 1337 << " = " << 1337 << " + " << 42;
-    }
-
-    CORRADE_COMPARE(out.str(), "hello, people! 42 + 1337 = 1379 = 1337 + 42");
-}
-
-void FormatTest::benchmarkDebug() {
-    std::ostringstream out;
-
-    CORRADE_BENCHMARK(1000) {
-        out.str({});
-        Debug{&out, Debug::Flag::NoNewlineAtTheEnd}
-            << "hello," << "people" << Debug::nospace << "!" << 42 << "+"
-            << 1337 << "=" << 42 + 1337 << "=" << 1337 << "+" << 42;
-    }
-
-    CORRADE_COMPARE(out.str(), "hello, people! 42 + 1337 = 1379 = 1337 + 42");
-}
-
-void FormatTest::benchmarkFloatFormat() {
-    char buffer[1024];
-
-    CORRADE_BENCHMARK(1000)
-        formatInto(buffer, "hello, {}! {1} + {2} = {} = {2} + {1}", "people", 4.2, 13.37, 4.2 + 13.37);
-
-    CORRADE_COMPARE(std::string{buffer}, "hello, people! 4.2 + 13.37 = 17.57 = 13.37 + 4.2");
-}
-
-void FormatTest::benchmarkFloatSnprintf() {
-    char buffer[1024];
-
-    CORRADE_BENCHMARK(1000)
-        snprintf(buffer, 1024, "hello, %s! %g + %g = %g = %g + %g",
-            "people", 4.2, 13.37, 4.2 + 13.37, 13.37, 4.2);
-
-    CORRADE_COMPARE(std::string{buffer}, "hello, people! 4.2 + 13.37 = 17.57 = 13.37 + 4.2");
-}
-
-void FormatTest::benchmarkFloatSstream() {
-    std::ostringstream out;
-
-    CORRADE_BENCHMARK(1000) {
-        out.str({});
-        out << "hello, " << "people" << "! " << 4.2 << " + " << 13.37 << " = "
-            << 4.2 + 13.37 << " = " << 13.37 << " + " << 4.2;
-    }
-
-    CORRADE_COMPARE(out.str(), "hello, people! 4.2 + 13.37 = 17.57 = 13.37 + 4.2");
-}
-
-void FormatTest::benchmarkFloatDebug() {
-    std::ostringstream out;
-
-    CORRADE_BENCHMARK(1000) {
-        out.str({});
-        Debug{&out, Debug::Flag::NoNewlineAtTheEnd}
-            << "hello," << "people" << Debug::nospace << "!" << 4.2 << "+"
-            << 13.37 << "=" << 4.2 + 13.37 << "=" << 13.37 << "+" << 4.2;
-    }
-
-    CORRADE_COMPARE(out.str(), "hello, people! 4.2 + 13.37 = 17.57 = 13.37 + 4.2");
 }
 
 }}}}

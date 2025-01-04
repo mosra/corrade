@@ -28,46 +28,67 @@
 #include "Corrade/Containers/String.h"
 #include "Corrade/TestSuite/Tester.h"
 #include "Corrade/TestSuite/Compare/FileToString.h"
-#include "Corrade/Utility/FormatStlStringView.h"
+#include "Corrade/Utility/DebugStl.h"
+#include "Corrade/Utility/FormatStl.h"
 #include "Corrade/Utility/Path.h"
 
 #include "configure.h"
 
 namespace Corrade { namespace Utility { namespace Test { namespace {
 
-struct FormatStlStringViewTest: TestSuite::Tester {
-    explicit FormatStlStringViewTest();
+struct FormatStlTest: TestSuite::Tester {
+    explicit FormatStlTest();
 
-    void test();
-    void testEmpty();
+    void string();
+    void stringEmpty();
+    void stringIntoAppend();
+    void stringIntoInsert();
 
     void file();
+
+    /* std::string_view is tested in FormatStlStringViewTest instead */
 };
 
-FormatStlStringViewTest::FormatStlStringViewTest() {
-    addTests({&FormatStlStringViewTest::test,
-              &FormatStlStringViewTest::testEmpty,
+FormatStlTest::FormatStlTest() {
+    addTests({&FormatStlTest::string,
+              &FormatStlTest::stringEmpty,
+              &FormatStlTest::stringIntoAppend,
+              &FormatStlTest::stringIntoInsert,
 
-              &FormatStlStringViewTest::file});
+              &FormatStlTest::file});
 }
 
-using namespace Containers::Literals;
-using namespace std::string_view_literals;
-
-void FormatStlStringViewTest::test() {
-    CORRADE_COMPARE(format("hello {}", std::string_view{"worlds", 5}),
+void FormatStlTest::string() {
+    /* This tests both string input and string output, yes, lazy */
+    CORRADE_COMPARE(formatString("hello {}", std::string{"worlds", 5}),
         "hello world");
-    CORRADE_COMPARE(format("hello {}", "world\0, i guess?"sv),
-        "hello world\0, i guess?"_s);
+    CORRADE_COMPARE(formatString("hello {}", std::string{"world\0, i guess?", 16}),
+        (std::string{"hello world\0, i guess?", 22}));
 }
 
-void FormatStlStringViewTest::testEmpty() {
-    /* Empty string view should not cause any issues with data access */
-    CORRADE_COMPARE(format("hello{}!", std::string_view{}), "hello!");
+void FormatStlTest::stringEmpty() {
+    /* Empty string should not cause any issues with data access */
+    CORRADE_COMPARE(formatString("hello{}!", std::string{}), "hello!");
 }
 
-void FormatStlStringViewTest::file() {
-    Containers::String filename = Path::join(FORMAT_WRITE_TEST_DIR, "format-stl-view.txt");
+void FormatStlTest::stringIntoAppend() {
+    /* Returned size should be including start offset */
+    std::string hello = "hello";
+    CORRADE_COMPARE(formatInto(hello, hello.size(), ", {}!", "world"), 13);
+    CORRADE_COMPARE(hello, "hello, world!");
+}
+
+void FormatStlTest::stringIntoInsert() {
+    /* Returned size should be including start offset but be less than string size */
+    std::string hello = "hello, __________! Happy to see you!";
+    CORRADE_COMPARE(hello.size(), 36);
+    CORRADE_COMPARE(formatInto(hello, 8, "Frank"), 13);
+    CORRADE_COMPARE(hello, "hello, _Frank____! Happy to see you!");
+    CORRADE_COMPARE(hello.size(), 36);
+}
+
+void FormatStlTest::file() {
+    Containers::String filename = Path::join(FORMAT_WRITE_TEST_DIR, "format-stl.txt");
     CORRADE_VERIFY(Path::make(FORMAT_WRITE_TEST_DIR));
     if(Path::exists(filename))
         CORRADE_VERIFY(Path::remove(filename));
@@ -76,7 +97,7 @@ void FormatStlStringViewTest::file() {
         FILE* f = std::fopen(filename.data(), "w");
         CORRADE_VERIFY(f);
         Containers::ScopeGuard e{f, fclose};
-        formatInto(f, "A {} {} {}", "string", std::string_view{"file"}, 27);
+        formatInto(f, "A {} {} {}", "string", std::string{"file"}, 27);
     }
     CORRADE_COMPARE_AS(filename,
         "A string file 27",
@@ -85,4 +106,4 @@ void FormatStlStringViewTest::file() {
 
 }}}}
 
-CORRADE_TEST_MAIN(Corrade::Utility::Test::FormatStlStringViewTest)
+CORRADE_TEST_MAIN(Corrade::Utility::Test::FormatStlTest)

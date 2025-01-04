@@ -298,6 +298,7 @@ if(NOT CMAKE_CXX_FLAGS MATCHES "-std=")
             UtilityFormatStlStringViewTest
             UtilityMacrosCpp17Test
             PROPERTIES CORRADE_CXX_STANDARD 17)
+        target_include_directories(UtilityFormatStlStringViewTest PRIVATE ${CMAKE_CURRENT_BINARY_DIR})
     endif()
 
     # Copied verbatim from src/Corrade/Test/CMakeLists.txt, please keep in sync
@@ -371,7 +372,11 @@ endif()
 target_include_directories(UtilityPathTest PRIVATE ${CMAKE_CURRENT_BINARY_DIR})
 
 corrade_add_test(UtilityFormatTest FormatTest.cpp LIBRARIES CorradeTestSuiteTestLib)
+corrade_add_test(UtilityFormatStlTest FormatStlTest.cpp)
 target_include_directories(UtilityFormatTest PRIVATE ${CMAKE_CURRENT_BINARY_DIR})
+target_include_directories(UtilityFormatStlTest PRIVATE ${CMAKE_CURRENT_BINARY_DIR})
+
+corrade_add_test(UtilityFormatBenchmark FormatBenchmark.cpp)
 
 corrade_add_test(UtilityHashDigestTest HashDigestTest.cpp)
 
