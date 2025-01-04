@@ -40,11 +40,15 @@
 #include "Corrade/Utility/Math.h"
 #include "Corrade/Utility/visibility.h"
 
-#ifdef CORRADE_TARGET_APPLE
-#include <stdlib.h>
-#elif defined(CORRADE_TARGET_UNIX) || defined(CORRADE_TARGET_WINDOWS)
-/* On Windows it's <malloc.h> as well, and it's relatively tiny without pulling
-   in any of the <windows.h> horror, so it's fine */
+/* In some cases on Unix #include <malloc.h> works, but Apple wants <stdlib.h>
+   and elsewhere it likely may only worked because <stdlib.h> was pulled in by
+   something else. Furthermore, we need <cstdlib> for std::free(), so include
+   it always. */
+#include <cstdlib>
+#ifdef CORRADE_TARGET_WINDOWS
+/* On Windows it's <malloc.h>, and it's relatively tiny without pulling in any
+   of the <windows.h> horror, so it's fine and we don't need to forward-declare
+   anything */
 #include <malloc.h>
 #endif
 
