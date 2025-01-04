@@ -24,7 +24,7 @@
     DEALINGS IN THE SOFTWARE.
 */
 
-#include <vector>
+#include <vector> /* for verification that StringIterable works with std::vector<std::string> */
 #include <unordered_map>
 
 #include "Corrade/Containers/ArrayViewStl.h"

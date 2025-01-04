@@ -24,9 +24,9 @@
     DEALINGS IN THE SOFTWARE.
 */
 
-#include <set>
+#include <set>      /* for unique allocation counting in a benchmark */
 #include <sstream>
-#include <vector>
+#include <vector>   /* for benchmark against STL */
 
 #include "Corrade/Containers/GrowableArray.h"
 #include "Corrade/Containers/StringStl.h"

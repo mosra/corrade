@@ -24,7 +24,7 @@
     DEALINGS IN THE SOFTWARE.
 */
 
-#include <vector>
+#include <vector> /* for verification that StringIterable works with std::vector<std::string_view> */
 
 #include "Corrade/Containers/ArrayViewStl.h"
 #include "Corrade/Containers/StringIterable.h"

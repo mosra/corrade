@@ -26,7 +26,6 @@
 
 #include <sstream>
 #include <unordered_set>
-#include <vector>
 
 #include "Corrade/Containers/Array.h"
 #include "Corrade/Containers/Reference.h"
@@ -40,9 +39,8 @@ namespace Corrade { namespace TestSuite { namespace Compare { namespace Test { n
 struct SortedContainerTest: Tester {
     explicit SortedContainerTest();
 
-    void copyableContainer();
+    void container();
     void nonOwningView();
-    void nonCopyableContainer();
     void noRandomAccessContainer();
     void noDefaultConstructor();
     void differentSize();
@@ -50,9 +48,8 @@ struct SortedContainerTest: Tester {
 };
 
 SortedContainerTest::SortedContainerTest() {
-    addTests({&SortedContainerTest::copyableContainer,
+    addTests({&SortedContainerTest::container,
               &SortedContainerTest::nonOwningView,
-              &SortedContainerTest::nonCopyableContainer,
               &SortedContainerTest::noRandomAccessContainer,
               &SortedContainerTest::noDefaultConstructor,
               &SortedContainerTest::differentSize,
@@ -62,14 +59,14 @@ SortedContainerTest::SortedContainerTest() {
 /* Majority is tested in ContainerTest, this tests only specifics to this
    derived class */
 
-void SortedContainerTest::copyableContainer() {
-    std::vector<int> a{1, 2, 4, 3};
-    std::vector<int> b{1, 4, 3, 2};
-    std::vector<int> c{1, 4, 3, 3};
+void SortedContainerTest::container() {
+    Containers::Array<int> a{InPlaceInit, {1, 2, 4, 3}};
+    Containers::Array<int> b{InPlaceInit, {1, 4, 3, 2}};
+    Containers::Array<int> c{InPlaceInit, {1, 4, 3, 3}};
 
-    CORRADE_COMPARE((Comparator<Compare::SortedContainer<std::vector<int>>>{}(a, b)), ComparisonStatusFlags{});
-    CORRADE_COMPARE((Comparator<Compare::SortedContainer<std::vector<int>>>{}(b, a)), ComparisonStatusFlags{});
-    CORRADE_COMPARE((Comparator<Compare::SortedContainer<std::vector<int>>>{}(a, c)), ComparisonStatusFlag::Failed);
+    CORRADE_COMPARE((Comparator<Compare::SortedContainer<Containers::Array<int>>>{}(a, b)), ComparisonStatusFlags{});
+    CORRADE_COMPARE((Comparator<Compare::SortedContainer<Containers::Array<int>>>{}(b, a)), ComparisonStatusFlags{});
+    CORRADE_COMPARE((Comparator<Compare::SortedContainer<Containers::Array<int>>>{}(a, c)), ComparisonStatusFlag::Failed);
 }
 
 void SortedContainerTest::nonOwningView() {
@@ -93,16 +90,6 @@ void SortedContainerTest::nonOwningView() {
         TestSuite::Compare::Container);
 }
 
-void SortedContainerTest::nonCopyableContainer() {
-    Containers::Array<int> a{InPlaceInit, {1, 2, 4, 3}};
-    Containers::Array<int> b{InPlaceInit, {1, 4, 3, 2}};
-    Containers::Array<int> c{InPlaceInit, {1, 4, 3, 3}};
-
-    CORRADE_COMPARE((Comparator<Compare::SortedContainer<Containers::Array<int>>>{}(a, b)), ComparisonStatusFlags{});
-    CORRADE_COMPARE((Comparator<Compare::SortedContainer<Containers::Array<int>>>{}(b, a)), ComparisonStatusFlags{});
-    CORRADE_COMPARE((Comparator<Compare::SortedContainer<Containers::Array<int>>>{}(a, c)), ComparisonStatusFlag::Failed);
-}
-
 void SortedContainerTest::noRandomAccessContainer() {
     std::unordered_set<int> a{1, 2, 4, 3};
     std::unordered_set<int> b{1, 4, 3, 2};
@@ -122,25 +109,25 @@ void SortedContainerTest::noDefaultConstructor() {
     Containers::Reference<int> two = twoData;
     Containers::Reference<int> three = threeData;
     Containers::Reference<int> four = fourData;
-    std::vector<Containers::Reference<int>> a{one, two, four, three};
-    std::vector<Containers::Reference<int>> b{one, four, three, two};
-    std::vector<Containers::Reference<int>> c{one, four, three, three};
+    Containers::Array<Containers::Reference<int>> a{InPlaceInit, {one, two, four, three}};
+    Containers::Array<Containers::Reference<int>> b{InPlaceInit, {one, four, three, two}};
+    Containers::Array<Containers::Reference<int>> c{InPlaceInit, {one, four, three, three}};
 
-    CORRADE_COMPARE((Comparator<Compare::SortedContainer<std::vector<Containers::Reference<int>>>>{}(a, b)), ComparisonStatusFlags{});
-    CORRADE_COMPARE((Comparator<Compare::SortedContainer<std::vector<Containers::Reference<int>>>>{}(b, a)), ComparisonStatusFlags{});
-    CORRADE_COMPARE((Comparator<Compare::SortedContainer<std::vector<Containers::Reference<int>>>>{}(a, c)), ComparisonStatusFlag::Failed);
+    CORRADE_COMPARE((Comparator<Compare::SortedContainer<Containers::Array<Containers::Reference<int>>>>{}(a, b)), ComparisonStatusFlags{});
+    CORRADE_COMPARE((Comparator<Compare::SortedContainer<Containers::Array<Containers::Reference<int>>>>{}(b, a)), ComparisonStatusFlags{});
+    CORRADE_COMPARE((Comparator<Compare::SortedContainer<Containers::Array<Containers::Reference<int>>>>{}(a, c)), ComparisonStatusFlag::Failed);
 }
 
 void SortedContainerTest::differentSize() {
     /* Mainly to verify we're not accidentally using wrong sizes for copying */
 
-    std::vector<int> a{1, 2, 4, 3};
-    std::vector<int> b;
+    Containers::Array<int> a{InPlaceInit, {1, 2, 4, 3}};
+    Containers::Array<int> b;
 
     {
         std::stringstream out;
         Debug redirectOutput{&out};
-        Comparator<Compare::SortedContainer<std::vector<int>>> compare;
+        Comparator<Compare::SortedContainer<Containers::Array<int>>> compare;
         ComparisonStatusFlags flags = compare(a, b);
         CORRADE_COMPARE(flags, ComparisonStatusFlag::Failed);
         compare.printMessage(flags, redirectOutput, "a", "b");
@@ -150,7 +137,7 @@ void SortedContainerTest::differentSize() {
     } {
         std::stringstream out;
         Debug redirectOutput{&out};
-        Comparator<Compare::SortedContainer<std::vector<int>>> compare;
+        Comparator<Compare::SortedContainer<Containers::Array<int>>> compare;
         ComparisonStatusFlags flags = compare(b, a);
         CORRADE_COMPARE(flags, ComparisonStatusFlag::Failed);
         compare.printMessage(flags, redirectOutput, "b", "a");

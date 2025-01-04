@@ -29,7 +29,6 @@
 #include <set>
 #include <sstream>
 #include <string>
-#include <vector>
 
 #include "Corrade/Containers/Pair.h"
 #include "Corrade/Containers/String.h"
@@ -937,7 +936,7 @@ void DebugTest::valueAsColorColorsDisabled() {
 
 void DebugTest::iterable() {
     std::ostringstream out;
-    Debug(&out) << std::vector<int>{1, 2, 3};
+    Debug(&out) << Containers::arrayView({1, 2, 3});
     CORRADE_COMPARE(out.str(), "{1, 2, 3}\n");
 
     out.str({});
@@ -951,11 +950,11 @@ void DebugTest::iterable() {
 
 void DebugTest::iterableNested() {
     std::ostringstream out;
-    Debug{&out} << std::vector<std::vector<int>>{
-        {1, 2, 3},
-        {4, 5},
-        {6, 7, 8}
-    };
+    Debug{&out} << Containers::arrayView({
+        Containers::arrayView({1, 2, 3}),
+        Containers::arrayView({4, 5}),
+        Containers::arrayView({6, 7, 8})
+    });
     CORRADE_COMPARE(out.str(),
         "{{1, 2, 3},\n"
         " {4, 5},\n"
@@ -965,18 +964,18 @@ void DebugTest::iterableNested() {
 void DebugTest::iterablePacked() {
     {
         std::ostringstream out;
-        Debug{&out} << Debug::packed << std::vector<int>{1, 2, 3};
+        Debug{&out} << Debug::packed << Containers::arrayView({1, 2, 3});
         CORRADE_COMPARE(out.str(), "123\n");
     }
 
     /* Nested containers should be printed packed too */
     {
         std::ostringstream out;
-        Debug{&out} << Debug::packed << std::vector<std::vector<std::string>>{
-            {"a", "b", "c"},
-            {"d", "e"},
-            {"f", "g", "h"}
-        };
+        Debug{&out} << Debug::packed << Containers::arrayView({
+            Containers::arrayView({"a", "b", "c"}),
+            Containers::arrayView({"d", "e"}),
+            Containers::arrayView({"f", "g", "h"})
+        });
         CORRADE_COMPARE(out.str(),
             "abc\n"
             "de\n"
@@ -988,7 +987,7 @@ void DebugTest::iterablePacked() {
     {
         std::ostringstream out;
         Debug(&out) << Debug::packed << std::set<std::string>{"a", "b", "c"}
-            << std::vector<int>{1, 2, 3};
+            << Containers::arrayView({1, 2, 3});
         CORRADE_COMPARE(out.str(), "abc {1, 2, 3}\n");
     }
 }
@@ -997,17 +996,17 @@ void DebugTest::iterableNospace() {
     /* The immediate nospace specifier should not be set for nested types */
     {
         std::ostringstream out;
-        Debug{&out} << "vector" << Debug::nospace
-            << std::vector<std::pair<int, int>>{{1, 2}, {3, 4}};
-        CORRADE_COMPARE(out.str(), "vector{(1, 2), (3, 4)}\n");
+        Debug{&out} << "array" << Debug::nospace
+            << Containers::arrayView<std::pair<int, int>>({{1, 2}, {3, 4}});
+        CORRADE_COMPARE(out.str(), "array{(1, 2), (3, 4)}\n");
     }
 
     /* The global nospace specifier should be preserved for nested types */
     {
         std::ostringstream out;
-        Debug{&out, Debug::Flag::NoSpace} << "vector"
-            << std::vector<std::pair<int, int>>{{1, 2}, {3, 4}};
-        CORRADE_COMPARE(out.str(), "vector{(1,2), (3,4)}\n");
+        Debug{&out, Debug::Flag::NoSpace} << "array"
+            << Containers::arrayView<std::pair<int, int>>({{1, 2}, {3, 4}});
+        CORRADE_COMPARE(out.str(), "array{(1,2), (3,4)}\n");
     }
 }
 
@@ -1033,8 +1032,8 @@ void DebugTest::iterablePairPacked() {
        back after */
     std::ostringstream out;
     Debug{&out} << Debug::packed
-        << std::make_pair(42, std::vector<int>{1, 2, 3})
-        << std::vector<int>{1, 2, 3};
+        << std::make_pair(42, Containers::arrayView({1, 2, 3}))
+        << Containers::arrayView({1, 2, 3});
     CORRADE_COMPARE(out.str(), "(42, 123) {1, 2, 3}\n");
 }
 
@@ -1043,8 +1042,8 @@ void DebugTest::iterableTuplePacked() {
        back after */
     std::ostringstream out;
     Debug{&out} << Debug::packed
-        << std::make_tuple("hey", 42, std::vector<int>{1, 2, 3})
-        << std::vector<int>{1, 2, 3};
+        << std::make_tuple("hey", 42, Containers::arrayView({1, 2, 3}))
+        << Containers::arrayView({1, 2, 3});
     CORRADE_COMPARE(out.str(), "(hey, 42, 123) {1, 2, 3}\n");
 }
 

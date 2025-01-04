@@ -27,6 +27,9 @@
 #include <functional>
 #include <sstream>
 
+#include "Corrade/Containers/GrowableArray.h"
+#include "Corrade/Containers/String.h"
+#include "Corrade/Containers/StringIterable.h"
 #include "Corrade/Interconnect/Emitter.h"
 #include "Corrade/Interconnect/Receiver.h"
 #include "Corrade/TestSuite/Tester.h"
@@ -81,7 +84,7 @@ struct Test: TestSuite::Tester {
 
 class Postman: public Interconnect::Emitter {
     public:
-        Signal newMessage(int price, const std::string& message) {
+        Signal newMessage(int price, Containers::StringView message) {
             return emit(&Postman::newMessage, price, message);
         }
 
@@ -92,14 +95,14 @@ class Postman: public Interconnect::Emitter {
 
 class TemplatedPostman: public Interconnect::Emitter {
     public:
-        template<class T> Signal newMessage(int price, const std::string& message) {
+        template<class T> Signal newMessage(int price, Containers::StringView message) {
             #ifdef CORRADE_TARGET_MSVC /* See _functionHash for explanation */
             _functionHash = sizeof(T);
             #endif
             return emit(&TemplatedPostman::newMessage<T>, price, message);
         }
 
-        template<class T> Signal oldMessage(int price, const std::string& message) {
+        template<class T> Signal oldMessage(int price, Containers::StringView message) {
             #ifdef CORRADE_TARGET_MSVC /* See _functionHash for explanation */
             _functionHash = sizeof(T)*2;
             #endif
@@ -122,9 +125,9 @@ class Mailbox: public Interconnect::Receiver {
     public:
         Mailbox(): money(0) {}
 
-        void addMessage(int price, const std::string& message) {
+        void addMessage(int price, Containers::StringView message) {
             money += price;
-            messages.push_back(message);
+            arrayAppend(messages, message);
         }
 
         void pay(int amount) {
@@ -132,7 +135,10 @@ class Mailbox: public Interconnect::Receiver {
         }
 
         int money;
-        std::vector<std::string> messages;
+        /* Test::emitterSubclass(), emitterMultipleInheritance*(),
+           receiverSubclass() create a string at runtime, so can't store just
+           views */
+        Containers::Array<Containers::String> messages;
 };
 
 Test::Test() {
@@ -543,18 +549,23 @@ void Test::emit() {
     /* Verify signal handling */
     postman.newMessage(60, "hello");
     postman.paymentRequested(50);
-    CORRADE_COMPARE(mailbox1.messages, std::vector<std::string>{"hello"});
+    CORRADE_COMPARE_AS(mailbox1.messages, Containers::StringIterable{
+        "hello"
+    }, TestSuite::Compare::Container);
     CORRADE_COMPARE(mailbox1.money, 10);
-    CORRADE_COMPARE(mailbox2.messages, std::vector<std::string>{"hello"});
+    CORRADE_COMPARE_AS(mailbox2.messages, Containers::StringIterable{
+        "hello"
+    }, TestSuite::Compare::Container);
     CORRADE_COMPARE(mailbox2.money, 10);
-    CORRADE_COMPARE(mailbox3.messages, std::vector<std::string>());
+    CORRADE_COMPARE_AS(mailbox3.messages, Containers::StringIterable{
+    }, TestSuite::Compare::Container);
     CORRADE_COMPARE(mailbox3.money, -50);
 }
 
 void Test::emitterSubclass() {
     class BetterPostman: public Postman {
         public:
-            Signal newRichTextMessage(int price, const std::string& value) {
+            Signal newRichTextMessage(int price, Containers::StringView value) {
                 return emit(&BetterPostman::newRichTextMessage, price, "***"+value+"***");
             }
     };
@@ -569,8 +580,9 @@ void Test::emitterSubclass() {
     /* Just to be sure */
     postman.newMessage(5, "hello");
     postman.newRichTextMessage(10, "ahoy");
-    CORRADE_COMPARE_AS(mailbox.messages, (std::vector<std::string>{"hello", "***ahoy***"}),
-                       TestSuite::Compare::SortedContainer);
+    CORRADE_COMPARE_AS(mailbox.messages, (Containers::StringIterable{
+        "hello", "***ahoy***"
+    }), TestSuite::Compare::SortedContainer);
     CORRADE_COMPARE(mailbox.money, 15);
 
     postman.disconnectSignal(&BetterPostman::newMessage);
@@ -585,7 +597,7 @@ void Test::emitterMultipleInheritance() {
     };
 
     struct Diamond: A, Postman {
-        Signal newDiamondCladMessage(int price, const std::string& value) {
+        Signal newDiamondCladMessage(int price, Containers::StringView value) {
             return emit(&Diamond::newDiamondCladMessage, price, "<>"+value+"<>");
         }
     };
@@ -598,8 +610,9 @@ void Test::emitterMultipleInheritance() {
 
     postman.newDiamondCladMessage(10, "ahoy");
     postman.newMessage(5, "hello");
-    CORRADE_COMPARE_AS(mailbox.messages, (std::vector<std::string>{"hello", "<>ahoy<>"}),
-                       TestSuite::Compare::SortedContainer);
+    CORRADE_COMPARE_AS(mailbox.messages, (Containers::StringIterable{
+        "hello", "<>ahoy<>"
+    }), TestSuite::Compare::SortedContainer);
     CORRADE_COMPARE(mailbox.money, 15);
 
     CORRADE_VERIFY(postman.hasSignalConnections(&Diamond::newMessage));
@@ -617,7 +630,7 @@ void Test::emitterMultipleInheritanceVirtual() {
     };
 
     struct Diamond: virtual A, Postman {
-        Signal newDiamondCladMessage(int price, const std::string& value) {
+        Signal newDiamondCladMessage(int price, Containers::StringView value) {
             return emit(&Diamond::newDiamondCladMessage, price, "<>"+value+"<>");
         }
     };
@@ -628,13 +641,14 @@ void Test::emitterMultipleInheritanceVirtual() {
     /* Virtual bases have extra big pointer sizes on MSVC (16 bytes on 32bit).
        Ensure this is handled correctly. */
     Interconnect::connect(postman, &Diamond::newDiamondCladMessage, mailbox, &Mailbox::addMessage);
-    Interconnect::connect(postman, &Diamond::newDiamondCladMessage, [](int, const std::string&){});
+    Interconnect::connect(postman, &Diamond::newDiamondCladMessage, [](int, Containers::StringView){});
     Interconnect::connect(postman, &Diamond::newMessage, mailbox, &Mailbox::addMessage);
 
     postman.newDiamondCladMessage(10, "ahoy");
     postman.newMessage(5, "hello");
-    CORRADE_COMPARE_AS(mailbox.messages, (std::vector<std::string>{"hello", "<>ahoy<>"}),
-                       TestSuite::Compare::SortedContainer);
+    CORRADE_COMPARE_AS(mailbox.messages, (Containers::StringIterable{
+        "hello", "<>ahoy<>"
+    }), TestSuite::Compare::SortedContainer);
     CORRADE_COMPARE(mailbox.money, 15);
 
     CORRADE_VERIFY(postman.hasSignalConnections(&Diamond::newMessage));
@@ -691,9 +705,9 @@ void Test::emitterIdenticalSignals() {
 void Test::receiverSubclass() {
     class BlueMailbox: public Mailbox {
         public:
-            void addBlueMessage(int price, const std::string& message) {
+            void addBlueMessage(int price, Containers::StringView message) {
                 money += price;
-                messages.push_back("Blue " + message);
+                arrayAppend(messages, "Blue " + message);
             }
     };
 
@@ -706,8 +720,9 @@ void Test::receiverSubclass() {
 
     /* Just to be sure */
     postman.newMessage(5, "hello");
-    CORRADE_COMPARE_AS(mailbox.messages, (std::vector<std::string>{"Blue hello", "hello"}),
-                       TestSuite::Compare::SortedContainer);
+    CORRADE_COMPARE_AS(mailbox.messages, (Containers::StringIterable{
+        "Blue hello", "hello"
+    }), TestSuite::Compare::SortedContainer);
     CORRADE_COMPARE(mailbox.money, 10);
 }
 
@@ -716,13 +731,13 @@ void Test::slotInReceiverBase() {
         public:
             VintageMailbox(): money(0) {}
 
-            void addMessage(int price, const std::string& message) {
+            void addMessage(int price, Containers::StringView message) {
                 money += price;
-                messages.push_back(message);
+                arrayAppend(messages, message);
             }
 
             int money;
-            std::vector<std::string> messages;
+            Containers::Array<Containers::StringView> messages;
     };
 
     class ModernMailbox: public VintageMailbox, public Interconnect::Receiver {};
@@ -735,7 +750,9 @@ void Test::slotInReceiverBase() {
 
     /* Just to be sure */
     postman.newMessage(5, "hello");
-    CORRADE_COMPARE(mailbox.messages, std::vector<std::string>{"hello"});
+    CORRADE_COMPARE_AS(mailbox.messages, Containers::StringIterable{
+        "hello"
+    }, TestSuite::Compare::Container);
     CORRADE_COMPARE(mailbox.money, 5);
 }
 
@@ -751,7 +768,6 @@ void Test::virtualSlot() {
             }
 
             int money;
-            std::vector<std::string> messages;
     };
 
     class TaxDodgingMailbox: public VirtualMailbox {
@@ -783,8 +799,12 @@ void Test::templatedSignal() {
 
     postman.newMessage<std::int32_t>(0, "integer");
     postman.newMessage<std::string>(0, "string");
-    CORRADE_COMPARE(intMailbox.messages, std::vector<std::string>{"integer"});
-    CORRADE_COMPARE(stringMailbox.messages, std::vector<std::string>{"string"});
+    CORRADE_COMPARE_AS(intMailbox.messages, Containers::StringIterable{
+        "integer"
+    }, TestSuite::Compare::Container);
+    CORRADE_COMPARE_AS(stringMailbox.messages, Containers::StringIterable{
+        "string"
+    }, TestSuite::Compare::Container);
 }
 
 void Test::changeConnectionsInSlot() {
@@ -795,13 +815,13 @@ void Test::changeConnectionsInSlot() {
         public:
             PropagatingMailbox(Postman* postman, Mailbox* mailbox): postman(postman), mailbox(mailbox) {}
 
-            void addMessage(int, const std::string& message) {
-                messages.push_back(message);
+            void addMessage(int, Containers::StringView message) {
+                arrayAppend(messages, message);
                 Interconnect::connect(*postman, &Postman::newMessage, *mailbox, &Mailbox::addMessage);
                 Interconnect::connect(*postman, &Postman::paymentRequested, *mailbox, &Mailbox::pay);
             }
 
-            std::vector<std::string> messages;
+            Containers::Array<Containers::StringView> messages;
 
         private:
             Postman* postman;
@@ -818,15 +838,19 @@ void Test::changeConnectionsInSlot() {
     /* Propagating mailbox connects the other mailbox, verify the proper slots
        are called proper times */
     postman.newMessage(19, "hello");
-    CORRADE_COMPARE(propagatingMailbox.messages, std::vector<std::string>{"hello"});
-    CORRADE_COMPARE(mailbox.messages, std::vector<std::string>{"hello"});
+    CORRADE_COMPARE_AS(propagatingMailbox.messages, Containers::StringIterable{
+        "hello"
+    }, TestSuite::Compare::Container);
+    CORRADE_COMPARE_AS(mailbox.messages, Containers::StringIterable{
+        "hello"
+    }, TestSuite::Compare::Container);
     CORRADE_COMPARE(mailbox.money, 19);
 }
 
 void Test::deleteReceiverInSlot() {
     class SuicideMailbox: public Interconnect::Receiver {
         public:
-            void addMessage(int, const std::string&) {
+            void addMessage(int, Containers::StringView) {
                 delete this;
             }
     };
@@ -843,8 +867,12 @@ void Test::deleteReceiverInSlot() {
     CORRADE_COMPARE(postman.signalConnectionCount(), 3);
     postman.newMessage(11, "hello");
     CORRADE_COMPARE(postman.signalConnectionCount(), 2);
-    CORRADE_COMPARE(mailbox2.messages, std::vector<std::string>{"hello"});
-    CORRADE_COMPARE(mailbox3.messages, std::vector<std::string>{"hello"});
+    CORRADE_COMPARE_AS(mailbox2.messages, Containers::StringIterable{
+        "hello"
+    }, TestSuite::Compare::Container);
+    CORRADE_COMPARE_AS(mailbox3.messages, Containers::StringIterable{
+        "hello"
+    }, TestSuite::Compare::Container);
 }
 
 void Test::function() {
@@ -852,7 +880,7 @@ void Test::function() {
     Debug redirectDebug{&out};
 
     Postman postman;
-    Connection connection = Interconnect::connect(postman, &Postman::newMessage, [](int, const std::string& message) { Debug() << message; });
+    Connection connection = Interconnect::connect(postman, &Postman::newMessage, [](int, Containers::StringView message) { Debug() << message; });
 
     postman.newMessage(0, "hello");
     CORRADE_COMPARE(out.str(), "hello\n");
@@ -865,7 +893,7 @@ void Test::capturingLambda() {
     std::ostringstream out;
 
     Postman postman;
-    Connection connection = Interconnect::connect(postman, &Postman::newMessage, [&out](int, const std::string& message) { Debug{&out} << message; });
+    Connection connection = Interconnect::connect(postman, &Postman::newMessage, [&out](int, Containers::StringView message) { Debug{&out} << message; });
 
     postman.newMessage(0, "hello");
     CORRADE_COMPARE(out.str(), "hello\n");
@@ -876,7 +904,7 @@ void Test::capturingLambda() {
 
 void Test::stdFunction() {
     std::ostringstream out;
-    std::function<void(int, const std::string&)> f{[&out](int, const std::string& message) { Debug{&out} << message; }};
+    std::function<void(int, Containers::StringView)> f{[&out](int, Containers::StringView message) { Debug{&out} << message; }};
 
     Postman postman;
     Connection connection = Interconnect::connect(postman, &Postman::newMessage, f);

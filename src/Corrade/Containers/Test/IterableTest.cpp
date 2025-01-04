@@ -29,7 +29,7 @@
 #include "Corrade/Containers/Iterable.h"
 
 #include <sstream>
-#include <vector>
+#include <vector> /* for verification that it works with STL */
 
 #include "Corrade/Containers/AnyReference.h"
 #include "Corrade/Containers/Array.h"

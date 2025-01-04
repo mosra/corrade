@@ -25,10 +25,10 @@
 */
 
 #include <sstream>
-#include <vector>
-
+#include "Corrade/Containers/GrowableArray.h"
 #include "Corrade/Containers/LinkedList.h"
 #include "Corrade/TestSuite/Tester.h"
+#include "Corrade/TestSuite/Compare/Container.h"
 #include "Corrade/Utility/DebugStl.h" /** @todo remove when <sstream> is gone */
 
 namespace Corrade { namespace Containers { namespace Test { namespace {
@@ -445,14 +445,20 @@ void LinkedListTest::rangeBasedFor() {
     list.insert(&item3);
 
     {
-        std::vector<Item*> items;
-        for(auto&& i: list) items.push_back(&i);
-        CORRADE_COMPARE(items, (std::vector<Item*>{&item, &item2, &item3}));
+        Containers::Array<Item*> items;
+        for(auto&& i: list)
+            arrayAppend(items, &i);
+        CORRADE_COMPARE_AS(items, Containers::arrayView({
+            &item, &item2, &item3
+        }), TestSuite::Compare::Container);
     } {
         const LinkedList& clist = list;
-        std::vector<const Item*> items;
-        for(auto&& i: clist) items.push_back(&i);
-        CORRADE_COMPARE(items, (std::vector<const Item*>{&item, &item2, &item3}));
+        Containers::Array<const Item*> items;
+        for(auto&& i: clist)
+            arrayAppend(items, &i);
+        CORRADE_COMPARE_AS(items, Containers::arrayView<const Item*>({
+            &item, &item2, &item3
+        }), TestSuite::Compare::Container);
     }
 }
 

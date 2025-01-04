@@ -25,7 +25,6 @@
 */
 
 #include <sstream>
-#include <vector>
 
 #include "Corrade/Containers/Array.h"
 #include "Corrade/TestSuite/Tester.h"
@@ -42,8 +41,6 @@ struct ContainerTest: Tester {
     void outputExpectedSmaller();
     void output();
     void floatingPoint();
-
-    void nonCopyableArray();
 };
 
 ContainerTest::ContainerTest() {
@@ -51,29 +48,27 @@ ContainerTest::ContainerTest() {
               &ContainerTest::outputActualSmaller,
               &ContainerTest::outputExpectedSmaller,
               &ContainerTest::output,
-              &ContainerTest::floatingPoint,
-
-              &ContainerTest::nonCopyableArray});
+              &ContainerTest::floatingPoint});
 }
 
 void ContainerTest::same() {
-    std::vector<int> a{1, 2, 3, 4};
-    CORRADE_COMPARE(Comparator<Compare::Container<std::vector<int>>>{}(a, a), ComparisonStatusFlags{});
+    Containers::Array<int> a{InPlaceInit, {1, 2, 3, 4}};
+    CORRADE_COMPARE(Comparator<Compare::Container<Containers::Array<int>>>{}(a, a), ComparisonStatusFlags{});
 
     /* Should not return any flags for a success */
-    Comparator<Compare::Container<std::vector<int>>> compare;
+    Comparator<Compare::Container<Containers::Array<int>>> compare;
     CORRADE_COMPARE(compare(a, a), ComparisonStatusFlags{});
 }
 
 void ContainerTest::outputActualSmaller() {
     std::stringstream out;
 
-    std::vector<int> a{1, 2, 3};
-    std::vector<int> b{1, 2, 3, 4};
+    Containers::Array<int> a{InPlaceInit, {1, 2, 3}};
+    Containers::Array<int> b{InPlaceInit, {1, 2, 3, 4}};
 
     {
         Debug redirectOutput{&out};
-        Comparator<Compare::Container<std::vector<int>>> compare;
+        Comparator<Compare::Container<Containers::Array<int>>> compare;
         ComparisonStatusFlags flags = compare(a, b);
         CORRADE_COMPARE(flags, ComparisonStatusFlag::Failed);
         compare.printMessage(flags, redirectOutput, "a", "b");
@@ -90,12 +85,12 @@ void ContainerTest::outputActualSmaller() {
 void ContainerTest::outputExpectedSmaller() {
     std::stringstream out;
 
-    std::vector<int> a{1, 2, 3, 4};
-    std::vector<int> b{1, 2, 3};
+    Containers::Array<int> a{InPlaceInit, {1, 2, 3, 4}};
+    Containers::Array<int> b{InPlaceInit, {1, 2, 3}};
 
     {
         Debug redirectOutput{&out};
-        Comparator<Compare::Container<std::vector<int>>> compare;
+        Comparator<Compare::Container<Containers::Array<int>>> compare;
         ComparisonStatusFlags flags = compare(a, b);
         CORRADE_COMPARE(flags, ComparisonStatusFlag::Failed);
         compare.printMessage(flags, redirectOutput, "a", "b");
@@ -111,12 +106,12 @@ void ContainerTest::outputExpectedSmaller() {
 void ContainerTest::output() {
     std::stringstream out;
 
-    std::vector<int> a{1, 9, 3, 4};
-    std::vector<int> b{1, 2, 3, 4};
+    Containers::Array<int> a{InPlaceInit, {1, 9, 3, 4}};
+    Containers::Array<int> b{InPlaceInit, {1, 2, 3, 4}};
 
     {
         Debug redirectOutput{&out};
-        Comparator<Compare::Container<std::vector<int>>> compare;
+        Comparator<Compare::Container<Containers::Array<int>>> compare;
         ComparisonStatusFlags flags = compare(a, b);
         CORRADE_COMPARE(flags, ComparisonStatusFlag::Failed);
         compare.printMessage(flags, redirectOutput, "a", "b");
@@ -132,15 +127,15 @@ void ContainerTest::output() {
 void ContainerTest::floatingPoint() {
     std::stringstream out;
 
-    std::vector<float> a{3.20212f, 3.20212f};
-    std::vector<float> b{3.20212f, 3.20213f};
-    std::vector<float> c{3.20213f, 3.20219f};
+    Containers::Array<float> a{InPlaceInit, {3.20212f, 3.20212f}};
+    Containers::Array<float> b{InPlaceInit, {3.20212f, 3.20213f}};
+    Containers::Array<float> c{InPlaceInit, {3.20213f, 3.20219f}};
 
-    CORRADE_COMPARE(Comparator<Compare::Container<std::vector<float>>>{}(a, b), ComparisonStatusFlags{});
+    CORRADE_COMPARE(Comparator<Compare::Container<Containers::Array<float>>>{}(a, b), ComparisonStatusFlags{});
 
     {
         Debug redirectOutput{&out};
-        Comparator<Compare::Container<std::vector<float>>> compare;
+        Comparator<Compare::Container<Containers::Array<float>>> compare;
         ComparisonStatusFlags flags = compare(a, c);
         CORRADE_COMPARE(flags, ComparisonStatusFlag::Failed);
         compare.printMessage(flags, redirectOutput, "a", "c");
@@ -152,16 +147,6 @@ void ContainerTest::floatingPoint() {
         "        but expected\n"
         "        {3.20213, 3.20219}\n"
         "        Actual 3.20212 but 3.20219 expected on position 1.\n");
-}
-
-void ContainerTest::nonCopyableArray() {
-    Containers::Array<int> a{InPlaceInit, {1, 2, 3, 4, 5}};
-    Containers::Array<int> b{InPlaceInit, {1, 2, 3, 4, 5}};
-    Containers::Array<int> c{InPlaceInit, {1, 2, 3, 5, 5}};
-
-    CORRADE_COMPARE(Comparator<Compare::Container<Containers::Array<int>>>{}(a, a), ComparisonStatusFlags{});
-    CORRADE_COMPARE(Comparator<Compare::Container<Containers::Array<int>>>{}(a, b), ComparisonStatusFlags{});
-    CORRADE_COMPARE(Comparator<Compare::Container<Containers::Array<int>>>{}(a, c), ComparisonStatusFlag::Failed);
 }
 
 }}}}}

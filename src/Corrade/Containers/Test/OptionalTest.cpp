@@ -25,7 +25,7 @@
 */
 
 #include <sstream>
-#include <vector>
+#include <vector> /* for verification that moving works with STL containers */
 
 #include "Corrade/Containers/Optional.h"
 #include "Corrade/Containers/Pair.h"
