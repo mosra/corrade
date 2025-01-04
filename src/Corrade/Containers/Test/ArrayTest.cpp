@@ -24,11 +24,9 @@
     DEALINGS IN THE SOFTWARE.
 */
 
-#include <sstream>
-
 #include "Corrade/Containers/Array.h"
+#include "Corrade/Containers/String.h"
 #include "Corrade/TestSuite/Tester.h"
-#include "Corrade/Utility/DebugStl.h" /** @todo remove when <sstream> is gone */
 
 namespace {
 
@@ -768,7 +766,7 @@ void ArrayTest::accessConst() {
 void ArrayTest::accessInvalid() {
     CORRADE_SKIP_IF_NO_DEBUG_ASSERT();
 
-    std::stringstream out;
+    Containers::String out;
     Error redirectError{&out};
 
     Array a;
@@ -776,7 +774,7 @@ void ArrayTest::accessInvalid() {
     a.front();
     a.back();
     b[5];
-    CORRADE_COMPARE(out.str(),
+    CORRADE_COMPARE(out,
         "Containers::Array::front(): array is empty\n"
         "Containers::Array::back(): array is empty\n"
         "Containers::Array::operator[](): index 5 out of range for 5 elements\n");

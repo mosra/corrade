@@ -24,11 +24,11 @@
     DEALINGS IN THE SOFTWARE.
 */
 
-#include <sstream>
+#include <new>
 
 #include "Corrade/Containers/BigEnumSet.hpp"
+#include "Corrade/Containers/String.h"
 #include "Corrade/TestSuite/Tester.h"
-#include "Corrade/Utility/DebugStl.h" /** @todo remove when <sstream> is gone */
 
 namespace Corrade { namespace Containers { namespace Test { namespace {
 
@@ -199,11 +199,11 @@ void BigEnumSetTest::constructOutOfRange() {
     Features{Feature(255)};
     BigEnumSet<Feature, 7>{Feature(447)};
 
-    std::ostringstream out;
+    Containers::String out;
     Error redirectError{&out};
     Features{Feature(0xdead)};
     BigEnumSet<Feature, 7>{Feature(448)};
-    CORRADE_COMPARE(out.str(),
+    CORRADE_COMPARE(out,
         "Containers::BigEnumSet: value 57005 too large for a 256-bit storage\n"
         "Containers::BigEnumSet: value 448 too large for a 448-bit storage\n");
 }
@@ -528,10 +528,10 @@ Utility::Debug& operator<<(Utility::Debug& debug, Features value) {
 }
 
 void BigEnumSetTest::debug() {
-    std::stringstream out;
+    Containers::String out;
 
     Utility::Debug{&out} << Features{} << (Feature::Fast|Feature::Cheap) << (Feature(0xfa)|Feature(0xcd)|Feature::Popular);
-    CORRADE_COMPARE(out.str(), "Features{} Feature::Fast|Feature::Cheap Feature::Popular|Feature(0xcd)|Feature(0xfa)\n");
+    CORRADE_COMPARE(out, "Features{} Feature::Fast|Feature::Cheap Feature::Popular|Feature(0xcd)|Feature(0xfa)\n");
 }
 
 }}}}

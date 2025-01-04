@@ -25,7 +25,6 @@
 */
 
 #include <functional>
-#include <sstream>
 
 #include "Corrade/Containers/GrowableArray.h"
 #include "Corrade/Containers/String.h"
@@ -35,7 +34,6 @@
 #include "Corrade/TestSuite/Tester.h"
 #include "Corrade/TestSuite/Compare/SortedContainer.h"
 #include "Corrade/TestSuite/Compare/Numeric.h"
-#include "Corrade/Utility/DebugStl.h"
 
 namespace Corrade { namespace Interconnect { namespace Test { namespace {
 
@@ -697,7 +695,7 @@ void Test::emitterIdenticalSignals() {
     Interconnect::connect(a, &Widget::released, [](){ Debug{} << "a released!"; });
     Interconnect::connect(b, &Widget::tapped, [](){ Debug{} << "b tapped!"; });
 
-    std::ostringstream out;
+    Containers::String out;
     Debug redirectOutput{&out};
     a.pressed();
     a.released();
@@ -710,7 +708,7 @@ void Test::emitterIdenticalSignals() {
     CORRADE_VERIFY(&Widget::tapped != &Widget::pressed);
     CORRADE_VERIFY(&Widget::tapped != &Widget::released);
 
-    CORRADE_COMPARE(out.str(),
+    CORRADE_COMPARE(out,
         "a pressed!\n"
         "a released!\n"
         "b tapped!\n");
@@ -890,44 +888,44 @@ void Test::deleteReceiverInSlot() {
 }
 
 void Test::function() {
-    std::ostringstream out;
+    Containers::String out;
     Debug redirectDebug{&out};
 
     Postman postman;
     Connection connection = Interconnect::connect(postman, &Postman::newMessage, [](int, Containers::StringView message) { Debug() << message; });
 
     postman.newMessage(0, "hello");
-    CORRADE_COMPARE(out.str(), "hello\n");
+    CORRADE_COMPARE(out, "hello\n");
     Interconnect::disconnect(postman, connection);
     postman.newMessage(0, "heyy");
-    CORRADE_COMPARE(out.str(), "hello\n");
+    CORRADE_COMPARE(out, "hello\n");
 }
 
 void Test::capturingLambda() {
-    std::ostringstream out;
+    Containers::String out;
 
     Postman postman;
     Connection connection = Interconnect::connect(postman, &Postman::newMessage, [&out](int, Containers::StringView message) { Debug{&out} << message; });
 
     postman.newMessage(0, "hello");
-    CORRADE_COMPARE(out.str(), "hello\n");
+    CORRADE_COMPARE(out, "hello\n");
     Interconnect::disconnect(postman, connection);
     postman.newMessage(0, "heyy");
-    CORRADE_COMPARE(out.str(), "hello\n");
+    CORRADE_COMPARE(out, "hello\n");
 }
 
 void Test::stdFunction() {
-    std::ostringstream out;
+    Containers::String out;
     std::function<void(int, Containers::StringView)> f{[&out](int, Containers::StringView message) { Debug{&out} << message; }};
 
     Postman postman;
     Connection connection = Interconnect::connect(postman, &Postman::newMessage, f);
 
     postman.newMessage(0, "hello");
-    CORRADE_COMPARE(out.str(), "hello\n");
+    CORRADE_COMPARE(out, "hello\n");
     Interconnect::disconnect(postman, connection);
     postman.newMessage(0, "heyy");
-    CORRADE_COMPARE(out.str(), "hello\n");
+    CORRADE_COMPARE(out, "hello\n");
 }
 
 void Test::nonCopyableParameter() {

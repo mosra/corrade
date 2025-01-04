@@ -29,12 +29,10 @@
    cause a compilation failure without it included. */
 #include "Corrade/Containers/StridedArrayView.h"
 
-#include <sstream>
-
 #include "Corrade/Containers/StridedBitArrayView.h"
+#include "Corrade/Containers/String.h"
 #include "Corrade/TestSuite/Tester.h"
 #include "Corrade/TestSuite/Compare/Container.h"
-#include "Corrade/Utility/DebugStl.h" /** @todo remove when <sstream> is gone */
 
 namespace {
 
@@ -1109,12 +1107,12 @@ void StridedArrayViewTest::constructViewTooSmall() {
         int other;
     } a[10]{};
 
-    std::ostringstream out;
+    Containers::String out;
     Error redirectError{&out};
 
     StridedArrayView1Di{a, &a[0].value, 10, 9};
 
-    CORRADE_COMPARE(out.str(),
+    CORRADE_COMPARE(out,
         "Containers::StridedArrayView: data size 80 is not enough for {10} elements of stride {9}\n");
 }
 
@@ -1126,12 +1124,12 @@ void StridedArrayViewTest::constructViewTooSmallVoid() {
         int other;
     } a[10]{};
 
-    std::ostringstream out;
+    Containers::String out;
     Error redirectError{&out};
 
     VoidStridedArrayView1D{a, &a[0].value, 10, 9};
 
-    CORRADE_COMPARE(out.str(),
+    CORRADE_COMPARE(out,
         "Containers::StridedArrayView: data size 80 is not enough for {10} elements of stride {9}\n");
 }
 
@@ -1143,12 +1141,12 @@ void StridedArrayViewTest::constructViewTooSmallConstVoid() {
         int other;
     } a[10]{};
 
-    std::ostringstream out;
+    Containers::String out;
     Error redirectError{&out};
 
     ConstVoidStridedArrayView1D{a, &a[0].value, 10, 9};
 
-    CORRADE_COMPARE(out.str(),
+    CORRADE_COMPARE(out,
         "Containers::StridedArrayView: data size 80 is not enough for {10} elements of stride {9}\n");
 }
 
@@ -1757,35 +1755,35 @@ void StridedArrayViewTest::construct3DPackedSizeOnly() {
 }
 
 void StridedArrayViewTest::construct3DOneSizeZero() {
-    std::ostringstream out;
+    Containers::String out;
     Error redirectError{&out};
 
     /* Assertion shouldn't fire because size in second dimension is zero */
     int data[1];
     StridedArrayView3Di a{{data, 0}, {5, 0, 3}, {46, 54, 22}};
-    CORRADE_COMPARE(out.str(), "");
+    CORRADE_COMPARE(out, "");
     CORRADE_COMPARE(a.data(), &data[0]);
 }
 
 void StridedArrayViewTest::construct3DOneSizeZeroVoid() {
-    std::ostringstream out;
+    Containers::String out;
     Error redirectError{&out};
 
     /* Assertion shouldn't fire because size in second dimension is zero */
     int data[1];
     VoidStridedArrayView3D a{{data, 0}, {5, 0, 3}, {46, 54, 22}};
-    CORRADE_COMPARE(out.str(), "");
+    CORRADE_COMPARE(out, "");
     CORRADE_COMPARE(a.data(), &data[0]);
 }
 
 void StridedArrayViewTest::construct3DOneSizeZeroConstVoid() {
-    std::ostringstream out;
+    Containers::String out;
     Error redirectError{&out};
 
     /* Assertion shouldn't fire because size in second dimension is zero */
     int data[1];
     ConstVoidStridedArrayView3D a{{data, 0}, {5, 0, 3}, {46, 54, 22}};
-    CORRADE_COMPARE(out.str(), "");
+    CORRADE_COMPARE(out, "");
     CORRADE_COMPARE(a.data(), &data[0]);
 }
 
@@ -1812,12 +1810,12 @@ void StridedArrayViewTest::construct3DViewTooSmall() {
 
     Plane a[2];
 
-    std::ostringstream out;
+    Containers::String out;
     Error redirectError{&out};
 
     StridedArrayView3Di{a, &a[0].plane[0].row[0].value, {2, 5, 3}, {sizeof(Plane), sizeof(Plane::Row), sizeof(Plane::Row::Item)}};
 
-    CORRADE_COMPARE(out.str(),
+    CORRADE_COMPARE(out,
         "Containers::StridedArrayView: data size 96 is not enough for {2, 5, 3} elements of stride {48, 24, 8}\n");
 }
 
@@ -1826,12 +1824,12 @@ void StridedArrayViewTest::construct3DViewTooSmallVoid() {
 
     Plane a[2];
 
-    std::ostringstream out;
+    Containers::String out;
     Error redirectError{&out};
 
     VoidStridedArrayView3D{a, &a[0].plane[0].row[0].value, {2, 5, 3}, {sizeof(Plane), sizeof(Plane::Row), sizeof(Plane::Row::Item)}};
 
-    CORRADE_COMPARE(out.str(),
+    CORRADE_COMPARE(out,
         "Containers::StridedArrayView: data size 96 is not enough for {2, 5, 3} elements of stride {48, 24, 8}\n");
 }
 
@@ -1840,12 +1838,12 @@ void StridedArrayViewTest::construct3DViewTooSmallConstVoid() {
 
     const Plane a[2]{};
 
-    std::ostringstream out;
+    Containers::String out;
     Error redirectError{&out};
 
     ConstVoidStridedArrayView3D{a, &a[0].plane[0].row[0].value, {2, 5, 3}, {sizeof(Plane), sizeof(Plane::Row), sizeof(Plane::Row::Item)}};
 
-    CORRADE_COMPARE(out.str(),
+    CORRADE_COMPARE(out,
         "Containers::StridedArrayView: data size 96 is not enough for {2, 5, 3} elements of stride {48, 24, 8}\n");
 }
 
@@ -2341,13 +2339,13 @@ void StridedArrayViewTest::asContiguousNonContiguous() {
     StridedArrayView3Di d{a, {5, 1, 2}, {6*4, 2*2*4, 4}};
     StridedArrayView3Di e{a, {5, 3, 1}, {6*4, 2*4, 2*4}};
 
-    std::ostringstream out;
+    Containers::String out;
     Error redirectError{&out};
     c.asContiguous();
     c.asContiguous<0>();
     d.asContiguous<1>();
     e.asContiguous<2>();
-    CORRADE_COMPARE(out.str(),
+    CORRADE_COMPARE(out,
         "Containers::StridedArrayView::asContiguous(): the view is not contiguous\n"
         "Containers::StridedArrayView::asContiguous(): the view is not contiguous from dimension 0\n"
         "Containers::StridedArrayView::asContiguous(): the view is not contiguous from dimension 1\n"
@@ -2457,7 +2455,7 @@ void StridedArrayViewTest::accessNegativeStride() {
 void StridedArrayViewTest::accessInvalid() {
     CORRADE_SKIP_IF_NO_DEBUG_ASSERT();
 
-    std::stringstream out;
+    Containers::String out;
     Error redirectError{&out};
 
     StridedArrayView1Di a;
@@ -2468,7 +2466,7 @@ void StridedArrayViewTest::accessInvalid() {
     StridedArrayView1Di b = data;
     b[5];
 
-    CORRADE_COMPARE(out.str(),
+    CORRADE_COMPARE(out,
         "Containers::StridedArrayView::front(): view is empty\n"
         "Containers::StridedArrayView::back(): view is empty\n"
         "Containers::StridedArrayView::operator[](): index 5 out of range for 5 elements\n");
@@ -2596,7 +2594,7 @@ void StridedArrayViewTest::access3DZeroStride() {
 void StridedArrayViewTest::access3DInvalid() {
     CORRADE_SKIP_IF_NO_DEBUG_ASSERT();
 
-    std::stringstream out;
+    Containers::String out;
     Error redirectError{&out};
 
     StridedArrayView3Di a{{nullptr, 1}, {1, 0, 1}, {4, 0, 4}};
@@ -2610,7 +2608,7 @@ void StridedArrayViewTest::access3DInvalid() {
     b[{0, 2, 3}];
     b[{1, 1, 3}];
 
-    CORRADE_COMPARE(out.str(),
+    CORRADE_COMPARE(out,
         "Containers::StridedArrayView::back(): view is empty\n"
         "Containers::StridedArrayView::front(): view is empty\n"
         "Containers::StridedArrayView::operator[](): index 3 out of range for 3 elements\n"
@@ -2877,13 +2875,13 @@ void StridedArrayViewTest::sliceInvalid() {
     int data[5] = {1, 2, 3, 4, 5};
     StridedArrayView1Di a = data;
 
-    std::ostringstream out;
+    Containers::String out;
     Error redirectError{&out};
 
     a.slice(5, 6);
     a.slice(2, 1);
 
-    CORRADE_COMPARE(out.str(),
+    CORRADE_COMPARE(out,
         "Containers::StridedArrayView::slice(): slice [5:6] out of range for 5 elements\n"
         "Containers::StridedArrayView::slice(): slice [2:1] out of range for 5 elements\n");
 }
@@ -2943,13 +2941,13 @@ void StridedArrayViewTest::slice3DInvalid() {
 
     StridedArrayView3Di a = {data, &data[0].plane[0].row[0].value, {2, 2, 3}, {sizeof(Plane), sizeof(Plane::Row), sizeof(Plane::Row::Item)}};
 
-    std::ostringstream out;
+    Containers::String out;
     Error redirectError{&out};
 
     a.slice({1, 0, 1}, {2, 4, 3});
     a.slice({2, 0, 1}, {0, 4, 3});
 
-    CORRADE_COMPARE(out.str(),
+    CORRADE_COMPARE(out,
         "Containers::StridedArrayView::slice(): slice [{1, 0, 1}:{2, 4, 3}] out of range for {2, 2, 3} elements in dimension 1\n"
         "Containers::StridedArrayView::slice(): slice [{2, 0, 1}:{0, 4, 3}] out of range for {2, 2, 3} elements in dimension 0\n");
 }
@@ -3004,13 +3002,13 @@ void StridedArrayViewTest::slice3DFirstDimensionInvalid() {
     int data[5] = {1, 2, 3, 4, 5};
     StridedArrayView3Di a = {data, {5, 1, 1}};
 
-    std::ostringstream out;
+    Containers::String out;
     Error redirectError{&out};
 
     a.slice(5, 6);
     a.slice(2, 1);
 
-    CORRADE_COMPARE(out.str(),
+    CORRADE_COMPARE(out,
         "Containers::StridedArrayView::slice(): slice [5:6] out of range for 5 elements\n"
         "Containers::StridedArrayView::slice(): slice [2:1] out of range for 5 elements\n");
 }
@@ -3058,13 +3056,13 @@ void StridedArrayViewTest::sliceDimensionUpInvalid() {
     int data[5] = {1, 2, 3, 4, 5};
     StridedArrayView1Di a = data;
 
-    std::ostringstream out;
+    Containers::String out;
     Error redirectError{&out};
 
     a.slice<3>(5, 6);
     a.slice<3>(1, 0);
 
-    CORRADE_COMPARE(out.str(),
+    CORRADE_COMPARE(out,
         "Containers::StridedArrayView::slice(): slice [{5}:{6}] out of range for {5} elements in dimension 0\n"
         "Containers::StridedArrayView::slice(): slice [{1}:{0}] out of range for {5} elements in dimension 0\n");
 }
@@ -3122,13 +3120,13 @@ void StridedArrayViewTest::sliceDimensionDownInvalid() {
 
     StridedArrayView3Di a = {data, &data[0].plane[0].row[0].value, {2, 2, 3}, {sizeof(Plane), sizeof(Plane::Row), sizeof(Plane::Row::Item)}};
 
-    std::ostringstream out;
+    Containers::String out;
     Error redirectError{&out};
 
     a.slice<2>({0, 1, 4}, {1, 2, 5});
     a.slice<1>({0, 1, 0}, {1, 0, 1});
 
-    CORRADE_COMPARE(out.str(),
+    CORRADE_COMPARE(out,
         "Containers::StridedArrayView::slice(): slice [{0, 1, 4}:{1, 2, 5}] out of range for {2, 2, 3} elements in dimension 2\n"
         "Containers::StridedArrayView::slice(): slice [{0, 1, 0}:{1, 0, 1}] out of range for {2, 2, 3} elements in dimension 1\n");
 }
@@ -3629,11 +3627,11 @@ void StridedArrayViewTest::sliceMemberFunctionPointerReturningOffsetOutOfRange()
     Containers::StridedArrayView1D<Data> view = data;
     Containers::StridedArrayView1D<const Data> cview = data;
 
-    std::ostringstream out;
+    Containers::String out;
     Error redirectError{&out};
     view.slice(&Data::first);
     cview.slice(&Data::first);
-    CORRADE_COMPARE(out.str(),
+    CORRADE_COMPARE(out,
         "Containers::StridedArrayView::slice(): member function slice returned offset 4 for a 4-byte type\n"
         "Containers::StridedArrayView::slice(): member function slice returned offset -4 for a 4-byte type\n");
 }
@@ -3675,10 +3673,10 @@ void StridedArrayViewTest::sliceBitIndexTooLarge() {
 
     Containers::StridedArrayView3D<float> view;
 
-    std::ostringstream out;
+    Containers::String out;
     Error redirectError{&out};
     view.sliceBit(32);
-    CORRADE_COMPARE(out.str(), "Containers::StridedArrayView::sliceBit(): index 32 out of range for a 32-bit type\n");
+    CORRADE_COMPARE(out, "Containers::StridedArrayView::sliceBit(): index 32 out of range for a 32-bit type\n");
 }
 
 void StridedArrayViewTest::sliceBitSizeTooLarge() {
@@ -3686,13 +3684,13 @@ void StridedArrayViewTest::sliceBitSizeTooLarge() {
 
     Containers::StridedArrayView3D<bool> view{nullptr, {1, std::size_t{1} << (sizeof(std::size_t)*8 - 3), 1}, {0, 0, 0}};
 
-    std::ostringstream out;
+    Containers::String out;
     Error redirectError{&out};
     view.sliceBit(0);
     #ifndef CORRADE_TARGET_32BIT
-    CORRADE_COMPARE(out.str(), "Containers::StridedArrayView::sliceBit(): size expected to be smaller than 2^61 bits, got {1, 2305843009213693952, 1}\n");
+    CORRADE_COMPARE(out, "Containers::StridedArrayView::sliceBit(): size expected to be smaller than 2^61 bits, got {1, 2305843009213693952, 1}\n");
     #else
-    CORRADE_COMPARE(out.str(), "Containers::StridedArrayView::sliceBit(): size expected to be smaller than 2^29 bits, got {1, 536870912, 1}\n");
+    CORRADE_COMPARE(out, "Containers::StridedArrayView::sliceBit(): size expected to be smaller than 2^29 bits, got {1, 536870912, 1}\n");
     #endif
 }
 
@@ -3762,11 +3760,11 @@ void StridedArrayViewTest::everyNegativeZeroSize() {
 void StridedArrayViewTest::everyInvalid() {
     CORRADE_SKIP_IF_NO_ASSERT();
 
-    std::ostringstream out;
+    Containers::String out;
     Error redirectError{&out};
 
     StridedArrayView1Di{}.every(0);
-    CORRADE_COMPARE(out.str(), "Containers::StridedArrayView::every(): expected a non-zero step, got {0}\n");
+    CORRADE_COMPARE(out, "Containers::StridedArrayView::every(): expected a non-zero step, got {0}\n");
 }
 
 void StridedArrayViewTest::every2D() {
@@ -3820,11 +3818,11 @@ void StridedArrayViewTest::every2DNegativeZeroSize() {
 void StridedArrayViewTest::every2DInvalid() {
     CORRADE_SKIP_IF_NO_ASSERT();
 
-    std::ostringstream out;
+    Containers::String out;
     Error redirectError{&out};
 
     StridedArrayView2Di{}.every({3, 0});
-    CORRADE_COMPARE(out.str(), "Containers::StridedArrayView::every(): expected a non-zero step, got {3, 0}\n");
+    CORRADE_COMPARE(out, "Containers::StridedArrayView::every(): expected a non-zero step, got {3, 0}\n");
 }
 
 void StridedArrayViewTest::every2DFirstDimension() {
@@ -4012,11 +4010,11 @@ void StridedArrayViewTest::broadcastedInvalid() {
 
     StridedArrayView3Di a{data, &data[0].value, {2, 1, 4}, {32, 32, 8}};
 
-    std::ostringstream out;
+    Containers::String out;
     Error redirectError{&out};
 
     a.broadcasted<2>(16);
-    CORRADE_COMPARE(out.str(),
+    CORRADE_COMPARE(out,
         "Containers::StridedArrayView::broadcasted(): can't broadcast dimension 2 with 4 elements\n");
 }
 
@@ -4179,7 +4177,7 @@ void StridedArrayViewTest::expandedCollapsedInvalid() {
     b1.collapsed<1, 2>();
     b1.flipped<1>().flipped<2>().collapsed<1, 2>();
 
-    std::ostringstream out;
+    Containers::String out;
     Error redirectError{&out};
     a.expanded<1>(Size1D{14});
     a.expanded<1>(Size2D{2, 6});
@@ -4188,7 +4186,7 @@ void StridedArrayViewTest::expandedCollapsedInvalid() {
     b1.flipped<0>().flipped<1>().flipped<2>().collapsed<0, 3>();
     b2.collapsed<0, 3>();
     b2.flipped<0>().flipped<1>().flipped<2>().collapsed<0, 3>();
-    CORRADE_COMPARE(out.str(),
+    CORRADE_COMPARE(out,
         "Containers::StridedArrayView::expanded(): product of {14} doesn't match 13 elements in dimension 1\n"
         "Containers::StridedArrayView::expanded(): product of {2, 6} doesn't match 13 elements in dimension 1\n"
         "Containers::StridedArrayView::expanded(): product of {2, 3, 2} doesn't match 13 elements in dimension 1\n"
@@ -4361,12 +4359,12 @@ void StridedArrayViewTest::castInvalid() {
     #endif
 
     {
-        std::ostringstream out;
+        Containers::String out;
         Error redirectError{&out};
         Containers::arrayCast<int>(a);
         Containers::arrayCast<int>(av);
         Containers::arrayCast<const int>(cav);
-        CORRADE_COMPARE(out.str(),
+        CORRADE_COMPARE(out,
             "Containers::arrayCast(): can't fit a 4-byte type into a stride of 2\n"
             "Containers::arrayCast(): can't fit a 4-byte type into a stride of 2\n"
             "Containers::arrayCast(): can't fit a 4-byte type into a stride of 2\n");
@@ -4538,7 +4536,7 @@ void StridedArrayViewTest::castInflateFlattenInvalid() {
 
     StridedArrayView3D<unsigned short> d{image, &image[0].r, {2, 1, 3}, {18, 2, 6}};
 
-    std::ostringstream out;
+    Containers::String out;
     Error redirectError{&out};
     arrayCast<2, unsigned int>(a);
     arrayCast<3, unsigned int>(a);
@@ -4548,7 +4546,7 @@ void StridedArrayViewTest::castInflateFlattenInvalid() {
     arrayCast<3, Rgb>(c);
     arrayCast<2, Rgb>(d);
     arrayCast<3, Rgb>(d);
-    CORRADE_COMPARE(out.str(),
+    CORRADE_COMPARE(out,
         "Containers::arrayCast(): last dimension needs to have byte size equal to new type size in order to be flattened, expected 4 but got 6\n"
         "Containers::arrayCast(): last dimension needs to have byte size divisible by new type size in order to be flattened, but for a 4-byte type got 6\n"
         "Containers::arrayCast(): last dimension needs to be contiguous in order to be flattened, expected stride 2 but got 6\n"
@@ -4561,10 +4559,10 @@ void StridedArrayViewTest::castInflateFlattenInvalid() {
     /* Inflating w/ keeping dimension count for zero and negative strides.
        Negative/zero strides *could* probably work but my brainz are too low
        right now to figure that out */
-    out.str({});
+    out = {};
     arrayCast<2, unsigned short>(StridedArrayView2D<Rgb>{image, {2, 3}, {18, 6}}.flipped<1>());
     arrayCast<2, unsigned short>(StridedArrayView2D<Rgb>{image, {2, 3}, {18, 0}});
-    CORRADE_COMPARE(out.str(),
+    CORRADE_COMPARE(out,
         "Containers::arrayCast(): last dimension needs to be contiguous in order to be flattened, expected stride 6 but got -6\n"
         "Containers::arrayCast(): last dimension needs to be contiguous in order to be flattened, expected stride 6 but got 0\n");
 }
@@ -4652,11 +4650,11 @@ void StridedArrayViewTest::castInflateVoidInvalid() {
     StridedArrayView2D<void> a{image, &image[0], {2, 3}, {18, 6}};
     StridedArrayView2D<void> b{image, &image[0], {1, 3}, {2, 6}};
 
-    std::ostringstream out;
+    Containers::String out;
     Error redirectError{&out};
     arrayCast<3, unsigned int>(a, 3);
     arrayCast<3, unsigned int>(b, 3);
-    CORRADE_COMPARE(out.str(),
+    CORRADE_COMPARE(out,
         "Containers::arrayCast(): can't fit 3 4-byte items into a stride of 6\n"
         "Containers::arrayCast(): can't fit a 4-byte type into a stride of 2\n");
 }

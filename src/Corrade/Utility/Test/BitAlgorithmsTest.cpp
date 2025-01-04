@@ -26,7 +26,6 @@
 
 #include <algorithm>
 #include <random>
-#include <sstream>
 
 #include "Corrade/Containers/Array.h"
 #include "Corrade/Containers/BitArray.h"
@@ -34,7 +33,6 @@
 #include "Corrade/TestSuite/Tester.h"
 #include "Corrade/TestSuite/Compare/Container.h"
 #include "Corrade/Utility/BitAlgorithms.h"
-#include "Corrade/Utility/DebugStl.h"
 #include "Corrade/Utility/Format.h"
 
 namespace Corrade { namespace Utility { namespace Test { namespace {
@@ -157,10 +155,10 @@ void BitAlgorithmsTest::copyMaskedDifferentSize() {
     const char src[15]{};
     char dst[3]{};
 
-    std::ostringstream out;
+    Containers::String out;
     Error redirectError{&out};
     Utility::copyMasked(src, Containers::BitArray{ValueInit, 14}, dst);
-    CORRADE_COMPARE(out.str(), "Utility::copyMasked(): expected source mask size to be 15 but got 14\n");
+    CORRADE_COMPARE(out, "Utility::copyMasked(): expected source mask size to be 15 but got 14\n");
 }
 
 void BitAlgorithmsTest::copyMaskedDifferentBitsSet() {
@@ -172,10 +170,10 @@ void BitAlgorithmsTest::copyMaskedDifferentBitsSet() {
     srcMask.set(7);
     srcMask.set(9);
 
-    std::ostringstream out;
+    Containers::String out;
     Error redirectError{&out};
     Utility::copyMasked(src, srcMask, dst);
-    CORRADE_COMPARE(out.str(), "Utility::copyMasked(): expected 2 destination items but got 3\n");
+    CORRADE_COMPARE(out, "Utility::copyMasked(): expected 2 destination items but got 3\n");
 }
 
 void BitAlgorithmsTest::copyMaskedDifferentTypeSize() {
@@ -188,12 +186,12 @@ void BitAlgorithmsTest::copyMaskedDifferentTypeSize() {
     srcMask.set(9);
     srcMask.set(11);
 
-    std::ostringstream out;
+    Containers::String out;
     Error redirectError{&out};
     Utility::copyMasked(
         Containers::arrayCast<2, const char>(Containers::stridedArrayView(src)),
         srcMask, Containers::arrayCast<2, char>(Containers::stridedArrayView(dst)));
-    CORRADE_COMPARE(out.str(), "Utility::copyMasked(): expected second destination dimension size to be 2 but got 8\n");
+    CORRADE_COMPARE(out, "Utility::copyMasked(): expected second destination dimension size to be 2 but got 8\n");
 }
 
 void BitAlgorithmsTest::copyMaskedNotContiguous() {
@@ -203,7 +201,7 @@ void BitAlgorithmsTest::copyMaskedNotContiguous() {
     std::uint8_t b[3]{};
     Containers::BitArray srcMask{DirectInit, 3, true};
 
-    std::ostringstream out;
+    Containers::String out;
     Error redirectError{&out};
     Utility::copyMasked(
         Containers::arrayCast<2, char>(Containers::stridedArrayView(a)).every({1, 2}),
@@ -211,7 +209,7 @@ void BitAlgorithmsTest::copyMaskedNotContiguous() {
     Utility::copyMasked(
         Containers::arrayCast<2, char>(Containers::stridedArrayView(b)),
         srcMask, Containers::arrayCast<2, char>(Containers::stridedArrayView(a)).every({1, 2}));
-    CORRADE_COMPARE(out.str(),
+    CORRADE_COMPARE(out,
         "Utility::copyMasked(): second source view dimension is not contiguous\n"
         "Utility::copyMasked(): second destination view dimension is not contiguous\n");
 }

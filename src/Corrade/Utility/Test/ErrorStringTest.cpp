@@ -25,10 +25,9 @@
 */
 
 #include <cerrno>
-#include <sstream>
 
+#include "Corrade/Containers/String.h"
 #include "Corrade/TestSuite/Tester.h"
-#include "Corrade/Utility/DebugStl.h"
 #include "Corrade/Utility/Implementation/ErrorString.h"
 
 #ifdef CORRADE_TARGET_WINDOWS
@@ -58,32 +57,40 @@ ErrorStringTest::ErrorStringTest() {
 }
 
 void ErrorStringTest::errnoString() {
-    std::stringstream out;
-    Debug debug{&out, Debug::Flag::NoNewlineAtTheEnd};
-    Implementation::printErrnoErrorString(debug, EACCES);
+    /* The string gets fully written only on destruction or with a newline at
+       the end */
+    Containers::String out;
+    {
+        Debug debug{&out, Debug::Flag::NoNewlineAtTheEnd};
+        Implementation::printErrnoErrorString(debug, EACCES);
+    }
 
     /** @todo is this locale-dependent or not? */
     #ifndef CORRADE_TARGET_EMSCRIPTEN
-    CORRADE_COMPARE(out.str(), "error 13 (Permission denied)");
+    CORRADE_COMPARE(out, "error 13 (Permission denied)");
     #else
     /* Emscripten uses a different errno */
-    CORRADE_COMPARE(out.str(), "error 2 (Permission denied)");
+    CORRADE_COMPARE(out, "error 2 (Permission denied)");
     #endif
 }
 
 #ifdef CORRADE_TARGET_WINDOWS
 void ErrorStringTest::windowsString() {
-    std::stringstream out;
-    Debug debug{&out, Debug::Flag::NoNewlineAtTheEnd};
-    Implementation::printWindowsErrorString(debug, ERROR_FILE_NOT_FOUND);
-    CORRADE_INFO("ERROR_FILE_NOT_FOUND error string is:" << out.str());
+    /* The string gets fully written only on destruction or with a newline at
+       the end */
+    Containers::String out;
+    {
+        Debug debug{&out, Debug::Flag::NoNewlineAtTheEnd};
+        Implementation::printWindowsErrorString(debug, ERROR_FILE_NOT_FOUND);
+    }
+    CORRADE_INFO("ERROR_FILE_NOT_FOUND error string is:" << out);
 
     /* FFS DO YOU HAVE TO YELL AT ME??? */
     const LANGID usEnglish = MAKELANGID(LANG_ENGLISH, SUBLANG_ENGLISH_US);
     if(GetUserDefaultLangID() != usEnglish)
         CORRADE_SKIP("User language is not US English, can't test");
 
-    CORRADE_COMPARE(out.str(), "error 2 (The system cannot find the file specified.)");
+    CORRADE_COMPARE(out, "error 2 (The system cannot find the file specified.)");
 }
 #endif
 

@@ -24,14 +24,11 @@
     DEALINGS IN THE SOFTWARE.
 */
 
-#include <sstream>
-
 #include "Corrade/Containers/String.h"
 #include "Corrade/TestSuite/Tester.h"
 #include "Corrade/TestSuite/Compare/FileToString.h"
 #include "Corrade/TestSuite/Compare/StringToFile.h"
-#include "Corrade/Utility/DebugStl.h" /** @todo remove when <sstream> is gone */
-#include "Corrade/Utility/FormatStl.h"
+#include "Corrade/Utility/Format.h"
 #include "Corrade/Utility/Path.h"
 #ifdef CORRADE_TARGET_EMSCRIPTEN
 #include "Corrade/Utility/Test/nodeJsVersionHelpers.h"
@@ -118,7 +115,7 @@ void StringToFileTest::utf8Filename() {
 }
 
 void StringToFileTest::notFound() {
-    std::stringstream out;
+    Containers::String out;
 
     Comparator<Compare::StringToFile> compare;
     ComparisonStatusFlags flags = compare("Hello World!", "nonexistent.txt");
@@ -131,7 +128,7 @@ void StringToFileTest::notFound() {
         compare.printMessage(flags, redirectOutput, "a", "file");
     }
 
-    CORRADE_COMPARE(out.str(), "File file (nonexistent.txt) cannot be read.\n");
+    CORRADE_COMPARE(out, "File file (nonexistent.txt) cannot be read.\n");
 
     /* Create the output dir if it doesn't exist, but avoid stale files making
        false positives */
@@ -141,19 +138,19 @@ void StringToFileTest::notFound() {
         CORRADE_VERIFY(Utility::Path::remove(filename));
 
     {
-        out.str({});
+        out = {};
         Debug redirectOutput{&out};
         compare.saveDiagnostic(flags, redirectOutput, FILETEST_SAVE_DIR);
     }
 
     /* Extreme dogfooding, eheh. We expect the *actual* contents, but under the
        *expected* filename */
-    CORRADE_COMPARE(out.str(), Utility::formatString("-> {}\n", filename));
+    CORRADE_COMPARE(out, Utility::format("-> {}\n", filename));
     CORRADE_COMPARE_AS(filename, "Hello World!", FileToString);
 }
 
 void StringToFileTest::differentContents() {
-    std::stringstream out;
+    Containers::String out;
 
     Comparator<Compare::StringToFile> compare;
     /* The filename is referenced as a string view as the assumption is that
@@ -168,7 +165,7 @@ void StringToFileTest::differentContents() {
         compare.printMessage(flags, redirectOutput, "a", "b");
     }
 
-    CORRADE_COMPARE(out.str(), "Files a and b have different contents. Actual character w but W expected on position 6.\n");
+    CORRADE_COMPARE(out, "Files a and b have different contents. Actual character w but W expected on position 6.\n");
 
     /* Create the output dir if it doesn't exist, but avoid stale files making
        false positives */
@@ -178,19 +175,19 @@ void StringToFileTest::differentContents() {
         CORRADE_VERIFY(Utility::Path::remove(filenameOut));
 
     {
-        out.str({});
+        out = {};
         Debug redirectOutput{&out};
         compare.saveDiagnostic(flags, redirectOutput, FILETEST_SAVE_DIR);
     }
 
     /* Extreme dogfooding, eheh. We expect the *actual* contents, but under the
        *expected* filename */
-    CORRADE_COMPARE(out.str(), Utility::formatString("-> {}\n", filenameOut));
+    CORRADE_COMPARE(out, Utility::format("-> {}\n", filenameOut));
     CORRADE_COMPARE_AS(filenameOut, "Hello world?", FileToString);
 }
 
 void StringToFileTest::actualSmaller() {
-    std::stringstream out;
+    Containers::String out;
 
     {
         Debug redirectOutput{&out};
@@ -207,11 +204,11 @@ void StringToFileTest::actualSmaller() {
            already */
     }
 
-    CORRADE_COMPARE(out.str(), "Files a and b have different size, actual 7 but 12 expected. Expected has character o on position 7.\n");
+    CORRADE_COMPARE(out, "Files a and b have different size, actual 7 but 12 expected. Expected has character o on position 7.\n");
 }
 
 void StringToFileTest::expectedSmaller() {
-    std::stringstream out;
+    Containers::String out;
 
     {
         Debug redirectOutput{&out};
@@ -228,7 +225,7 @@ void StringToFileTest::expectedSmaller() {
            already */
     }
 
-    CORRADE_COMPARE(out.str(), "Files a and b have different size, actual 12 but 7 expected. Actual has character o on position 7.\n");
+    CORRADE_COMPARE(out, "Files a and b have different size, actual 12 but 7 expected. Actual has character o on position 7.\n");
 }
 
 }}}}}

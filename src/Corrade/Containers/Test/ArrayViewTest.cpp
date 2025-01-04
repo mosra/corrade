@@ -24,11 +24,9 @@
     DEALINGS IN THE SOFTWARE.
 */
 
-#include <sstream>
-
 #include "Corrade/Containers/ArrayView.h"
+#include "Corrade/Containers/String.h"
 #include "Corrade/TestSuite/Tester.h"
-#include "Corrade/Utility/DebugStl.h" /** @todo remove when <sstream> is gone */
 
 namespace {
 
@@ -1000,13 +998,13 @@ void ArrayViewTest::accessConstVoid() {
 void ArrayViewTest::accessInvalid() {
     CORRADE_SKIP_IF_NO_DEBUG_ASSERT();
 
-    std::stringstream out;
+    Containers::String out;
     Error redirectError{&out};
 
     ArrayView a;
     a.front();
     a.back();
-    CORRADE_COMPARE(out.str(),
+    CORRADE_COMPARE(out,
         "Containers::ArrayView::front(): view is empty\n"
         "Containers::ArrayView::back(): view is empty\n");
 }
@@ -1034,7 +1032,7 @@ void ArrayViewTest::sliceInvalid() {
 
     CORRADE_COMPARE(a.size(), 5);
 
-    std::ostringstream out;
+    Containers::String out;
     Error redirectError{&out};
 
     /* Testing both pointer and size versions */
@@ -1050,7 +1048,7 @@ void ArrayViewTest::sliceInvalid() {
     a.slice<5>(1);
     a.slice<1, 6>();
 
-    CORRADE_COMPARE(out.str(),
+    CORRADE_COMPARE(out,
         "Containers::ArrayView::slice(): slice [-1:0] out of range for 5 elements\n"
         "Containers::ArrayView::slice(): slice [5:6] out of range for 5 elements\n"
         "Containers::ArrayView::slice(): slice [5:6] out of range for 5 elements\n"
@@ -1395,12 +1393,12 @@ void ArrayViewTest::castInvalid() {
     CORRADE_COMPARE(cbv.size(), 5);
 
     {
-        std::ostringstream out;
+        Containers::String out;
         Error redirectError{&out};
         Containers::arrayCast<std::uint32_t>(a);
         Containers::arrayCast<std::uint32_t>(av);
         Containers::arrayCast<const std::uint32_t>(cav);
-        CORRADE_COMPARE(out.str(),
+        CORRADE_COMPARE(out,
             "Containers::arrayCast(): can't reinterpret 10 1-byte items into a 4-byte type\n"
             "Containers::arrayCast(): can't reinterpret 10 bytes into a 4-byte type\n"
             "Containers::arrayCast(): can't reinterpret 10 bytes into a 4-byte type\n");

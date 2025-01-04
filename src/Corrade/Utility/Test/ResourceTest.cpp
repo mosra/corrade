@@ -24,20 +24,18 @@
     DEALINGS IN THE SOFTWARE.
 */
 
-#include <map>
-#include <sstream>
+#include <map> /* for a lookup bechmark against std::map<std::string> */
+#include <string> /* for a lookup bechmark against std::map<std::string> */
 
 #include "Corrade/Containers/Optional.h"
 #include "Corrade/Containers/String.h"
 #include "Corrade/Containers/StringIterable.h"
-#include "Corrade/Containers/StringStl.h" /** @todo remove when <sstream> is gone */
 #include "Corrade/TestSuite/Tester.h"
 #include "Corrade/TestSuite/Compare/Container.h"
 #include "Corrade/TestSuite/Compare/Numeric.h"
 #include "Corrade/TestSuite/Compare/String.h"
 #include "Corrade/TestSuite/Compare/StringToFile.h"
-#include "Corrade/Utility/DebugStl.h" /** @todo remove when <sstream> is gone */
-#include "Corrade/Utility/FormatStl.h"
+#include "Corrade/Utility/Format.h"
 #include "Corrade/Utility/Path.h"
 #include "Corrade/Utility/Resource.h"
 #include "Corrade/Utility/Implementation/Resource.h"
@@ -294,19 +292,19 @@ void ResourceTest::hasGroup() {
 
 void ResourceTest::emptyGroup() {
     /* Should not print any error messages about anything */
-    std::ostringstream out;
+    Containers::String out;
     Error redirectError{&out};
     Resource rs{"nothing"};
-    CORRADE_COMPARE(out.str(), "");
+    CORRADE_COMPARE(out, "");
 }
 
 void ResourceTest::nonexistentGroup() {
     CORRADE_SKIP_IF_NO_ASSERT();
 
-    std::ostringstream out;
+    Containers::String out;
     Error redirectError{&out};
     Resource rs{"nonexistentGroup"};
-    CORRADE_COMPARE(out.str(), "Utility::Resource: group 'nonexistentGroup' was not found\n");
+    CORRADE_COMPARE(out, "Utility::Resource: group 'nonexistentGroup' was not found\n");
 }
 
 void ResourceTest::list() {
@@ -384,14 +382,14 @@ void ResourceTest::getEmptyFileString() {
 void ResourceTest::getNonexistentFile() {
     CORRADE_SKIP_IF_NO_ASSERT();
 
-    std::ostringstream out;
+    Containers::String out;
     Error redirectError{&out};
     Resource rs{"test"};
     rs.getString("nonexistentFile");
     rs.getRaw("nonexistentFile");
     /* The message is still get() as that's what eventually will getRaw() be
        renamed to; and getString() uses the same underlying code */
-    CORRADE_COMPARE(out.str(),
+    CORRADE_COMPARE(out,
         "Utility::Resource::get(): file 'nonexistentFile' was not found in group 'test'\n"
         "Utility::Resource::get(): file 'nonexistentFile' was not found in group 'test'\n");
 }
@@ -605,10 +603,10 @@ void ResourceTest::alignmentLargerThanDataSize() {
 void ResourceTest::overrideGroup() {
     Resource::overrideGroup("test", Path::join(RESOURCE_TEST_DIR, "resources-overridden.conf"));
 
-    std::ostringstream out;
+    Containers::String out;
     Debug redirectDebug{&out};
     Resource rs{"test"};
-    CORRADE_COMPARE(out.str(), formatString("Utility::Resource: group 'test' overridden with '{}'\n", Path::join(RESOURCE_TEST_DIR, "resources-overridden.conf")));
+    CORRADE_COMPARE(out, format("Utility::Resource: group 'test' overridden with '{}'\n", Path::join(RESOURCE_TEST_DIR, "resources-overridden.conf")));
 
     /* Overriden files are not marked as global but are null-terminated */
     Containers::StringView predisposition = rs.getString("predisposition.bin");
@@ -623,19 +621,19 @@ void ResourceTest::overrideGroup() {
 void ResourceTest::overrideGroupNonexistent() {
     CORRADE_SKIP_IF_NO_ASSERT();
 
-    std::ostringstream out;
+    Containers::String out;
     Error redirectError{&out};
     Resource::overrideGroup("nonexistentGroup", {});
-    CORRADE_COMPARE(out.str(), "Utility::Resource::overrideGroup(): group 'nonexistentGroup' was not found\n");
+    CORRADE_COMPARE(out, "Utility::Resource::overrideGroup(): group 'nonexistentGroup' was not found\n");
 }
 
 void ResourceTest::overrideGroupDifferent() {
     Resource::overrideGroup("test", Path::join(RESOURCE_TEST_DIR, "resources-overridden-different.conf"));
 
-    std::ostringstream out;
+    Containers::String out;
     Warning redirectWarning{&out};
     Resource rs{"test"};
-    CORRADE_COMPARE(out.str(), "Utility::Resource: overridden with different group, found 'wat' but expected 'test'\n");
+    CORRADE_COMPARE(out, "Utility::Resource: overridden with different group, found 'wat' but expected 'test'\n");
 }
 
 void ResourceTest::overrideGroupFileNonexistent() {
@@ -647,12 +645,12 @@ void ResourceTest::overrideGroupFileNonexistent() {
        thus it fails */
     CORRADE_VERIFY(!rs.hasFile("consequence2.bin"));
 
-    std::ostringstream out;
+    Containers::String out;
     Error redirectError{&out};
     rs.getString("consequence2.txt");
     /* The file is in the overriden group, but not in the compiled-in data and
        thus it fails */
-    CORRADE_COMPARE(out.str(), "Utility::Resource::get(): file 'consequence2.txt' was not found in group 'test'\n");
+    CORRADE_COMPARE(out, "Utility::Resource::get(): file 'consequence2.txt' was not found in group 'test'\n");
 }
 
 void ResourceTest::overrideGroupFileFallback() {
@@ -661,10 +659,10 @@ void ResourceTest::overrideGroupFileFallback() {
     Resource::overrideGroup("test", Path::join(RESOURCE_TEST_DIR, "resources-overridden-none.conf"));
     Resource rs{"test"};
 
-    std::ostringstream out;
+    Containers::String out;
     Warning redirectWarning{&out};
     Containers::StringView consequence = rs.getString("consequence.bin");
-    CORRADE_COMPARE(out.str(), "Utility::Resource::get(): file 'consequence.bin' was not found in overridden group, fallback to compiled-in resources\n");
+    CORRADE_COMPARE(out, "Utility::Resource::get(): file 'consequence.bin' was not found in overridden group, fallback to compiled-in resources\n");
 
     /* Original compiled-in file, global flag (but implicitly not
        null-terminated) */
@@ -678,12 +676,12 @@ void ResourceTest::overrideGroupFileFallbackReadError() {
     Resource::overrideGroup("test", Path::join(RESOURCE_TEST_DIR, "resources-overridden-nonexistent-file.conf"));
     Resource rs{"test"};
 
-    std::ostringstream out;
+    Containers::String out;
     Error redirectError{&out};
     Warning redirectWarning(&out);
     Containers::StringView consequence = rs.getString("consequence.bin");
     /* There's an error message from Path::read() before */
-    CORRADE_COMPARE_AS(out.str(),
+    CORRADE_COMPARE_AS(out,
         "\nUtility::Resource::get(): cannot open file path/to/nonexistent.bin from overridden group\n"
         "Utility::Resource::get(): file 'consequence.bin' was not found in overridden group, fallback to compiled-in resources\n",
         TestSuite::Compare::StringHasSuffix);

@@ -34,7 +34,7 @@
 #include "Corrade/TestSuite/Tester.h"
 #include "Corrade/TestSuite/Compare/Container.h"
 #include "Corrade/TestSuite/Compare/Numeric.h"
-#include "Corrade/Utility/DebugStl.h"
+#include "Corrade/Utility/DebugStl.h" /* for std::string */
 
 namespace Corrade { namespace Containers { namespace Test { namespace {
 

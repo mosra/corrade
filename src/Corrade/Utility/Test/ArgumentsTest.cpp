@@ -25,12 +25,11 @@
 */
 
 #include <algorithm> /* std::find_if() */
-#include <sstream>
 #include <vector>
 
 #include "Corrade/TestSuite/Tester.h"
 #include "Corrade/Utility/Arguments.h"
-#include "Corrade/Utility/DebugStl.h"
+#include "Corrade/Utility/DebugStl.h" /** @todo remove when Arguments are string-free */
 
 namespace Corrade { namespace Utility {
 
@@ -557,10 +556,10 @@ void ArgumentsTest::setHelpNotFound() {
 
     Arguments args;
 
-    std::ostringstream out;
+    Containers::String out;
     Error redirectError{&out};
     args.setHelp("opt", "this is an option");
-    CORRADE_COMPARE(out.str(), "Utility::Arguments::setHelp(): key opt not found\n");
+    CORRADE_COMPARE(out, "Utility::Arguments::setHelp(): key opt not found\n");
 }
 
 void ArgumentsTest::setHelpKeyForBoolean() {
@@ -568,10 +567,10 @@ void ArgumentsTest::setHelpKeyForBoolean() {
 
     Arguments args;
 
-    std::ostringstream out;
+    Containers::String out;
     Error redirectError{&out};
     args.setHelp("help", "this very thing", "HALP");
-    CORRADE_COMPARE(out.str(), "Utility::Arguments::setHelp(): help key can't be set for boolean option help\n");
+    CORRADE_COMPARE(out, "Utility::Arguments::setHelp(): help key can't be set for boolean option help\n");
 }
 
 void ArgumentsTest::duplicateKey() {
@@ -580,7 +579,7 @@ void ArgumentsTest::duplicateKey() {
     Arguments args;
     args.addArgument("foo");
 
-    std::ostringstream out;
+    Containers::String out;
     Error redirectError{&out};
     args.addArgument("foo")
         .addArrayArgument("foo")
@@ -589,7 +588,7 @@ void ArgumentsTest::duplicateKey() {
         .addArrayOption("foo")
         .addBooleanOption("foo")
         .addFinalOptionalArgument("foo");
-    CORRADE_COMPARE(out.str(),
+    CORRADE_COMPARE(out,
         "Utility::Arguments::addArgument(): the key foo is already used\n"
         "Utility::Arguments::addArrayArgument(): the key foo is already used\n"
         "Utility::Arguments::addNamedArgument(): the key foo or its short variant is already used\n"
@@ -605,13 +604,13 @@ void ArgumentsTest::duplicateShortKey() {
     Arguments args;
     args.addNamedArgument('b', "bar");
 
-    std::ostringstream out;
+    Containers::String out;
     Error redirectError{&out};
     args.addNamedArgument('b', "foo")
         .addOption('b', "fig")
         .addArrayOption('b', "plop")
         .addBooleanOption('b', "bur");
-    CORRADE_COMPARE(out.str(),
+    CORRADE_COMPARE(out,
         "Utility::Arguments::addNamedArgument(): the key foo or its short variant is already used\n"
         "Utility::Arguments::addOption(): the key fig or its short variant is already used\n"
         "Utility::Arguments::addArrayOption(): the key plop or its short variant is already used\n"
@@ -623,7 +622,7 @@ void ArgumentsTest::emptyKey() {
 
     Arguments args;
 
-    std::ostringstream out;
+    Containers::String out;
     Error redirectError{&out};
     args.addArgument("")
         .addArrayArgument("")
@@ -632,7 +631,7 @@ void ArgumentsTest::emptyKey() {
         .addArrayOption("")
         .addBooleanOption("")
         .addFinalOptionalArgument("");
-    CORRADE_COMPARE(out.str(),
+    CORRADE_COMPARE(out,
         "Utility::Arguments::addArgument(): key can't be empty\n"
         "Utility::Arguments::addArrayArgument(): key can't be empty\n"
         "Utility::Arguments::addNamedArgument(): invalid key  or its short variant\n"
@@ -651,14 +650,14 @@ void ArgumentsTest::disallowedCharacter() {
     args.addArgument("well, actually")
         .addFinalOptionalArgument("i'm saying");
 
-    std::ostringstream out;
+    Containers::String out;
     Error redirectError{&out};
     args
         .addNamedArgument("a mistake")
         .addOption("it is")
         .addArrayOption("tru ly")
         .addBooleanOption("really!");
-    CORRADE_COMPARE(out.str(),
+    CORRADE_COMPARE(out,
         "Utility::Arguments::addNamedArgument(): invalid key a mistake or its short variant\n"
         "Utility::Arguments::addOption(): invalid key it is or its short variant\n"
         "Utility::Arguments::addArrayOption(): invalid key tru ly or its short variant\n"
@@ -668,7 +667,7 @@ void ArgumentsTest::disallowedCharacter() {
 void ArgumentsTest::disallowedCharacterShort() {
     CORRADE_SKIP_IF_NO_ASSERT();
 
-    std::ostringstream out;
+    Containers::String out;
     Error redirectError{&out};
     Arguments args;
     args
@@ -676,7 +675,7 @@ void ArgumentsTest::disallowedCharacterShort() {
         .addOption(' ', "bar")
         .addArrayOption('#', "hash")
         .addBooleanOption('?', "halp");
-    CORRADE_COMPARE(out.str(),
+    CORRADE_COMPARE(out,
         "Utility::Arguments::addNamedArgument(): invalid key dash or its short variant\n"
         "Utility::Arguments::addOption(): invalid key bar or its short variant\n"
         "Utility::Arguments::addArrayOption(): invalid key hash or its short variant\n"
@@ -686,65 +685,65 @@ void ArgumentsTest::disallowedCharacterShort() {
 void ArgumentsTest::disallowedIgnoreUnknown() {
     CORRADE_SKIP_IF_NO_ASSERT();
 
-    std::ostringstream out;
+    Containers::String out;
     Error redirectError{&out};
     Arguments args{Arguments::Flag::IgnoreUnknownOptions};
-    CORRADE_COMPARE(out.str(), "Utility::Arguments: Flag::IgnoreUnknownOptions allowed only in the prefixed variant\n");
+    CORRADE_COMPARE(out, "Utility::Arguments: Flag::IgnoreUnknownOptions allowed only in the prefixed variant\n");
 }
 
 void ArgumentsTest::arrayArgumentTwice() {
     CORRADE_SKIP_IF_NO_ASSERT();
 
-    std::ostringstream out;
+    Containers::String out;
     Error redirectError{&out};
     Arguments args;
     args.addArrayArgument("first")
         .addArrayArgument("second");
-    CORRADE_COMPARE(out.str(), "Utility::Arguments::addArrayArgument(): there's already an array argument first\n");
+    CORRADE_COMPARE(out, "Utility::Arguments::addArrayArgument(): there's already an array argument first\n");
 }
 
 void ArgumentsTest::finalOptionalArgumentTwice() {
     CORRADE_SKIP_IF_NO_ASSERT();
 
-    std::ostringstream out;
+    Containers::String out;
     Error redirectError{&out};
     Arguments args;
     args.addFinalOptionalArgument("first")
         .addFinalOptionalArgument("second");
-    CORRADE_COMPARE(out.str(), "Utility::Arguments::addFinalOptionalArgument(): there's already a final optional argument first\n");
+    CORRADE_COMPARE(out, "Utility::Arguments::addFinalOptionalArgument(): there's already a final optional argument first\n");
 }
 
 void ArgumentsTest::finalOptionalArgumentWithArray() {
     CORRADE_SKIP_IF_NO_ASSERT();
 
-    std::ostringstream out;
+    Containers::String out;
     Error redirectError{&out};
     Arguments args;
     args.addArrayArgument("first")
         .addFinalOptionalArgument("second");
-    CORRADE_COMPARE(out.str(), "Utility::Arguments::addFinalOptionalArgument(): there's already an array argument first\n");
+    CORRADE_COMPARE(out, "Utility::Arguments::addFinalOptionalArgument(): there's already an array argument first\n");
 }
 
 void ArgumentsTest::argumentAfterFinalOptionalArgument() {
     CORRADE_SKIP_IF_NO_ASSERT();
 
-    std::ostringstream out;
+    Containers::String out;
     Error redirectError{&out};
     Arguments args;
     args.addFinalOptionalArgument("arg")
         .addArgument("bla");
-    CORRADE_COMPARE(out.str(), "Utility::Arguments::addArgument(): can't add more arguments after the final optional one\n");
+    CORRADE_COMPARE(out, "Utility::Arguments::addArgument(): can't add more arguments after the final optional one\n");
 }
 
 void ArgumentsTest::arrayArgumentAfterFinalOptionalArgument() {
     CORRADE_SKIP_IF_NO_ASSERT();
 
-    std::ostringstream out;
+    Containers::String out;
     Error redirectError{&out};
     Arguments args;
     args.addFinalOptionalArgument("arg")
         .addArrayArgument("bla");
-    CORRADE_COMPARE(out.str(), "Utility::Arguments::addArrayArgument(): can't add more arguments after the final optional one\n");
+    CORRADE_COMPARE(out, "Utility::Arguments::addArrayArgument(): can't add more arguments after the final optional one\n");
 }
 
 void ArgumentsTest::parseNullptr() {
@@ -935,10 +934,10 @@ void ArgumentsTest::parseShortOptionValuePackEmpty() {
 
     const char* argv[] = { "", "-D", "main.cpp" };
 
-    std::ostringstream out;
+    Containers::String out;
     Error redirectError{&out};
     CORRADE_VERIFY(!args.tryParse(Containers::arraySize(argv), argv));
-    CORRADE_COMPARE(out.str(), "Missing command-line argument input\n");
+    CORRADE_COMPARE(out, "Missing command-line argument input\n");
 }
 
 void ArgumentsTest::parseShortBooleanOptionPack() {
@@ -1074,10 +1073,10 @@ void ArgumentsTest::parseUnknownShortArgument() {
 
     const char* argv[] = { "", "-e" };
 
-    std::ostringstream out;
+    Containers::String out;
     Error redirectError{&out};
     CORRADE_VERIFY(!args.tryParse(Containers::arraySize(argv), argv));
-    CORRADE_COMPARE(out.str(), "Unknown command-line argument -e\n");
+    CORRADE_COMPARE(out, "Unknown command-line argument -e\n");
 }
 
 void ArgumentsTest::parseUnknownLongArgument() {
@@ -1093,10 +1092,10 @@ void ArgumentsTest::parseUnknownLongArgument() {
 
     const char* argv[] = { "", "--error" };
 
-    std::ostringstream out;
+    Containers::String out;
     Error redirectError{&out};
     CORRADE_VERIFY(!args.tryParse(Containers::arraySize(argv), argv));
-    CORRADE_COMPARE(out.str(), "Unknown command-line argument --error\n");
+    CORRADE_COMPARE(out, "Unknown command-line argument --error\n");
 }
 
 void ArgumentsTest::parseUnknownLongArgumentEquals() {
@@ -1115,10 +1114,10 @@ void ArgumentsTest::parseUnknownLongArgumentEquals() {
 
     const char* argv[] = { "", "--error=large" };
 
-    std::ostringstream out;
+    Containers::String out;
     Error redirectError{&out};
     CORRADE_VERIFY(!args.tryParse(Containers::arraySize(argv), argv));
-    CORRADE_COMPARE(out.str(), "Unknown command-line argument --error\n");
+    CORRADE_COMPARE(out, "Unknown command-line argument --error\n");
 }
 
 void ArgumentsTest::parseSuperfluousArgument() {
@@ -1134,10 +1133,10 @@ void ArgumentsTest::parseSuperfluousArgument() {
 
     const char* argv[] = { "", "error" };
 
-    std::ostringstream out;
+    Containers::String out;
     Error redirectError{&out};
     CORRADE_VERIFY(!args.tryParse(Containers::arraySize(argv), argv));
-    CORRADE_COMPARE(out.str(), "Superfluous command-line argument error\n");
+    CORRADE_COMPARE(out, "Superfluous command-line argument error\n");
 }
 
 void ArgumentsTest::parsePositionalArgumentAsNamed() {
@@ -1154,10 +1153,10 @@ void ArgumentsTest::parsePositionalArgumentAsNamed() {
 
     const char* argv[] = { "", "--file", "foo" };
 
-    std::ostringstream out;
+    Containers::String out;
     Error redirectError{&out};
     CORRADE_VERIFY(!args.tryParse(Containers::arraySize(argv), argv));
-    CORRADE_COMPARE(out.str(), "Positional command-line argument specified as --file\n");
+    CORRADE_COMPARE(out, "Positional command-line argument specified as --file\n");
 }
 
 void ArgumentsTest::parsePositionalArrayArgumentAsNamed() {
@@ -1174,10 +1173,10 @@ void ArgumentsTest::parsePositionalArrayArgumentAsNamed() {
 
     const char* argv[] = { "", "--files", "foo" };
 
-    std::ostringstream out;
+    Containers::String out;
     Error redirectError{&out};
     CORRADE_VERIFY(!args.tryParse(Containers::arraySize(argv), argv));
-    CORRADE_COMPARE(out.str(), "Positional command-line argument specified as --files\n");
+    CORRADE_COMPARE(out, "Positional command-line argument specified as --files\n");
 }
 
 void ArgumentsTest::parsePositionalFinalOptionalArgumentAsNamed() {
@@ -1194,10 +1193,10 @@ void ArgumentsTest::parsePositionalFinalOptionalArgumentAsNamed() {
 
     const char* argv[] = { "", "--output", "foo" };
 
-    std::ostringstream out;
+    Containers::String out;
     Error redirectError{&out};
     CORRADE_VERIFY(!args.tryParse(Containers::arraySize(argv), argv));
-    CORRADE_COMPARE(out.str(), "Positional command-line argument specified as --output\n");
+    CORRADE_COMPARE(out, "Positional command-line argument specified as --output\n");
 }
 
 void ArgumentsTest::parseSingleDash() {
@@ -1215,10 +1214,10 @@ void ArgumentsTest::parseSingleDash() {
 
     const char* argv[] = { "", "-" };
 
-    std::ostringstream out;
+    Containers::String out;
     Error redirectError{&out};
     CORRADE_VERIFY(!args.tryParse(Containers::arraySize(argv), argv));
-    CORRADE_COMPARE(out.str(), "Superfluous command-line argument -\n");
+    CORRADE_COMPARE(out, "Superfluous command-line argument -\n");
 }
 
 void ArgumentsTest::parseArgumentAfterSeparator() {
@@ -1227,10 +1226,10 @@ void ArgumentsTest::parseArgumentAfterSeparator() {
 
     const char* argv[] = { "", "--", "-b" };
 
-    std::ostringstream out;
+    Containers::String out;
     Error redirectError{&out};
     CORRADE_VERIFY(!args.tryParse(Containers::arraySize(argv), argv));
-    CORRADE_COMPARE(out.str(), "Superfluous command-line argument -b\n");
+    CORRADE_COMPARE(out, "Superfluous command-line argument -b\n");
 }
 
 void ArgumentsTest::parseInvalidShortArgument() {
@@ -1246,10 +1245,10 @@ void ArgumentsTest::parseInvalidShortArgument() {
 
     const char* argv[] = { "", "-?" };
 
-    std::ostringstream out;
+    Containers::String out;
     Error redirectError{&out};
     CORRADE_VERIFY(!args.tryParse(Containers::arraySize(argv), argv));
-    CORRADE_COMPARE(out.str(), "Invalid command-line argument -?\n");
+    CORRADE_COMPARE(out, "Invalid command-line argument -?\n");
 }
 
 void ArgumentsTest::parseInvalidLongArgument() {
@@ -1265,10 +1264,10 @@ void ArgumentsTest::parseInvalidLongArgument() {
 
     const char* argv[] = { "", "--??" };
 
-    std::ostringstream out;
+    Containers::String out;
     Error redirectError{&out};
     CORRADE_VERIFY(!args.tryParse(Containers::arraySize(argv), argv));
-    CORRADE_COMPARE(out.str(), "Invalid command-line argument --??\n");
+    CORRADE_COMPARE(out, "Invalid command-line argument --??\n");
 }
 
 void ArgumentsTest::parseInvalidLongArgumentEquals() {
@@ -1287,10 +1286,10 @@ void ArgumentsTest::parseInvalidLongArgumentEquals() {
 
     const char* argv[] = { "", "--help?=##" };
 
-    std::ostringstream out;
+    Containers::String out;
     Error redirectError{&out};
     CORRADE_VERIFY(!args.tryParse(Containers::arraySize(argv), argv));
-    CORRADE_COMPARE(out.str(), "Invalid command-line argument --help?\n");
+    CORRADE_COMPARE(out, "Invalid command-line argument --help?\n");
 }
 
 void ArgumentsTest::parseInvalidLongArgumentDashes() {
@@ -1306,10 +1305,10 @@ void ArgumentsTest::parseInvalidLongArgumentDashes() {
 
     const char* argv[] = { "", "-long-argument" };
 
-    std::ostringstream out;
+    Containers::String out;
     Error redirectError{&out};
     CORRADE_VERIFY(!args.tryParse(Containers::arraySize(argv), argv));
-    CORRADE_COMPARE(out.str(), "Invalid command-line argument -long-argument (did you mean --long-argument?)\n");
+    CORRADE_COMPARE(out, "Invalid command-line argument -long-argument (did you mean --long-argument?)\n");
 }
 
 void ArgumentsTest::parseEqualsWithNoKey() {
@@ -1325,10 +1324,10 @@ void ArgumentsTest::parseEqualsWithNoKey() {
 
     const char* argv[] = { "", "--=value" };
 
-    std::ostringstream out;
+    Containers::String out;
     Error redirectError{&out};
     CORRADE_VERIFY(!args.tryParse(Containers::arraySize(argv), argv));
-    CORRADE_COMPARE(out.str(), "Invalid command-line argument --\n");
+    CORRADE_COMPARE(out, "Invalid command-line argument --\n");
 }
 
 void ArgumentsTest::parseBooleanWithEquals() {
@@ -1345,10 +1344,10 @@ void ArgumentsTest::parseBooleanWithEquals() {
 
     const char* argv[] = { "", "--yes=13" };
 
-    std::ostringstream out;
+    Containers::String out;
     Error redirectError{&out};
     CORRADE_VERIFY(!args.tryParse(Containers::arraySize(argv), argv));
-    CORRADE_COMPARE(out.str(), "Invalid boolean command-line argument --yes=13\n");
+    CORRADE_COMPARE(out, "Invalid boolean command-line argument --yes=13\n");
 }
 
 void ArgumentsTest::parseMissingValue() {
@@ -1365,10 +1364,10 @@ void ArgumentsTest::parseMissingValue() {
 
     const char* argv[] = { "", "--output" };
 
-    std::ostringstream out;
+    Containers::String out;
     Error redirectError{&out};
     CORRADE_VERIFY(!args.tryParse(Containers::arraySize(argv), argv));
-    CORRADE_COMPARE(out.str(), "Missing value for command-line argument --output\n");
+    CORRADE_COMPARE(out, "Missing value for command-line argument --output\n");
 }
 
 void ArgumentsTest::parseMissingOption() {
@@ -1387,10 +1386,10 @@ void ArgumentsTest::parseMissingOption() {
 
     const char* argv[] = { "", "--yes" };
 
-    std::ostringstream out;
+    Containers::String out;
     Error redirectError{&out};
     CORRADE_VERIFY(!args.tryParse(Containers::arraySize(argv), argv));
-    CORRADE_COMPARE(out.str(), "Missing command-line argument --output\n");
+    CORRADE_COMPARE(out, "Missing command-line argument --output\n");
 }
 
 void ArgumentsTest::parseMissingArgument() {
@@ -1409,10 +1408,10 @@ void ArgumentsTest::parseMissingArgument() {
 
     const char* argv[] = { "", "--yes" };
 
-    std::ostringstream out;
+    Containers::String out;
     Error redirectError{&out};
     CORRADE_VERIFY(!args.tryParse(Containers::arraySize(argv), argv));
-    CORRADE_COMPARE(out.str(), "Missing command-line argument file.dat\n");
+    CORRADE_COMPARE(out, "Missing command-line argument file.dat\n");
 }
 
 void ArgumentsTest::parseMissingArrayArgumentMiddle() {
@@ -1424,12 +1423,12 @@ void ArgumentsTest::parseMissingArrayArgumentMiddle() {
 
     const char* argv[] = { "", "compress", "data.zip", "data.log" };
 
-    std::ostringstream out;
+    Containers::String out;
     Error redirectError{&out};
     CORRADE_VERIFY(!args.tryParse(Containers::arraySize(argv), argv));
     /* It's actually the array arguments missing (there has to be at least
        one), but that's impossible to distinguish here */
-    CORRADE_COMPARE(out.str(), "Missing command-line argument logfile\n");
+    CORRADE_COMPARE(out, "Missing command-line argument logfile\n");
 }
 
 void ArgumentsTest::parseMissingArrayArgumentLast() {
@@ -1439,11 +1438,11 @@ void ArgumentsTest::parseMissingArrayArgumentLast() {
 
     const char* argv[] = { "", "compress" };
 
-    std::ostringstream out;
+    Containers::String out;
     Error redirectError{&out};
     CORRADE_VERIFY(!args.tryParse(Containers::arraySize(argv), argv));
     /* Verify it's correctly printed (and not --input or some such) */
-    CORRADE_COMPARE(out.str(), "Missing command-line argument input\n");
+    CORRADE_COMPARE(out, "Missing command-line argument input\n");
 }
 
 void ArgumentsTest::prefixedParse() {
@@ -1586,7 +1585,7 @@ Arguments:
 void ArgumentsTest::prefixedDisallowedCalls() {
     CORRADE_SKIP_IF_NO_ASSERT();
 
-    std::ostringstream out;
+    Containers::String out;
     Error redirectError{&out};
     Arguments args{"reader"};
     args.addArgument("foo")
@@ -1597,7 +1596,7 @@ void ArgumentsTest::prefixedDisallowedCalls() {
         .addBooleanOption("eh")
         .setGlobalHelp("global help");
 
-    CORRADE_COMPARE(out.str(),
+    CORRADE_COMPARE(out,
         "Utility::Arguments::addArgument(): argument foo not allowed in prefixed version\n"
         "Utility::Arguments::addArrayArgument(): argument bizbaz not allowed in prefixed version\n"
         "Utility::Arguments::addNamedArgument(): argument bar not allowed in prefixed version\n"
@@ -1610,31 +1609,31 @@ void ArgumentsTest::prefixedDisallowedCalls() {
 void ArgumentsTest::prefixedDisallowedWithPrefix() {
     CORRADE_SKIP_IF_NO_ASSERT();
 
-    std::ostringstream out;
+    Containers::String out;
     Error redirectError{&out};
     Arguments args;
     args.addOption("reader-flush")
         .addSkippedPrefix("reader");
 
-    CORRADE_COMPARE(out.str(),
+    CORRADE_COMPARE(out,
         "Utility::Arguments::addSkippedPrefix(): skipped prefix reader conflicts with existing keys\n");
 }
 
 void ArgumentsTest::prefixedDisallowedWithPrefixAfterSkipPrefix() {
     CORRADE_SKIP_IF_NO_ASSERT();
 
-    std::ostringstream out;
+    Containers::String out;
     Error redirectError{&out};
     Arguments args;
     args.addSkippedPrefix("reader")
         .addOption("reader-flush");
 
-    CORRADE_COMPARE(out.str(),
+    CORRADE_COMPARE(out,
         "Utility::Arguments::addOption(): key reader-flush conflicts with skipped prefixes\n");
 }
 
 void ArgumentsTest::prefixedUnknownWithPrefix() {
-    std::ostringstream out;
+    Containers::String out;
     Error redirectError{&out};
     Arguments args{"reader"};
     args.addOption("bar");
@@ -1642,7 +1641,7 @@ void ArgumentsTest::prefixedUnknownWithPrefix() {
     const char* argv[] = { "", "--reader-foo", "hello", "--something", "other" };
 
     CORRADE_VERIFY(!args.tryParse(Containers::arraySize(argv), argv));
-    CORRADE_COMPARE(out.str(), "Unknown command-line argument --reader-foo\n");
+    CORRADE_COMPARE(out, "Unknown command-line argument --reader-foo\n");
 }
 
 void ArgumentsTest::prefixedInvalidPrefixedName() {
@@ -1690,10 +1689,10 @@ void ArgumentsTest::prefixedIgnoreUnknownInvalidPrefixedName() {
        value */
     const char* argv[] = { "", "--reader-foo", "yes", "--reader-?", "what" };
 
-    std::ostringstream out;
+    Containers::String out;
     Error redirectError{&out};
     CORRADE_VERIFY(!args.tryParse(Containers::arraySize(argv), argv));
-    CORRADE_COMPARE(out.str(), "Invalid command-line argument --reader-?\n");
+    CORRADE_COMPARE(out, "Invalid command-line argument --reader-?\n");
 }
 
 void ArgumentsTest::notParsedYet() {
@@ -1704,14 +1703,14 @@ void ArgumentsTest::notParsedYet() {
         .addArrayOption("array")
         .addBooleanOption("boolean");
 
-    std::ostringstream out;
+    Containers::String out;
     Error redirectError{&out};
     args.value("value");
     args.arrayValueCount("array");
     args.arrayValue("array", 0);
     args.isSet("boolean");
     CORRADE_VERIFY(!args.isParsed());
-    CORRADE_COMPARE(out.str(),
+    CORRADE_COMPARE(out,
         "Utility::Arguments::value(): arguments were not successfully parsed yet\n"
         "Utility::Arguments::arrayValueCount(): arguments were not successfully parsed yet\n"
         "Utility::Arguments::arrayValue(): arguments were not successfully parsed yet\n"
@@ -1728,7 +1727,7 @@ void ArgumentsTest::notParsedYetOnlyHelp() {
         .addArrayOption("array")
         .addBooleanOption("boolean");
 
-    std::ostringstream out;
+    Containers::String out;
     Error redirectError{&out};
     /* parse() should not succeed if there is --help but some arguments were
        not specified */
@@ -1738,7 +1737,7 @@ void ArgumentsTest::notParsedYetOnlyHelp() {
     args.arrayValue("array", 0);
     args.isSet("boolean");
     CORRADE_VERIFY(!args.isParsed());
-    CORRADE_COMPARE(out.str(),
+    CORRADE_COMPARE(out,
         "Missing command-line argument value\n"
         "Utility::Arguments::value(): arguments were not successfully parsed yet\n"
         "Utility::Arguments::arrayValueCount(): arguments were not successfully parsed yet\n"
@@ -1753,13 +1752,13 @@ void ArgumentsTest::valueNotFound() {
     args.addOption("foobar") /* only so asserts have some reference to return */
         .parse(0, nullptr);
 
-    std::ostringstream out;
+    Containers::String out;
     Error redirectError{&out};
     args.value("nonexistent");
     args.arrayValueCount("nonexistent");
     args.arrayValue("nonexistent", 0);
     args.isSet("nonexistent");
-    CORRADE_COMPARE(out.str(),
+    CORRADE_COMPARE(out,
         "Utility::Arguments::value(): key nonexistent not found\n"
         "Utility::Arguments::arrayValueCount(): key nonexistent not found\n"
         "Utility::Arguments::arrayValue(): key nonexistent not found\n"
@@ -1775,7 +1774,7 @@ void ArgumentsTest::valueMismatchedUse() {
         .addBooleanOption("boolean")
         .parse(0, nullptr);
 
-    std::ostringstream out;
+    Containers::String out;
     Error redirectError{&out};
     args.value("array");
     args.value("boolean");
@@ -1785,7 +1784,7 @@ void ArgumentsTest::valueMismatchedUse() {
     args.arrayValue("boolean", 0);
     args.isSet("value");
     args.isSet("array");
-    CORRADE_COMPARE(out.str(),
+    CORRADE_COMPARE(out,
         "Utility::Arguments::value(): cannot use this function for an array/boolean option array\n"
         "Utility::Arguments::value(): cannot use this function for an array/boolean option boolean\n"
         "Utility::Arguments::arrayValueCount(): cannot use this function for a non-array option value\n"
@@ -1806,10 +1805,10 @@ void ArgumentsTest::arrayValueOutOfRange() {
         .addArrayOption('X', "opt")
         .parse(Containers::arraySize(argv), argv);
 
-    std::ostringstream out;
+    Containers::String out;
     Error redirectError{&out};
     args.arrayValue("opt", 3);
-    CORRADE_COMPARE(out.str(),
+    CORRADE_COMPARE(out,
         "Utility::Arguments::arrayValue(): id 3 out of range for 3 values with key opt\n");
 }
 
@@ -1947,10 +1946,10 @@ void ArgumentsTest::parseErrorCallbackIgnoreAll2() {
 }
 
 void ArgumentsTest::debugParseError() {
-    std::ostringstream out;
+    Containers::String out;
 
     Debug{&out} << Arguments::ParseError::MissingArgument << Arguments::ParseError(0xf0);
-    CORRADE_COMPARE(out.str(), "Utility::Arguments::ParseError::MissingArgument Utility::Arguments::ParseError(0xf0)\n");
+    CORRADE_COMPARE(out, "Utility::Arguments::ParseError::MissingArgument Utility::Arguments::ParseError(0xf0)\n");
 }
 
 }}}}

@@ -25,10 +25,9 @@
 */
 
 #include <limits>
-#include <sstream>
 
+#include "Corrade/Containers/String.h"
 #include "Corrade/TestSuite/Tester.h"
-#include "Corrade/Utility/DebugStl.h" /** @todo remove when <sstream> is gone */
 
 namespace Corrade { namespace TestSuite { namespace Test { namespace {
 
@@ -109,7 +108,7 @@ void FloatingPointTest::infinity() {
 }
 
 void FloatingPointTest::output() {
-    std::stringstream out;
+    Containers::String out;
 
     {
         Debug redirectOutput{&out};
@@ -119,7 +118,7 @@ void FloatingPointTest::output() {
         compare.printMessage(flags, redirectOutput, "a", "b");
     }
 
-    CORRADE_COMPARE(out.str(), "Floating-point values a and b are not the same, actual 3 but 8 expected (delta -5).\n");
+    CORRADE_COMPARE(out, "Floating-point values a and b are not the same, actual 3 but 8 expected (delta -5).\n");
 }
 
 }}}}

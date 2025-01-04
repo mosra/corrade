@@ -25,7 +25,6 @@
 */
 
 #include <cstring>
-#include <sstream>
 
 #include "Corrade/Containers/Array.h"
 #include "Corrade/Containers/StaticArray.h"
@@ -35,7 +34,6 @@
 #include "Corrade/TestSuite/Tester.h"
 #include "Corrade/TestSuite/Compare/Container.h"
 #include "Corrade/TestSuite/Compare/Numeric.h"
-#include "Corrade/Utility/DebugStl.h"
 
 namespace {
 
@@ -535,11 +533,11 @@ void StringTest::constructTakeOwnershipNull() {
 
     const char* data = nullptr;
 
-    std::ostringstream out;
+    Containers::String out;
     Error redirectError{&out};
     String a{data, 5, [](char*, std::size_t) {}};
     String b{data, [](char*, std::size_t) {}};
-    CORRADE_COMPARE(out.str(),
+    CORRADE_COMPARE(out,
         "Containers::String: can only take ownership of a non-null null-terminated array\n"
         "Containers::String: can only take ownership of a non-null null-terminated array\n");
 }
@@ -549,12 +547,12 @@ void StringTest::constructTakeOwnershipNotNullTerminated() {
 
     const char data[] { 'a', '3' };
 
-    std::ostringstream out;
+    Containers::String out;
     Error redirectError{&out};
     String a{data, 1, [](char*, std::size_t) {}};
     /* The size-less constructor uses strlen(), so it will either find a \0
        somewhere random or will crash */
-    CORRADE_COMPARE(out.str(), "Containers::String: can only take ownership of a non-null null-terminated array\n");
+    CORRADE_COMPARE(out, "Containers::String: can only take ownership of a non-null null-terminated array\n");
 }
 
 #ifdef CORRADE_TARGET_32BIT
@@ -563,11 +561,11 @@ void StringTest::constructTakeOwnershipTooLarge() {
 
     const char* data = "abc";
 
-    std::ostringstream out;
+    Containers::String out;
     Error redirectError{&out};
     String a{data, std::size_t{1} << (sizeof(std::size_t)*8 - 2), [](char*, std::size_t) {}};
     /* Can't really test this with the size-less constructor */
-    CORRADE_COMPARE(out.str(),
+    CORRADE_COMPARE(out,
         "Containers::String: string expected to be smaller than 2^30 bytes, got 1073741824\n");
 }
 #endif
@@ -703,11 +701,11 @@ void StringTest::constructPointerSizeNullZeroAllocatedInit() {
 void StringTest::constructPointerSizeNullNonZero() {
     CORRADE_SKIP_IF_NO_ASSERT();
 
-    std::ostringstream out;
+    Containers::String out;
     Error redirectError{&out};
     String a{nullptr, 3};
     String aa{AllocatedInit, nullptr, 3};
-    CORRADE_COMPARE(out.str(),
+    CORRADE_COMPARE(out,
         "Containers::String: received a null string of size 3\n"
         "Containers::String: received a null string of size 3\n");
 }
@@ -716,11 +714,11 @@ void StringTest::constructPointerSizeNullNonZero() {
 void StringTest::constructPointerSizeTooLarge() {
     CORRADE_SKIP_IF_NO_ASSERT();
 
-    std::ostringstream out;
+    Containers::String out;
     Error redirectError{&out};
     String a{"abc", std::size_t{1} << (sizeof(std::size_t)*8 - 2)};
     String aa{AllocatedInit, "abc", std::size_t{1} << (sizeof(std::size_t)*8 - 2)};
-    CORRADE_COMPARE(out.str(),
+    CORRADE_COMPARE(out,
         "Containers::String: string expected to be smaller than 2^30 bytes, got 1073741824\n"
         "Containers::String: string expected to be smaller than 2^30 bytes, got 1073741824\n");
 }
@@ -772,10 +770,10 @@ void StringTest::constructValueInitZeroSize() {
 void StringTest::constructValueInitTooLarge() {
     CORRADE_SKIP_IF_NO_ASSERT();
 
-    std::ostringstream out;
+    Containers::String out;
     Error redirectError{&out};
     String a{Corrade::ValueInit, std::size_t{1} << (sizeof(std::size_t)*8 - 2)};
-    CORRADE_COMPARE(out.str(),
+    CORRADE_COMPARE(out,
         "Containers::String: string expected to be smaller than 2^30 bytes, got 1073741824\n");
 }
 #endif
@@ -826,10 +824,10 @@ void StringTest::constructDirectInitZeroSize() {
 void StringTest::constructDirectInitTooLarge() {
     CORRADE_SKIP_IF_NO_ASSERT();
 
-    std::ostringstream out;
+    Containers::String out;
     Error redirectError{&out};
     String a{Corrade::DirectInit, std::size_t{1} << (sizeof(std::size_t)*8 - 2), 'X'};
-    CORRADE_COMPARE(out.str(),
+    CORRADE_COMPARE(out,
         "Containers::String: string expected to be smaller than 2^30 bytes, got 1073741824\n");
 }
 #endif
@@ -878,10 +876,10 @@ void StringTest::constructNoInitZeroSize() {
 void StringTest::constructNoInitTooLarge() {
     CORRADE_SKIP_IF_NO_ASSERT();
 
-    std::ostringstream out;
+    Containers::String out;
     Error redirectError{&out};
     String a{Corrade::NoInit, std::size_t{1} << (sizeof(std::size_t)*8 - 2)};
-    CORRADE_COMPARE(out.str(),
+    CORRADE_COMPARE(out,
         "Containers::String: string expected to be smaller than 2^30 bytes, got 1073741824\n");
 }
 #endif
@@ -2183,7 +2181,7 @@ void StringTest::accessInvalid() {
     b[5];
     bAllocated[5];
 
-    std::stringstream out;
+    Containers::String out;
     Error redirectError{&out};
     /* front() / back() should return the first ever byte before the null
        terminator and the last ever byte before the null terminator. There
@@ -2193,7 +2191,7 @@ void StringTest::accessInvalid() {
     a[1];
     b[6];
     bAllocated[6];
-    CORRADE_COMPARE(out.str(),
+    CORRADE_COMPARE(out,
         "Containers::String::front(): string is empty\n"
         "Containers::String::back(): string is empty\n"
         "Containers::String::operator[](): index 1 out of range for 0 null-terminated bytes\n"
@@ -2545,12 +2543,12 @@ void StringTest::exceptPrefixInvalid() {
     String a{"overcomplicated"};
     const String ca{"overcomplicated"};
 
-    std::ostringstream out;
+    Containers::String out;
     Error redirectOutput{&out};
     a.exceptPrefix("complicated");
     ca.exceptPrefix("complicated");
     /* Assert is coming from StringView */
-    CORRADE_COMPARE(out.str(),
+    CORRADE_COMPARE(out,
         "Containers::StringView::exceptPrefix(): string doesn't begin with complicated\n"
         "Containers::StringView::exceptPrefix(): string doesn't begin with complicated\n");
 }
@@ -2595,12 +2593,12 @@ void StringTest::exceptSuffixInvalid() {
     String a{"overcomplicated"};
     const String ca{"overcomplicated"};
 
-    std::ostringstream out;
+    Containers::String out;
     Error redirectOutput{&out};
     a.exceptSuffix("over");
     ca.exceptSuffix("over");
     /* Assert is coming from StringView */
-    CORRADE_COMPARE(out.str(),
+    CORRADE_COMPARE(out,
         "Containers::StringView::exceptSuffix(): string doesn't end with over\n"
         "Containers::StringView::exceptSuffix(): string doesn't end with over\n");
 }
@@ -2974,11 +2972,11 @@ void StringTest::releaseDeleterSmall() {
     String a;
     CORRADE_VERIFY(a.isSmall());
 
-    std::ostringstream out;
+    Containers::String out;
     Error redirectError{&out};
     a.deleter();
     a.release();
-    CORRADE_COMPARE(out.str(),
+    CORRADE_COMPARE(out,
         "Containers::String::deleter(): cannot call on a SSO instance\n"
         "Containers::String::release(): cannot call on a SSO instance\n");
 }

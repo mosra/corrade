@@ -24,7 +24,6 @@
     DEALINGS IN THE SOFTWARE.
 */
 
-#include <sstream>
 #include <vector>
 
 /* There's no better way to disable file deprecation warnings */
@@ -33,7 +32,6 @@
 #include "Corrade/Containers/Array.h"
 #include "Corrade/Containers/Optional.h"
 #include "Corrade/Containers/ScopeGuard.h"
-#include "Corrade/Containers/StringStl.h"
 #include "Corrade/TestSuite/Tester.h"
 #include "Corrade/TestSuite/Compare/Container.h"
 #include "Corrade/TestSuite/Compare/File.h"
@@ -42,9 +40,9 @@
 #include "Corrade/TestSuite/Compare/String.h"
 #include "Corrade/TestSuite/Compare/SortedContainer.h"
 #include "Corrade/Utility/Algorithms.h"
-#include "Corrade/Utility/DebugStl.h"
+#include "Corrade/Utility/DebugStl.h" /* for std::string return values */
 #include "Corrade/Utility/Directory.h"
-#include "Corrade/Utility/FormatStl.h"
+#include "Corrade/Utility/FormatStl.h" /* for std::string return values */
 #ifdef CORRADE_TARGET_APPLE
 #include "Corrade/Utility/System.h" /* isSandboxed() */
 #endif
@@ -706,16 +704,16 @@ void DirectoryTest::removeDirectory() {
 void DirectoryTest::removeFileNonexistent() {
     CORRADE_VERIFY(!Directory::exists("nonexistent"));
 
-    std::ostringstream out;
+    Containers::String out;
     Error redirectError{&out};
     CORRADE_VERIFY(!Directory::rm("nonexistent"));
     #ifdef CORRADE_TARGET_EMSCRIPTEN
     /* Emscripten uses a different errno for "No such file or directory" */
-    CORRADE_COMPARE_AS(out.str(),
+    CORRADE_COMPARE_AS(out,
         "Utility::Path::remove(): can't remove nonexistent: error 44 (",
         TestSuite::Compare::StringHasPrefix);
     #else
-    CORRADE_COMPARE_AS(out.str(),
+    CORRADE_COMPARE_AS(out,
         "Utility::Path::remove(): can't remove nonexistent: error 2 (",
         TestSuite::Compare::StringHasPrefix);
     #endif
@@ -726,30 +724,30 @@ void DirectoryTest::removeDirectoryNonEmpty() {
     CORRADE_VERIFY(Directory::mkpath(directory));
     CORRADE_VERIFY(Directory::writeString(Directory::join(directory, "file.txt"), "a"));
 
-    std::ostringstream out;
+    Containers::String out;
     Error redirectError{&out};
     CORRADE_VERIFY(!Directory::rm(directory));
     #ifdef CORRADE_TARGET_EMSCRIPTEN
     /* Emscripten uses a different errno for "Directory not empty",
        also there's a dedicated code path (and message) for directories */
-    CORRADE_COMPARE_AS(out.str(),
-        formatString("Utility::Path::remove(): can't remove directory {}: error 55 (", directory),
+    CORRADE_COMPARE_AS(out,
+        format("Utility::Path::remove(): can't remove directory {}: error 55 (", directory),
         TestSuite::Compare::StringHasPrefix);
     #elif defined(CORRADE_TARGET_WINDOWS)
     /* Windows also have a dedicated code path and message for dirs,
        "The directory is not empty." */
-    CORRADE_COMPARE_AS(out.str(),
-        formatString("Utility::Path::remove(): can't remove directory {}: error 145 (", directory),
+    CORRADE_COMPARE_AS(out,
+        format("Utility::Path::remove(): can't remove directory {}: error 145 (", directory),
         TestSuite::Compare::StringHasPrefix);
     #elif defined(CORRADE_TARGET_APPLE)
     /* Otherwise there's common handling for files and dirs, however Apple has
        to be special and also have a different error code for the same thing */
-    CORRADE_COMPARE_AS(out.str(),
-        formatString("Utility::Path::remove(): can't remove {}: error 66 (", directory),
+    CORRADE_COMPARE_AS(out,
+        format("Utility::Path::remove(): can't remove {}: error 66 (", directory),
         TestSuite::Compare::StringHasPrefix);
     #else
-    CORRADE_COMPARE_AS(out.str(),
-        formatString("Utility::Path::remove(): can't remove {}: error 39 (", directory),
+    CORRADE_COMPARE_AS(out,
+        format("Utility::Path::remove(): can't remove {}: error 39 (", directory),
         TestSuite::Compare::StringHasPrefix);
     #endif
 }
@@ -806,17 +804,17 @@ void DirectoryTest::moveDirectory() {
 void DirectoryTest::moveSourceNonexistent() {
     std::string to = Directory::join(_writeTestDir, "empty");
 
-    std::ostringstream out;
+    Containers::String out;
     Error redirectError{&out};
     CORRADE_VERIFY(!Directory::move("nonexistent", to));
     #ifdef CORRADE_TARGET_EMSCRIPTEN
     /* Emscripten uses a different errno for "No such file or directory" */
-    CORRADE_COMPARE_AS(out.str(),
-        formatString("Utility::Path::move(): can't move nonexistent to {}: error 44 (", to),
+    CORRADE_COMPARE_AS(out,
+        format("Utility::Path::move(): can't move nonexistent to {}: error 44 (", to),
         TestSuite::Compare::StringHasPrefix);
     #else
-    CORRADE_COMPARE_AS(out.str(),
-        formatString("Utility::Path::move(): can't move nonexistent to {}: error 2 (", to),
+    CORRADE_COMPARE_AS(out,
+        format("Utility::Path::move(): can't move nonexistent to {}: error 2 (", to),
         TestSuite::Compare::StringHasPrefix);
     #endif
 }
@@ -845,18 +843,18 @@ void DirectoryTest::moveDestinationNoPermission() {
     CORRADE_SKIP("Not sure how to test on this system.");
     #endif
 
-    std::ostringstream out;
+    Containers::String out;
     Error redirectError{&out};
     CORRADE_VERIFY(!Directory::move(from, to));
     #ifndef CORRADE_TARGET_WINDOWS
-    CORRADE_COMPARE_AS(out.str(),
-        formatString("Utility::Path::move(): can't move {} to {}: error 13 (", from, to),
+    CORRADE_COMPARE_AS(out,
+        format("Utility::Path::move(): can't move {} to {}: error 13 (", from, to),
         TestSuite::Compare::StringHasPrefix);
     #else
     /* Windows APIs fill GetLastError() instead of errno, leading to a
        different code ("Access is denied.") */
-    CORRADE_COMPARE_AS(out.str(),
-        formatString("Utility::Path::move(): can't move {} to {}: error 5 (", from, to),
+    CORRADE_COMPARE_AS(out,
+        format("Utility::Path::move(): can't move {} to {}: error 5 (", from, to),
         TestSuite::Compare::StringHasPrefix);
     #endif
     #endif
@@ -951,18 +949,18 @@ void DirectoryTest::mkpathNoPermission() {
     CORRADE_SKIP("Not sure how to test on this system.");
     #endif
 
-    std::ostringstream out;
+    Containers::String out;
     Error redirectError{&out};
     CORRADE_VERIFY(!Directory::mkpath(Directory::join(prefix, "nope/never")));
     #ifndef CORRADE_TARGET_WINDOWS
-    CORRADE_COMPARE_AS(out.str(),
-        formatString("Utility::Path::make(): can't create {}/nope: error 13 (", prefix),
+    CORRADE_COMPARE_AS(out,
+        format("Utility::Path::make(): can't create {}/nope: error 13 (", prefix),
         TestSuite::Compare::StringHasPrefix);
     #else
     /* Windows APIs fill GetLastError() instead of errno, leading to a
        different code */
-    CORRADE_COMPARE_AS(out.str(),
-        formatString("Utility::Path::make(): can't create {}/nope: error 5 (", prefix),
+    CORRADE_COMPARE_AS(out,
+        format("Utility::Path::make(): can't create {}/nope: error 5 (", prefix),
         TestSuite::Compare::StringHasPrefix);
     #endif
     #endif
@@ -1025,10 +1023,10 @@ void DirectoryTest::currentNonexistent() {
         /* Interestingly, this doesn't fail */
         CORRADE_VERIFY(Directory::exists("."));
 
-        std::ostringstream out;
+        Containers::String out;
         Error redirectError{&out};
         CORRADE_COMPARE(Directory::current(), "");
-        CORRADE_COMPARE_AS(out.str(),
+        CORRADE_COMPARE_AS(out,
             "Utility::Path::currentDirectory(): error 2 (",
             TestSuite::Compare::StringHasPrefix);
     }
@@ -1126,15 +1124,15 @@ void DirectoryTest::libraryLocationStatic() {
 
 void DirectoryTest::libraryLocationNull() {
     #if defined(CORRADE_TARGET_UNIX) || (defined(CORRADE_TARGET_WINDOWS) && !defined(CORRADE_TARGET_WINDOWS_RT))
-    std::ostringstream out;
+    Containers::String out;
     Error redirectError{&out};
     CORRADE_COMPARE(Directory::libraryLocation(nullptr), "");
     #ifdef CORRADE_TARGET_WINDOWS
-    CORRADE_COMPARE_AS(out.str(),
+    CORRADE_COMPARE_AS(out,
         "Utility::Path::libraryLocation(): can't get library location: error 87 (",
         TestSuite::Compare::StringHasPrefix);
     #else
-    CORRADE_COMPARE(out.str(), "Utility::Path::libraryLocation(): can't get library location\n");
+    CORRADE_COMPARE(out, "Utility::Path::libraryLocation(): can't get library location\n");
     #endif
     #else
     CORRADE_SKIP("Not implemented on this platform.");
@@ -1143,16 +1141,16 @@ void DirectoryTest::libraryLocationNull() {
 
 void DirectoryTest::libraryLocationInvalid() {
     #if defined(CORRADE_TARGET_UNIX) || (defined(CORRADE_TARGET_WINDOWS) && !defined(CORRADE_TARGET_WINDOWS_RT))
-    std::ostringstream out;
+    Containers::String out;
     Error redirectError{&out};
     CORRADE_COMPARE(Directory::libraryLocation(reinterpret_cast<const void*>(0xbadcafe)), "");
     #ifdef CORRADE_TARGET_WINDOWS
     /* "The specified module could not be found." */
-    CORRADE_COMPARE_AS(out.str(),
+    CORRADE_COMPARE_AS(out,
         "Utility::Path::libraryLocation(): can't get library location: error 126 (",
         TestSuite::Compare::StringHasPrefix);
     #else
-    CORRADE_COMPARE(out.str(), "Utility::Path::libraryLocation(): can't get library location\n");
+    CORRADE_COMPARE(out, "Utility::Path::libraryLocation(): can't get library location\n");
     #endif
     #else
     CORRADE_SKIP("Not implemented on this platform.");
@@ -1520,21 +1518,21 @@ void DirectoryTest::listSortPrecedence() {
 }
 
 void DirectoryTest::listNonexistent() {
-    std::ostringstream out;
+    Containers::String out;
     Error redirectError{&out};
     CORRADE_COMPARE(Directory::list("nonexistent"), std::vector<std::string>{});
     #ifdef CORRADE_TARGET_WINDOWS
     /* Windows has its own code path and thus different errors */
-    CORRADE_COMPARE_AS(out.str(),
+    CORRADE_COMPARE_AS(out,
         "Utility::Path::list(): can't list nonexistent: error 3 (",
         TestSuite::Compare::StringHasPrefix);
     #elif defined(CORRADE_TARGET_EMSCRIPTEN)
     /* Emscripten uses a different errno for "No such file or directory" */
-    CORRADE_COMPARE_AS(out.str(),
+    CORRADE_COMPARE_AS(out,
         "Utility::Path::list(): can't list nonexistent: error 44 (",
         TestSuite::Compare::StringHasPrefix);
     #else
-    CORRADE_COMPARE_AS(out.str(),
+    CORRADE_COMPARE_AS(out,
         "Utility::Path::list(): can't list nonexistent: error 2 (",
         TestSuite::Compare::StringHasPrefix);
     #endif
@@ -1621,12 +1619,12 @@ void DirectoryTest::fileSizeNonSeekable() {
     #if defined(__unix__) && !defined(CORRADE_TARGET_EMSCRIPTEN) && \
         !defined(__FreeBSD__) && !defined(__OpenBSD__) && !defined(__bsdi__) && \
         !defined(__NetBSD__) && !defined(__DragonFly__)
-    std::ostringstream out;
+    Containers::String out;
     Error redirectError{&out};
     /* /proc/loadavg works on Android Emulator but not on a real device;
        /proc/zoneinfo works everywhere */
     CORRADE_VERIFY(!Directory::fileSize("/proc/zoneinfo"));
-    CORRADE_COMPARE(out.str(), "Utility::Path::size(): /proc/zoneinfo is not seekable\n");
+    CORRADE_COMPARE(out, "Utility::Path::size(): /proc/zoneinfo is not seekable\n");
     #else
     CORRADE_SKIP("Not implemented on this platform.");
     #endif
@@ -1652,7 +1650,7 @@ void DirectoryTest::fileSizeDirectory() {
         CORRADE_SKIP("iOS (in a simulator) thinks all paths are files, can't test.");
     #endif
 
-    std::ostringstream out;
+    Containers::String out;
     Error redirectError{&out};
     CORRADE_COMPARE(Directory::fileSize(_testDir), Containers::NullOpt);
 
@@ -1660,25 +1658,25 @@ void DirectoryTest::fileSizeDirectory() {
        On other systems no idea, so let's say we expect the same message as on
        Unix. */
     #ifdef CORRADE_TARGET_WINDOWS
-    CORRADE_COMPARE_AS(out.str(),
-        formatString("Utility::Path::size(): can't open {}: error 13 (", _testDir),
+    CORRADE_COMPARE_AS(out,
+        format("Utility::Path::size(): can't open {}: error 13 (", _testDir),
         TestSuite::Compare::StringHasPrefix);
     #else
-    CORRADE_COMPARE(out.str(), formatString("Utility::Path::size(): {} is a directory\n", _testDir));
+    CORRADE_COMPARE(out, format("Utility::Path::size(): {} is a directory\n", _testDir));
     #endif
 }
 
 void DirectoryTest::fileSizeNonexistent() {
-    std::ostringstream out;
+    Containers::String out;
     Error redirectError{&out};
     CORRADE_COMPARE(Directory::fileSize("nonexistent"), Containers::NullOpt);
     #ifdef CORRADE_TARGET_EMSCRIPTEN
     /* Emscripten uses a different errno for "No such file or directory" */
-    CORRADE_COMPARE_AS(out.str(),
+    CORRADE_COMPARE_AS(out,
         "Utility::Path::size(): can't open nonexistent: error 44 (",
         TestSuite::Compare::StringHasPrefix);
     #else
-    CORRADE_COMPARE_AS(out.str(),
+    CORRADE_COMPARE_AS(out,
         "Utility::Path::size(): can't open nonexistent: error 2 (",
         TestSuite::Compare::StringHasPrefix);
     #endif
@@ -1766,7 +1764,7 @@ void DirectoryTest::readDirectory() {
         CORRADE_SKIP("iOS (in a simulator) thinks all paths are files, can't test.");
     #endif
 
-    std::ostringstream out;
+    Containers::String out;
     Error redirectError{&out};
     CORRADE_VERIFY(!Directory::read(_testDir));
 
@@ -1774,11 +1772,11 @@ void DirectoryTest::readDirectory() {
        On other systems no idea, so let's say we expect the same message as on
        Unix. */
     #ifdef CORRADE_TARGET_WINDOWS
-    CORRADE_COMPARE_AS(out.str(),
-        formatString("Utility::Path::read(): can't open {}: error 13 (", _testDir),
+    CORRADE_COMPARE_AS(out,
+        format("Utility::Path::read(): can't open {}: error 13 (", _testDir),
         TestSuite::Compare::StringHasPrefix);
     #else
-    CORRADE_COMPARE(out.str(), formatString("Utility::Path::read(): {} is a directory\n", _testDir));
+    CORRADE_COMPARE(out, format("Utility::Path::read(): {} is a directory\n", _testDir));
     #endif
 
     /* Nonexistent file into string shouldn't throw on nullptr */
@@ -1786,16 +1784,16 @@ void DirectoryTest::readDirectory() {
 }
 
 void DirectoryTest::readNonexistent() {
-    std::ostringstream out;
+    Containers::String out;
     Error redirectError{&out};
     CORRADE_VERIFY(!Directory::read("nonexistent"));
     #ifdef CORRADE_TARGET_EMSCRIPTEN
     /* Emscripten uses a different errno for "No such file or directory" */
-    CORRADE_COMPARE_AS(out.str(),
+    CORRADE_COMPARE_AS(out,
         "Utility::Path::read(): can't open nonexistent: error 44 (",
         TestSuite::Compare::StringHasPrefix);
     #else
-    CORRADE_COMPARE_AS(out.str(),
+    CORRADE_COMPARE_AS(out,
         "Utility::Path::read(): can't open nonexistent: error 2 (",
         TestSuite::Compare::StringHasPrefix);
     #endif
@@ -1844,24 +1842,24 @@ void DirectoryTest::writeEmpty() {
 }
 
 void DirectoryTest::writeDirectory() {
-    std::ostringstream out;
+    Containers::String out;
     Error redirectError{&out};
     CORRADE_VERIFY(!Directory::write(_writeTestDir, nullptr));
     /* Fortunately enough, opening the directory for writing fails already,
        without having to do anything special */
     #ifdef CORRADE_TARGET_WINDOWS
     /* Windows APIs use "Permission denied" instead of "Is a directory" */
-    CORRADE_COMPARE_AS(out.str(),
-        formatString("Utility::Path::write(): can't open {}: error 13 (", _writeTestDir),
+    CORRADE_COMPARE_AS(out,
+        format("Utility::Path::write(): can't open {}: error 13 (", _writeTestDir),
         TestSuite::Compare::StringHasPrefix);
     #elif defined(CORRADE_TARGET_EMSCRIPTEN)
     /* Emscripten uses a different errno for "Is a directory" */
-    CORRADE_COMPARE_AS(out.str(),
-        formatString("Utility::Path::write(): can't open {}: error 31 (", _writeTestDir),
+    CORRADE_COMPARE_AS(out,
+        format("Utility::Path::write(): can't open {}: error 31 (", _writeTestDir),
         TestSuite::Compare::StringHasPrefix);
     #else
-    CORRADE_COMPARE_AS(out.str(),
-        formatString("Utility::Path::write(): can't open {}: error 21 (", _writeTestDir),
+    CORRADE_COMPARE_AS(out,
+        format("Utility::Path::write(): can't open {}: error 21 (", _writeTestDir),
         TestSuite::Compare::StringHasPrefix);
     #endif
 }
@@ -1890,11 +1888,11 @@ void DirectoryTest::writeNoPermission() {
     CORRADE_SKIP("Not sure how to test on this system.");
     #endif
 
-    std::ostringstream out;
+    Containers::String out;
     Error redirectError{&out};
     CORRADE_VERIFY(!Directory::write(filename, nullptr));
-    CORRADE_COMPARE_AS(out.str(),
-        formatString("Utility::Path::write(): can't open {}: error 13 (", filename),
+    CORRADE_COMPARE_AS(out,
+        format("Utility::Path::write(): can't open {}: error 13 (", filename),
         TestSuite::Compare::StringHasPrefix);
     #endif
 }
@@ -1958,24 +1956,24 @@ void DirectoryTest::appendEmpty() {
 }
 
 void DirectoryTest::appendDirectory() {
-    std::ostringstream out;
+    Containers::String out;
     Error redirectError{&out};
     CORRADE_VERIFY(!Directory::append(_writeTestDir, nullptr));
     /* Fortunately enough, opening the directory for writing fails already,
        without having to do anything special */
     #ifdef CORRADE_TARGET_WINDOWS
     /* Windows APIs use "Permission denied" instead of "Is a directory" */
-    CORRADE_COMPARE_AS(out.str(),
-        formatString("Utility::Path::append(): can't open {}: error 13 (", _writeTestDir),
+    CORRADE_COMPARE_AS(out,
+        format("Utility::Path::append(): can't open {}: error 13 (", _writeTestDir),
         TestSuite::Compare::StringHasPrefix);
     #elif defined(CORRADE_TARGET_EMSCRIPTEN)
     /* Emscripten uses a different errno for "Is a directory" */
-    CORRADE_COMPARE_AS(out.str(),
-        formatString("Utility::Path::append(): can't open {}: error 31 (", _writeTestDir),
+    CORRADE_COMPARE_AS(out,
+        format("Utility::Path::append(): can't open {}: error 31 (", _writeTestDir),
         TestSuite::Compare::StringHasPrefix);
     #else
-    CORRADE_COMPARE_AS(out.str(),
-        formatString("Utility::Path::append(): can't open {}: error 21 (", _writeTestDir),
+    CORRADE_COMPARE_AS(out,
+        format("Utility::Path::append(): can't open {}: error 21 (", _writeTestDir),
         TestSuite::Compare::StringHasPrefix);
     #endif
 }
@@ -2003,11 +2001,11 @@ void DirectoryTest::appendNoPermission() {
     CORRADE_SKIP("Not sure how to test on this system.");
     #endif
 
-    std::ostringstream out;
+    Containers::String out;
     Error redirectError{&out};
     CORRADE_VERIFY(!Directory::append(filename, nullptr));
-    CORRADE_COMPARE_AS(out.str(),
-        formatString("Utility::Path::append(): can't open {}: error 13 (", filename),
+    CORRADE_COMPARE_AS(out,
+        format("Utility::Path::append(): can't open {}: error 13 (", filename),
         TestSuite::Compare::StringHasPrefix);
     #endif
 }
@@ -2090,28 +2088,28 @@ void DirectoryTest::copyDirectory() {
     CORRADE_VERIFY(Directory::exists(source));
 
     {
-        std::ostringstream out;
+        Containers::String out;
         Error redirectError{&out};
         CORRADE_VERIFY(!Directory::copy(source, _writeTestDir));
         /* Opening a directory for writing fails on its own, so there's no need
            for a special message */
         #ifdef CORRADE_TARGET_WINDOWS
         /* Windows APIs use "Permission denied" instead of "Is a directory" */
-        CORRADE_COMPARE_AS(out.str(),
-            formatString("Utility::Path::copy(): can't open {} for writing: error 13 (", _writeTestDir),
+        CORRADE_COMPARE_AS(out,
+            format("Utility::Path::copy(): can't open {} for writing: error 13 (", _writeTestDir),
             TestSuite::Compare::StringHasPrefix);
         #elif defined(CORRADE_TARGET_EMSCRIPTEN)
         /* Emscripten uses a different errno for "Is a directory" */
-        CORRADE_COMPARE_AS(out.str(),
-            formatString("Utility::Path::copy(): can't open {} for writing: error 31 (", _writeTestDir),
+        CORRADE_COMPARE_AS(out,
+            format("Utility::Path::copy(): can't open {} for writing: error 31 (", _writeTestDir),
             TestSuite::Compare::StringHasPrefix);
         #else
-        CORRADE_COMPARE_AS(out.str(),
-            formatString("Utility::Path::copy(): can't open {} for writing: error 21 (", _writeTestDir),
+        CORRADE_COMPARE_AS(out,
+            format("Utility::Path::copy(): can't open {} for writing: error 21 (", _writeTestDir),
             TestSuite::Compare::StringHasPrefix);
         #endif
     } {
-        std::ostringstream out;
+        Containers::String out;
         Error redirectError{&out};
         CORRADE_VERIFY(!Directory::copy(_writeTestDir, destination));
 
@@ -2119,26 +2117,26 @@ void DirectoryTest::copyDirectory() {
            check. On other systems no idea, so let's say we expect the same
            message as on Unix. */
         #ifdef CORRADE_TARGET_WINDOWS
-        CORRADE_COMPARE_AS(out.str(),
-            formatString("Utility::Path::copy(): can't open {} for reading: error 13 (", _writeTestDir),
+        CORRADE_COMPARE_AS(out,
+            format("Utility::Path::copy(): can't open {} for reading: error 13 (", _writeTestDir),
             TestSuite::Compare::StringHasPrefix);
         #else
-        CORRADE_COMPARE(out.str(), formatString("Utility::Path::copy(): can't read from {} which is a directory\n", _writeTestDir));
+        CORRADE_COMPARE(out, format("Utility::Path::copy(): can't read from {} which is a directory\n", _writeTestDir));
         #endif
     }
 }
 
 void DirectoryTest::copyReadNonexistent() {
-    std::ostringstream out;
+    Containers::String out;
     Error redirectError{&out};
     CORRADE_VERIFY(!Directory::copy("nonexistent", Directory::join(_writeTestDir, "empty")));
     #ifdef CORRADE_TARGET_EMSCRIPTEN
     /* Emscripten uses a different errno for "No such file or directory" */
-    CORRADE_COMPARE_AS(out.str(),
+    CORRADE_COMPARE_AS(out,
         "Utility::Path::copy(): can't open nonexistent for reading: error 44 (",
         TestSuite::Compare::StringHasPrefix);
     #else
-    CORRADE_COMPARE_AS(out.str(),
+    CORRADE_COMPARE_AS(out,
         "Utility::Path::copy(): can't open nonexistent for reading: error 2 (",
         TestSuite::Compare::StringHasPrefix);
     #endif
@@ -2167,11 +2165,11 @@ void DirectoryTest::copyWriteNoPermission() {
     CORRADE_SKIP("Not sure how to test on this system.");
     #endif
 
-    std::ostringstream out;
+    Containers::String out;
     Error redirectError{&out};
     CORRADE_VERIFY(!Directory::copy(Directory::join(_testDir, "dir/dummy"), filename));
-    CORRADE_COMPARE_AS(out.str(),
-        formatString("Utility::Path::copy(): can't open {} for writing: error 13 (", filename),
+    CORRADE_COMPARE_AS(out,
+        format("Utility::Path::copy(): can't open {} for writing: error 13 (", filename),
         TestSuite::Compare::StringHasPrefix);
     #endif
 }
@@ -2307,7 +2305,7 @@ void DirectoryTest::mapEmpty() {
 
 void DirectoryTest::mapDirectory() {
     #if defined(CORRADE_TARGET_UNIX) || (defined(CORRADE_TARGET_WINDOWS) && !defined(CORRADE_TARGET_WINDOWS_RT))
-    std::ostringstream out;
+    Containers::String out;
     Error redirectError{&out};
     CORRADE_VERIFY(!Directory::map(_writeTestDir));
     /* Opening a directory for R+W fails on its own, so there's no need for a
@@ -2315,12 +2313,12 @@ void DirectoryTest::mapDirectory() {
     #ifdef CORRADE_TARGET_WINDOWS
     /* Windows APIs fill GetLastError() instead of errno, leading to a
        different code ("Access denied") */
-    CORRADE_COMPARE_AS(out.str(),
-        formatString("Utility::Path::map(): can't open {}: error 5 (", _writeTestDir),
+    CORRADE_COMPARE_AS(out,
+        format("Utility::Path::map(): can't open {}: error 5 (", _writeTestDir),
         TestSuite::Compare::StringHasPrefix);
     #else
-    CORRADE_COMPARE_AS(out.str(),
-        formatString("Utility::Path::map(): can't open {}: error 21 (", _writeTestDir),
+    CORRADE_COMPARE_AS(out,
+        format("Utility::Path::map(): can't open {}: error 21 (", _writeTestDir),
         TestSuite::Compare::StringHasPrefix);
     #endif
     #else
@@ -2330,10 +2328,10 @@ void DirectoryTest::mapDirectory() {
 
 void DirectoryTest::mapNonexistent() {
     #if defined(CORRADE_TARGET_UNIX) || (defined(CORRADE_TARGET_WINDOWS) && !defined(CORRADE_TARGET_WINDOWS_RT))
-    std::ostringstream out;
+    Containers::String out;
     Error redirectError{&out};
     CORRADE_VERIFY(!Directory::map("nonexistent"));
-    CORRADE_COMPARE_AS(out.str(),
+    CORRADE_COMPARE_AS(out,
         "Utility::Path::map(): can't open nonexistent: error 2 (",
         TestSuite::Compare::StringHasPrefix);
     #else
@@ -2381,18 +2379,18 @@ void DirectoryTest::mapReadDirectory() {
     #endif
 
     #if defined(CORRADE_TARGET_UNIX) || (defined(CORRADE_TARGET_WINDOWS) && !defined(CORRADE_TARGET_WINDOWS_RT))
-    std::ostringstream out;
+    Containers::String out;
     Error redirectError{&out};
     CORRADE_VERIFY(!Directory::mapRead(_writeTestDir));
     /* On Windows the opening itself fails, on Unix we have an explicit check */
     #ifdef CORRADE_TARGET_WINDOWS
     /* Windows APIs fill GetLastError() instead of errno, leading to a
        different code ("Access denied") */
-    CORRADE_COMPARE_AS(out.str(),
-        formatString("Utility::Path::mapRead(): can't open {}: error 5 (", _writeTestDir),
+    CORRADE_COMPARE_AS(out,
+        format("Utility::Path::mapRead(): can't open {}: error 5 (", _writeTestDir),
         TestSuite::Compare::StringHasPrefix);
     #else
-    CORRADE_COMPARE(out.str(), formatString("Utility::Path::mapRead(): {} is a directory\n", _writeTestDir));
+    CORRADE_COMPARE(out, format("Utility::Path::mapRead(): {} is a directory\n", _writeTestDir));
     #endif
     #else
     CORRADE_SKIP("Not implemented on this platform.");
@@ -2401,10 +2399,10 @@ void DirectoryTest::mapReadDirectory() {
 
 void DirectoryTest::mapReadNonexistent() {
     #if defined(CORRADE_TARGET_UNIX) || (defined(CORRADE_TARGET_WINDOWS) && !defined(CORRADE_TARGET_WINDOWS_RT))
-    std::ostringstream out;
+    Containers::String out;
     Error redirectError{&out};
     CORRADE_VERIFY(!Directory::mapRead("nonexistent"));
-    CORRADE_COMPARE_AS(out.str(),
+    CORRADE_COMPARE_AS(out,
         "Utility::Path::mapRead(): can't open nonexistent: error 2 (",
         TestSuite::Compare::StringHasPrefix);
     #else
@@ -2455,7 +2453,7 @@ void DirectoryTest::mapWriteEmpty() {
 
 void DirectoryTest::mapWriteDirectory() {
     #if defined(CORRADE_TARGET_UNIX) || (defined(CORRADE_TARGET_WINDOWS) && !defined(CORRADE_TARGET_WINDOWS_RT))
-    std::ostringstream out;
+    Containers::String out;
     Error redirectError{&out};
     CORRADE_VERIFY(!Directory::mapWrite(_writeTestDir, 64));
     /* Opening a directory for R+W fails on its own, so there's no need for a
@@ -2463,12 +2461,12 @@ void DirectoryTest::mapWriteDirectory() {
     #ifdef CORRADE_TARGET_WINDOWS
     /* Windows APIs fill GetLastError() instead of errno, leading to a
        different code ("Access denied") */
-    CORRADE_COMPARE_AS(out.str(),
-        formatString("Utility::Path::mapWrite(): can't open {}: error 5 (", _writeTestDir),
+    CORRADE_COMPARE_AS(out,
+        format("Utility::Path::mapWrite(): can't open {}: error 5 (", _writeTestDir),
         TestSuite::Compare::StringHasPrefix);
     #else
-    CORRADE_COMPARE_AS(out.str(),
-        formatString("Utility::Path::mapWrite(): can't open {}: error 21 (", _writeTestDir),
+    CORRADE_COMPARE_AS(out,
+        format("Utility::Path::mapWrite(): can't open {}: error 21 (", _writeTestDir),
         TestSuite::Compare::StringHasPrefix);
     #endif
     #else
@@ -2496,18 +2494,18 @@ void DirectoryTest::mapWriteNoPermission() {
     #error
     #endif
 
-    std::ostringstream out;
+    Containers::String out;
     Error redirectError{&out};
     CORRADE_VERIFY(!Directory::mapWrite(filename, 64));
     #ifdef CORRADE_TARGET_WINDOWS
     /* Windows APIs fill GetLastError() instead of errno, leading to a
        different code */
-    CORRADE_COMPARE_AS(out.str(),
-        formatString("Utility::Path::mapWrite(): can't open {}: error 5 (", filename),
+    CORRADE_COMPARE_AS(out,
+        format("Utility::Path::mapWrite(): can't open {}: error 5 (", filename),
         TestSuite::Compare::StringHasPrefix);
     #else
-    CORRADE_COMPARE_AS(out.str(),
-        formatString("Utility::Path::mapWrite(): can't open {}: error 13 (", filename),
+    CORRADE_COMPARE_AS(out,
+        format("Utility::Path::mapWrite(): can't open {}: error 13 (", filename),
         TestSuite::Compare::StringHasPrefix);
     #endif
     #else

@@ -31,7 +31,6 @@
 #include "Corrade/Containers/StringIterable.h"
 #include "Corrade/TestSuite/Tester.h"
 #include "Corrade/TestSuite/Compare/Container.h"
-#include "Corrade/Utility/DebugStl.h"
 
 namespace Corrade { namespace Test { namespace {
 

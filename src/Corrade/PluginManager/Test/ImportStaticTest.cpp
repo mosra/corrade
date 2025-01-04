@@ -24,13 +24,10 @@
     DEALINGS IN THE SOFTWARE.
 */
 
-#include <sstream>
-
 #include "Corrade/Containers/ScopeGuard.h"
 #include "Corrade/PluginManager/Manager.hpp"
 #include "Corrade/TestSuite/Tester.h"
 #include "Corrade/TestSuite/Compare/Container.h"
-#include "Corrade/Utility/DebugStl.h" /** @todo remove when <sstream> is gone */
 
 #include "AbstractAnimal.h"
 
@@ -87,13 +84,13 @@ void ImportStaticTest::importOnce() {
             ejectPlugin();
         }};
 
-        std::ostringstream out;
+        Containers::String out;
         Error redirectError{&out};
 
         /* This shouldn't report any error and list the plugin just once */
         {
             PluginManager::Manager<AbstractAnimal> manager{"nonexistent"};
-            CORRADE_COMPARE(out.str(), "");
+            CORRADE_COMPARE(out, "");
             CORRADE_COMPARE_AS(manager.pluginList(),
                 Containers::arrayView<Containers::StringView>({"Canary"}),
                 TestSuite::Compare::Container);
@@ -128,13 +125,13 @@ void ImportStaticTest::importTwice() {
             ejectPlugin();
         }};
 
-        std::ostringstream out;
+        Containers::String out;
         Error redirectError{&out};
 
         /* This shouldn't report any error and list the plugin just once */
         {
             PluginManager::Manager<AbstractAnimal> manager{"nonexistent"};
-            CORRADE_COMPARE(out.str(), "");
+            CORRADE_COMPARE(out, "");
             CORRADE_COMPARE_AS(manager.pluginList(),
                 Containers::arrayView<Containers::StringView>({"Canary"}),
                 TestSuite::Compare::Container);
@@ -142,7 +139,7 @@ void ImportStaticTest::importTwice() {
         /* And instantiating everything second time should have no issues either */
         } {
             PluginManager::Manager<AbstractAnimal> manager{"nonexistent"};
-            CORRADE_COMPARE(out.str(), "");
+            CORRADE_COMPARE(out, "");
             CORRADE_COMPARE_AS(manager.pluginList(),
                 Containers::arrayView<Containers::StringView>({"Canary"}),
                 TestSuite::Compare::Container);
@@ -179,13 +176,13 @@ void ImportStaticTest::importTwiceMixedWithAnother() {
             ejectPlugin();
         }};
 
-        std::ostringstream out;
+        Containers::String out;
         Error redirectError{&out};
 
         /* This shouldn't report any error and list the plugin just once */
         {
             PluginManager::Manager<AbstractAnimal> manager{"nonexistent"};
-            CORRADE_COMPARE(out.str(), "");
+            CORRADE_COMPARE(out, "");
             CORRADE_COMPARE_AS(manager.pluginList(),
                 Containers::arrayView<Containers::StringView>({"Canary", "Dird"}),
                 TestSuite::Compare::Container);
@@ -193,7 +190,7 @@ void ImportStaticTest::importTwiceMixedWithAnother() {
         /* And instantiating everything second time should have no issues either */
         } {
             PluginManager::Manager<AbstractAnimal> manager{"nonexistent"};
-            CORRADE_COMPARE(out.str(), "");
+            CORRADE_COMPARE(out, "");
             CORRADE_COMPARE_AS(manager.pluginList(),
                 Containers::arrayView<Containers::StringView>({"Canary", "Dird"}),
                 TestSuite::Compare::Container);

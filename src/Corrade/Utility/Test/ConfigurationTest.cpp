@@ -24,7 +24,7 @@
     DEALINGS IN THE SOFTWARE.
 */
 
-#include <sstream>
+#include <sstream> /** @todo remove once Configuration parsing is stream-free */
 #include <string>
 #include <utility>
 #include <vector>
@@ -38,8 +38,8 @@
 #include "Corrade/TestSuite/Compare/FileToString.h"
 #include "Corrade/TestSuite/Compare/String.h"
 #include "Corrade/Utility/Configuration.h"
-#include "Corrade/Utility/DebugStl.h"
-#include "Corrade/Utility/FormatStl.h"
+#include "Corrade/Utility/DebugStl.h" /** @todo remove once Configuration is string-free */
+#include "Corrade/Utility/Format.h"
 #include "Corrade/Utility/Path.h"
 
 /* The __EMSCRIPTEN_major__ etc macros used to be passed implicitly, version
@@ -215,7 +215,7 @@ void ConfigurationTest::parse() {
 }
 
 void ConfigurationTest::parseMissingEquals() {
-    std::ostringstream out;
+    Containers::String out;
     Error redirectError{&out};
     Configuration conf(Path::join(CONFIGURATION_TEST_DIR, "missing-equals.conf"));
 
@@ -223,11 +223,11 @@ void ConfigurationTest::parseMissingEquals() {
     CORRADE_VERIFY(!conf.isValid());
     CORRADE_VERIFY(conf.isEmpty());
     CORRADE_VERIFY(conf.filename().empty());
-    CORRADE_COMPARE(out.str(), "Utility::Configuration::Configuration(): missing equals for a value\n");
+    CORRADE_COMPARE(out, "Utility::Configuration::Configuration(): missing equals for a value\n");
 }
 
 void ConfigurationTest::parseMissingQuote() {
-    std::ostringstream out;
+    Containers::String out;
     Error redirectError{&out};
     Configuration conf(Path::join(CONFIGURATION_TEST_DIR, "missing-quote.conf"));
 
@@ -235,11 +235,11 @@ void ConfigurationTest::parseMissingQuote() {
     CORRADE_VERIFY(!conf.isValid());
     CORRADE_VERIFY(conf.isEmpty());
     CORRADE_VERIFY(conf.filename().empty());
-    CORRADE_COMPARE(out.str(), "Utility::Configuration::Configuration(): missing closing quote for a value\n");
+    CORRADE_COMPARE(out, "Utility::Configuration::Configuration(): missing closing quote for a value\n");
 }
 
 void ConfigurationTest::parseMissingMultiLineQuote() {
-    std::ostringstream out;
+    Containers::String out;
     Error redirectError{&out};
     Configuration conf(Path::join(CONFIGURATION_TEST_DIR, "missing-multiline-quote.conf"));
 
@@ -247,7 +247,7 @@ void ConfigurationTest::parseMissingMultiLineQuote() {
     CORRADE_VERIFY(!conf.isValid());
     CORRADE_VERIFY(conf.isEmpty());
     CORRADE_VERIFY(conf.filename().empty());
-    CORRADE_COMPARE(out.str(), "Utility::Configuration::Configuration(): missing closing quotes for a multi-line value\n");
+    CORRADE_COMPARE(out, "Utility::Configuration::Configuration(): missing closing quotes for a multi-line value\n");
 }
 
 void ConfigurationTest::parseHierarchic() {
@@ -315,33 +315,33 @@ void ConfigurationTest::parseHierarchicShortcuts() {
 }
 
 void ConfigurationTest::parseHierarchicEmptyGroup() {
-    std::ostringstream out;
+    Containers::String out;
     Error redirectError{&out};
     Configuration conf(Path::join(CONFIGURATION_TEST_DIR, "hierarchic-empty-group.conf"));
     CORRADE_VERIFY(!conf.isValid());
     CORRADE_VERIFY(conf.isEmpty());
     CORRADE_VERIFY(conf.filename().empty());
-    CORRADE_COMPARE(out.str(), "Utility::Configuration::Configuration(): empty group name\n");
+    CORRADE_COMPARE(out, "Utility::Configuration::Configuration(): empty group name\n");
 }
 
 void ConfigurationTest::parseHierarchicEmptySubgroup() {
-    std::ostringstream out;
+    Containers::String out;
     Error redirectError{&out};
     Configuration conf(Path::join(CONFIGURATION_TEST_DIR, "hierarchic-empty-subgroup.conf"));
     CORRADE_VERIFY(!conf.isValid());
     CORRADE_VERIFY(conf.isEmpty());
     CORRADE_VERIFY(conf.filename().empty());
-    CORRADE_COMPARE(out.str(), "Utility::Configuration::Configuration(): empty subgroup name\n");
+    CORRADE_COMPARE(out, "Utility::Configuration::Configuration(): empty subgroup name\n");
 }
 
 void ConfigurationTest::parseHierarchicMissingBracket() {
-    std::ostringstream out;
+    Containers::String out;
     Error redirectError{&out};
     Configuration conf(Path::join(CONFIGURATION_TEST_DIR, "hierarchic-missing-bracket.conf"));
     CORRADE_VERIFY(!conf.isValid());
     CORRADE_VERIFY(conf.isEmpty());
     CORRADE_VERIFY(conf.filename().empty());
-    CORRADE_COMPARE(out.str(), "Utility::Configuration::Configuration(): missing closing bracket for a group header\n");
+    CORRADE_COMPARE(out, "Utility::Configuration::Configuration(): missing closing bracket for a group header\n");
 }
 
 void ConfigurationTest::utf8Filename() {
@@ -397,32 +397,32 @@ void ConfigurationTest::valueIndex() {
 void ConfigurationTest::names() {
     CORRADE_SKIP_IF_NO_ASSERT();
 
-    std::ostringstream out;
+    Containers::String out;
     Error redirectError{&out};
     Configuration conf;
 
     {
         /* With CORRADE_GRACEFUL_ASSERT the groups are leaked */
         auto g = conf.addGroup("");
-        CORRADE_COMPARE(out.str(), "Utility::ConfigurationGroup::addGroup(): empty group name\n");
+        CORRADE_COMPARE(out, "Utility::ConfigurationGroup::addGroup(): empty group name\n");
         delete g;
     }
 
     {
         /* With CORRADE_GRACEFUL_ASSERT the groups are leaked */
-        out.str({});
+        out = {};
         auto g = conf.addGroup("a/b/c");
-        CORRADE_COMPARE(out.str(), "Utility::ConfigurationGroup::addGroup(): disallowed character in group name\n");
+        CORRADE_COMPARE(out, "Utility::ConfigurationGroup::addGroup(): disallowed character in group name\n");
         delete g;
     }
 
-    out.str({});
+    out = {};
     conf.setValue("", "foo");
-    CORRADE_COMPARE(out.str(), "Utility::ConfigurationGroup::setValue(): empty key\n");
+    CORRADE_COMPARE(out, "Utility::ConfigurationGroup::setValue(): empty key\n");
 
-    out.str({});
+    out = {};
     conf.addValue("a=", "foo");
-    CORRADE_COMPARE(out.str(), "Utility::ConfigurationGroup::addValue(): disallowed character in key\n");
+    CORRADE_COMPARE(out, "Utility::ConfigurationGroup::addValue(): disallowed character in key\n");
 }
 
 void ConfigurationTest::readonly() {
@@ -443,7 +443,7 @@ void ConfigurationTest::readError() {
     /* A directory, yes. At first I thought this would be a nice & quick way to
        check, but given the amount of OS-specific workarounds all around I'm
        not so sure anymore. */
-    std::ostringstream out;
+    Containers::String out;
     Error redirectError{&out};
     Configuration conf(CONFIGURATION_TEST_DIR);
     CORRADE_VERIFY(!conf.isValid());
@@ -454,11 +454,11 @@ void ConfigurationTest::readError() {
        On other systems no idea, so let's say we expect the same message as on
        Unix. */
     #ifdef CORRADE_TARGET_WINDOWS
-    CORRADE_COMPARE_AS(out.str(),
-        formatString("Utility::Path::read(): can't open {}: error ", CONFIGURATION_TEST_DIR),
+    CORRADE_COMPARE_AS(out,
+        format("Utility::Path::read(): can't open {}: error ", CONFIGURATION_TEST_DIR),
         TestSuite::Compare::StringHasPrefix);
     #else
-    CORRADE_COMPARE(out.str(), formatString("Utility::Path::read(): {} is a directory\n", CONFIGURATION_TEST_DIR));
+    CORRADE_COMPARE(out, format("Utility::Path::read(): {} is a directory\n", CONFIGURATION_TEST_DIR));
     #endif
 }
 

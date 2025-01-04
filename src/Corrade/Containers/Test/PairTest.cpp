@@ -25,11 +25,11 @@
 */
 
 #include <new>
-#include <sstream>
 
+#include "Corrade/Containers/ArrayView.h" /* used in debugPropagateFlags() */
 #include "Corrade/Containers/Pair.h"
+#include "Corrade/Containers/String.h"
 #include "Corrade/TestSuite/Tester.h"
-#include "Corrade/Utility/DebugStl.h"
 
 namespace {
 
@@ -893,7 +893,7 @@ void PairTest::accessRvalueLifetimeExtension() {
         bool orphaned = true;
     };
 
-    std::ostringstream out;
+    Containers::String out;
     Debug redirectOutput{&out};
     {
         /* Here a reference lifetime extension should kick in, causing the
@@ -910,24 +910,24 @@ void PairTest::accessRvalueLifetimeExtension() {
         CORRADE_VERIFY(&first);
         CORRADE_VERIFY(&second);
     }
-    CORRADE_COMPARE(out.str(),
+    CORRADE_COMPARE(out,
         "shouldn't be dead yet\n"
         "dying!\n"
         "dying!\n");
 }
 
 void PairTest::debug() {
-    std::stringstream out;
+    Containers::String out;
     Debug{&out} << pair(42.5f, 3);
-    CORRADE_COMPARE(out.str(), "{42.5, 3}\n");
+    CORRADE_COMPARE(out, "{42.5, 3}\n");
 }
 
 void PairTest::debugPropagateFlags() {
-    std::stringstream out;
+    Containers::String out;
     /* The modifier shouldn't become persistent for values after. The nospace
        modifier shouldn't get propagated. */
     Debug{&out} << ">" << Debug::nospace << Debug::packed << pair(Containers::arrayView({3, 4, 5}), Containers::arrayView({"A", "B"})) << Containers::arrayView({"a", "b", "c"});
-    CORRADE_COMPARE(out.str(), ">{345, AB} {a, b, c}\n");
+    CORRADE_COMPARE(out, ">{345, AB} {a, b, c}\n");
 }
 
 void PairTest::constructorExplicitInCopyInitialization() {

@@ -24,15 +24,13 @@
     DEALINGS IN THE SOFTWARE.
 */
 
-#include <sstream>
-
+#include "Corrade/Containers/ArrayView.h" /* arraySize(), ArrayView */
 #include "Corrade/Containers/StridedBitArrayView.h"
-#include "Corrade/Containers/StringStl.h" /** @todo remove when <sstream> is gone */
+#include "Corrade/Containers/String.h"
 #include "Corrade/TestSuite/Tester.h"
 #include "Corrade/TestSuite/Compare/Container.h"
 #include "Corrade/TestSuite/Compare/Numeric.h"
 #include "Corrade/TestSuite/Compare/String.h"
-#include "Corrade/Utility/DebugStl.h" /** @todo remove when <sstream> is gone */
 
 namespace Corrade { namespace Containers {
 
@@ -724,26 +722,26 @@ void StridedBitArrayViewTest::constructSizeOnlyArray() {
 void StridedBitArrayViewTest::constructOffsetTooLarge() {
     CORRADE_SKIP_IF_NO_DEBUG_ASSERT();
 
-    std::ostringstream out;
+    Containers::String out;
     Error redirectError{&out};
     StridedBitArrayView1D{BitArrayView{nullptr, 0, 0}, nullptr, 8, 0, 1};
-    CORRADE_COMPARE(out.str(),
+    CORRADE_COMPARE(out,
         "Containers::StridedBitArrayView: offset expected to be smaller than 8 bits, got 8\n");
 }
 
 void StridedBitArrayViewTest::constructSizeTooLarge() {
     CORRADE_SKIP_IF_NO_DEBUG_ASSERT();
 
-    std::ostringstream out;
+    Containers::String out;
     Error redirectError{&out};
     /* Creating a view with zero stride, otherwise this would get caught by
        other asserts already */
     StridedBitArrayView1D{BitArrayView{nullptr, 0, 1}, std::size_t{1} << (sizeof(std::size_t)*8 - 3), 0};
     #ifndef CORRADE_TARGET_32BIT
-    CORRADE_COMPARE(out.str(),
+    CORRADE_COMPARE(out,
         "Containers::StridedBitArrayView: size expected to be smaller than 2^61 bits, got {2305843009213693952}\n");
     #else
-    CORRADE_COMPARE(out.str(),
+    CORRADE_COMPARE(out,
         "Containers::StridedBitArrayView: size expected to be smaller than 2^29 bits, got {536870912}\n");
     #endif
 }
@@ -751,10 +749,10 @@ void StridedBitArrayViewTest::constructSizeTooLarge() {
 void StridedBitArrayViewTest::constructViewTooSmall() {
     CORRADE_SKIP_IF_NO_ASSERT();
 
-    std::ostringstream out;
+    Containers::String out;
     Error redirectError{&out};
     StridedBitArrayView1D{BitArrayView{nullptr, 0, 15}, nullptr, 0, 8, 2};
-    CORRADE_COMPARE(out.str(),
+    CORRADE_COMPARE(out,
         "Containers::StridedBitArrayView: data size 15 is not enough for {8} bits of stride {2}\n");
 }
 
@@ -765,10 +763,10 @@ void StridedBitArrayViewTest::constructBeginOffsetTooSmall() {
     char a[3]{};
     StridedBitArrayView1D{BitArrayView{a, 7, 15}, a + 1, 6, 4, 2};
 
-    std::ostringstream out;
+    Containers::String out;
     Error redirectError{&out};
     StridedBitArrayView1D{BitArrayView{a, 7, 15}, a, 6, 4, 2};
-    CORRADE_COMPARE(out.str(),
+    CORRADE_COMPARE(out,
         "Containers::StridedBitArrayView: offset 6 is less than data offset 7 in the same byte\n");
 }
 
@@ -1127,26 +1125,26 @@ void StridedBitArrayViewTest::construct3DOneSizeZero() {
     int data[1]{};
 
     /* Assertion shouldn't fire because size in second dimension is zero */
-    std::ostringstream out;
+    Containers::String out;
     Error redirectError{&out};
     StridedBitArrayView3D a{BitArrayView{data, 0, 0}, {5, 0, 3}, {46, 54, 22}};
-    CORRADE_COMPARE(out.str(), "");
+    CORRADE_COMPARE(out, "");
     CORRADE_COMPARE(a.data(), &data[0]);
 }
 
 void StridedBitArrayViewTest::construct3DSizeTooLarge() {
     CORRADE_SKIP_IF_NO_DEBUG_ASSERT();
 
-    std::ostringstream out;
+    Containers::String out;
     Error redirectError{&out};
     /* Creating a view with zero stride, otherwise this would get caught by
        other asserts already */
     StridedBitArrayView3D{BitArrayView{nullptr, 0, 1}, {1,
         std::size_t{1} << (sizeof(std::size_t)*8 - 3), 1}, {1, 0, 1}};
     #ifndef CORRADE_TARGET_32BIT
-    CORRADE_COMPARE(out.str(), "Containers::StridedBitArrayView: size expected to be smaller than 2^61 bits, got {1, 2305843009213693952, 1}\n");
+    CORRADE_COMPARE(out, "Containers::StridedBitArrayView: size expected to be smaller than 2^61 bits, got {1, 2305843009213693952, 1}\n");
     #else
-    CORRADE_COMPARE(out.str(), "Containers::StridedBitArrayView: size expected to be smaller than 2^29 bits, got {1, 536870912, 1}\n");
+    CORRADE_COMPARE(out, "Containers::StridedBitArrayView: size expected to be smaller than 2^29 bits, got {1, 536870912, 1}\n");
     #endif
 }
 
@@ -1155,10 +1153,10 @@ void StridedBitArrayViewTest::construct3DViewTooSmall() {
 
     int data[3]{};
 
-    std::ostringstream out;
+    Containers::String out;
     Error redirectError{&out};
     StridedBitArrayView3D{BitArrayView{data}, {2, 5, 3}, {48, 24, 8}};
-    CORRADE_COMPARE(out.str(),
+    CORRADE_COMPARE(out,
         "Containers::StridedBitArrayView: data size 96 is not enough for {2, 5, 3} bits of stride {48, 24, 8}\n");
 }
 
@@ -1335,13 +1333,13 @@ void StridedBitArrayViewTest::asContiguousNonContiguous() {
     StridedBitArrayView3D d{a, {5, 1, 2}, {6*4, 2*2*4, 4}};
     StridedBitArrayView3D e{a, {5, 3, 1}, {6*4, 2*4, 2*4}};
 
-    std::ostringstream out;
+    Containers::String out;
     Error redirectError{&out};
     c.asContiguous();
     c.asContiguous<0>();
     d.asContiguous<1>();
     e.asContiguous<2>();
-    CORRADE_COMPARE(out.str(),
+    CORRADE_COMPARE(out,
         "Containers::StridedBitArrayView::asContiguous(): the view is not contiguous\n"
         "Containers::StridedBitArrayView::asContiguous(): the view is not contiguous from dimension 0\n"
         "Containers::StridedBitArrayView::asContiguous(): the view is not contiguous from dimension 1\n"
@@ -1498,13 +1496,13 @@ void StridedBitArrayViewTest::accessInvalid() {
     std::uint64_t data[1]{};
     MutableStridedBitArrayView1D a{MutableBitArrayView{data, 4, 53}, 26, 2};
 
-    std::stringstream out;
+    Containers::String out;
     Error redirectError{&out};
     a[26];
     a.set(26);
     a.reset(26);
     a.set(26, true);
-    CORRADE_COMPARE(out.str(),
+    CORRADE_COMPARE(out,
         "Containers::StridedBitArrayView::operator[](): index 26 out of range for 26 elements\n"
         "Containers::StridedBitArrayView::set(): index 26 out of range for 26 bits\n"
         "Containers::StridedBitArrayView::reset(): index 26 out of range for 26 bits\n"
@@ -1939,7 +1937,7 @@ void StridedBitArrayViewTest::access3DNegativeStrideMutable() {
 void StridedBitArrayViewTest::access3DInvalid() {
     CORRADE_SKIP_IF_NO_DEBUG_ASSERT();
 
-    std::stringstream out;
+    Containers::String out;
     Error redirectError{&out};
 
     std::uint32_t data[1]{};
@@ -1962,7 +1960,7 @@ void StridedBitArrayViewTest::access3DInvalid() {
     b.set({0, 1, 3}, false);
     b.set({0, 2, 2}, false);
     b.set({1, 1, 2}, false);
-    CORRADE_COMPARE_AS(out.str(),
+    CORRADE_COMPARE_AS(out,
         "Containers::StridedBitArrayView::operator[](): index 1 out of range for 1 elements\n"
         "Containers::StridedBitArrayView::operator[](): index 2 out of range for 2 elements\n"
         "Containers::StridedBitArrayView::operator[](): index 3 out of range for 3 elements\n"
@@ -2052,11 +2050,11 @@ void StridedBitArrayViewTest::sliceInvalid() {
 
     const StridedBitArrayView1D a{BitArrayView{nullptr, 5, 24}, 5, 3};
 
-    std::ostringstream out;
+    Containers::String out;
     Error redirectError{&out};
     a.slice(5, 6);
     a.slice(2, 1);
-    CORRADE_COMPARE(out.str(),
+    CORRADE_COMPARE(out,
         "Containers::StridedBitArrayView::slice(): slice [5:6] out of range for 5 elements\n"
         "Containers::StridedBitArrayView::slice(): slice [2:1] out of range for 5 elements\n");
 }
@@ -2137,11 +2135,11 @@ void StridedBitArrayViewTest::slice3DInvalid() {
 
     StridedBitArrayView3D a{BitArrayView{nullptr, 7, 23*8}, {3, 4, 5}, {55, 11, 2}};
 
-    std::ostringstream out;
+    Containers::String out;
     Error redirectError{&out};
     a.slice({1, 0, 1}, {3, 5, 3});
     a.slice({2, 0, 1}, {0, 4, 3});
-    CORRADE_COMPARE(out.str(),
+    CORRADE_COMPARE(out,
         "Containers::StridedBitArrayView::slice(): slice [{1, 0, 1}:{3, 5, 3}] out of range for {3, 4, 5} elements in dimension 1\n"
         "Containers::StridedBitArrayView::slice(): slice [{2, 0, 1}:{0, 4, 3}] out of range for {3, 4, 5} elements in dimension 0\n");
 }
@@ -2229,11 +2227,11 @@ void StridedBitArrayViewTest::slice3DFirstDimensionInvalid() {
 
     StridedBitArrayView3D a{BitArrayView{nullptr, 7, 23*8}, {3, 3, 2}, {55, 11, 2}};
 
-    std::ostringstream out;
+    Containers::String out;
     Error redirectError{&out};
     a.slice(3, 4);
     a.slice(2, 1);
-    CORRADE_COMPARE(out.str(),
+    CORRADE_COMPARE(out,
         "Containers::StridedBitArrayView::slice(): slice [3:4] out of range for 3 elements\n"
         "Containers::StridedBitArrayView::slice(): slice [2:1] out of range for 3 elements\n");
 }
@@ -2275,11 +2273,11 @@ void StridedBitArrayViewTest::every() {
 void StridedBitArrayViewTest::everyInvalid() {
     CORRADE_SKIP_IF_NO_ASSERT();
 
-    std::ostringstream out;
+    Containers::String out;
     Error redirectError{&out};
 
     StridedBitArrayView1D{}.every(0);
-    CORRADE_COMPARE(out.str(), "Containers::StridedBitArrayView::every(): expected a non-zero step, got {0}\n");
+    CORRADE_COMPARE(out, "Containers::StridedBitArrayView::every(): expected a non-zero step, got {0}\n");
 }
 
 void StridedBitArrayViewTest::every3D() {
@@ -2303,11 +2301,11 @@ void StridedBitArrayViewTest::every3D() {
 void StridedBitArrayViewTest::every3DInvalid() {
     CORRADE_SKIP_IF_NO_ASSERT();
 
-    std::ostringstream out;
+    Containers::String out;
     Error redirectError{&out};
 
     StridedBitArrayView3D{}.every({3, 0, 4});
-    CORRADE_COMPARE(out.str(), "Containers::StridedBitArrayView::every(): expected a non-zero step, got {3, 0, 4}\n");
+    CORRADE_COMPARE(out, "Containers::StridedBitArrayView::every(): expected a non-zero step, got {3, 0, 4}\n");
 }
 
 void StridedBitArrayViewTest::every3DFirstDimension() {
@@ -2498,10 +2496,10 @@ void StridedBitArrayViewTest::broadcastedInvalid() {
     /* Same input as in access3D() */
     StridedBitArrayView3D a{BitArrayView{DataPadded3D + 1, 7, 23*8}, {3, 4, 5}, {55, 11, 2}};
 
-    std::ostringstream out;
+    Containers::String out;
     Error redirectError{&out};
     a.broadcasted<2>(16);
-    CORRADE_COMPARE(out.str(),
+    CORRADE_COMPARE(out,
         "Containers::StridedBitArrayView::broadcasted(): can't broadcast dimension 2 with 5 elements\n");
 }
 
@@ -2736,7 +2734,7 @@ void StridedBitArrayViewTest::expandedCollapsedInvalid() {
     b1.collapsed<1, 2>();
     b1.flipped<1>().flipped<2>().collapsed<1, 2>();
 
-    std::ostringstream out;
+    Containers::String out;
     Error redirectError{&out};
     a.expanded<1>(Size1D{14});
     a.expanded<1>(Size2D{2, 6});
@@ -2745,7 +2743,7 @@ void StridedBitArrayViewTest::expandedCollapsedInvalid() {
     b1.flipped<0>().flipped<1>().flipped<2>().collapsed<0, 3>();
     b2.collapsed<0, 3>();
     b2.flipped<0>().flipped<1>().flipped<2>().collapsed<0, 3>();
-    CORRADE_COMPARE(out.str(),
+    CORRADE_COMPARE(out,
         "Containers::StridedBitArrayView::expanded(): product of {14} doesn't match 13 elements in dimension 1\n"
         "Containers::StridedBitArrayView::expanded(): product of {2, 6} doesn't match 13 elements in dimension 1\n"
         "Containers::StridedBitArrayView::expanded(): product of {2, 3, 2} doesn't match 13 elements in dimension 1\n"
@@ -2760,7 +2758,7 @@ void StridedBitArrayViewTest::debug() {
           1 1  1 1  0 1  0 1  0 0  1 1 */
     char data[]{'\xe0', '\x61', '\xa6', '\x0a'};
 
-    std::ostringstream out;
+    Containers::String out;
     /* Testing also the BitArrayView to check for potential ambiguous overloads
        due to it being convertible to StridedBitArrayView */
     Debug{&out} << BitArrayView{DataPadded + 1, 5, 24};
@@ -2770,7 +2768,7 @@ void StridedBitArrayViewTest::debug() {
     Debug{&out} << StridedBitArrayView1D{BitArrayView{DataPadded + 1, 5, 24}, 12, 2};
     Debug{&out} << MutableStridedBitArrayView1D{MutableBitArrayView{data, 5, 24}, 12, 2};
     Debug{&out} << StridedBitArrayView1D{BitArrayView{DataPadded + 1, 5, 24}, 9, 2};
-    CORRADE_COMPARE(out.str(),
+    CORRADE_COMPARE(out,
         "{11110000, 11001100, 10101010}\n"
         "{11110000, 11001100, 10101010}\n"
         "{11001010, 1111}\n"
@@ -2786,13 +2784,13 @@ void StridedBitArrayViewTest::debug3D() {
         '\xe0', '\x3f', '\x00', '\x98', '\x09', '\x00', '\x00', '\x00'
     };
 
-    std::ostringstream out;
+    Containers::String out;
     /* Compared to the usual four rows this has only two to avoid overly
        verbose output. Bit group separation tested in the 1D case above
        already. */
     Debug{&out} << StridedBitArrayView3D{BitArrayView{DataPadded3D + 1, 7, 165}, {3, 2, 5}, {55, 11, 2}};
     Debug{&out} << MutableStridedBitArrayView3D{MutableBitArrayView{data, 7, 165}, {3, 2, 5}, {55, 11, 2}};
-    CORRADE_COMPARE(out.str(),
+    CORRADE_COMPARE(out,
         "{{{11111}, {00000}}, {{00000}, {11001}}, {{11111}, {00000}}}\n"
         "{{{11111}, {00000}}, {{00000}, {11001}}, {{11111}, {00000}}}\n");
 }

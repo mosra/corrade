@@ -28,10 +28,8 @@
    accidental help from standard headers */
 #include "Corrade/configure.h"
 
-#include <sstream>
-
+#include "Corrade/Containers/String.h"
 #include "Corrade/TestSuite/Tester.h"
-#include "Corrade/Utility/DebugStl.h" /** @todo remove when <sstream> is gone */
 
 #include "configure.h"
 
@@ -66,7 +64,7 @@ TargetTest::TargetTest() {
 }
 
 void TargetTest::system() {
-    std::ostringstream out;
+    Containers::String out;
     #ifdef CORRADE_TARGET_APPLE
     Debug{&out} << "CORRADE_TARGET_APPLE";
     #ifndef CORRADE_TARGET_UNIX
@@ -109,12 +107,12 @@ void TargetTest::system() {
     #endif
     #endif
 
-    Debug{Debug::Flag::NoNewlineAtTheEnd} << out.str();
-    CORRADE_VERIFY(!out.str().empty() || !"No suitable CORRADE_TARGET_* defined");
+    Debug{Debug::Flag::NoNewlineAtTheEnd} << out;
+    CORRADE_FAIL_IF(!out, "No suitable CORRADE_TARGET_* defined");
 }
 
 void TargetTest::architecture() {
-    std::ostringstream out;
+    Containers::String out;
     int unique = 0;
 
     #ifdef CORRADE_TARGET_X86
@@ -137,8 +135,8 @@ void TargetTest::architecture() {
     Debug{&out} << "CORRADE_TARGET_WASM";
     #endif
 
-    Debug{Debug::Flag::NoNewlineAtTheEnd} << out.str();
-    CORRADE_VERIFY(!out.str().empty() || !"No suitable CORRADE_TARGET_* defined");
+    Debug{Debug::Flag::NoNewlineAtTheEnd} << out;
+    CORRADE_FAIL_IF(!out, "No suitable CORRADE_TARGET_* defined");
     CORRADE_COMPARE(unique, 1);
 }
 
@@ -172,7 +170,7 @@ void TargetTest::endian() {
 }
 
 void TargetTest::compiler() {
-    std::ostringstream out;
+    Containers::String out;
 
     #ifdef CORRADE_TARGET_GCC
     Debug{&out, Debug::Flag::NoSpace} << "CORRADE_TARGET_GCC " << __GNUC__ << "." << __GNUC_MINOR__ << "." << __GNUC_PATCHLEVEL__;
@@ -198,8 +196,8 @@ void TargetTest::compiler() {
     Debug{&out} << "CORRADE_TARGET_MINGW";
     #endif
 
-    Debug{Debug::Flag::NoNewlineAtTheEnd} << out.str();
-    CORRADE_VERIFY(!out.str().empty() || !"No suitable CORRADE_TARGET_* defined");
+    Debug{Debug::Flag::NoNewlineAtTheEnd} << out;
+    CORRADE_FAIL_IF(!out, "No suitable CORRADE_TARGET_* defined");
 
     #if defined(CMAKE_CORRADE_TARGET_GCC) != defined(CORRADE_TARGET_GCC)
     CORRADE_FAIL("Inconsistency in CMake-defined CORRADE_TARGET_GCC");
@@ -252,7 +250,7 @@ void TargetTest::msvcPermissiveFlag() {
 #endif
 
 void TargetTest::stl() {
-    std::ostringstream out;
+    Containers::String out;
     int unique = 0;
 
     #ifdef CORRADE_TARGET_LIBSTDCXX
@@ -274,13 +272,13 @@ void TargetTest::stl() {
     Debug{&out} << "CORRADE_TARGET_DINKUMWARE" << _MSC_VER;
     #endif
 
-    Debug{Debug::Flag::NoNewlineAtTheEnd} << out.str();
-    CORRADE_VERIFY(!out.str().empty() || !"No suitable CORRADE_TARGET_* defined");
+    Debug{Debug::Flag::NoNewlineAtTheEnd} << out;
+    CORRADE_FAIL_IF(!out, "No suitable CORRADE_TARGET_* defined");
     CORRADE_COMPARE(unique, 1);
 }
 
 void TargetTest::cpu() {
-    std::ostringstream out;
+    Containers::String out;
 
     #ifdef CORRADE_TARGET_X86
     #ifdef CORRADE_TARGET_SSE2
@@ -422,8 +420,9 @@ void TargetTest::cpu() {
     CORRADE_FAIL("CORRADE_TARGET_SIMD128 defined but CORRADE_TARGET_WASM not");
     #endif
 
-    Debug{Debug::Flag::NoNewlineAtTheEnd} << out.str();
-    if(out.str().empty()) Debug{} << "No suitable CORRADE_TARGET_* defined";
+    Debug{Debug::Flag::NoNewlineAtTheEnd} << out;
+    if(!out)
+        CORRADE_WARN("No suitable CORRADE_TARGET_* defined");
     CORRADE_VERIFY(true);
 }
 

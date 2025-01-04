@@ -24,12 +24,11 @@
     DEALINGS IN THE SOFTWARE.
 */
 
-#include <sstream>
 #include "Corrade/Containers/GrowableArray.h"
 #include "Corrade/Containers/LinkedList.h"
+#include "Corrade/Containers/String.h"
 #include "Corrade/TestSuite/Tester.h"
 #include "Corrade/TestSuite/Compare/Container.h"
-#include "Corrade/Utility/DebugStl.h" /** @todo remove when <sstream> is gone */
 
 namespace Corrade { namespace Containers { namespace Test { namespace {
 
@@ -170,7 +169,7 @@ void LinkedListTest::insert() {
 void LinkedListTest::insertFromOtherList() {
     CORRADE_SKIP_IF_NO_ASSERT();
 
-    std::stringstream out;
+    Containers::String out;
     Error redirectError{&out};
 
     LinkedList list;
@@ -179,13 +178,13 @@ void LinkedListTest::insertFromOtherList() {
 
     LinkedList list2;
     list2.insert(&item);
-    CORRADE_COMPARE(out.str(), "Containers::LinkedList::insert(): cannot insert an item already connected elsewhere\n");
+    CORRADE_COMPARE(out, "Containers::LinkedList::insert(): cannot insert an item already connected elsewhere\n");
 }
 
 void LinkedListTest::insertBeforeFromOtherList() {
     CORRADE_SKIP_IF_NO_ASSERT();
 
-    std::stringstream out;
+    Containers::String out;
     Error redirectError{&out};
 
     LinkedList list;
@@ -195,13 +194,13 @@ void LinkedListTest::insertBeforeFromOtherList() {
     LinkedList list2;
     Item item2;
     list2.insert(&item2, &item);
-    CORRADE_COMPARE(out.str(), "Containers::LinkedList::insert(): cannot insert before an item which is not a part of the list\n");
+    CORRADE_COMPARE(out, "Containers::LinkedList::insert(): cannot insert before an item which is not a part of the list\n");
 }
 
 void LinkedListTest::cutFromOtherList() {
     CORRADE_SKIP_IF_NO_ASSERT();
 
-    std::stringstream out;
+    Containers::String out;
     Error redirectError{&out};
 
     LinkedList list;
@@ -210,7 +209,7 @@ void LinkedListTest::cutFromOtherList() {
 
     LinkedList list2;
     list2.cut(&item);
-    CORRADE_COMPARE(out.str(), "Containers::LinkedList::cut(): cannot cut out an item which is not a part of the list\n");
+    CORRADE_COMPARE(out, "Containers::LinkedList::cut(): cannot cut out an item which is not a part of the list\n");
 }
 
 void LinkedListTest::cut() {

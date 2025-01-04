@@ -25,19 +25,17 @@
 */
 
 #include <cmath> /* NAN, INFINITY */
-#include <sstream>
 
 #include "Corrade/Containers/ArrayView.h"
 #include "Corrade/Containers/ScopeGuard.h"
 #include "Corrade/Containers/StridedArrayView.h"
 #include "Corrade/Containers/StridedBitArrayView.h"
+#include "Corrade/Containers/String.h"
 #include "Corrade/Containers/StringIterable.h"
-#include "Corrade/Containers/StringStl.h" /** @todo remove once Debug is stream-free */
 #include "Corrade/TestSuite/Tester.h"
 #include "Corrade/TestSuite/Compare/FileToString.h"
 #include "Corrade/TestSuite/Compare/String.h"
-#include "Corrade/Utility/DebugStl.h" /** @todo remove once Debug is stream-free */
-#include "Corrade/Utility/FormatStl.h" /** @todo remove once Debug is stream-free */
+#include "Corrade/Utility/Format.h"
 #include "Corrade/Utility/JsonWriter.h"
 #include "Corrade/Utility/Path.h"
 
@@ -978,10 +976,10 @@ void JsonWriterTest::rawJsonInObjectKey() {
     JsonWriter json;
     json.beginObject();
 
-    std::ostringstream out;
+    Containers::String out;
     Error redirectError{&out};
     json.writeJson("/* A comment*/ \"key\"");
-    CORRADE_COMPARE(out.str(),
+    CORRADE_COMPARE(out,
         "Utility::JsonWriter::writeJson(): expected an object key or object end\n");
 }
 
@@ -1030,11 +1028,11 @@ void JsonWriterTest::toFileFailed() {
 
     CORRADE_VERIFY(Path::make(JSONWRITER_TEST_DIR));
 
-    std::ostringstream out;
+    Containers::String out;
     Error redirectError{&out};
     CORRADE_VERIFY(!json.toFile(JSONWRITER_TEST_DIR));
     /* There's an error from Path::write() before */
-    CORRADE_COMPARE_AS(out.str(),
+    CORRADE_COMPARE_AS(out,
         "\nUtility::JsonWriter::toFile(): can't write to " JSONWRITER_TEST_DIR "\n",
         TestSuite::Compare::StringHasSuffix);
 }
@@ -1042,10 +1040,10 @@ void JsonWriterTest::toFileFailed() {
 void JsonWriterTest::tooBigIndent() {
     CORRADE_SKIP_IF_NO_ASSERT();
 
-    std::ostringstream out;
+    Containers::String out;
     Error redirectError{&out};
     JsonWriter{{}, 9};
-    CORRADE_COMPARE(out.str(), "Utility::JsonWriter: indentation can be at most 8 characters, got 9\n");
+    CORRADE_COMPARE(out, "Utility::JsonWriter: indentation can be at most 8 characters, got 9\n");
 }
 
 void JsonWriterTest::currentArraySizeNoValue() {
@@ -1053,10 +1051,10 @@ void JsonWriterTest::currentArraySizeNoValue() {
 
     JsonWriter json;
 
-    std::ostringstream out;
+    Containers::String out;
     Error redirectError{&out};
     json.currentArraySize();
-    CORRADE_COMPARE(out.str(), "Utility::JsonWriter::currentArraySize(): not in an array\n");
+    CORRADE_COMPARE(out, "Utility::JsonWriter::currentArraySize(): not in an array\n");
 }
 
 void JsonWriterTest::currentArraySizeObject() {
@@ -1067,10 +1065,10 @@ void JsonWriterTest::currentArraySizeObject() {
             .beginObject()
             .writeKey("hello");
 
-    std::ostringstream out;
+    Containers::String out;
     Error redirectError{&out};
     json.currentArraySize();
-    CORRADE_COMPARE(out.str(), "Utility::JsonWriter::currentArraySize(): not in an array\n");
+    CORRADE_COMPARE(out, "Utility::JsonWriter::currentArraySize(): not in an array\n");
 }
 
 void JsonWriterTest::objectEndButNoObject() {
@@ -1078,10 +1076,10 @@ void JsonWriterTest::objectEndButNoObject() {
 
     JsonWriter json;
 
-    std::ostringstream out;
+    Containers::String out;
     Error redirectError{&out};
     json.endObject();
-    CORRADE_COMPARE(out.str(), "Utility::JsonWriter::endObject(): expected a value\n");
+    CORRADE_COMPARE(out, "Utility::JsonWriter::endObject(): expected a value\n");
 }
 
 void JsonWriterTest::arrayEndButNoArray() {
@@ -1089,10 +1087,10 @@ void JsonWriterTest::arrayEndButNoArray() {
 
     JsonWriter json;
 
-    std::ostringstream out;
+    Containers::String out;
     Error redirectError{&out};
     json.endArray();
-    CORRADE_COMPARE(out.str(), "Utility::JsonWriter::endArray(): expected a value\n");
+    CORRADE_COMPARE(out, "Utility::JsonWriter::endArray(): expected a value\n");
 }
 
 void JsonWriterTest::arrayEndButObjectEndExpected() {
@@ -1101,10 +1099,10 @@ void JsonWriterTest::arrayEndButObjectEndExpected() {
     JsonWriter json;
     json.beginObject();
 
-    std::ostringstream out;
+    Containers::String out;
     Error redirectError{&out};
     json.endArray();
-    CORRADE_COMPARE(out.str(), "Utility::JsonWriter::endArray(): expected an object key or object end\n");
+    CORRADE_COMPARE(out, "Utility::JsonWriter::endArray(): expected an object key or object end\n");
 }
 
 void JsonWriterTest::objectEndButArrayEndExpected() {
@@ -1113,10 +1111,10 @@ void JsonWriterTest::objectEndButArrayEndExpected() {
     JsonWriter json;
     json.beginArray();
 
-    std::ostringstream out;
+    Containers::String out;
     Error redirectError{&out};
     json.endObject();
-    CORRADE_COMPARE(out.str(), "Utility::JsonWriter::endObject(): expected an array value or array end\n");
+    CORRADE_COMPARE(out, "Utility::JsonWriter::endObject(): expected an array value or array end\n");
 }
 
 void JsonWriterTest::valueButObjectKeyExpected() {
@@ -1125,12 +1123,12 @@ void JsonWriterTest::valueButObjectKeyExpected() {
     JsonWriter json;
     json.beginObject();
 
-    std::ostringstream out;
+    Containers::String out;
     Error redirectError{&out};
     json.write("hello")
         .writeArray({5})
         .writeJson("false");
-    CORRADE_COMPARE(out.str(),
+    CORRADE_COMPARE(out,
         "Utility::JsonWriter::write(): expected an object key or object end\n"
         "Utility::JsonWriter::writeArray(): expected an object key or object end\n"
         "Utility::JsonWriter::writeJson(): expected an object key or object end\n");
@@ -1143,10 +1141,10 @@ void JsonWriterTest::objectKeyButValueExpected() {
     json.beginObject()
         .writeKey("hi");
 
-    std::ostringstream out;
+    Containers::String out;
     Error redirectError{&out};
     json.writeKey("hello");
-    CORRADE_COMPARE(out.str(), "Utility::JsonWriter::writeKey(): expected an object value\n");
+    CORRADE_COMPARE(out, "Utility::JsonWriter::writeKey(): expected an object value\n");
 }
 
 void JsonWriterTest::objectKeyButDocumentEndExpected() {
@@ -1155,10 +1153,10 @@ void JsonWriterTest::objectKeyButDocumentEndExpected() {
     JsonWriter json;
     json.write("hi");
 
-    std::ostringstream out;
+    Containers::String out;
     Error redirectError{&out};
     json.writeKey("hello");
-    CORRADE_COMPARE(out.str(), "Utility::JsonWriter::writeKey(): expected document end\n");
+    CORRADE_COMPARE(out, "Utility::JsonWriter::writeKey(): expected document end\n");
 }
 
 void JsonWriterTest::valueButDocumentEndExpected() {
@@ -1167,12 +1165,12 @@ void JsonWriterTest::valueButDocumentEndExpected() {
     JsonWriter json;
     json.write("hi");
 
-    std::ostringstream out;
+    Containers::String out;
     Error redirectError{&out};
     json.write("hello")
         .writeArray({5})
         .writeJson("/* HI JSON CAN YOU COMMENT */");
-    CORRADE_COMPARE(out.str(),
+    CORRADE_COMPARE(out,
         "Utility::JsonWriter::write(): expected document end\n"
         "Utility::JsonWriter::writeArray(): expected document end\n"
         "Utility::JsonWriter::writeJson(): expected document end\n");
@@ -1184,7 +1182,7 @@ void JsonWriterTest::disallowedInCompactArray() {
     JsonWriter json;
     json.beginCompactArray();
 
-    std::ostringstream out;
+    Containers::String out;
     Error redirectError{&out};
     json
         .beginObject()
@@ -1196,7 +1194,7 @@ void JsonWriterTest::disallowedInCompactArray() {
            their own internal indentation etc., which would significantly break
            the formatting here. */
         .writeJson("/* HI JSON CAN YOU COMMENT */");
-    CORRADE_COMPARE(out.str(),
+    CORRADE_COMPARE(out,
         "Utility::JsonWriter::beginObject(): expected a compact array value or array end\n"
         "Utility::JsonWriter::beginArray(): expected a compact array value or array end\n"
         "Utility::JsonWriter::beginCompactArray(): expected a compact array value or array end\n"
@@ -1209,11 +1207,11 @@ void JsonWriterTest::toStringOrFileNoValue() {
 
     JsonWriter json;
 
-    std::ostringstream out;
+    Containers::String out;
     Error redirectError{&out};
     json.toString();
     json.toFile(Path::join(JSONWRITER_TEST_DIR, "file.json"));
-    CORRADE_COMPARE(out.str(),
+    CORRADE_COMPARE(out,
         "Utility::JsonWriter::toString(): incomplete JSON, expected a value\n"
         "Utility::JsonWriter::toFile(): incomplete JSON, expected a value\n");
 }
@@ -1224,11 +1222,11 @@ void JsonWriterTest::toStringOrFileIncompleteObject() {
     JsonWriter json;
     json.beginObject();
 
-    std::ostringstream out;
+    Containers::String out;
     Error redirectError{&out};
     json.toString();
     json.toFile(Path::join(JSONWRITER_TEST_DIR, "file.json"));
-    CORRADE_COMPARE(out.str(),
+    CORRADE_COMPARE(out,
         "Utility::JsonWriter::toString(): incomplete JSON, expected an object key or object end\n"
         "Utility::JsonWriter::toFile(): incomplete JSON, expected an object key or object end\n");
 }
@@ -1240,11 +1238,11 @@ void JsonWriterTest::toStringOrFileIncompleteObjectValue() {
     json.beginObject()
         .writeKey("hi");
 
-    std::ostringstream out;
+    Containers::String out;
     Error redirectError{&out};
     json.toString();
     json.toFile(Path::join(JSONWRITER_TEST_DIR, "file.json"));
-    CORRADE_COMPARE(out.str(),
+    CORRADE_COMPARE(out,
         "Utility::JsonWriter::toString(): incomplete JSON, expected an object value\n"
         "Utility::JsonWriter::toFile(): incomplete JSON, expected an object value\n");
 }
@@ -1255,11 +1253,11 @@ void JsonWriterTest::toStringOrFileIncompleteArray() {
     JsonWriter json;
     json.beginArray();
 
-    std::ostringstream out;
+    Containers::String out;
     Error redirectError{&out};
     json.toString();
     json.toFile(Path::join(JSONWRITER_TEST_DIR, "file.json"));
-    CORRADE_COMPARE(out.str(),
+    CORRADE_COMPARE(out,
         "Utility::JsonWriter::toString(): incomplete JSON, expected an array value or array end\n"
         "Utility::JsonWriter::toFile(): incomplete JSON, expected an array value or array end\n");
 }
@@ -1272,10 +1270,10 @@ void JsonWriterTest::invalidFloat() {
 
     JsonWriter json;
 
-    std::ostringstream out;
+    Containers::String out;
     Error redirectError{&out};
     json.write(data.floatValue);
-    CORRADE_COMPARE(out.str(), formatString(
+    CORRADE_COMPARE(out, format(
         "Utility::JsonWriter::write(): invalid floating-point value {}\n",
         data.message));
 }
@@ -1288,10 +1286,10 @@ void JsonWriterTest::invalidDouble() {
 
     JsonWriter json;
 
-    std::ostringstream out;
+    Containers::String out;
     Error redirectError{&out};
     json.write(data.doubleValue);
-    CORRADE_COMPARE(out.str(), formatString(
+    CORRADE_COMPARE(out, format(
         "Utility::JsonWriter::write(): invalid floating-point value {0}\n",
         data.message));
 }
@@ -1301,10 +1299,10 @@ void JsonWriterTest::invalidUnsignedLong() {
 
     JsonWriter json;
 
-    std::ostringstream out;
+    Containers::String out;
     Error redirectError{&out};
     json.write(4503599627370496ull);
-    CORRADE_COMPARE(out.str(),
+    CORRADE_COMPARE(out,
         "Utility::JsonWriter::write(): too large integer value 4503599627370496\n");
 }
 
@@ -1316,10 +1314,10 @@ void JsonWriterTest::invalidLong() {
 
     JsonWriter json;
 
-    std::ostringstream out;
+    Containers::String out;
     Error redirectError{&out};
     json.write(data.value);
-    CORRADE_COMPARE(out.str(), formatString(
+    CORRADE_COMPARE(out, format(
         "Utility::JsonWriter::write(): too small or large integer value {}\n",
         data.message));
 }

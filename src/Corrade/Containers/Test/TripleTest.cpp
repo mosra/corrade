@@ -25,11 +25,11 @@
 */
 
 #include <new>
-#include <sstream>
 
+#include "Corrade/Containers/ArrayView.h" /* used in debugPropagateFlags() */
+#include "Corrade/Containers/String.h"
 #include "Corrade/Containers/Triple.h"
 #include "Corrade/TestSuite/Tester.h"
-#include "Corrade/Utility/DebugStl.h"
 
 namespace {
 
@@ -1314,7 +1314,7 @@ void TripleTest::accessRvalueLifetimeExtension() {
         bool orphaned = true;
     };
 
-    std::ostringstream out;
+    Containers::String out;
     Debug redirectOutput{&out};
     {
         /* Here a reference lifetime extension should kick in, causing the
@@ -1333,7 +1333,7 @@ void TripleTest::accessRvalueLifetimeExtension() {
         CORRADE_VERIFY(&second);
         CORRADE_VERIFY(&third);
     }
-    CORRADE_COMPARE(out.str(),
+    CORRADE_COMPARE(out,
         "shouldn't be dead yet\n"
         "dying!\n"
         "dying!\n"
@@ -1341,17 +1341,17 @@ void TripleTest::accessRvalueLifetimeExtension() {
 }
 
 void TripleTest::debug() {
-    std::stringstream out;
+    Containers::String out;
     Debug{&out} << triple(42.5f, 3, true);
-    CORRADE_COMPARE(out.str(), "{42.5, 3, true}\n");
+    CORRADE_COMPARE(out, "{42.5, 3, true}\n");
 }
 
 void TripleTest::debugPropagateFlags() {
-    std::stringstream out;
+    Containers::String out;
     /* The modifier shouldn't become persistent for values after. The nospace
        modifier shouldn't get propagated. */
     Debug{&out} << ">" << Debug::nospace << Debug::packed << triple(Containers::arrayView({3, 4, 5}), false, Containers::arrayView({"A", "B"})) << Containers::arrayView({"a", "b", "c"});
-    CORRADE_COMPARE(out.str(), ">{345, false, AB} {a, b, c}\n");
+    CORRADE_COMPARE(out, ">{345, false, AB} {a, b, c}\n");
 }
 
 void TripleTest::constructorExplicitInCopyInitialization() {

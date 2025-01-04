@@ -24,10 +24,8 @@
     DEALINGS IN THE SOFTWARE.
 */
 
-#include <sstream>
-
+#include "Corrade/Containers/String.h"
 #include "Corrade/TestSuite/Tester.h"
-#include "Corrade/Utility/DebugStl.h"
 
 namespace Corrade { namespace TestSuite { namespace Test { namespace {
 
@@ -44,17 +42,17 @@ ComparatorTest::ComparatorTest() {
 }
 
 void ComparatorTest::debugComparisonStatusFlag() {
-    std::ostringstream out;
+    Containers::String out;
 
     Debug{&out} << ComparisonStatusFlag::Failed << ComparisonStatusFlag(0x3f);
-    CORRADE_COMPARE(out.str(), "TestSuite::ComparisonStatusFlag::Failed TestSuite::ComparisonStatusFlag(0x3f)\n");
+    CORRADE_COMPARE(out, "TestSuite::ComparisonStatusFlag::Failed TestSuite::ComparisonStatusFlag(0x3f)\n");
 }
 
 void ComparatorTest::debugComparisonStatusFlags() {
-    std::ostringstream out;
+    Containers::String out;
 
     Debug{&out} << (ComparisonStatusFlag::Failed|ComparisonStatusFlag::Diagnostic) << ComparisonStatusFlags{};
-    CORRADE_COMPARE(out.str(), "TestSuite::ComparisonStatusFlag::Failed|TestSuite::ComparisonStatusFlag::Diagnostic TestSuite::ComparisonStatusFlags{}\n");
+    CORRADE_COMPARE(out, "TestSuite::ComparisonStatusFlag::Failed|TestSuite::ComparisonStatusFlag::Diagnostic TestSuite::ComparisonStatusFlags{}\n");
 }
 
 }}}}

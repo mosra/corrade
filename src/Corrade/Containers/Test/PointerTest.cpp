@@ -24,11 +24,9 @@
     DEALINGS IN THE SOFTWARE.
 */
 
-#include <sstream>
-
 #include "Corrade/Containers/Pointer.h"
+#include "Corrade/Containers/String.h"
 #include "Corrade/TestSuite/Tester.h"
-#include "Corrade/Utility/DebugStl.h" /** @todo remove when <sstream> is gone */
 
 namespace {
 
@@ -565,7 +563,7 @@ void PointerTest::accessInvalid() {
     CORRADE_VERIFY(!a);
     CORRADE_VERIFY(!ca);
 
-    std::ostringstream out;
+    Containers::String out;
     {
         Error redirectError{&out};
         a->foo();
@@ -573,7 +571,7 @@ void PointerTest::accessInvalid() {
         (*a).foo();
         (*ca).foo();
     }
-    CORRADE_COMPARE(out.str(),
+    CORRADE_COMPARE(out,
         "Containers::Pointer: the pointer is null\n"
         "Containers::Pointer: the pointer is null\n"
         "Containers::Pointer: the pointer is null\n"
@@ -773,12 +771,12 @@ void PointerTest::moveConstructPlainStruct() {
 #pragma GCC diagnostic ignored "-Wfree-nonheap-object"
 #endif
 void PointerTest::debug() {
-    std::stringstream out;
+    Containers::String out;
     std::intptr_t a = 0xdeadbeef;
     Pointer<int> aptr{reinterpret_cast<int*>(a)};
     Debug{&out} << aptr << Pointer<int>{} << nullptr;
     aptr.release();
-    CORRADE_COMPARE(out.str(), "0xdeadbeef 0x0 nullptr\n");
+    CORRADE_COMPARE(out, "0xdeadbeef 0x0 nullptr\n");
 }
 #if defined(CORRADE_TARGET_GCC) && __GNUC__ >= 11 && __OPTIMIZE__
 #pragma GCC diagnostic pop

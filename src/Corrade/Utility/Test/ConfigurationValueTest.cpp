@@ -29,8 +29,8 @@
 #include "Corrade/TestSuite/Tester.h"
 #include "Corrade/TestSuite/Compare/Container.h"
 #include "Corrade/Utility/Configuration.h"
-#include "Corrade/Utility/DebugStl.h"
-#include "Corrade/Utility/FormatStl.h"
+#include "Corrade/Utility/DebugStl.h" /** @todo remove once Configuration is string-free */
+#include "Corrade/Utility/FormatStl.h" /** @todo remove once Configuration is string-free */
 
 namespace Corrade { namespace Utility {
 

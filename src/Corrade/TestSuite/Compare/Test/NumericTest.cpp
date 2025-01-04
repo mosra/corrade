@@ -24,11 +24,9 @@
     DEALINGS IN THE SOFTWARE.
 */
 
-#include <sstream>
-
+#include "Corrade/Containers/String.h"
 #include "Corrade/TestSuite/Tester.h"
 #include "Corrade/TestSuite/Compare/Numeric.h"
-#include "Corrade/Utility/DebugStl.h" /** @todo remove when <sstream> is gone */
 
 namespace Corrade { namespace TestSuite { namespace Compare { namespace Test { namespace {
 
@@ -123,7 +121,7 @@ void NumericTest::less() {
     CORRADE_COMPARE(Comparator<Less<float>>{}(b, b), ComparisonStatusFlag::Failed);
     CORRADE_COMPARE(Comparator<Less<float>>{}(c, b), ComparisonStatusFlag::Failed);
 
-    std::stringstream out;
+    Containers::String out;
 
     {
         Debug redirectOutput{&out};
@@ -133,7 +131,7 @@ void NumericTest::less() {
         compare.printMessage(flags, redirectOutput, "c", "b");
     }
 
-    CORRADE_COMPARE(out.str(), "Value c is not less than b, actual is 9.29 but expected < 9.28\n");
+    CORRADE_COMPARE(out, "Value c is not less than b, actual is 9.29 but expected < 9.28\n");
 }
 
 void NumericTest::lessOrEqual() {
@@ -144,7 +142,7 @@ void NumericTest::lessOrEqual() {
     CORRADE_COMPARE(Comparator<LessOrEqual<float>>{}(b, b), ComparisonStatusFlags{});
     CORRADE_COMPARE(Comparator<LessOrEqual<float>>{}(c, b), ComparisonStatusFlag::Failed);
 
-    std::stringstream out;
+    Containers::String out;
 
     {
         Debug redirectOutput{&out};
@@ -154,7 +152,7 @@ void NumericTest::lessOrEqual() {
         compare.printMessage(flags, redirectOutput, "c", "b");
     }
 
-    CORRADE_COMPARE(out.str(), "Value c is not less than or equal to b, actual is 9.29 but expected <= 9.28\n");
+    CORRADE_COMPARE(out, "Value c is not less than or equal to b, actual is 9.29 but expected <= 9.28\n");
 }
 
 void NumericTest::greaterOrEqual() {
@@ -165,7 +163,7 @@ void NumericTest::greaterOrEqual() {
     CORRADE_COMPARE(Comparator<GreaterOrEqual<float>>{}(b, b), ComparisonStatusFlags{});
     CORRADE_COMPARE(Comparator<GreaterOrEqual<float>>{}(c, b), ComparisonStatusFlags{});
 
-    std::stringstream out;
+    Containers::String out;
 
     {
         Debug redirectOutput{&out};
@@ -175,7 +173,7 @@ void NumericTest::greaterOrEqual() {
         compare.printMessage(flags, redirectOutput, "a", "b");
     }
 
-    CORRADE_COMPARE(out.str(), "Value a is not greater than or equal to b, actual is 9.27 but expected >= 9.28\n");
+    CORRADE_COMPARE(out, "Value a is not greater than or equal to b, actual is 9.27 but expected >= 9.28\n");
 }
 
 void NumericTest::greater() {
@@ -186,7 +184,7 @@ void NumericTest::greater() {
     CORRADE_COMPARE(Comparator<Greater<float>>{}(b, b), ComparisonStatusFlag::Failed);
     CORRADE_COMPARE(Comparator<Greater<float>>{}(c, b), ComparisonStatusFlags{});
 
-    std::stringstream out;
+    Containers::String out;
 
     {
         Debug redirectOutput{&out};
@@ -195,7 +193,7 @@ void NumericTest::greater() {
         compare.printMessage(flags, redirectOutput, "a", "b");
     }
 
-    CORRADE_COMPARE(out.str(), "Value a is not greater than b, actual is 9.27 but expected > 9.28\n");
+    CORRADE_COMPARE(out, "Value a is not greater than b, actual is 9.27 but expected > 9.28\n");
 }
 
 void NumericTest::around() {
@@ -209,7 +207,7 @@ void NumericTest::around() {
     CORRADE_COMPARE(Comparator<Around<float>>{0.02f}(d, b), ComparisonStatusFlags{});
     CORRADE_COMPARE(Comparator<Around<float>>{0.02f}(e, b), ComparisonStatusFlags{});
 
-    std::stringstream out;
+    Containers::String out;
 
     {
         Debug redirectOutput{&out};
@@ -219,7 +217,7 @@ void NumericTest::around() {
         compare.printMessage(flags, redirectOutput, "a", "b");
     }
 
-    CORRADE_COMPARE(out.str(), "Value a is not around b, actual is 9.25 but 9.26 <= expected <= 9.3\n");
+    CORRADE_COMPARE(out, "Value a is not around b, actual is 9.25 but 9.26 <= expected <= 9.3\n");
 
     /* Verify that the helper works */
     CORRADE_COMPARE_WITH(d, b, Compare::around(0.02f));
@@ -233,7 +231,7 @@ void NumericTest::notEqual() {
     CORRADE_COMPARE(Comparator<NotEqual<float>>{}(a, b), ComparisonStatusFlag::Failed);
     CORRADE_COMPARE(Comparator<NotEqual<float>>{}(a, c), ComparisonStatusFlag{});
 
-    std::stringstream out;
+    Containers::String out;
 
     {
         Debug redirectOutput{&out};
@@ -242,7 +240,7 @@ void NumericTest::notEqual() {
         compare.printMessage(flags, redirectOutput, "a", "b");
     }
 
-    CORRADE_COMPARE(out.str(), "Value a is equal to b, 9.25 was expected to be different from 9.25\n");
+    CORRADE_COMPARE(out, "Value a is equal to b, 9.25 was expected to be different from 9.25\n");
 }
 
 void NumericTest::lessMulti() {
@@ -348,7 +346,7 @@ void NumericTest::divisible() {
     CORRADE_COMPARE(Comparator<Divisible<int>>{}(a, c), ComparisonStatusFlag::Failed);
     CORRADE_COMPARE(Comparator<Divisible<int>>{}(b, a), ComparisonStatusFlag::Failed);
 
-    std::stringstream out;
+    Containers::String out;
 
     {
         Debug redirectOutput{&out};
@@ -357,7 +355,7 @@ void NumericTest::divisible() {
         compare.printMessage(flags, redirectOutput, "a", "c");
     }
 
-    CORRADE_COMPARE(out.str(), "Value a is not divisible by c, 20 % 8 was not expected to be 4\n");
+    CORRADE_COMPARE(out, "Value a is not divisible by c, 20 % 8 was not expected to be 4\n");
 }
 
 void NumericTest::notDivisible() {
@@ -368,7 +366,7 @@ void NumericTest::notDivisible() {
     CORRADE_COMPARE(Comparator<NotDivisible<int>>{}(a, c), ComparisonStatusFlag::Failed);
     CORRADE_COMPARE(Comparator<NotDivisible<int>>{}(b, a), ComparisonStatusFlags{});
 
-    std::stringstream out;
+    Containers::String out;
 
     {
         Debug redirectOutput{&out};
@@ -377,7 +375,7 @@ void NumericTest::notDivisible() {
         compare.printMessage(flags, redirectOutput, "a", "c");
     }
 
-    CORRADE_COMPARE(out.str(), "Value a is divisible by c, 20 % 4 was not expected to be 0\n");
+    CORRADE_COMPARE(out, "Value a is divisible by c, 20 % 4 was not expected to be 0\n");
 }
 
 void NumericTest::aligned() {
@@ -387,7 +385,7 @@ void NumericTest::aligned() {
     CORRADE_COMPARE(Comparator<Aligned>{}(a, b), ComparisonStatusFlags{});
     CORRADE_COMPARE(Comparator<Aligned>{}(a, c), ComparisonStatusFlag::Failed);
 
-    std::stringstream out;
+    Containers::String out;
 
     {
         Debug redirectOutput{&out};
@@ -396,7 +394,7 @@ void NumericTest::aligned() {
         compare.printMessage(flags, redirectOutput, "a", "c");
     }
 
-    CORRADE_COMPARE(out.str(), "Pointer a is not aligned to c bytes, 0xdeadbe14 % 8 was not expected to be 4\n");
+    CORRADE_COMPARE(out, "Pointer a is not aligned to c bytes, 0xdeadbe14 % 8 was not expected to be 4\n");
 }
 
 void NumericTest::notAligned() {
@@ -406,7 +404,7 @@ void NumericTest::notAligned() {
     CORRADE_COMPARE(Comparator<NotAligned>{}(a, b), ComparisonStatusFlags{});
     CORRADE_COMPARE(Comparator<NotAligned>{}(a, c), ComparisonStatusFlag::Failed);
 
-    std::stringstream out;
+    Containers::String out;
 
     {
         Debug redirectOutput{&out};
@@ -415,7 +413,7 @@ void NumericTest::notAligned() {
         compare.printMessage(flags, redirectOutput, "a", "c");
     }
 
-    CORRADE_COMPARE(out.str(), "Pointer a is aligned to c bytes, 0xdeadbe14 % 4 was not expected to be 0\n");
+    CORRADE_COMPARE(out, "Pointer a is aligned to c bytes, 0xdeadbe14 % 4 was not expected to be 0\n");
 }
 
 }}}}}

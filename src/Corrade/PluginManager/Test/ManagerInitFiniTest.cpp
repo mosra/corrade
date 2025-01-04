@@ -24,11 +24,8 @@
     DEALINGS IN THE SOFTWARE.
 */
 
-#include <sstream>
-
 #include "Corrade/PluginManager/Manager.hpp"
 #include "Corrade/TestSuite/Tester.h"
-#include "Corrade/Utility/DebugStl.h" /** @todo remove when <sstream> is gone */
 
 #include "init-fini/InitFini.h"
 
@@ -58,48 +55,48 @@ ManagerInitFiniTest::ManagerInitFiniTest() {
 }
 
 void ManagerInitFiniTest::staticPlugin() {
-    std::ostringstream out;
+    Containers::String out;
     Debug redirectDebug{&out};
 
     {
         /* Initialization is right after manager assigns them to itself */
         PluginManager::Manager<InitFini> manager;
-        CORRADE_COMPARE(out.str(), "Static plugin initialized\n");
+        CORRADE_COMPARE(out, "Static plugin initialized\n");
 
         /* Finalization is right before manager frees them */
-        out.str({});
+        out = {};
     }
 
-    CORRADE_COMPARE(out.str(), "Static plugin finalized\n");
+    CORRADE_COMPARE(out, "Static plugin finalized\n");
 }
 
 #ifndef CORRADE_PLUGINMANAGER_NO_DYNAMIC_PLUGIN_SUPPORT
 void ManagerInitFiniTest::dynamicPlugin() {
-    std::ostringstream out;
+    Containers::String out;
     Debug redirectDebug{&out};
 
     {
         PluginManager::Manager<InitFini> manager;
-        CORRADE_COMPARE(out.str(), "Static plugin initialized\n");
+        CORRADE_COMPARE(out, "Static plugin initialized\n");
 
         /* Initialization is right after manager loads them. Base
            initialization is not called again. */
-        out.str({});
+        out = {};
         CORRADE_COMPARE(manager.load("InitFiniDynamic"), LoadState::Loaded);
-        CORRADE_COMPARE(out.str(), "Dynamic plugin initialized\n");
+        CORRADE_COMPARE(out, "Dynamic plugin initialized\n");
 
         /* Finalization is right before manager unloads them. Base finalization
            is not called yet. */
-        out.str({});
+        out = {};
         CORRADE_COMPARE(manager.unload("InitFiniDynamic"), LoadState::NotLoaded);
-        CORRADE_COMPARE(out.str(), "Dynamic plugin finalized\n");
+        CORRADE_COMPARE(out, "Dynamic plugin finalized\n");
 
-        out.str({});
+        out = {};
     }
 
     /* Static plugin (a dependency of the dynamic one) is called on
        destruction */
-    CORRADE_COMPARE(out.str(), "Static plugin finalized\n");
+    CORRADE_COMPARE(out, "Static plugin finalized\n");
 }
 #endif
 

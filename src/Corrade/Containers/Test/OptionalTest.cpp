@@ -24,13 +24,12 @@
     DEALINGS IN THE SOFTWARE.
 */
 
-#include <sstream>
 #include <vector> /* for verification that moving works with STL containers */
 
 #include "Corrade/Containers/Optional.h"
 #include "Corrade/Containers/Pair.h"
+#include "Corrade/Containers/String.h"
 #include "Corrade/TestSuite/Tester.h"
-#include "Corrade/Utility/DebugStl.h" /** @todo remove when <sstream> is gone */
 
 namespace {
 
@@ -1010,7 +1009,7 @@ void OptionalTest::accessRvalueLifetimeExtension() {
         bool orphaned = true;
     };
 
-    std::ostringstream out;
+    Containers::String out;
     Debug redirectOutput{&out};
     {
         /* Here a reference lifetime extension should kick in, causing the
@@ -1029,7 +1028,7 @@ void OptionalTest::accessRvalueLifetimeExtension() {
            (even though it's a load-bearing reference) */
         CORRADE_VERIFY(&value);
     }
-    CORRADE_COMPARE(out.str(),
+    CORRADE_COMPARE(out,
         "shouldn't be dead yet\n"
         "dying!\n");
 }
@@ -1047,7 +1046,7 @@ void OptionalTest::accessInvalid() {
     CORRADE_VERIFY(!a);
     CORRADE_VERIFY(!ca);
 
-    std::ostringstream out;
+    Containers::String out;
     {
         Error redirectError{&out};
         a->foo();
@@ -1055,7 +1054,7 @@ void OptionalTest::accessInvalid() {
         (*a).foo();
         (*ca).foo();
     }
-    CORRADE_COMPARE(out.str(),
+    CORRADE_COMPARE(out,
         "Containers::Optional: the optional is empty\n"
         "Containers::Optional: the optional is empty\n"
         "Containers::Optional: the optional is empty\n"
@@ -1063,9 +1062,9 @@ void OptionalTest::accessInvalid() {
 }
 
 void OptionalTest::debug() {
-    std::stringstream out;
+    Containers::String out;
     Debug{&out} << optional(42) << Optional<int>{} << NullOpt;
-    CORRADE_COMPARE(out.str(), "42 Containers::NullOpt Containers::NullOpt\n");
+    CORRADE_COMPARE(out, "42 Containers::NullOpt Containers::NullOpt\n");
 }
 
 void OptionalTest::constructorExplicitInCopyInitialization() {

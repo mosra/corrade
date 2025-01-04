@@ -24,11 +24,10 @@
     DEALINGS IN THE SOFTWARE.
 */
 
-#include <sstream>
-
+#include "Corrade/Containers/ArrayView.h" /* arraySize() */
+#include "Corrade/Containers/String.h"
 #include "Corrade/TestSuite/Tester.h"
 #include "Corrade/TestSuite/Compare/String.h"
-#include "Corrade/Utility/DebugStl.h" /** @todo remove when <sstream> is gone */
 
 namespace Corrade { namespace TestSuite { namespace Compare { namespace Test { namespace {
 
@@ -237,12 +236,12 @@ void StringTest::diffMessageFailed() {
         compare.printMessage(flags, out, "a", "b");
     }
 
-    std::ostringstream out;
+    Containers::String out;
     {
         Debug dc{&out, Debug::Flag::DisableColors};
         compare.printMessage(flags, dc, "a", "b");
     }
-    CORRADE_COMPARE(out.str(), data.message);
+    CORRADE_COMPARE(out, data.message);
 }
 
 void StringTest::diffMessageFailedReverse() {
@@ -262,12 +261,12 @@ void StringTest::diffMessageFailedReverse() {
         compare.printMessage(flags, out, "b", "a");
     }
 
-    std::ostringstream out;
+    Containers::String out;
     {
         Debug dc{&out, Debug::Flag::DisableColors};
         compare.printMessage(flags, dc, "b", "a");
     }
-    CORRADE_COMPARE(out.str(), data.messageReverse);
+    CORRADE_COMPARE(out, data.messageReverse);
 }
 
 void StringTest::hasPrefix() {
@@ -283,7 +282,7 @@ void StringTest::hasPrefix() {
 }
 
 void StringTest::hasPrefixMessageFailed() {
-    std::ostringstream out;
+    Containers::String out;
 
     {
         Debug redirectOutput{&out};
@@ -293,14 +292,14 @@ void StringTest::hasPrefixMessageFailed() {
         compare.printMessage(flags, redirectOutput, "a", "b");
     }
 
-    CORRADE_COMPARE(out.str(), "String a isn't prefixed with b, actual is\n"
+    CORRADE_COMPARE(out, "String a isn't prefixed with b, actual is\n"
 "        hello world\n"
 "        but expected prefix\n"
 "        world\n");
 }
 
 void StringTest::hasPrefixMessageVerbose() {
-    std::ostringstream out;
+    Containers::String out;
 
     {
         Debug redirectOutput{&out};
@@ -310,7 +309,7 @@ void StringTest::hasPrefixMessageVerbose() {
         compare.printMessage(flags, redirectOutput, "a", "b");
     }
 
-    CORRADE_COMPARE(out.str(), "String a is prefixed with b, the actual string\n"
+    CORRADE_COMPARE(out, "String a is prefixed with b, the actual string\n"
 "        hello world\n"
 "        has expected prefix\n"
 "        hell\n");
@@ -329,7 +328,7 @@ void StringTest::hasSuffix() {
 }
 
 void StringTest::hasSuffixMessageFailed() {
-    std::ostringstream out;
+    Containers::String out;
 
     {
         Debug redirectOutput{&out};
@@ -339,14 +338,14 @@ void StringTest::hasSuffixMessageFailed() {
         compare.printMessage(flags, redirectOutput, "a", "b");
     }
 
-    CORRADE_COMPARE(out.str(), "String a isn't suffixed with b, actual is\n"
+    CORRADE_COMPARE(out, "String a isn't suffixed with b, actual is\n"
 "        hello world\n"
 "        but expected suffix\n"
 "        hell\n");
 }
 
 void StringTest::hasSuffixMessageVerbose() {
-    std::ostringstream out;
+    Containers::String out;
 
     {
         Debug redirectOutput{&out};
@@ -356,7 +355,7 @@ void StringTest::hasSuffixMessageVerbose() {
         compare.printMessage(flags, redirectOutput, "a", "b");
     }
 
-    CORRADE_COMPARE(out.str(), "String a is suffixed with b, the actual string\n"
+    CORRADE_COMPARE(out, "String a is suffixed with b, the actual string\n"
 "        hello world\n"
 "        has expected suffix\n"
 "        world\n");
@@ -375,7 +374,7 @@ void StringTest::contains() {
 }
 
 void StringTest::containsMessageFailed() {
-    std::ostringstream out;
+    Containers::String out;
 
     {
         Debug redirectOutput{&out};
@@ -385,14 +384,14 @@ void StringTest::containsMessageFailed() {
         compare.printMessage(flags, redirectOutput, "a", "b");
     }
 
-    CORRADE_COMPARE(out.str(), "String a doesn't contain b, actual is\n"
+    CORRADE_COMPARE(out, "String a doesn't contain b, actual is\n"
 "        what a hell world\n"
 "        but expected to contain\n"
 "        hello\n");
 }
 
 void StringTest::containsMessageVerbose() {
-    std::ostringstream out;
+    Containers::String out;
 
     {
         Debug redirectOutput{&out};
@@ -402,7 +401,7 @@ void StringTest::containsMessageVerbose() {
         compare.printMessage(flags, redirectOutput, "a", "b");
     }
 
-    CORRADE_COMPARE(out.str(), "String a contains b at position 7, the actual string\n"
+    CORRADE_COMPARE(out, "String a contains b at position 7, the actual string\n"
 "        what a hell world\n"
 "        expectedly contains\n"
 "        hell\n");
@@ -421,7 +420,7 @@ void StringTest::notContains() {
 }
 
 void StringTest::notContainsMessageFailed() {
-    std::ostringstream out;
+    Containers::String out;
 
     {
         Debug redirectOutput{&out};
@@ -431,14 +430,14 @@ void StringTest::notContainsMessageFailed() {
         compare.printMessage(flags, redirectOutput, "a", "b");
     }
 
-    CORRADE_COMPARE(out.str(), "String a contains b at position 7, actual is\n"
+    CORRADE_COMPARE(out, "String a contains b at position 7, actual is\n"
 "        what a hell world\n"
 "        but expected to not contain\n"
 "        hell\n");
 }
 
 void StringTest::notContainsMessageVerbose() {
-    std::ostringstream out;
+    Containers::String out;
 
     {
         Debug redirectOutput{&out};
@@ -448,7 +447,7 @@ void StringTest::notContainsMessageVerbose() {
         compare.printMessage(flags, redirectOutput, "a", "b");
     }
 
-    CORRADE_COMPARE(out.str(), "String a doesn't contain b, the actual string\n"
+    CORRADE_COMPARE(out, "String a doesn't contain b, the actual string\n"
 "        what a hell world\n"
 "        expectedly doesn't contain\n"
 "        hello\n");

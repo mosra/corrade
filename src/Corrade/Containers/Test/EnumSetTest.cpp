@@ -24,11 +24,11 @@
     DEALINGS IN THE SOFTWARE.
 */
 
-#include <sstream>
+#include <new>
 
 #include "Corrade/Containers/EnumSet.hpp"
+#include "Corrade/Containers/String.h"
 #include "Corrade/TestSuite/Tester.h"
-#include "Corrade/Utility/DebugStl.h" /** @todo remove when <sstream> is gone */
 
 namespace Corrade { namespace Containers { namespace Test { namespace {
 
@@ -333,19 +333,19 @@ void EnumSetTest::templateFriendOperators() {
 }
 
 void EnumSetTest::debug() {
-    std::stringstream out;
+    Containers::String out;
 
     Utility::Debug{&out} << Features{} << (Feature::Fast|Feature::Cheap) << (Feature(0xdead000)|Feature::Popular);
-    CORRADE_COMPARE(out.str(), "Features{} Feature::Fast|Feature::Cheap Feature::Popular|Feature(0xdead000)\n");
+    CORRADE_COMPARE(out, "Features{} Feature::Fast|Feature::Cheap Feature::Popular|Feature(0xdead000)\n");
 }
 
 void EnumSetTest::debugPacked() {
-    std::stringstream out;
+    Containers::String out;
 
     /* Nested enum values should be printed packed, the actual set printing is
        the same. The value in the middle is not packed. */
     Utility::Debug{&out} << Debug::packed << Features{} << Debug::packed << (Feature::Fast|Feature::Cheap) << (Feature::Cheap|Feature::Popular) << Debug::packed << (Feature(0xdead000)|Feature::Popular);
-    CORRADE_COMPARE(out.str(), "{} Fast|Cheap Feature::Cheap|Feature::Popular Popular|Feature(0xdead000)\n");
+    CORRADE_COMPARE(out, "{} Fast|Cheap Feature::Cheap|Feature::Popular Popular|Feature(0xdead000)\n");
 }
 
 }}}}

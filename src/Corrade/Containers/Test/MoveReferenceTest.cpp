@@ -24,11 +24,9 @@
     DEALINGS IN THE SOFTWARE.
 */
 
-#include <sstream>
-
 #include "Corrade/Containers/MoveReference.h"
+#include "Corrade/Containers/String.h"
 #include "Corrade/TestSuite/Tester.h"
-#include "Corrade/Utility/DebugStl.h" /** @todo remove when <sstream> is gone */
 
 namespace Corrade { namespace Containers { namespace Test { namespace {
 
@@ -183,9 +181,9 @@ void MoveReferenceTest::debug() {
     int a = 18;
     MoveReference<int> b = Utility::move(a);
 
-    std::ostringstream out;
+    Containers::String out;
     Debug{&out} << b;
-    CORRADE_COMPARE(out.str(), "18\n");
+    CORRADE_COMPARE(out, "18\n");
 }
 
 }}}}

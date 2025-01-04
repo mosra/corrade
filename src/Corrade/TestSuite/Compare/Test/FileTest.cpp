@@ -24,13 +24,10 @@
     DEALINGS IN THE SOFTWARE.
 */
 
-#include <sstream>
-
 #include "Corrade/Containers/String.h"
 #include "Corrade/TestSuite/Tester.h"
 #include "Corrade/TestSuite/Compare/File.h"
-#include "Corrade/Utility/DebugStl.h"
-#include "Corrade/Utility/FormatStl.h"
+#include "Corrade/Utility/Format.h"
 #include "Corrade/Utility/Path.h"
 
 /* The __EMSCRIPTEN_major__ etc macros used to be passed implicitly, version
@@ -102,7 +99,7 @@ void FileTest::utf8Filename() {
 }
 
 void FileTest::actualNotFound() {
-    std::stringstream out;
+    Containers::String out;
 
     {
         Debug redirectOutput{&out};
@@ -113,11 +110,11 @@ void FileTest::actualNotFound() {
         compare.printMessage(flags, redirectOutput, "a", "b");
     }
 
-    CORRADE_COMPARE(out.str(), "Actual file a (nonexistent.txt) cannot be read.\n");
+    CORRADE_COMPARE(out, "Actual file a (nonexistent.txt) cannot be read.\n");
 }
 
 void FileTest::expectedNotFound() {
-    std::stringstream out;
+    Containers::String out;
 
     Comparator<Compare::File> compare;
     ComparisonStatusFlags flags = compare(Utility::Path::join(FILETEST_DIR, "base.txt"), "nonexistent.txt");
@@ -130,7 +127,7 @@ void FileTest::expectedNotFound() {
         compare.printMessage(flags, redirectOutput, "a", "b");
     }
 
-    CORRADE_COMPARE(out.str(), "Expected file b (nonexistent.txt) cannot be read.\n");
+    CORRADE_COMPARE(out, "Expected file b (nonexistent.txt) cannot be read.\n");
 
     /* Create the output dir if it doesn't exist, but avoid stale files making
        false positives */
@@ -140,20 +137,20 @@ void FileTest::expectedNotFound() {
         CORRADE_VERIFY(Utility::Path::remove(filename));
 
     {
-        out.str({});
+        out = {};
         Debug redirectOutput{&out};
         compare.saveDiagnostic(flags, redirectOutput, FILETEST_SAVE_DIR);
     }
 
     /* Extreme dogfooding, eheh. We expect the *actual* contents, but under the
        *expected* filename */
-    CORRADE_COMPARE(out.str(), Utility::formatString("-> {}\n", filename));
+    CORRADE_COMPARE(out, Utility::format("-> {}\n", filename));
     CORRADE_COMPARE_AS(filename,
         Utility::Path::join(FILETEST_DIR, "base.txt"), File);
 }
 
 void FileTest::differentContents() {
-    std::stringstream out;
+    Containers::String out;
 
     Comparator<Compare::File> compare{FILETEST_DIR};
     ComparisonStatusFlags flags = compare("different.txt", "base.txt");
@@ -164,7 +161,7 @@ void FileTest::differentContents() {
         compare.printMessage(flags, redirectOutput, "a", "b");
     }
 
-    CORRADE_COMPARE(out.str(), "Files a and b have different contents. Actual character w but W expected on position 6.\n");
+    CORRADE_COMPARE(out, "Files a and b have different contents. Actual character w but W expected on position 6.\n");
 
     /* Create the output dir if it doesn't exist, but avoid stale files making
        false positives */
@@ -174,20 +171,20 @@ void FileTest::differentContents() {
         CORRADE_VERIFY(Utility::Path::remove(filename));
 
     {
-        out.str({});
+        out = {};
         Debug redirectOutput{&out};
         compare.saveDiagnostic(flags, redirectOutput, FILETEST_SAVE_DIR);
     }
 
     /* Extreme dogfooding, eheh. We expect the *actual* contents, but under the
        *expected* filename */
-    CORRADE_COMPARE(out.str(), Utility::formatString("-> {}\n", filename));
+    CORRADE_COMPARE(out, Utility::format("-> {}\n", filename));
     CORRADE_COMPARE_AS(filename,
         Utility::Path::join(FILETEST_DIR, "different.txt"), File);
 }
 
 void FileTest::actualSmaller() {
-    std::stringstream out;
+    Containers::String out;
 
     {
         Debug redirectOutput{&out};
@@ -199,11 +196,11 @@ void FileTest::actualSmaller() {
            already */
     }
 
-    CORRADE_COMPARE(out.str(), "Files a and b have different size, actual 7 but 12 expected. Expected has character o on position 7.\n");
+    CORRADE_COMPARE(out, "Files a and b have different size, actual 7 but 12 expected. Expected has character o on position 7.\n");
 }
 
 void FileTest::expectedSmaller() {
-    std::stringstream out;
+    Containers::String out;
 
     {
         Debug redirectOutput{&out};
@@ -215,7 +212,7 @@ void FileTest::expectedSmaller() {
            already */
     }
 
-    CORRADE_COMPARE(out.str(), "Files a and b have different size, actual 12 but 7 expected. Actual has character o on position 7.\n");
+    CORRADE_COMPARE(out, "Files a and b have different size, actual 12 but 7 expected. Actual has character o on position 7.\n");
 }
 
 }}}}}

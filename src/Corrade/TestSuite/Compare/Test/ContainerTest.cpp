@@ -24,12 +24,10 @@
     DEALINGS IN THE SOFTWARE.
 */
 
-#include <sstream>
-
 #include "Corrade/Containers/Array.h"
+#include "Corrade/Containers/String.h"
 #include "Corrade/TestSuite/Tester.h"
 #include "Corrade/TestSuite/Compare/Container.h"
-#include "Corrade/Utility/DebugStl.h" /** @todo remove when <sstream> is gone */
 
 namespace Corrade { namespace TestSuite { namespace Compare { namespace Test { namespace {
 
@@ -61,7 +59,7 @@ void ContainerTest::same() {
 }
 
 void ContainerTest::outputActualSmaller() {
-    std::stringstream out;
+    Containers::String out;
 
     Containers::Array<int> a{InPlaceInit, {1, 2, 3}};
     Containers::Array<int> b{InPlaceInit, {1, 2, 3, 4}};
@@ -74,7 +72,7 @@ void ContainerTest::outputActualSmaller() {
         compare.printMessage(flags, redirectOutput, "a", "b");
     }
 
-    CORRADE_COMPARE(out.str(),
+    CORRADE_COMPARE(out,
         "Containers a and b have different size, actual 3 but 4 expected. Actual contents:\n"
         "        {1, 2, 3}\n"
         "        but expected\n"
@@ -83,7 +81,7 @@ void ContainerTest::outputActualSmaller() {
 }
 
 void ContainerTest::outputExpectedSmaller() {
-    std::stringstream out;
+    Containers::String out;
 
     Containers::Array<int> a{InPlaceInit, {1, 2, 3, 4}};
     Containers::Array<int> b{InPlaceInit, {1, 2, 3}};
@@ -96,7 +94,7 @@ void ContainerTest::outputExpectedSmaller() {
         compare.printMessage(flags, redirectOutput, "a", "b");
     }
 
-    CORRADE_COMPARE(out.str(), "Containers a and b have different size, actual 4 but 3 expected. Actual contents:\n"
+    CORRADE_COMPARE(out, "Containers a and b have different size, actual 4 but 3 expected. Actual contents:\n"
         "        {1, 2, 3, 4}\n"
         "        but expected\n"
         "        {1, 2, 3}\n"
@@ -104,7 +102,7 @@ void ContainerTest::outputExpectedSmaller() {
 }
 
 void ContainerTest::output() {
-    std::stringstream out;
+    Containers::String out;
 
     Containers::Array<int> a{InPlaceInit, {1, 9, 3, 4}};
     Containers::Array<int> b{InPlaceInit, {1, 2, 3, 4}};
@@ -117,7 +115,7 @@ void ContainerTest::output() {
         compare.printMessage(flags, redirectOutput, "a", "b");
     }
 
-    CORRADE_COMPARE(out.str(), "Containers a and b have different contents, actual:\n"
+    CORRADE_COMPARE(out, "Containers a and b have different contents, actual:\n"
         "        {1, 9, 3, 4}\n"
         "        but expected\n"
         "        {1, 2, 3, 4}\n"
@@ -125,7 +123,7 @@ void ContainerTest::output() {
 }
 
 void ContainerTest::floatingPoint() {
-    std::stringstream out;
+    Containers::String out;
 
     Containers::Array<float> a{InPlaceInit, {3.20212f, 3.20212f}};
     Containers::Array<float> b{InPlaceInit, {3.20212f, 3.20213f}};
@@ -142,7 +140,7 @@ void ContainerTest::floatingPoint() {
     }
 
     /* It should report the second element, not the first */
-    CORRADE_COMPARE(out.str(), "Containers a and c have different contents, actual:\n"
+    CORRADE_COMPARE(out, "Containers a and c have different contents, actual:\n"
         "        {3.20212, 3.20212}\n"
         "        but expected\n"
         "        {3.20213, 3.20219}\n"

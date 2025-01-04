@@ -26,6 +26,7 @@
 
 #include <limits>
 
+#include "Corrade/Containers/String.h"
 #include "Corrade/TestSuite/Tester.h"
 
 #include "Corrade/TestSuite/Implementation/BenchmarkStats.h"
@@ -174,13 +175,15 @@ void BenchmarkStatsTest::print() {
     auto&& data = PrintData[testCaseInstanceId()];
     setTestCaseDescription(data.name);
 
-    std::ostringstream str;
-    Debug out{&str, Debug::Flag::DisableColors};
-
-    Implementation::printStats(out, 153.70*data.multiplierMean,
-        42.10*data.multiplierStddev, Utility::Debug::Color::Default, data.units);
-
-    CORRADE_COMPARE(str.str(), data.expected);
+    /* The string gets fully written only on destruction or with a newline at
+       the end */
+    Containers::String str;
+    {
+        Debug out{&str, Debug::Flag::DisableColors|Debug::Flag::NoNewlineAtTheEnd};
+        Implementation::printStats(out, 153.70*data.multiplierMean,
+            42.10*data.multiplierStddev, Utility::Debug::Color::Default, data.units);
+    }
+    CORRADE_COMPARE(str, data.expected);
 }
 
 }}}}

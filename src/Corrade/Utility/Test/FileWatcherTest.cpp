@@ -24,13 +24,10 @@
     DEALINGS IN THE SOFTWARE.
 */
 
-#include <sstream>
-
+#include "Corrade/Containers/ArrayView.h" /* ArrayView conversion in Path::write() */
 #include "Corrade/Containers/Optional.h"
-#include "Corrade/Containers/StringStl.h" /** @todo remove when <sstream> is gone */
 #include "Corrade/TestSuite/Tester.h"
 #include "Corrade/TestSuite/Compare/String.h"
-#include "Corrade/Utility/DebugStl.h" /** @todo remove when <sstream> is gone */
 #include "Corrade/Utility/FileWatcher.h"
 #include "Corrade/Utility/Path.h"
 #include "Corrade/Utility/System.h"
@@ -91,7 +88,7 @@ FileWatcherTest::FileWatcherTest() {
 using namespace Containers::Literals;
 
 void FileWatcherTest::nonexistent() {
-    std::ostringstream out;
+    Containers::String out;
     {
         Error redirectError{&out};
         FileWatcher watcher{"nonexistent"};
@@ -103,11 +100,11 @@ void FileWatcherTest::nonexistent() {
     /* Error reported only once, hasChanged() is a no-op when not valid */
     #ifdef CORRADE_TARGET_EMSCRIPTEN
     /* Emscripten uses a different errno for "No such file or directory" */
-    CORRADE_COMPARE_AS(out.str(),
+    CORRADE_COMPARE_AS(out,
         "Utility::FileWatcher: can't stat nonexistent, aborting watch: error 44 (",
         TestSuite::Compare::StringHasPrefix);
     #else
-    CORRADE_COMPARE_AS(out.str(),
+    CORRADE_COMPARE_AS(out,
         "Utility::FileWatcher: can't stat nonexistent, aborting watch: error 2 (",
         TestSuite::Compare::StringHasPrefix);
     #endif
@@ -344,17 +341,17 @@ void FileWatcherTest::changedClearedIgnoreEmpty() {
 }
 
 void FileWatcherTest::debugFlag() {
-    std::ostringstream out;
+    Containers::String out;
 
     Debug(&out) << FileWatcher::Flag::IgnoreChangeIfEmpty << FileWatcher::Flag(0xde);
-    CORRADE_COMPARE(out.str(), "Utility::FileWatcher::Flag::IgnoreChangeIfEmpty Utility::FileWatcher::Flag(0xde)\n");
+    CORRADE_COMPARE(out, "Utility::FileWatcher::Flag::IgnoreChangeIfEmpty Utility::FileWatcher::Flag(0xde)\n");
 }
 
 void FileWatcherTest::debugFlags() {
-    std::ostringstream out;
+    Containers::String out;
 
     Debug(&out) << (FileWatcher::Flag::IgnoreChangeIfEmpty|FileWatcher::Flag::IgnoreErrors) << FileWatcher::Flags{};
-    CORRADE_COMPARE(out.str(), "Utility::FileWatcher::Flag::IgnoreErrors|Utility::FileWatcher::Flag::IgnoreChangeIfEmpty Utility::FileWatcher::Flags{}\n");
+    CORRADE_COMPARE(out, "Utility::FileWatcher::Flag::IgnoreErrors|Utility::FileWatcher::Flag::IgnoreChangeIfEmpty Utility::FileWatcher::Flags{}\n");
 }
 
 }}}}

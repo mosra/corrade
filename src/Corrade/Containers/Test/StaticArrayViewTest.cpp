@@ -24,8 +24,6 @@
     DEALINGS IN THE SOFTWARE.
 */
 
-#include <sstream>
-
 #include "Corrade/Containers/ArrayView.h"
 #include "Corrade/TestSuite/Tester.h"
 

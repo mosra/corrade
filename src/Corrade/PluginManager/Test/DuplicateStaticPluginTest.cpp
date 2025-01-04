@@ -24,8 +24,6 @@
     DEALINGS IN THE SOFTWARE.
 */
 
-#include <sstream>
-
 #include "Corrade/Containers/Array.h"
 #include "Corrade/Containers/StringView.h"
 /* The hpp is needed by a static build with CORRADE_BUILD_DEPRECATED disabled,
@@ -33,7 +31,6 @@
 #include "Corrade/PluginManager/Manager.hpp"
 #include "Corrade/TestSuite/Tester.h"
 #include "Corrade/TestSuite/Compare/Container.h"
-#include "Corrade/Utility/DebugStl.h"
 
 #include "AbstractAnimal.h"
 
@@ -63,7 +60,7 @@ void DuplicateStaticPluginTest::test() {
     CORRADE_COMPARE(initialize1(), 42);
     CORRADE_COMPARE(initialize2(), 1337);
 
-    std::ostringstream out;
+    Containers::String out;
     Warning redirectWarning{&out};
     PluginManager::Manager<AbstractAnimal> manager{"nonexistent"};
 
@@ -73,7 +70,7 @@ void DuplicateStaticPluginTest::test() {
     CORRADE_COMPARE_AS(manager.pluginList(),
         Containers::arrayView<Containers::StringView>({"Canary", "Dird"}),
         TestSuite::Compare::Container);
-    CORRADE_COMPARE(out.str(), "PluginManager::Manager: duplicate static plugin Canary, ignoring\n");
+    CORRADE_COMPARE(out, "PluginManager::Manager: duplicate static plugin Canary, ignoring\n");
 }
 
 }}}}

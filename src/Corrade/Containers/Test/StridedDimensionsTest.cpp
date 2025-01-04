@@ -24,12 +24,12 @@
     DEALINGS IN THE SOFTWARE.
 */
 
-#include <sstream>
+#include <new>
 
 #include "Corrade/Containers/StridedArrayView.h"
+#include "Corrade/Containers/String.h"
 #include "Corrade/TestSuite/Tester.h"
 #include "Corrade/TestSuite/Compare/Container.h"
-#include "Corrade/Utility/DebugStl.h" /** @todo remove when <sstream> is gone */
 
 namespace {
 
@@ -327,14 +327,14 @@ void StridedDimensionsTest::accessInvalid() {
     Size3D a{3, 12, 76};
     const Size3D ca{3, 12, 76};
 
-    std::ostringstream out;
+    Containers::String out;
     Error redirectError{&out};
 
     a[3];
     /* To avoid sanitizers getting angry */
     reinterpret_cast<const Size2D&>(ca)[2];
 
-    CORRADE_COMPARE(out.str(),
+    CORRADE_COMPARE(out,
         "Containers::StridedDimensions::operator[](): dimension 3 out of range for 3 dimensions\n"
         "Containers::StridedDimensions::operator[](): dimension 2 out of range for 2 dimensions\n");
 }

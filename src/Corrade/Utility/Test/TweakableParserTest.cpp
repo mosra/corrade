@@ -25,14 +25,11 @@
 */
 
 #include <climits> /* LONG_MAX */
-#include <sstream>
 
 #include "Corrade/Containers/ArrayView.h"
 #include "Corrade/Containers/String.h"
 #include "Corrade/TestSuite/Tester.h"
-#include "Corrade/Utility/DebugStl.h" /** @todo remove when <sstream> is gone */
 #include "Corrade/Utility/Format.h"
-#include "Corrade/Utility/FormatStl.h" /** @todo remove when <sstream> is gone */
 #include "Corrade/Utility/String.h" /* uppercase() */
 #include "Corrade/Utility/Tweakable.h"
 
@@ -305,11 +302,11 @@ template<class T> void TweakableParserTest::integralError() {
     setTestCaseTemplateName(TypeTraits<T>::name());
     setTestCaseDescription(data.name);
 
-    std::ostringstream out;
+    Containers::String out;
     Warning redirectWarning{&out};
     Error redirectError{&out};
     TweakableState state = TweakableParser<T>::parse(Utility::format(data.data, TypeTraits<T>::suffix())).first();
-    CORRADE_COMPARE(out.str(), formatString(data.error, TypeTraits<T>::suffix()));
+    CORRADE_COMPARE(out, format(data.error, TypeTraits<T>::suffix()));
     CORRADE_COMPARE(state, data.state);
 }
 
@@ -384,11 +381,11 @@ template<class T> void TweakableParserTest::floatingPointError() {
     setTestCaseTemplateName(TypeTraits<T>::name());
     setTestCaseDescription(data.name);
 
-    std::ostringstream out;
+    Containers::String out;
     Warning redirectWarning{&out};
     Error redirectError{&out};
     TweakableState state = TweakableParser<T>::parse(Utility::format(data.data, TypeTraits<T>::suffix())).first();
-    CORRADE_COMPARE(out.str(), formatString(data.error, TypeTraits<T>::suffix()));
+    CORRADE_COMPARE(out, format(data.error, TypeTraits<T>::suffix()));
     CORRADE_COMPARE(state, data.state);
 }
 
@@ -409,11 +406,11 @@ void TweakableParserTest::characterError() {
     setTestCaseDescription(data.name);
     std::string input = data.data; /* lazy way to get a length */
 
-    std::ostringstream out;
+    Containers::String out;
     Warning redirectWarning{&out};
     Error redirectError{&out};
     TweakableState state = TweakableParser<char>::parse({input.data(), input.size()}).first();
-    CORRADE_COMPARE(out.str(), data.error);
+    CORRADE_COMPARE(out, data.error);
     CORRADE_COMPARE(state, data.state);
 }
 
@@ -429,11 +426,11 @@ void TweakableParserTest::booleanError() {
     setTestCaseDescription(data.name);
     std::string input = data.data; /* lazy way to get a length */
 
-    std::ostringstream out;
+    Containers::String out;
     Warning redirectWarning{&out};
     Error redirectError{&out};
     TweakableState state = TweakableParser<bool>::parse({input.data(), input.size()}).first();
-    CORRADE_COMPARE(out.str(), data.error);
+    CORRADE_COMPARE(out, data.error);
     CORRADE_COMPARE(state, data.state);
 }
 

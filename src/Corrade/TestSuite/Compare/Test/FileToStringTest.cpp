@@ -24,12 +24,9 @@
     DEALINGS IN THE SOFTWARE.
 */
 
-#include <sstream>
-
 #include "Corrade/Containers/String.h"
 #include "Corrade/TestSuite/Tester.h"
 #include "Corrade/TestSuite/Compare/FileToString.h"
-#include "Corrade/Utility/DebugStl.h" /** @todo remove when <sstream> is gone */
 #include "Corrade/Utility/Path.h"
 #ifdef CORRADE_TARGET_EMSCRIPTEN
 #include "Corrade/Utility/Test/nodeJsVersionHelpers.h"
@@ -115,7 +112,7 @@ void FileToStringTest::utf8Filename() {
 }
 
 void FileToStringTest::notFound() {
-    std::stringstream out;
+    Containers::String out;
 
     {
         Debug redirectOutput{&out};
@@ -125,11 +122,11 @@ void FileToStringTest::notFound() {
         compare.printMessage(flags, redirectOutput, "file", "b");
     }
 
-    CORRADE_COMPARE(out.str(), "File file (nonexistent.txt) cannot be read.\n");
+    CORRADE_COMPARE(out, "File file (nonexistent.txt) cannot be read.\n");
 }
 
 void FileToStringTest::differentContents() {
-    std::stringstream out;
+    Containers::String out;
 
     {
         Debug redirectOutput{&out};
@@ -144,11 +141,11 @@ void FileToStringTest::differentContents() {
         compare.printMessage(flags, redirectOutput, "a", "b");
     }
 
-    CORRADE_COMPARE(out.str(), "Files a and b have different contents. Actual character w but W expected on position 6.\n");
+    CORRADE_COMPARE(out, "Files a and b have different contents. Actual character w but W expected on position 6.\n");
 }
 
 void FileToStringTest::actualSmaller() {
-    std::stringstream out;
+    Containers::String out;
 
     {
         Debug redirectOutput{&out};
@@ -163,11 +160,11 @@ void FileToStringTest::actualSmaller() {
         compare.printMessage(flags, redirectOutput, "a", "b");
     }
 
-    CORRADE_COMPARE(out.str(), "Files a and b have different size, actual 7 but 12 expected. Expected has character o on position 7.\n");
+    CORRADE_COMPARE(out, "Files a and b have different size, actual 7 but 12 expected. Expected has character o on position 7.\n");
 }
 
 void FileToStringTest::expectedSmaller() {
-    std::stringstream out;
+    Containers::String out;
 
     {
         Debug redirectOutput{&out};
@@ -182,7 +179,7 @@ void FileToStringTest::expectedSmaller() {
         compare.printMessage(flags, redirectOutput, "a", "b");
     }
 
-    CORRADE_COMPARE(out.str(), "Files a and b have different size, actual 12 but 7 expected. Actual has character o on position 7.\n");
+    CORRADE_COMPARE(out, "Files a and b have different size, actual 12 but 7 expected. Actual has character o on position 7.\n");
 }
 
 }}}}}

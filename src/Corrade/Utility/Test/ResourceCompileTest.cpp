@@ -28,7 +28,6 @@
 #include "Corrade/TestSuite/Compare/Container.h"
 #include "Corrade/TestSuite/Compare/String.h"
 #include "Corrade/TestSuite/Compare/StringToFile.h"
-#include "Corrade/Utility/DebugStl.h"
 #include "Corrade/Utility/Implementation/ResourceCompile.h"
 #ifdef CORRADE_TARGET_EMSCRIPTEN
 #include "Corrade/Utility/Test/nodeJsVersionHelpers.h"
@@ -316,11 +315,11 @@ void ResourceCompileTest::compileFromUtf8Filenames() {
 
 void ResourceCompileTest::compileFromEmptyGroup() {
     /* Empty group name is allowed */
-    std::ostringstream out;
+    Containers::String out;
     Error redirectError{&out};
     CORRADE_VERIFY(Implementation::resourceCompileFrom("ResourceTestData",
         Path::join(RESOURCE_TEST_DIR, "resources-empty-group.conf")));
-    CORRADE_COMPARE(out.str(), "");
+    CORRADE_COMPARE(out, "");
 
     /* Missing group entry is not allowed -- tested in compileFromInvalid()
        below */
@@ -393,12 +392,12 @@ void ResourceCompileTest::compileFromInvalid() {
     auto&& data = CompileFromInvalidData[testCaseInstanceId()];
     setTestCaseDescription(data.name);
 
-    std::ostringstream out;
+    Containers::String out;
     Error redirectError{&out};
     CORRADE_VERIFY(Implementation::resourceCompileFrom("ResourceTestData", Utility::Path::join(RESOURCE_TEST_DIR, data.file)).isEmpty());
     if(Containers::StringView{data.message}.hasSuffix('\n'))
-        CORRADE_COMPARE_AS(out.str(), data.message, TestSuite::Compare::StringHasSuffix);
-    else CORRADE_COMPARE(out.str(), Utility::formatString("    Error: {}\n", data.message));
+        CORRADE_COMPARE_AS(out, data.message, TestSuite::Compare::StringHasSuffix);
+    else CORRADE_COMPARE(out, format("    Error: {}\n", data.message));
 }
 
 void ResourceCompileTest::compileSingle() {
@@ -408,11 +407,11 @@ void ResourceCompileTest::compileSingle() {
 }
 
 void ResourceCompileTest::compileSingleNonexistentFile() {
-    std::ostringstream out;
+    Containers::String out;
     Error redirectError{&out};
     CORRADE_VERIFY(!Implementation::resourceCompileSingle("ResourceTestData", "/nonexistent.dat"));
     /* There's an error message from Path::read() before */
-    CORRADE_COMPARE_AS(out.str(),
+    CORRADE_COMPARE_AS(out,
         "\n    Error: cannot open file /nonexistent.dat\n",
         TestSuite::Compare::StringHasSuffix);
 }

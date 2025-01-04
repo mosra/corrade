@@ -25,11 +25,11 @@
 */
 
 #include <iostream>
-#include <sstream>
+#include <sstream> /** @todo remove once Debug is fully stream-free */
 
 #include "Corrade/Containers/ArrayView.h"
 #include "Corrade/Containers/String.h"
-#include "Corrade/Containers/StringStl.h"
+#include "Corrade/Containers/StringStl.h" /** @todo remove once Debug is fully stream-free */
 #include "Corrade/TestSuite/Tester.h"
 #include "Corrade/TestSuite/Compare/StringToFile.h"
 #include "Corrade/Utility/Path.h"

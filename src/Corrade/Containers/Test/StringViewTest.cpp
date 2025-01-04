@@ -28,8 +28,6 @@
    included first */
 #include "Corrade/Containers/StringView.h"
 
-#include <sstream>
-
 #include "Corrade/Cpu.h"
 #include "Corrade/Containers/Array.h"
 #include "Corrade/Containers/StaticArray.h"
@@ -38,7 +36,6 @@
 #include "Corrade/TestSuite/Compare/Container.h"
 #include "Corrade/TestSuite/Compare/Numeric.h"
 #include "Corrade/Utility/Algorithms.h"
-#include "Corrade/Utility/DebugStl.h" /** @todo remove once Debug is stream-free */
 #include "Corrade/Utility/Format.h"
 #include "Corrade/Utility/Memory.h"
 #include "Corrade/Utility/Test/cpuVariantHelpers.h"
@@ -730,10 +727,10 @@ void StringViewTest::constructLiteralEmpty() {
 void StringViewTest::constructTooLarge() {
     CORRADE_SKIP_IF_NO_DEBUG_ASSERT();
 
-    std::ostringstream out;
+    Containers::String out;
     Error redirectError{&out};
     StringView{nullptr, std::size_t{1} << (sizeof(std::size_t)*8 - 2)};
-    CORRADE_COMPARE(out.str(),
+    CORRADE_COMPARE(out,
         "Containers::StringView: string expected to be smaller than 2^30 bytes, got 1073741824\n");
 }
 #endif
@@ -741,10 +738,10 @@ void StringViewTest::constructTooLarge() {
 void StringViewTest::constructNullptrNullTerminated() {
     CORRADE_SKIP_IF_NO_DEBUG_ASSERT();
 
-    std::ostringstream out;
+    Containers::String out;
     Error redirectError{&out};
     StringView{nullptr, 0, StringViewFlag::NullTerminated};
-    CORRADE_COMPARE(out.str(),
+    CORRADE_COMPARE(out,
         "Containers::StringView: can't use StringViewFlag::NullTerminated with null data\n");
 }
 
@@ -1102,7 +1099,7 @@ void StringViewTest::accessInvalid() {
     a[0];
     b[5];
 
-    std::stringstream out;
+    Containers::String out;
     Error redirectError{&out};
     /* front() / back() should return the first ever byte before the null
        terminator and the last ever byte before the null terminator. There
@@ -1115,7 +1112,7 @@ void StringViewTest::accessInvalid() {
     aNotNullTerminated[0];
     b[6];
     bNotNullTerminated[5];
-    CORRADE_COMPARE(out.str(),
+    CORRADE_COMPARE(out,
         "Containers::StringView::front(): view is empty\n"
         "Containers::StringView::back(): view is empty\n"
         "Containers::StringView::operator[](): index 1 out of range for 0 null-terminated bytes\n"
@@ -1137,7 +1134,7 @@ void StringViewTest::sliceInvalid() {
     const char* data = "Bhello";
     StringView a{data + 1, 5, StringViewFlag::Global|StringViewFlag::NullTerminated};
 
-    std::ostringstream out;
+    Containers::String out;
     Error redirectError{&out};
 
     /* Testing both pointer and size versions */
@@ -1147,7 +1144,7 @@ void StringViewTest::sliceInvalid() {
     a.slice(a.data() + 2, a.data() + 1);
     a.slice(2, 1);
 
-    CORRADE_COMPARE(out.str(),
+    CORRADE_COMPARE(out,
         "Containers::StringView::slice(): slice [-1:0] out of range for 5 elements\n"
         "Containers::StringView::slice(): slice [5:6] out of range for 5 elements\n"
         "Containers::StringView::slice(): slice [5:6] out of range for 5 elements\n"
@@ -1404,10 +1401,10 @@ void StringViewTest::splitString() {
 void StringViewTest::splitStringEmpty() {
     CORRADE_SKIP_IF_NO_ASSERT();
 
-    std::ostringstream out;
+    Containers::String out;
     Error redirectError{&out};
     "hello"_s.split("");
-    CORRADE_COMPARE(out.str(), "Containers::StringView::split(): delimiter is empty\n");
+    CORRADE_COMPARE(out, "Containers::StringView::split(): delimiter is empty\n");
 }
 
 void StringViewTest::splitFlags() {
@@ -1897,10 +1894,10 @@ void StringViewTest::exceptPrefixFlags() {
 void StringViewTest::exceptPrefixInvalid() {
     CORRADE_SKIP_IF_NO_ASSERT();
 
-    std::ostringstream out;
+    Containers::String out;
     Error redirectOutput{&out};
     "overcomplicated"_s.exceptPrefix("complicated");
-    CORRADE_COMPARE(out.str(),
+    CORRADE_COMPARE(out,
         "Containers::StringView::exceptPrefix(): string doesn't begin with complicated\n");
 }
 
@@ -1947,10 +1944,10 @@ void StringViewTest::exceptSuffixFlags() {
 void StringViewTest::exceptSuffixInvalid() {
     CORRADE_SKIP_IF_NO_ASSERT();
 
-    std::ostringstream out;
+    Containers::String out;
     Error redirectOutput{&out};
     "overcomplicated"_s.exceptSuffix("over");
-    CORRADE_COMPARE(out.str(),
+    CORRADE_COMPARE(out,
         "Containers::StringView::exceptSuffix(): string doesn't end with over\n");
 }
 
@@ -3490,25 +3487,25 @@ void StringViewTest::countCharacterUnalignedLessThanOneVector() {
 }
 
 void StringViewTest::debugFlag() {
-    std::ostringstream out;
+    Containers::String out;
 
     Debug{&out} << StringViewFlag::Global << StringViewFlag(0xf0f0u);
-    CORRADE_COMPARE(out.str(), "Containers::StringViewFlag::Global Containers::StringViewFlag(0xf0f0)\n");
+    CORRADE_COMPARE(out, "Containers::StringViewFlag::Global Containers::StringViewFlag(0xf0f0)\n");
 }
 
 void StringViewTest::debugFlags() {
-    std::ostringstream out;
+    Containers::String out;
 
     Debug{&out} << (StringViewFlag::Global|StringViewFlag::NullTerminated) << StringViewFlags{};
-    CORRADE_COMPARE(out.str(), "Containers::StringViewFlag::Global|Containers::StringViewFlag::NullTerminated Containers::StringViewFlags{}\n");
+    CORRADE_COMPARE(out, "Containers::StringViewFlag::Global|Containers::StringViewFlag::NullTerminated Containers::StringViewFlags{}\n");
 }
 
 void StringViewTest::debug() {
-    std::ostringstream out;
+    Containers::String out;
     /* The operator<< is implemented directly in Debug, testing here to have
        everything together */
-    Debug{&out} << "lolwat, using iostream to\0test string views?!"_s;
-    CORRADE_COMPARE(out.str(), (std::string{"lolwat, using iostream to\0test string views?!\n", 46}));
+    Debug{&out} << "lolwat, using string views to\0test string views?!"_s;
+    CORRADE_COMPARE(out, "lolwat, using string views to\0test string views?!\n"_s);
 }
 
 }}}}

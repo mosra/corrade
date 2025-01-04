@@ -25,14 +25,13 @@
 */
 
 #include <algorithm> /* std::copy() */
-#include <sstream>
 
 #include "Corrade/Containers/Array.h"
 #include "Corrade/Containers/ArrayViewStl.h"
+#include "Corrade/Containers/String.h"
 #include "Corrade/TestSuite/Tester.h"
 #include "Corrade/TestSuite/Compare/Container.h"
 #include "Corrade/Utility/Algorithms.h"
-#include "Corrade/Utility/DebugStl.h"
 
 namespace Corrade { namespace Utility { namespace Test { namespace {
 
@@ -524,7 +523,7 @@ void AlgorithmsTest::copyInitializerListStridedZeroSize() {
 void AlgorithmsTest::copyNonMatchingSizes() {
     CORRADE_SKIP_IF_NO_DEBUG_ASSERT();
 
-    std::ostringstream out;
+    Containers::String out;
     Error redirectError{&out};
 
     char a[2*3*5*7]{};
@@ -538,7 +537,7 @@ void AlgorithmsTest::copyNonMatchingSizes() {
     Utility::copy({1, 2}, Containers::ArrayView<char>{a, 3});
     Utility::copy({1, 2, 3, 4}, Containers::ArrayView<char>{a, 3});
 
-    CORRADE_COMPARE(out.str(),
+    CORRADE_COMPARE(out,
         "Utility::copy(): sizes 2 and 3 don't match\n"
 
         "Utility::copy(): sizes 2 and 3 don't match\n"
@@ -548,7 +547,7 @@ void AlgorithmsTest::copyNonMatchingSizes() {
 void AlgorithmsTest::copyStridedNonMatchingSizes() {
     CORRADE_SKIP_IF_NO_ASSERT();
 
-    std::ostringstream out;
+    Containers::String out;
     Error redirectError{&out};
 
     char a[2*3*5*7]{};
@@ -568,7 +567,7 @@ void AlgorithmsTest::copyStridedNonMatchingSizes() {
     Utility::copy(Containers::StridedArrayView3D<const int>{b, {2, 3, 5}},
                   Containers::StridedArrayView3D<int>{b, {2, 3, 4}});
 
-    CORRADE_COMPARE(out.str(),
+    CORRADE_COMPARE(out,
         "Utility::copy(): sizes {2} and {3} don't match\n"
         "Utility::copy(): sizes {2, 3} and {2, 4} don't match\n"
         "Utility::copy(): sizes {2, 3, 5} and {2, 4, 5} don't match\n"
@@ -1148,11 +1147,11 @@ void AlgorithmsTest::flipInPlaceNonContigous() {
     Utility::flipInPlace<0>(b);
     Utility::flipInPlace<2>(d);
 
-    std::ostringstream out;
+    Containers::String out;
     Error redirectError{&out};
     Utility::flipInPlace<0>(c);
     Utility::flipInPlace<1>(d);
-    CORRADE_COMPARE(out.str(),
+    CORRADE_COMPARE(out,
         "Utility::flipInPlace(): the view is not contiguous after dimension 0\n"
         "Utility::flipInPlace(): the view is not contiguous after dimension 1\n");
 }

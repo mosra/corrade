@@ -24,13 +24,10 @@
     DEALINGS IN THE SOFTWARE.
 */
 
-#include <sstream>
-
 #include "Corrade/Containers/String.h"
 #include "Corrade/TestSuite/Tester.h"
-#include "Corrade/Utility/DebugStl.h" /** @todo remove when <sstream> is gone */
+#include "Corrade/Utility/DebugStl.h" /** @todo remove once Tweakable internals are std::string-free */
 #include "Corrade/Utility/Format.h"
-#include "Corrade/Utility/FormatStl.h"
 #include "Corrade/Utility/Tweakable.h"
 
 #include "Corrade/Utility/Implementation/tweakable.h"
@@ -304,12 +301,12 @@ _('\'') // also no parser
     variables[5].parser = Implementation::TweakableTraits<char>::parse;
 
     {
-        std::ostringstream out;
+        Containers::String out;
         Debug redirectOutput{&out};
         Warning redirectWarning{&out};
         std::set<std::tuple<void(*)(void(*)(), void*), void(*)(), void*>> scopes;
         TweakableState state = Implementation::parseTweakables("_", "a.cpp", data, variables, scopes);
-        CORRADE_COMPARE(out.str(),
+        CORRADE_COMPARE(out,
             "Utility::Tweakable::update(): updating _( 3) in a.cpp:3\n"
             "Utility::Tweakable::update(): updating _(true) in a.cpp:5\n"
             "Utility::Tweakable::update(): updating _( -1.1 ) in a.cpp:6\n"
@@ -328,12 +325,12 @@ _('\'') // also no parser
 
     /* Second pass should report no change */
     {
-        std::ostringstream out;
+        Containers::String out;
         std::set<std::tuple<void(*)(void(*)(), void*), void(*)(), void*>> scopes;
         Debug redirectOutput{&out};
         Warning redirectWarning{&out};
         TweakableState state = Implementation::parseTweakables("_", "a.cpp", data, variables, scopes);
-        CORRADE_COMPARE(out.str(),
+        CORRADE_COMPARE(out,
             "Utility::Tweakable::update(): ignoring unknown new value _(\"some \\\"thing\\\"\") in a.cpp:8\n"
             "Utility::Tweakable::update(): ignoring unknown new value _('\\'') in a.cpp:13\n");
         CORRADE_COMPARE(state, TweakableState::NoChange);
@@ -354,12 +351,12 @@ void TweakableTest::parseTweakablesError() {
     variables[0].parser = data.parser;
 
     {
-        std::ostringstream out;
+        Containers::String out;
         Warning redirectWarning{&out};
         Error redirectError{&out};
         std::set<std::tuple<void(*)(void(*)(), void*), void(*)(), void*>> scopes;
         TweakableState state = Implementation::parseTweakables("_", "a.cpp", data.data, variables, scopes);
-        CORRADE_COMPARE(out.str(), data.error);
+        CORRADE_COMPARE(out, data.error);
         CORRADE_COMPARE(state, data.state);
     }
 }
@@ -375,13 +372,12 @@ void TweakableTest::parseSpecials() {
     variables[1].parser = nullptr;
 
     {
-        std::ostringstream out;
+        Containers::String out;
         Debug redirectOutput{&out};
         Warning redirectWarning{&out};
         std::set<std::tuple<void(*)(void(*)(), void*), void(*)(), void*>> scopes;
         TweakableState state = Implementation::parseTweakables("TW", "a.cpp", data.data, variables, scopes);
-        CORRADE_COMPARE(out.str(), formatString(
-            "Utility::Tweakable::update(): updating TW(1337) in a.cpp:{}\n", data.line));
+        CORRADE_COMPARE(out, format("Utility::Tweakable::update(): updating TW(1337) in a.cpp:{}\n", data.line));
         CORRADE_COMPARE(state, TweakableState::Success);
         CORRADE_COMPARE(scopes.size(), 0);
     }
@@ -397,12 +393,12 @@ void TweakableTest::parseSpecialsError() {
     variables[0].parser = Implementation::TweakableTraits<int>::parse;
 
     {
-        std::ostringstream out;
+        Containers::String out;
         Warning redirectWarning{&out};
         Error redirectError{&out};
         std::set<std::tuple<void(*)(void(*)(), void*), void(*)(), void*>> scopes;
         TweakableState state = Implementation::parseTweakables("_", "a.cpp", data.data, variables, scopes);
-        CORRADE_COMPARE(out.str(), data.error);
+        CORRADE_COMPARE(out, data.error);
         CORRADE_COMPARE(state, TweakableState::Error);
     }
 }
@@ -491,9 +487,9 @@ void TweakableTest::benchmarkEnabled() {
 }
 
 void TweakableTest::debugState() {
-    std::ostringstream out;
+    Containers::String out;
     Debug{&out} << TweakableState::NoChange << TweakableState(0xde);
-    CORRADE_COMPARE(out.str(), "Utility::TweakableState::NoChange Utility::TweakableState(0xde)\n");
+    CORRADE_COMPARE(out, "Utility::TweakableState::NoChange Utility::TweakableState(0xde)\n");
 }
 
 }}}}

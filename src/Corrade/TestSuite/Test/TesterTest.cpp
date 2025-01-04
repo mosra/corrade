@@ -27,19 +27,19 @@
 #include <cctype>
 #include <cstdlib>
 #include <iostream>
-#include <sstream>
+#include <sstream> /** @todo remove once Debug is fully stream-free */
 #include <typeinfo>
 
 #include "Corrade/Containers/Array.h"
 #include "Corrade/Containers/Optional.h"
 #include "Corrade/Containers/ScopeGuard.h"
-#include "Corrade/Containers/StringStl.h" /** @todo drop once Debug is stream-free */
+#include "Corrade/Containers/StringStl.h" /** @todo remove once Debug is fully stream-free */
 #include "Corrade/Containers/StringView.h"
 #include "Corrade/TestSuite/Tester.h"
 #include "Corrade/TestSuite/Compare/Container.h"
 #include "Corrade/TestSuite/Compare/StringToFile.h"
 #include "Corrade/Utility/DebugAssert.h"
-#include "Corrade/Utility/DebugStl.h"
+#include "Corrade/Utility/DebugStl.h" /** @todo remove once Debug is fully stream-free */
 #include "Corrade/Utility/Path.h"
 #include "Corrade/Utility/StlMath.h"
 #include "Corrade/Utility/String.h" /* replaceAll() */

@@ -24,12 +24,11 @@
     DEALINGS IN THE SOFTWARE.
 */
 
-#include <sstream>
-
+#include "Corrade/Containers/ArrayView.h" /* arraySize() */
 #include "Corrade/Containers/BitArray.h"
 #include "Corrade/Containers/BitArrayView.h"
+#include "Corrade/Containers/String.h"
 #include "Corrade/TestSuite/Tester.h"
-#include "Corrade/Utility/DebugStl.h" /** @todo remove once Debug is stream-free */
 
 namespace Corrade { namespace Containers { namespace Test { namespace {
 
@@ -243,10 +242,10 @@ void BitArrayTest::constructValueInitZeroSize() {
 void BitArrayTest::constructValueInitSizeTooLarge() {
     CORRADE_SKIP_IF_NO_ASSERT();
 
-    std::ostringstream out;
+    Containers::String out;
     Error redirectError{&out};
     BitArray{Corrade::ValueInit, std::size_t{1} << (sizeof(std::size_t)*8 - 3)};
-    CORRADE_COMPARE(out.str(), "Containers::BitArray: size expected to be smaller than 2^29 bits, got 536870912\n");
+    CORRADE_COMPARE(out, "Containers::BitArray: size expected to be smaller than 2^29 bits, got 536870912\n");
 }
 #endif
 
@@ -278,10 +277,10 @@ void BitArrayTest::constructDirectInitZeroSize() {
 void BitArrayTest::constructDirectInitSizeTooLarge() {
     CORRADE_SKIP_IF_NO_ASSERT();
 
-    std::ostringstream out;
+    Containers::String out;
     Error redirectError{&out};
     BitArray{Corrade::DirectInit, std::size_t{1} << (sizeof(std::size_t)*8 - 3), true};
-    CORRADE_COMPARE(out.str(), "Containers::BitArray: size expected to be smaller than 2^29 bits, got 536870912\n");
+    CORRADE_COMPARE(out, "Containers::BitArray: size expected to be smaller than 2^29 bits, got 536870912\n");
 }
 #endif
 
@@ -306,10 +305,10 @@ void BitArrayTest::constructNoInitZeroSize() {
 void BitArrayTest::constructNoInitSizeTooLarge() {
     CORRADE_SKIP_IF_NO_ASSERT();
 
-    std::ostringstream out;
+    Containers::String out;
     Error redirectError{&out};
     BitArray{Corrade::NoInit, std::size_t{1} << (sizeof(std::size_t)*8 - 3)};
-    CORRADE_COMPARE(out.str(), "Containers::BitArray: size expected to be smaller than 2^29 bits, got 536870912\n");
+    CORRADE_COMPARE(out, "Containers::BitArray: size expected to be smaller than 2^29 bits, got 536870912\n");
 }
 #endif
 
@@ -336,20 +335,20 @@ void BitArrayTest::constructTakeOwnership() {
 void BitArrayTest::constructTakeOwnershipOffsetTooLarge() {
     CORRADE_SKIP_IF_NO_ASSERT();
 
-    std::ostringstream out;
+    Containers::String out;
     Error redirectError{&out};
     BitArray{nullptr, 8, 0, [](char*, std::size_t) {}};
-    CORRADE_COMPARE(out.str(), "Containers::BitArray: offset expected to be smaller than 8 bits, got 8\n");
+    CORRADE_COMPARE(out, "Containers::BitArray: offset expected to be smaller than 8 bits, got 8\n");
 }
 
 #ifdef CORRADE_TARGET_32BIT
 void BitArrayTest::constructTakeOwnershipSizeTooLarge() {
     CORRADE_SKIP_IF_NO_ASSERT();
 
-    std::ostringstream out;
+    Containers::String out;
     Error redirectError{&out};
     BitArray{nullptr, 0, std::size_t{1} << (sizeof(std::size_t)*8 - 3), [](char*, std::size_t) {}};
-    CORRADE_COMPARE(out.str(), "Containers::BitArray: size expected to be smaller than 2^29 bits, got 536870912\n");
+    CORRADE_COMPARE(out, "Containers::BitArray: size expected to be smaller than 2^29 bits, got 536870912\n");
 }
 #endif
 
@@ -534,13 +533,13 @@ void BitArrayTest::accessInvalid() {
     std::uint64_t data;
     BitArray array{&data, 4, 53, [](char*, std::size_t) {}};
 
-    std::stringstream out;
+    Containers::String out;
     Error redirectError{&out};
     array[53];
     array.set(53);
     array.reset(53);
     array.set(53, true);
-    CORRADE_COMPARE(out.str(),
+    CORRADE_COMPARE(out,
         "Containers::BitArray::operator[](): index 53 out of range for 53 bits\n"
         "Containers::BitArray::set(): index 53 out of range for 53 bits\n"
         "Containers::BitArray::reset(): index 53 out of range for 53 bits\n"
@@ -710,9 +709,9 @@ void BitArrayTest::debug() {
        BitArrayViewTest::debug() */
     char data[]{'\xe0', '\x61', '\xa6', '\x0a'};
 
-    std::ostringstream out;
+    Containers::String out;
     Debug{&out} << BitArray{data, 5, 19, [](char*, std::size_t) {}};
-    CORRADE_COMPARE(out.str(), "{11110000, 11001100, 101}\n");
+    CORRADE_COMPARE(out, "{11110000, 11001100, 101}\n");
 }
 
 }}}}

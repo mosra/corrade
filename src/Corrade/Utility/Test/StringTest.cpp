@@ -24,8 +24,6 @@
     DEALINGS IN THE SOFTWARE.
 */
 
-#include <sstream>
-
 #include "Corrade/Containers/Array.h"
 #include "Corrade/Containers/Optional.h"
 #include "Corrade/Containers/StaticArray.h"
@@ -35,7 +33,7 @@
 #include "Corrade/TestSuite/Compare/Container.h"
 #include "Corrade/TestSuite/Compare/Numeric.h"
 #include "Corrade/Utility/Algorithms.h"
-#include "Corrade/Utility/DebugStl.h"
+#include "Corrade/Utility/DebugStl.h" /** @todo remove when std::string is no more */
 #include "Corrade/Utility/Format.h"
 #include "Corrade/Utility/Memory.h"
 #include "Corrade/Utility/String.h"
@@ -1709,10 +1707,10 @@ void StringTest::stripPrefix() {
 void StringTest::stripPrefixInvalid() {
     CORRADE_SKIP_IF_NO_ASSERT();
 
-    std::ostringstream out;
+    Containers::String out;
     Error redirectOutput{&out};
     String::stripPrefix("overcomplicated", "complicated");
-    CORRADE_COMPARE(out.str(), "Utility::String::stripPrefix(): string doesn't begin with given prefix\n");
+    CORRADE_COMPARE(out, "Utility::String::stripPrefix(): string doesn't begin with given prefix\n");
 }
 
 void StringTest::stripSuffix() {
@@ -1725,10 +1723,10 @@ void StringTest::stripSuffix() {
 void StringTest::stripSuffixInvalid() {
     CORRADE_SKIP_IF_NO_ASSERT();
 
-    std::ostringstream out;
+    Containers::String out;
     Error redirectOutput{&out};
     String::stripSuffix("overcomplicated", "over");
-    CORRADE_COMPARE(out.str(), "Utility::String::stripSuffix(): string doesn't end with given suffix\n");
+    CORRADE_COMPARE(out, "Utility::String::stripSuffix(): string doesn't end with given suffix\n");
 }
 
 void StringTest::replaceFirst() {
@@ -1768,10 +1766,10 @@ void StringTest::replaceAllNotFound() {
 void StringTest::replaceAllEmptySearch() {
     CORRADE_SKIP_IF_NO_ASSERT();
 
-    std::ostringstream out;
+    Containers::String out;
     Error redirectOutput{&out};
     String::replaceAll("this completely messed up", "", "got ");
-    CORRADE_COMPARE(out.str(), "Utility::String::replaceAll(): empty search string would cause an infinite loop\n");
+    CORRADE_COMPARE(out, "Utility::String::replaceAll(): empty search string would cause an infinite loop\n");
 }
 
 void StringTest::replaceAllEmptyReplace() {
@@ -2060,10 +2058,10 @@ void StringTest::parseNumberSequenceOverflow() {
 }
 
 void StringTest::parseNumberSequenceError() {
-    std::ostringstream out;
+    Containers::String out;
     Error redirectError{&out};
     String::parseNumberSequence("3,5y7,x,25", 0, ~std::uint32_t{});
-    CORRADE_COMPARE(out.str(), "Utility::parseNumberSequence(): unrecognized character y in 3,5y7,x,25\n");
+    CORRADE_COMPARE(out, "Utility::parseNumberSequence(): unrecognized character y in 3,5y7,x,25\n");
 }
 
 }}}}

@@ -29,14 +29,12 @@
 #include "Corrade/Utility/Format.h"
 
 #include <limits>
-#include <sstream>
 
 #include "Corrade/Containers/Array.h"
 #include "Corrade/Containers/String.h"
 #include "Corrade/Containers/ScopeGuard.h"
 #include "Corrade/TestSuite/Tester.h"
 #include "Corrade/TestSuite/Compare/FileToString.h"
-#include "Corrade/Utility/DebugStl.h"
 #include "Corrade/Utility/Path.h"
 
 #include "configure.h"
@@ -255,7 +253,7 @@ void FormatTest::character() {
 void FormatTest::characterLong() {
     CORRADE_SKIP_IF_NO_ASSERT();
 
-    std::ostringstream out;
+    Containers::String out;
     Error redirectError{&out};
 
     /* Using formatInto() instead of format() to avoid all errors being printed
@@ -263,7 +261,7 @@ void FormatTest::characterLong() {
     char buffer[128]{};
     formatInto(buffer, "{:c}", 97ll);
     formatInto(buffer, "{:c}", 97ull);
-    CORRADE_COMPARE(out.str(),
+    CORRADE_COMPARE(out,
         "Utility::format(): character type used for a 64-bit value\n"
         "Utility::format(): character type used for a 64-bit value\n");
 }
@@ -302,7 +300,7 @@ void FormatTest::hexadecimalUppercase() {
 void FormatTest::integerFloat() {
     CORRADE_SKIP_IF_NO_ASSERT();
 
-    std::ostringstream out;
+    Containers::String out;
     Error redirectError{&out};
 
     /* Using formatInto() instead of format() to avoid all errors being printed
@@ -310,7 +308,7 @@ void FormatTest::integerFloat() {
     char buffer[128]{};
     formatInto(buffer, "{:g}", 123456);
     formatInto(buffer, "{:g}", 123456ull);
-    CORRADE_COMPARE(out.str(),
+    CORRADE_COMPARE(out,
         "Utility::format(): floating-point type used for an integral value\n"
         "Utility::format(): floating-point type used for an integral value\n");
 }
@@ -571,7 +569,7 @@ void FormatTest::floatFixedUppercase() {
 void FormatTest::floatBase() {
     CORRADE_SKIP_IF_NO_ASSERT();
 
-    std::ostringstream out;
+    Containers::String out;
     Error redirectError{&out};
 
     /* Using formatInto() instead of format() to avoid all errors being printed
@@ -581,7 +579,7 @@ void FormatTest::floatBase() {
     formatInto(buffer, "{:o}", 123456.0f);
     formatInto(buffer, "{:x}", 123456.0);
     formatInto(buffer, "{:d}", 123456.0l);
-    CORRADE_COMPARE(out.str(),
+    CORRADE_COMPARE(out,
         "Utility::format(): character type used for a floating-point value\n"
         "Utility::format(): integral type used for a floating-point value\n"
         "Utility::format(): integral type used for a floating-point value\n"
@@ -769,7 +767,7 @@ void FormatTest::emptyFormat() {
 void FormatTest::tooSmallBuffer() {
     CORRADE_SKIP_IF_NO_ASSERT();
 
-    std::ostringstream out;
+    Containers::String out;
     Error redirectError{&out};
 
     /* The assertion doesn't quit the function, so it will continue with
@@ -778,7 +776,7 @@ void FormatTest::tooSmallBuffer() {
     formatInto({data, 10}, "{}", "hello this is big");
     formatInto({data, 10}, "hello is {} big", "this");
 
-    CORRADE_COMPARE(out.str(),
+    CORRADE_COMPARE(out,
         "Utility::formatInto(): buffer too small, expected at least 17 but got 10\n"
         "Utility::formatInto(): buffer too small, expected at least 13 but got 10\n");
 }
@@ -786,7 +784,7 @@ void FormatTest::tooSmallBuffer() {
 void FormatTest::mismatchedDelimiter() {
     CORRADE_SKIP_IF_NO_ASSERT();
 
-    std::ostringstream out;
+    Containers::String out;
     Error redirectError{&out};
 
     /* Using formatInto() instead of format() to avoid all errors being printed
@@ -796,15 +794,15 @@ void FormatTest::mismatchedDelimiter() {
         formatInto(buffer, "{");
         formatInto(buffer, "{123545");
         formatInto(buffer, "struct { int a; } foo;");
-        CORRADE_COMPARE(out.str(),
+        CORRADE_COMPARE(out,
             "Utility::format(): unexpected end of format string\n"
             "Utility::format(): unexpected end of format string\n"
             "Utility::format(): unknown placeholder content:  \n");
     } {
-        out.str({});
+        out = {};
         formatInto(buffer, "}");
         formatInto(buffer, "a; } foo;");
-        CORRADE_COMPARE(out.str(),
+        CORRADE_COMPARE(out,
             "Utility::format(): mismatched }\n"
             "Utility::format(): mismatched }\n");
     }
@@ -813,7 +811,7 @@ void FormatTest::mismatchedDelimiter() {
 void FormatTest::unknownPlaceholderContent() {
     CORRADE_SKIP_IF_NO_ASSERT();
 
-    std::ostringstream out;
+    Containers::String out;
     Error redirectError{&out};
 
     /* Using formatInto() instead of format() to avoid all errors being printed
@@ -823,7 +821,7 @@ void FormatTest::unknownPlaceholderContent() {
     formatInto(buffer, "{1oh}");
     formatInto(buffer, "{1:xe}");
 
-    CORRADE_COMPARE(out.str(),
+    CORRADE_COMPARE(out,
         "Utility::format(): unknown placeholder content: n\n"
         "Utility::format(): unknown placeholder content: o\n"
         "Utility::format(): unknown placeholder content: e\n");
@@ -832,7 +830,7 @@ void FormatTest::unknownPlaceholderContent() {
 void FormatTest::invalidPrecision() {
     CORRADE_SKIP_IF_NO_ASSERT();
 
-    std::ostringstream out;
+    Containers::String out;
     Error redirectError{&out};
 
     /* Using formatInto() instead of format() to avoid all errors being printed
@@ -841,7 +839,7 @@ void FormatTest::invalidPrecision() {
     formatInto(buffer, "{:.}");
     formatInto(buffer, "{1:.x}");
 
-    CORRADE_COMPARE(out.str(),
+    CORRADE_COMPARE(out,
         "Utility::format(): invalid character in precision specifier: }\n"
         "Utility::format(): invalid character in precision specifier: x\n");
 }
@@ -849,7 +847,7 @@ void FormatTest::invalidPrecision() {
 void FormatTest::typeForString() {
     CORRADE_SKIP_IF_NO_ASSERT();
 
-    std::ostringstream out;
+    Containers::String out;
     Error redirectError{&out};
 
     /* Using formatInto() instead of format() to avoid all errors being printed
@@ -857,14 +855,14 @@ void FormatTest::typeForString() {
     char buffer[256]{};
     formatInto(buffer, "{:x}", "dead");
 
-    CORRADE_COMPARE(out.str(),
+    CORRADE_COMPARE(out,
         "Utility::format(): type specifier can't be used for a string value\n");
 }
 
 void FormatTest::invalidType() {
     CORRADE_SKIP_IF_NO_ASSERT();
 
-    std::ostringstream out;
+    Containers::String out;
     Error redirectError{&out};
 
     /* Using formatInto() instead of format() to avoid all errors being printed
@@ -872,7 +870,7 @@ void FormatTest::invalidType() {
     char buffer[256]{};
     formatInto(buffer, "{:H}");
 
-    CORRADE_COMPARE(out.str(),
+    CORRADE_COMPARE(out,
         "Utility::format(): invalid type specifier: H\n");
 }
 

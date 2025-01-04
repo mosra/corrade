@@ -24,11 +24,9 @@
     DEALINGS IN THE SOFTWARE.
 */
 
-#include <sstream>
-
+#include "Corrade/Containers/String.h"
 #include "Corrade/Interconnect/StateMachine.h"
 #include "Corrade/TestSuite/Tester.h"
-#include "Corrade/Utility/DebugStl.h" /** @todo remove when <sstream> is gone */
 
 namespace Corrade { namespace Interconnect { namespace Test { namespace {
 
@@ -88,7 +86,7 @@ void StateMachineTest::test() {
         {State::End,    Input::KeyB,    State::Start}
     });
 
-    std::ostringstream out;
+    Containers::String out;
     Debug redirectDebug{&out};
 
     Interconnect::connect(m, &StateMachine::entered<State::Start>,
@@ -107,12 +105,13 @@ void StateMachineTest::test() {
 
     m.step(Input::KeyA)
      .step(Input::KeyB);
-    CORRADE_COMPARE(out.str(), "start exited, next 1\n"
-                               "going from start to end\n"
-                               "end entered, previous 0\n"
-                               "end exited, next 0\n"
-                               "going from end to start\n"
-                               "start entered, previous 1\n");
+    CORRADE_COMPARE(out,
+        "start exited, next 1\n"
+        "going from start to end\n"
+        "end entered, previous 0\n"
+        "end exited, next 0\n"
+        "going from end to start\n"
+        "start entered, previous 1\n");
 }
 
 }}}}

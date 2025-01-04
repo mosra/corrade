@@ -28,7 +28,6 @@
    *Reference or StridedArrayView being included first */
 #include "Corrade/Containers/Iterable.h"
 
-#include <sstream>
 #include <vector> /* for verification that it works with STL */
 
 #include "Corrade/Containers/AnyReference.h"
@@ -36,10 +35,10 @@
 #include "Corrade/Containers/ArrayViewStl.h"
 #include "Corrade/Containers/MoveReference.h"
 #include "Corrade/Containers/Reference.h"
+#include "Corrade/Containers/String.h"
 #include "Corrade/Containers/StringView.h"
 #include "Corrade/Containers/StridedArrayView.h"
 #include "Corrade/TestSuite/Tester.h"
-#include "Corrade/Utility/DebugStl.h"
 
 namespace Corrade { namespace Containers { namespace Test { namespace {
 
@@ -603,12 +602,12 @@ void IterableTest::accessInvalid() {
     Iterable<const int> bi = data;
     CORRADE_COMPARE(bi.size(), 3);
 
-    std::ostringstream out;
+    Containers::String out;
     Error redirectError{&out};
     ai.front();
     ai.back();
     bi[3];
-    CORRADE_COMPARE(out.str(),
+    CORRADE_COMPARE(out,
         "Containers::Iterable::front(): view is empty\n"
         "Containers::Iterable::back(): view is empty\n"
         "Containers::Iterable::operator[](): index 3 out of range for 3 elements\n");

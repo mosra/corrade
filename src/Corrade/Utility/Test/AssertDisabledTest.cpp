@@ -24,16 +24,14 @@
     DEALINGS IN THE SOFTWARE.
 */
 
-#include <sstream>
-
 #if defined(TEST_DEBUG_ASSERT) && !defined(CORRADE_IS_DEBUG_BUILD) && defined(NDEBUG)
 /* for debug asserts do nothing, they should be disabled in release builds */
 #elif !defined(CORRADE_NO_ASSERT)
 #define CORRADE_NO_ASSERT
 #endif
 
+#include "Corrade/Containers/String.h"
 #include "Corrade/TestSuite/Tester.h"
-#include "Corrade/Utility/DebugStl.h" /** @todo remove when <sstream> is gone */
 
 #ifdef TEST_DEBUG_ASSERT
 #include "Corrade/Utility/DebugAssert.h"
@@ -87,7 +85,7 @@ void AssertDisabledTest::test() {
     #endif
 
     #ifndef __clang_analyzer__
-    std::ostringstream out;
+    Containers::String out;
     Error redirectError{&out};
 
     int a = 0;
@@ -113,7 +111,7 @@ void AssertDisabledTest::test() {
     CORRADE_COMPARE(c, 3);
     CORRADE_COMPARE(d, 3);
     CORRADE_COMPARE(e, 3);
-    CORRADE_COMPARE(out.str(), "");
+    CORRADE_COMPARE(out, "");
     #else
     CORRADE_SKIP("With assertions disabled, CORRADE_VERIFY() and CORRADE_COMPARE() cause a lot of false positives in Address Sanitizer.");
     #endif
@@ -129,7 +127,7 @@ constexpr int divideInternal(int a, int b) {
 
 void AssertDisabledTest::constexprTest() {
     #ifndef __clang_analyzer__
-    std::ostringstream out;
+    Containers::String out;
     Error redirectError{&out};
 
     {
@@ -146,7 +144,7 @@ void AssertDisabledTest::constexprTest() {
         CORRADE_COMPARE(three, 3);
     }
 
-    CORRADE_COMPARE(out.str(), "");
+    CORRADE_COMPARE(out, "");
     #else
     CORRADE_SKIP("With assertions disabled, CORRADE_VERIFY() and CORRADE_COMPARE() cause a lot of false positives in Address Sanitizer.");
     #endif

@@ -28,7 +28,6 @@
    String[View] or StridedArrayView being included first */
 #include "Corrade/Containers/StringIterable.h"
 
-#include <sstream>
 #include <vector> /* for verification that StringIterable works with a STL vector */
 
 #include "Corrade/Containers/Array.h"
@@ -39,7 +38,6 @@
 #include "Corrade/Containers/StridedArrayView.h"
 #include "Corrade/TestSuite/Tester.h"
 #include "Corrade/TestSuite/Compare/Container.h"
-#include "Corrade/Utility/DebugStl.h"
 
 namespace {
 
@@ -496,12 +494,12 @@ void StringIterableTest::accessInvalid() {
     StringIterable bi = data;
     CORRADE_COMPARE(bi.size(), 3);
 
-    std::ostringstream out;
+    Containers::String out;
     Error redirectError{&out};
     ai.front();
     ai.back();
     bi[3];
-    CORRADE_COMPARE(out.str(),
+    CORRADE_COMPARE(out,
         "Containers::StringIterable::front(): view is empty\n"
         "Containers::StringIterable::back(): view is empty\n"
         "Containers::StringIterable::operator[](): index 3 out of range for 3 elements\n");

@@ -24,7 +24,7 @@
     DEALINGS IN THE SOFTWARE.
 */
 
-#include <sstream>
+#include <sstream> /** @todo remove once Debug is fully stream-free */
 
 #include "Corrade/configure.h"
 
@@ -48,7 +48,7 @@
 #include "Corrade/Containers/Reference.h"
 #include "Corrade/TestSuite/Tester.h"
 #include "Corrade/Utility/Arguments.h"
-#include "Corrade/Utility/DebugStl.h" /** @todo remove when <sstream> is gone */
+#include "Corrade/Utility/DebugStl.h" /** @todo remove once Debug is fully stream-free */
 
 #ifdef TEST_DEBUG_ASSERT
 #include "Corrade/Utility/DebugAssert.h"

@@ -24,7 +24,7 @@
     DEALINGS IN THE SOFTWARE.
 */
 
-#include <sstream>
+#include <sstream> /** @todo remove once Debug is fully stream-free */
 
 #include "Corrade/Containers/StringView.h"
 #include "Corrade/TestSuite/Tester.h"

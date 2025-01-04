@@ -24,14 +24,11 @@
     DEALINGS IN THE SOFTWARE.
 */
 
-#include <sstream>
-
 #include "Corrade/Containers/GrowableArray.h"
 #include "Corrade/Containers/String.h"
 #include "Corrade/TestSuite/Tester.h"
 #include "Corrade/TestSuite/Compare/Container.h"
 #include "Corrade/TestSuite/Compare/Numeric.h"
-#include "Corrade/Utility/DebugStl.h"
 #include "Corrade/Utility/Format.h"
 #include "Corrade/Utility/Memory.h"
 
@@ -271,10 +268,10 @@ void MemoryTest::allocateExplicitAlignmentValueInit() {
 void MemoryTest::allocateNotMultipleOfAlignment() {
     CORRADE_SKIP_IF_NO_ASSERT();
 
-    std::ostringstream out;
+    Containers::String out;
     Error redirectError{&out};
     allocateAligned<short, 32>(17);
-    CORRADE_COMPARE(out.str(), "Utility::allocateAligned(): total byte size 34 not a multiple of a 32-byte alignment\n");
+    CORRADE_COMPARE(out, "Utility::allocateAligned(): total byte size 34 not a multiple of a 32-byte alignment\n");
 }
 
 }}}}

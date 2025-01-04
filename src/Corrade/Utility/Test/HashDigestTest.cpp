@@ -24,12 +24,10 @@
     DEALINGS IN THE SOFTWARE.
 */
 
-#include <sstream>
-
+#include "Corrade/Containers/String.h"
 #include "Corrade/TestSuite/Tester.h"
 #include "Corrade/Utility/AbstractHash.h"
-#include "Corrade/Utility/Debug.h"
-#include "Corrade/Utility/DebugStl.h"
+#include "Corrade/Utility/DebugStl.h" /** @todo remove once HashDigest is std::string-free */
 
 namespace Corrade { namespace Utility { namespace Test { namespace {
 
@@ -76,9 +74,9 @@ void HashDigestTest::constructHexString() {
 }
 
 void HashDigestTest::debug() {
-    std::ostringstream out;
+    Containers::String out;
     Debug(&out) << HashDigest<4>::fromHexString("defeca7e");
-    CORRADE_COMPARE(out.str(), "defeca7e\n");
+    CORRADE_COMPARE(out, "defeca7e\n");
 }
 
 }}}}

@@ -24,8 +24,6 @@
     DEALINGS IN THE SOFTWARE.
 */
 
-#include <sstream>
-
 #include "Corrade/Containers/Array.h"
 #include "Corrade/Containers/Optional.h"
 #include "Corrade/Containers/ScopeGuard.h"
@@ -36,9 +34,9 @@
 #include "Corrade/TestSuite/Compare/Container.h"
 #include "Corrade/TestSuite/Compare/Numeric.h"
 #include "Corrade/TestSuite/Compare/String.h"
-#include "Corrade/Utility/DebugStl.h" /** @todo remove when <sstream> is gone */
-#include "Corrade/Utility/FormatStl.h"
 #include "Corrade/Utility/Configuration.h"
+#include "Corrade/Utility/DebugStl.h" /** @todo remove once Configuration is std::string-free */
+#include "Corrade/Utility/Format.h"
 #include "Corrade/Utility/Path.h"
 #include "Corrade/Utility/System.h"
 
@@ -256,12 +254,12 @@ void ManagerTest::pluginDirectoryNonexistent() {
     struct SomePlugin: AbstractPlugin {};
 
     /* Everything okay in this case, a nonexistent directory is ignored */
-    std::ostringstream out;
+    Containers::String out;
     {
         Error redirectError{&out};
         PluginManager::Manager<SomePlugin> manager{"nonexistent"};
     }
-    CORRADE_COMPARE(out.str(), "");
+    CORRADE_COMPARE(out, "");
 }
 
 void ManagerTest::pluginDirectoryNotReadable() {
@@ -286,13 +284,13 @@ void ManagerTest::pluginDirectoryNotReadable() {
     struct SomePlugin: AbstractPlugin {};
 
     /* Everything okay in this case, a nonexistent directory is ignored */
-    std::ostringstream out;
+    Containers::String out;
     {
         Error redirectError{&out};
         PluginManager::Manager<SomePlugin> manager{directory};
     }
-    CORRADE_COMPARE_AS(out.str(),
-        Utility::formatString("Utility::Path::list(): can't list {}: error ", directory),
+    CORRADE_COMPARE_AS(out,
+        Utility::format("Utility::Path::list(): can't list {}: error ", directory),
         TestSuite::Compare::StringHasPrefix);
 }
 
@@ -343,10 +341,10 @@ void ManagerTest::pluginInterfaceNotGlobal() {
         }
     };
 
-    std::ostringstream out;
+    Containers::String out;
     Error redirectError{&out};
     PluginManager::Manager<SomePlugin> manager;
-    CORRADE_COMPARE(out.str(), "PluginManager::AbstractPlugin::pluginInterface(): returned view is not global: this.will.Assert/1.0\n");
+    CORRADE_COMPARE(out, "PluginManager::AbstractPlugin::pluginInterface(): returned view is not global: this.will.Assert/1.0\n");
 }
 
 #ifndef CORRADE_PLUGINMANAGER_NO_DYNAMIC_PLUGIN_SUPPORT
@@ -357,10 +355,10 @@ void ManagerTest::pluginSuffixNotGlobal() {
         static Containers::StringView pluginSuffix() { return ".boom"; }
     };
 
-    std::ostringstream out;
+    Containers::String out;
     Error redirectError{&out};
     PluginManager::Manager<SomePlugin> manager;
-    CORRADE_COMPARE(out.str(), "PluginManager::AbstractPlugin::pluginSuffix(): returned view is not global: .boom\n");
+    CORRADE_COMPARE(out, "PluginManager::AbstractPlugin::pluginSuffix(): returned view is not global: .boom\n");
 }
 #endif
 
@@ -373,22 +371,22 @@ void ManagerTest::pluginMetadataSuffixNotGlobal() {
         }
     };
 
-    std::ostringstream out;
+    Containers::String out;
     Error redirectError{&out};
     PluginManager::Manager<SomePlugin> manager;
-    CORRADE_COMPARE(out.str(), "PluginManager::AbstractPlugin::pluginMetadataSuffix(): returned view is not global: .boomconf\n");
+    CORRADE_COMPARE(out, "PluginManager::AbstractPlugin::pluginMetadataSuffix(): returned view is not global: .boomconf\n");
 }
 
 void ManagerTest::pluginSearchPathsNotUsed() {
     struct SomePlugin: AbstractPlugin {};
 
     /* Everything okay in this case (no assert) */
-    std::ostringstream out;
+    Containers::String out;
     Error redirectError{&out};
     {
         PluginManager::Manager<SomePlugin> manager{"someDirectory"};
     }
-    CORRADE_COMPARE(out.str(), "");
+    CORRADE_COMPARE(out, "");
 }
 
 #ifndef CORRADE_PLUGINMANAGER_NO_DYNAMIC_PLUGIN_SUPPORT
@@ -398,12 +396,12 @@ void ManagerTest::pluginSearchPathsNotProvided() {
     struct SomePlugin: AbstractPlugin {};
 
     /* Complain that no plugin search path is set */
-    std::ostringstream out;
+    Containers::String out;
     Error redirectError{&out};
     {
         PluginManager::Manager<SomePlugin> manager;
     }
-    CORRADE_COMPARE(out.str(), "PluginManager::Manager: either pluginDirectory has to be set or T::pluginSearchPaths() is expected to have at least one entry\n");
+    CORRADE_COMPARE(out, "PluginManager::Manager: either pluginDirectory has to be set or T::pluginSearchPaths() is expected to have at least one entry\n");
 }
 
 void ManagerTest::pluginSearchPathsNotFound() {
@@ -414,12 +412,12 @@ void ManagerTest::pluginSearchPathsNotFound() {
     };
 
     /* Complain that no plugin search path is set */
-    std::ostringstream out;
+    Containers::String out;
     Warning redirectWarning{&out};
     {
         PluginManager::Manager<SomePlugin> manager;
     }
-    CORRADE_COMPARE(out.str(), "PluginManager::Manager: none of the plugin search paths in {nonexistent, /absolute/but/nonexistent} exists and pluginDirectory was not set, skipping plugin discovery\n");
+    CORRADE_COMPARE(out, "PluginManager::Manager: none of the plugin search paths in {nonexistent, /absolute/but/nonexistent} exists and pluginDirectory was not set, skipping plugin discovery\n");
 }
 #endif
 
@@ -466,13 +464,13 @@ void ManagerTest::nameList() {
 
 #ifndef CORRADE_PLUGINMANAGER_NO_DYNAMIC_PLUGIN_SUPPORT
 void ManagerTest::wrongMetadataFile() {
-    std::ostringstream out;
+    Containers::String out;
     Error redirectError{&out};
 
     PluginManager::Manager<WrongMetadata> manager;
     CORRADE_COMPARE(manager.loadState("WrongMetadata"), LoadState::WrongMetadataFile);
     CORRADE_COMPARE(manager.load("WrongMetadata"), LoadState::WrongMetadataFile);
-    CORRADE_COMPARE(out.str(),
+    CORRADE_COMPARE(out,
         "Utility::Configuration::Configuration(): missing equals for a value\n"
         "PluginManager::Manager::load(): plugin WrongMetadata is not ready to load: PluginManager::LoadState::WrongMetadataFile\n");
 }
@@ -482,32 +480,32 @@ void ManagerTest::missingMetadataFile() {
     CORRADE_VERIFY(Utility::Path::make(dir));
     CORRADE_VERIFY(Utility::Path::write(Utility::Path::join(dir, "MissingMetadata" + AbstractPlugin::pluginSuffix()), "this is not a binary"_s));
 
-    std::ostringstream out;
+    Containers::String out;
     Error redirectError{&out};
 
     PluginManager::Manager<WrongMetadata> manager{dir};
     CORRADE_COMPARE(manager.loadState("MissingMetadata"), LoadState::WrongMetadataFile);
     CORRADE_COMPARE(manager.load("MissingMetadata"), LoadState::WrongMetadataFile);
-    CORRADE_COMPARE(out.str(), Utility::formatString(
+    CORRADE_COMPARE(out, Utility::format(
         "PluginManager::Manager: {} was not found\n"
         "PluginManager::Manager::load(): plugin MissingMetadata is not ready to load: PluginManager::LoadState::WrongMetadataFile\n",
         Utility::Path::join(dir, "MissingMetadata.conf")));
 }
 
 void ManagerTest::missingLibraryDependency() {
-    std::ostringstream out;
+    Containers::String out;
     Error redirectError{&out};
 
     PluginManager::Manager<AbstractWrongPlugin> manager;
     CORRADE_COMPARE(manager.load("MissingLibraryDependency"), PluginManager::LoadState::LoadFailed);
     CORRADE_COMPARE(manager.loadState("MissingLibraryDependency"), PluginManager::LoadState::NotLoaded);
-    CORRADE_COMPARE_AS(out.str(),
-        Utility::formatString("PluginManager::Manager::load(): cannot load plugin MissingLibraryDependency from \"{}/MissingLibraryDependency{}\": ", manager.pluginDirectory(), AbstractWrongPlugin::pluginSuffix()),
+    CORRADE_COMPARE_AS(out,
+        Utility::format("PluginManager::Manager::load(): cannot load plugin MissingLibraryDependency from \"{}/MissingLibraryDependency{}\": ", manager.pluginDirectory(), AbstractWrongPlugin::pluginSuffix()),
         TestSuite::Compare::StringHasPrefix);
 }
 
 void ManagerTest::noPluginVersion() {
-    std::ostringstream out;
+    Containers::String out;
     Error redirectError{&out};
 
     PluginManager::Manager<AbstractWrongPlugin> manager;
@@ -516,28 +514,28 @@ void ManagerTest::noPluginVersion() {
     /* On Windows the error code is printed as well, on Unix only dlerror()
        alone which doesn't have any standard representation to check against */
     #ifdef CORRADE_TARGET_WINDOWS
-    CORRADE_COMPARE_AS(out.str(),
+    CORRADE_COMPARE_AS(out,
         "PluginManager::Manager::load(): cannot get version of plugin NoPluginVersion: error 127 (",
         TestSuite::Compare::StringHasPrefix);
     #else
-    CORRADE_COMPARE_AS(out.str(),
+    CORRADE_COMPARE_AS(out,
         "PluginManager::Manager::load(): cannot get version of plugin NoPluginVersion: ",
         TestSuite::Compare::StringHasPrefix);
     #endif
 }
 
 void ManagerTest::wrongPluginVersion() {
-    std::ostringstream out;
+    Containers::String out;
     Error redirectError{&out};
 
     PluginManager::Manager<AbstractFood> foodManager;
     CORRADE_COMPARE(foodManager.load("OldBread"), PluginManager::LoadState::WrongPluginVersion);
     CORRADE_COMPARE(foodManager.loadState("OldBread"), PluginManager::LoadState::NotLoaded);
-    CORRADE_COMPARE(out.str(), Utility::formatString("PluginManager::Manager::load(): wrong version of plugin OldBread, expected {} but got 0\n", CORRADE_PLUGIN_VERSION));
+    CORRADE_COMPARE(out, Utility::format("PluginManager::Manager::load(): wrong version of plugin OldBread, expected {} but got 0\n", CORRADE_PLUGIN_VERSION));
 }
 
 void ManagerTest::noPluginInterface() {
-    std::ostringstream out;
+    Containers::String out;
     Error redirectError{&out};
 
     PluginManager::Manager<AbstractWrongPlugin> manager;
@@ -546,27 +544,27 @@ void ManagerTest::noPluginInterface() {
     /* On Windows the error code is printed as well, on Unix only dlerror()
        alone which doesn't have any standard representation to check against */
     #ifdef CORRADE_TARGET_WINDOWS
-    CORRADE_COMPARE_AS(out.str(),
+    CORRADE_COMPARE_AS(out,
         "PluginManager::Manager::load(): cannot get interface string of plugin NoPluginInterface: error 127 (",
         TestSuite::Compare::StringHasPrefix);
     #else
-    CORRADE_COMPARE_AS(out.str(),
+    CORRADE_COMPARE_AS(out,
         "PluginManager::Manager::load(): cannot get interface string of plugin NoPluginInterface: ",
         TestSuite::Compare::StringHasPrefix);
     #endif
 }
 
 void ManagerTest::wrongPluginInterface() {
-    std::ostringstream out;
+    Containers::String out;
     Error redirectError{&out};
 
     PluginManager::Manager<AbstractFood> foodManager;
     CORRADE_COMPARE(foodManager.load("RottenTomato"), PluginManager::LoadState::WrongInterfaceVersion);
-    CORRADE_COMPARE(out.str(), "PluginManager::Manager::load(): wrong interface string of plugin RottenTomato, expected cz.mosra.corrade.PluginManager.Test.AbstractFood/1.0 but got cz.mosra.corrade.PluginManager.Test.AbstractFood/0.1\n");
+    CORRADE_COMPARE(out, "PluginManager::Manager::load(): wrong interface string of plugin RottenTomato, expected cz.mosra.corrade.PluginManager.Test.AbstractFood/1.0 but got cz.mosra.corrade.PluginManager.Test.AbstractFood/0.1\n");
 }
 
 void ManagerTest::noPluginInitializer() {
-    std::ostringstream out;
+    Containers::String out;
     Error redirectError{&out};
 
     PluginManager::Manager<AbstractWrongPlugin> manager;
@@ -575,18 +573,18 @@ void ManagerTest::noPluginInitializer() {
     /* On Windows the error code is printed as well, on Unix only dlerror()
        alone which doesn't have any standard representation to check against */
     #ifdef CORRADE_TARGET_WINDOWS
-    CORRADE_COMPARE_AS(out.str(),
+    CORRADE_COMPARE_AS(out,
         "PluginManager::Manager::load(): cannot get initializer of plugin NoPluginInitializer: error 127 (",
         TestSuite::Compare::StringHasPrefix);
     #else
-    CORRADE_COMPARE_AS(out.str(),
+    CORRADE_COMPARE_AS(out,
         "PluginManager::Manager::load(): cannot get initializer of plugin NoPluginInitializer: ",
         TestSuite::Compare::StringHasPrefix);
     #endif
 }
 
 void ManagerTest::noPluginFinalizer() {
-    std::ostringstream out;
+    Containers::String out;
     Error redirectError{&out};
 
     PluginManager::Manager<AbstractWrongPlugin> manager;
@@ -595,18 +593,18 @@ void ManagerTest::noPluginFinalizer() {
     /* On Windows the error code is printed as well, on Unix only dlerror()
        alone which doesn't have any standard representation to check against */
     #ifdef CORRADE_TARGET_WINDOWS
-    CORRADE_COMPARE_AS(out.str(),
+    CORRADE_COMPARE_AS(out,
         "PluginManager::Manager::load(): cannot get finalizer of plugin NoPluginFinalizer: error 127 (",
         TestSuite::Compare::StringHasPrefix);
     #else
-    CORRADE_COMPARE_AS(out.str(),
+    CORRADE_COMPARE_AS(out,
         "PluginManager::Manager::load(): cannot get finalizer of plugin NoPluginFinalizer: ",
         TestSuite::Compare::StringHasPrefix);
     #endif
 }
 
 void ManagerTest::noPluginInstancer() {
-    std::ostringstream out;
+    Containers::String out;
     Error redirectError{&out};
 
     PluginManager::Manager<AbstractWrongPlugin> manager;
@@ -615,11 +613,11 @@ void ManagerTest::noPluginInstancer() {
     /* On Windows the error code is printed as well, on Unix only dlerror()
        alone which doesn't have any standard representation to check against */
     #ifdef CORRADE_TARGET_WINDOWS
-    CORRADE_COMPARE_AS(out.str(),
+    CORRADE_COMPARE_AS(out,
         "PluginManager::Manager::load(): cannot get instancer of plugin NoPluginInstancer: error 127 (",
         TestSuite::Compare::StringHasPrefix);
     #else
-    CORRADE_COMPARE_AS(out.str(),
+    CORRADE_COMPARE_AS(out,
         "PluginManager::Manager::load(): cannot get instancer of plugin NoPluginInstancer: ",
         TestSuite::Compare::StringHasPrefix);
     #endif
@@ -637,23 +635,23 @@ void ManagerTest::queryNonexistent() {
 void ManagerTest::loadNonexistent() {
     PluginManager::Manager<AbstractAnimal> manager;
 
-    std::ostringstream out;
+    Containers::String out;
     Error redirectError{&out};
     CORRADE_COMPARE(manager.load("Nonexistent"), LoadState::NotFound);
     #if defined(CORRADE_TARGET_EMSCRIPTEN) || defined(CORRADE_TARGET_WINDOWS_RT) || defined(CORRADE_TARGET_IOS) || defined(CORRADE_TARGET_ANDROID)
-    CORRADE_COMPARE(out.str(), "PluginManager::Manager::load(): plugin Nonexistent was not found\n");
+    CORRADE_COMPARE(out, "PluginManager::Manager::load(): plugin Nonexistent was not found\n");
     #else
-    CORRADE_COMPARE(out.str(), "PluginManager::Manager::load(): plugin Nonexistent is not static and was not found in " PLUGINS_DIR "/animals\n");
+    CORRADE_COMPARE(out, "PluginManager::Manager::load(): plugin Nonexistent is not static and was not found in " PLUGINS_DIR "/animals\n");
     #endif
 }
 
 void ManagerTest::unloadNonexistent() {
     PluginManager::Manager<AbstractAnimal> manager;
 
-    std::ostringstream out;
+    Containers::String out;
     Error redirectError{&out};
     CORRADE_COMPARE(manager.unload("Nonexistent"), LoadState::NotFound);
-    CORRADE_COMPARE(out.str(), "PluginManager::Manager::unload(): plugin Nonexistent was not found\n");
+    CORRADE_COMPARE(out, "PluginManager::Manager::unload(): plugin Nonexistent was not found\n");
 }
 
 void ManagerTest::staticPlugin() {
@@ -698,10 +696,10 @@ void ManagerTest::dynamicPlugin() {
         CORRADE_COMPARE(animal->legCount(), 4);
 
         /* Try to unload plugin when instance is used */
-        std::ostringstream out;
+        Containers::String out;
         Error redirectError{&out};
         CORRADE_COMPARE(manager.unload("Dog"), LoadState::Used);
-        CORRADE_COMPARE(out.str(), "PluginManager::Manager::unload(): plugin Dog is currently used and cannot be deleted\n");
+        CORRADE_COMPARE(out, "PluginManager::Manager::unload(): plugin Dog is currently used and cannot be deleted\n");
         CORRADE_COMPARE(manager.loadState("Dog"), LoadState::Loaded);
     }
 
@@ -760,10 +758,10 @@ void ManagerTest::dynamicPluginFilePathConflictsWithLoadedPlugin() {
 
     /* Fails when Dog is loaded */
     {
-        std::ostringstream out;
+        Containers::String out;
         Error redirectError{&out};
         CORRADE_COMPARE(manager.load(DOG_PLUGIN_FILENAME), LoadState::Used);
-        CORRADE_COMPARE(out.str(), "PluginManager::load(): Dog"  + AbstractPlugin::pluginSuffix() + " conflicts with currently loaded plugin of the same name\n");
+        CORRADE_COMPARE(out, "PluginManager::load(): Dog"  + AbstractPlugin::pluginSuffix() + " conflicts with currently loaded plugin of the same name\n");
     }
 
     /* AGoodBoy is provided by (the currently loaded) Dog plugin */
@@ -965,10 +963,10 @@ void ManagerTest::hierarchy() {
         CORRADE_COMPARE(animal->name(), "Rodriguez");
 
         /* Try to unload plugin when another is depending on it */
-        std::ostringstream out;
+        Containers::String out;
         Error redirectError{&out};
         CORRADE_COMPARE(manager.unload("Dog"), LoadState::Required);
-        CORRADE_COMPARE(out.str(), "PluginManager::Manager::unload(): plugin Dog is required by other plugins: {PitBull}\n");
+        CORRADE_COMPARE(out, "PluginManager::Manager::unload(): plugin Dog is required by other plugins: {PitBull}\n");
     }
 
     /* After deleting instance, unload PitBull plugin, then try again */
@@ -1050,10 +1048,10 @@ void ManagerTest::crossManagerDependenciesRetrieveExternalManagerNoInterface() {
 
     PluginManager::Manager<AbstractAnimal> manager;
 
-    std::ostringstream out;
+    Containers::String out;
     Error redirectError{&out};
     manager.externalManager<NoInterface>();
-    CORRADE_COMPARE(out.str(), "PluginManager::Manager::externalManager(): can only retrieve managers with a non-empty plugin interface\n");
+    CORRADE_COMPARE(out, "PluginManager::Manager::externalManager(): can only retrieve managers with a non-empty plugin interface\n");
 }
 
 void ManagerTest::crossManagerDependenciesInstantiateFromDifferent() {
@@ -1066,10 +1064,10 @@ void ManagerTest::crossManagerDependenciesInstantiateFromDifferent() {
     /* The plugin can be instanced only through its own manager */
     CORRADE_VERIFY(manager.instantiate("Canary"));
 
-    std::ostringstream out;
+    Containers::String out;
     Error redirectError{&out};
     foodManager.instantiate("Canary");
-    CORRADE_COMPARE(out.str(), "PluginManager::Manager::instantiate(): plugin Canary is not loaded\n");
+    CORRADE_COMPARE(out, "PluginManager::Manager::instantiate(): plugin Canary is not loaded\n");
 }
 
 void ManagerTest::crossManagerDependenciesWrongDestructionOrder() {
@@ -1079,10 +1077,10 @@ void ManagerTest::crossManagerDependenciesWrongDestructionOrder() {
     PluginManager::Manager<AbstractFood> foodManager;
     foodManager.registerExternalManager(*manager);
 
-    std::ostringstream out;
+    Containers::String out;
     Error redirectError{&out};
     manager = Containers::NullOpt;
-    CORRADE_COMPARE(out.str(), "PluginManager::Manager: wrong destruction order, cz.mosra.corrade.PluginManager.Test.AbstractAnimal/1.0 plugins still needed by 1 other managers for external dependencies\n");
+    CORRADE_COMPARE(out, "PluginManager::Manager: wrong destruction order, cz.mosra.corrade.PluginManager.Test.AbstractAnimal/1.0 plugins still needed by 1 other managers for external dependencies\n");
 }
 
 void ManagerTest::unresolvedDependencies() {
@@ -1097,10 +1095,10 @@ void ManagerTest::unresolvedDependencies() {
        loading fails too. Dog plugin then shouldn't have HotDogWithSnail in
        usedBy list. */
 
-    std::ostringstream out;
+    Containers::String out;
     Error redirectError{&out};
     CORRADE_COMPARE(foodManager.load("HotDogWithSnail"), LoadState::UnresolvedDependency);
-    CORRADE_COMPARE(out.str(),
+    CORRADE_COMPARE(out,
         "PluginManager::Manager::load(): unresolved dependency SomethingThatDoesNotExist of plugin Snail\n"
         "PluginManager::Manager::load(): unresolved dependency Snail of plugin HotDogWithSnail\n");
     CORRADE_COMPARE(foodManager.loadState("HotDogWithSnail"), LoadState::NotLoaded);
@@ -1256,10 +1254,10 @@ void ManagerTest::dynamicProvidesDependency() {
         Containers::StringIterable{"JustSomeMammal"},
         TestSuite::Compare::Container);
 
-    std::ostringstream out;
+    Containers::String out;
     Error redirectError{&out};
     CORRADE_COMPARE(manager.load("Bulldog"), LoadState::UnresolvedDependency);
-    CORRADE_COMPARE(out.str(), "PluginManager::Manager::load(): unresolved dependency JustSomeMammal of plugin Bulldog\n");
+    CORRADE_COMPARE(out, "PluginManager::Manager::load(): unresolved dependency JustSomeMammal of plugin Bulldog\n");
 }
 
 void ManagerTest::setPreferredPlugins() {
@@ -1314,10 +1312,10 @@ void ManagerTest::setPreferredPluginsUnknownAlias() {
 
     PluginManager::Manager<AbstractAnimal> manager;
 
-    std::ostringstream out;
+    Containers::String out;
     Error redirectError{&out};
     manager.setPreferredPlugins("Chihuahua", {"PitBull"});
-    CORRADE_COMPARE(out.str(), "PluginManager::Manager::setPreferredPlugins(): Chihuahua is not a known alias\n");
+    CORRADE_COMPARE(out, "PluginManager::Manager::setPreferredPlugins(): Chihuahua is not a known alias\n");
 }
 
 void ManagerTest::setPreferredPluginsDoesNotProvide() {
@@ -1325,10 +1323,10 @@ void ManagerTest::setPreferredPluginsDoesNotProvide() {
 
     PluginManager::Manager<AbstractAnimal> manager;
 
-    std::ostringstream out;
+    Containers::String out;
     Error redirectError{&out};
     manager.setPreferredPlugins("Dog", {"Snail"});
-    CORRADE_COMPARE(out.str(), "PluginManager::Manager::setPreferredPlugins(): Snail does not provide Dog\n");
+    CORRADE_COMPARE(out, "PluginManager::Manager::setPreferredPlugins(): Snail does not provide Dog\n");
 }
 
 void ManagerTest::setPreferredPluginsOverridePrimaryPlugin() {
@@ -1501,17 +1499,17 @@ void ManagerTest::generatedMetadata() {
 }
 
 void ManagerTest::debugLoadState() {
-    std::ostringstream o;
+    Containers::String out;
 
-    Debug(&o) << LoadState::Static << LoadState(0x3f);
-    CORRADE_COMPARE(o.str(), "PluginManager::LoadState::Static PluginManager::LoadState(0x3f)\n");
+    Debug{&out} << LoadState::Static << LoadState(0x3f);
+    CORRADE_COMPARE(out, "PluginManager::LoadState::Static PluginManager::LoadState(0x3f)\n");
 }
 
 void ManagerTest::debugLoadStates() {
-    std::ostringstream out;
+    Containers::String out;
 
     Debug{&out} << (LoadState::Static|LoadState::NotFound) << LoadStates{};
-    CORRADE_COMPARE(out.str(), "PluginManager::LoadState::NotFound|PluginManager::LoadState::Static PluginManager::LoadStates{}\n");
+    CORRADE_COMPARE(out, "PluginManager::LoadState::NotFound|PluginManager::LoadState::Static PluginManager::LoadStates{}\n");
 }
 
 }}}}

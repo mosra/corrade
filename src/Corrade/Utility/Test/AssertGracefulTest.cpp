@@ -24,12 +24,10 @@
     DEALINGS IN THE SOFTWARE.
 */
 
-#include <sstream>
-
 #define CORRADE_GRACEFUL_ASSERT
 
+#include "Corrade/Containers/String.h"
 #include "Corrade/TestSuite/Tester.h"
-#include "Corrade/Utility/DebugStl.h" /** @todo remove when <sstream> is gone */
 
 #ifdef TEST_DEBUG_ASSERT
 #include "Corrade/Utility/DebugAssert.h"
@@ -87,7 +85,7 @@ void AssertGracefulTest::test() {
     #endif
     #endif
 
-    std::ostringstream out;
+    Containers::String out;
     Error redirectError{&out};
 
     int a = 5;
@@ -111,7 +109,7 @@ void AssertGracefulTest::test() {
     CORRADE_COMPARE(b, 7);
     CORRADE_COMPARE(c, 7);
     CORRADE_COMPARE(d, 7);
-    CORRADE_COMPARE(out.str(),
+    CORRADE_COMPARE(out,
         "A should be zero\n"
         "A should be zero!\n"
         "foo() should succeed\n"
@@ -142,7 +140,7 @@ void AssertGracefulTest::constexprTest() {
     #endif
     #endif
 
-    std::ostringstream out;
+    Containers::String out;
     Error redirectError{&out};
 
     {
@@ -153,7 +151,7 @@ void AssertGracefulTest::constexprTest() {
     /* CORRADE_INTERNAL_CONSTEXPR_[DEBUG_]ASSERT() doesn't have a graceful
        version */
 
-    CORRADE_COMPARE(out.str(),
+    CORRADE_COMPARE(out,
         "b can't be zero\n");
 }
 

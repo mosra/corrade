@@ -24,15 +24,13 @@
     DEALINGS IN THE SOFTWARE.
 */
 
-#include <sstream>
-
 #include "Corrade/Cpu.h"
+#include "Corrade/Containers/ArrayView.h" /* arraySize() */
 #include "Corrade/Containers/BitArrayView.h"
 #include "Corrade/Containers/Test/BitArrayViewTest.h"
 #include "Corrade/TestSuite/Tester.h"
 #include "Corrade/TestSuite/Compare/Container.h"
 #include "Corrade/TestSuite/Compare/Numeric.h"
-#include "Corrade/Utility/DebugStl.h" /** @todo remove once Debug is stream-free */
 #include "Corrade/Utility/Test/cpuVariantHelpers.h"
 
 namespace Corrade { namespace Containers { namespace Test { namespace {
@@ -337,14 +335,14 @@ void BitArrayViewTest::constructFixedSizeOffsetSizeArrayTooSmall() {
     /* This is fine */
     BitArrayView{data, 5, 107};
 
-    std::ostringstream out;
+    Containers::String out;
     Error redirectError{&out};
     /* Would pass without the offset */
     BitArrayView{data, 6, 107};
     #ifndef CORRADE_MSVC2015_COMPATIBILITY
-    CORRADE_COMPARE(out.str(), "Containers::BitArrayView: an array of 14 bytes is not enough for 6 + 107 bits\n");
+    CORRADE_COMPARE(out, "Containers::BitArrayView: an array of 14 bytes is not enough for 6 + 107 bits\n");
     #else
-    CORRADE_COMPARE(out.str(), "Containers::BitArrayView: an array is not large enough for 6 + 107 bits\n");
+    CORRADE_COMPARE(out, "Containers::BitArrayView: an array is not large enough for 6 + 107 bits\n");
     #endif
 }
 
@@ -368,20 +366,20 @@ void BitArrayViewTest::constructNullptrSize() {
 void BitArrayViewTest::constructOffsetTooLarge() {
     CORRADE_SKIP_IF_NO_DEBUG_ASSERT();
 
-    std::ostringstream out;
+    Containers::String out;
     Error redirectError{&out};
     BitArrayView{nullptr, 8, 0};
-    CORRADE_COMPARE(out.str(), "Containers::BitArrayView: offset expected to be smaller than 8 bits, got 8\n");
+    CORRADE_COMPARE(out, "Containers::BitArrayView: offset expected to be smaller than 8 bits, got 8\n");
 }
 
 #ifdef CORRADE_TARGET_32BIT
 void BitArrayViewTest::constructSizeTooLarge() {
     CORRADE_SKIP_IF_NO_DEBUG_ASSERT();
 
-    std::ostringstream out;
+    Containers::String out;
     Error redirectError{&out};
     BitArrayView{nullptr, 0, std::size_t{1} << (sizeof(std::size_t)*8 - 3)};
-    CORRADE_COMPARE(out.str(), "Containers::BitArrayView: size expected to be smaller than 2^29 bits, got 536870912\n");
+    CORRADE_COMPARE(out, "Containers::BitArrayView: size expected to be smaller than 2^29 bits, got 536870912\n");
 }
 #endif
 
@@ -616,13 +614,13 @@ void BitArrayViewTest::accessInvalid() {
     std::uint64_t data[1]{};
     MutableBitArrayView view{data, 4, 53};
 
-    std::stringstream out;
+    Containers::String out;
     Error redirectError{&out};
     view[53];
     view.set(53);
     view.reset(53);
     view.set(53, true);
-    CORRADE_COMPARE(out.str(),
+    CORRADE_COMPARE(out,
         "Containers::BitArrayView::operator[](): index 53 out of range for 53 bits\n"
         "Containers::BitArrayView::set(): index 53 out of range for 53 bits\n"
         "Containers::BitArrayView::reset(): index 53 out of range for 53 bits\n"
@@ -669,11 +667,11 @@ void BitArrayViewTest::sliceInvalid() {
     const std::uint64_t data[1]{};
     BitArrayView view{data, 6, 53};
 
-    std::ostringstream out;
+    Containers::String out;
     Error redirectError{&out};
     view.slice(47, 54);
     view.slice(47, 46);
-    CORRADE_COMPARE(out.str(),
+    CORRADE_COMPARE(out,
         "Containers::BitArrayView::slice(): slice [47:54] out of range for 53 bits\n"
         "Containers::BitArrayView::slice(): slice [47:46] out of range for 53 bits\n");
 }
@@ -894,11 +892,11 @@ void BitArrayViewTest::debug() {
        first), smaller sizes should cut away the last bits */
     char data[]{'\xe0', '\x61', '\xa6', '\x0a'};
 
-    std::ostringstream out;
+    Containers::String out;
     Debug{&out} << BitArrayView{DataPadded + 1, 5, 24};
     Debug{&out} << MutableBitArrayView{data, 5, 24};
     Debug{&out} << BitArrayView{DataPadded + 1, 5, 19};
-    CORRADE_COMPARE(out.str(),
+    CORRADE_COMPARE(out,
         "{11110000, 11001100, 10101010}\n"
         "{11110000, 11001100, 10101010}\n"
         "{11110000, 11001100, 101}\n");

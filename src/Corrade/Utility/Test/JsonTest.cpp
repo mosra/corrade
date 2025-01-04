@@ -24,21 +24,18 @@
     DEALINGS IN THE SOFTWARE.
 */
 
-#include <sstream>
-
 #include "Corrade/Containers/Array.h"
 #include "Corrade/Containers/GrowableArray.h"
 #include "Corrade/Containers/Optional.h"
 #include "Corrade/Containers/Pair.h"
 #include "Corrade/Containers/StridedArrayView.h"
 #include "Corrade/Containers/StridedBitArrayView.h"
+#include "Corrade/Containers/String.h"
 #include "Corrade/Containers/StringIterable.h"
-#include "Corrade/Containers/StringStl.h" /** @todo remove once Debug is stream-free */
 #include "Corrade/TestSuite/Tester.h"
 #include "Corrade/TestSuite/Compare/Container.h"
 #include "Corrade/TestSuite/Compare/String.h"
-#include "Corrade/Utility/DebugStl.h" /** @todo remove once Debug is stream-free */
-#include "Corrade/Utility/FormatStl.h" /** @todo remove once Debug is stream-free */
+#include "Corrade/Utility/Format.h"
 #include "Corrade/Utility/Json.h"
 #include "Corrade/Utility/Path.h"
 
@@ -1461,10 +1458,10 @@ void JsonTest::error() {
     auto&& data = ErrorData[testCaseInstanceId()];
     setTestCaseDescription(data.name);
 
-    std::ostringstream out;
+    Containers::String out;
     Error redirectError{&out};
     CORRADE_VERIFY(!Json::fromString(data.data));
-    CORRADE_COMPARE(out.str(), Utility::formatString("Utility::Json: {}\n", data.message));
+    CORRADE_COMPARE(out, format("Utility::Json: {}\n", data.message));
 }
 
 void JsonTest::singleObject() {
@@ -1645,7 +1642,7 @@ void JsonTest::simpleObject() {
         const JsonToken& key = json->tokens()[1 + 2*i];
         /* Unlike objects and arrays, the key token data don't contain the
            nested value even the value is a child */
-        CORRADE_COMPARE(key.data(), formatString("\"key{}\"", i + 1));
+        CORRADE_COMPARE(key.data(), format("\"key{}\"", i + 1));
         CORRADE_COMPARE(key.type(), JsonToken::Type::String);
         CORRADE_VERIFY(!key.isParsed());
     }
@@ -3115,10 +3112,10 @@ void JsonTest::parsedObjectAccessEmpty() {
     Containers::Optional<Utility::JsonObjectView> object = json->parseObject(json->tokens()[data.tokenIndex]);
     CORRADE_VERIFY(object);
 
-    std::ostringstream out;
+    Containers::String out;
     Error redirectError{&out};
     (*object)["something"];
-    CORRADE_COMPARE(out.str(), "Utility::JsonView::operator[](): view is empty\n");
+    CORRADE_COMPARE(out, "Utility::JsonView::operator[](): view is empty\n");
 }
 
 void JsonTest::parsedArrayFind() {
@@ -3170,10 +3167,10 @@ void JsonTest::parsedArrayAccessEmpty() {
     Containers::Optional<Utility::JsonArrayView> array = json->parseArray(json->tokens()[data.tokenIndex]);
     CORRADE_VERIFY(array);
 
-    std::ostringstream out;
+    Containers::String out;
     Error redirectError{&out};
     (*array)[0];
-    CORRADE_COMPARE(out.str(), "Utility::JsonView::operator[](): view is empty\n");
+    CORRADE_COMPARE(out, "Utility::JsonView::operator[](): view is empty\n");
 }
 
 void JsonTest::parseError() {
@@ -3186,12 +3183,12 @@ void JsonTest::parseError() {
     const JsonToken& token = json->root();
     const JsonToken::Type type = token.type();
 
-    std::ostringstream out;
+    Containers::String out;
     Error redirectError{&out};
     CORRADE_EXPECT_FAIL_IF(!data.message, "Not implemented yet.");
     CORRADE_VERIFY(!((*json).*data.function)(json->root()));
     if(!data.message) return;
-    CORRADE_COMPARE(out.str(), formatString("Utility::Json::{}\n", data.message));
+    CORRADE_COMPARE(out, format("Utility::Json::{}\n", data.message));
 
     /* Verify that the JSON token doesn't get corrupted by the error */
     CORRADE_VERIFY(!token.isParsed());
@@ -3208,10 +3205,10 @@ void JsonTest::parseOptionError() {
     auto&& data = ParseOptionErrorData[testCaseInstanceId()];
     setTestCaseDescription(data.name);
 
-    std::ostringstream out;
+    Containers::String out;
     Error redirectError{&out};
     CORRADE_VERIFY(!Json::fromString(data.json, data.option));
-    CORRADE_COMPARE(out.str(), formatString("Utility::Json::{}\n", data.message));
+    CORRADE_COMPARE(out, format("Utility::Json::{}\n", data.message));
 }
 
 void JsonTest::parseSingleError() {
@@ -3225,10 +3222,10 @@ void JsonTest::parseSingleError() {
     Containers::Optional<Json> json = Json::fromString(format("\n\n     {}", data.json));
     CORRADE_VERIFY(json);
 
-    std::ostringstream out;
+    Containers::String out;
     Error redirectError{&out};
     CORRADE_VERIFY(!data.function(*json));
-    CORRADE_COMPARE(out.str(), formatString("Utility::Json::{}\n", data.message));
+    CORRADE_COMPARE(out, format("Utility::Json::{}\n", data.message));
 }
 
 void JsonTest::parseArrayError() {
@@ -3242,10 +3239,10 @@ void JsonTest::parseArrayError() {
     Containers::Optional<Json> json = Json::fromString(data.json);
     CORRADE_VERIFY(json);
 
-    std::ostringstream out;
+    Containers::String out;
     Error redirectError{&out};
     CORRADE_VERIFY(!data.function(*json));
-    CORRADE_COMPARE(out.str(), formatString("Utility::Json::{} at <in>:2:4\n", data.message));
+    CORRADE_COMPARE(out, format("Utility::Json::{} at <in>:2:4\n", data.message));
 }
 
 void JsonTest::parseTokenNotOwned() {
@@ -3256,7 +3253,7 @@ void JsonTest::parseTokenNotOwned() {
 
     JsonToken token = json->root();
 
-    std::ostringstream out;
+    Containers::String out;
     Error redirectError{&out};
     json->parseLiterals(token);
     json->parseDoubles(token);
@@ -3333,7 +3330,7 @@ void JsonTest::parseTokenNotOwned() {
         "Utility::Json::parseUnsignedIntArray(): token not owned by the instance\n"
         #endif
         "Utility::Json::parseStringArray(): token not owned by the instance\n";
-    CORRADE_COMPARE(out.str(), expected);
+    CORRADE_COMPARE(out, expected);
 }
 
 void JsonTest::iterator() {
@@ -3395,10 +3392,10 @@ void JsonTest::iterateObjectNotObject() {
     Containers::Optional<Json> json = Json::fromString("[]", Json::Option::ParseLiterals);
     CORRADE_VERIFY(json);
 
-    std::ostringstream out;
+    Containers::String out;
     Error redirectError{&out};
     json->root().asObject();
-    CORRADE_COMPARE(out.str(), "Utility::JsonToken::asObject(): token is a parsed Utility::JsonToken::Type::Array\n");
+    CORRADE_COMPARE(out, "Utility::JsonToken::asObject(): token is a parsed Utility::JsonToken::Type::Array\n");
 }
 
 void JsonTest::iterateObjectNotParsed() {
@@ -3407,10 +3404,10 @@ void JsonTest::iterateObjectNotParsed() {
     Containers::Optional<Json> json = Json::fromString("{}");
     CORRADE_VERIFY(json);
 
-    std::ostringstream out;
+    Containers::String out;
     Error redirectError{&out};
     json->root().asObject();
-    CORRADE_COMPARE(out.str(), "Utility::JsonToken::asObject(): token is an unparsed Utility::JsonToken::Type::Object\n");
+    CORRADE_COMPARE(out, "Utility::JsonToken::asObject(): token is an unparsed Utility::JsonToken::Type::Object\n");
 }
 
 void JsonTest::iterateObjectKeyNotParsed() {
@@ -3419,10 +3416,10 @@ void JsonTest::iterateObjectKeyNotParsed() {
     Containers::Optional<Json> json = Json::fromString("{\"key\": false}", Json::Option::ParseLiterals);
     CORRADE_VERIFY(json);
 
-    std::ostringstream out;
+    Containers::String out;
     Error redirectError{&out};
     (*json->root().asObject().begin()).key();
-    CORRADE_COMPARE(out.str(), "Utility::JsonObjectItem::key(): string isn't parsed\n");
+    CORRADE_COMPARE(out, "Utility::JsonObjectItem::key(): string isn't parsed\n");
 }
 
 void JsonTest::iterateArray() {
@@ -3469,10 +3466,10 @@ void JsonTest::iterateArrayNotArray() {
     Containers::Optional<Json> json = Json::fromString("{}", Json::Option::ParseLiterals);
     CORRADE_VERIFY(json);
 
-    std::ostringstream out;
+    Containers::String out;
     Error redirectError{&out};
     json->root().asArray();
-    CORRADE_COMPARE(out.str(), "Utility::JsonToken::asArray(): token is a parsed Utility::JsonToken::Type::Object\n");
+    CORRADE_COMPARE(out, "Utility::JsonToken::asArray(): token is a parsed Utility::JsonToken::Type::Object\n");
 }
 
 void JsonTest::iterateArrayNotParsed() {
@@ -3481,10 +3478,10 @@ void JsonTest::iterateArrayNotParsed() {
     Containers::Optional<Json> json = Json::fromString("[]");
     CORRADE_VERIFY(json);
 
-    std::ostringstream out;
+    Containers::String out;
     Error redirectError{&out};
     json->root().asArray();
-    CORRADE_COMPARE(out.str(), "Utility::JsonToken::asArray(): token is an unparsed Utility::JsonToken::Type::Array\n");
+    CORRADE_COMPARE(out, "Utility::JsonToken::asArray(): token is an unparsed Utility::JsonToken::Type::Array\n");
 }
 
 void JsonTest::findObjectKey() {
@@ -3515,10 +3512,10 @@ void JsonTest::findObjectKeyNotFound() {
     })", Json::Option::ParseLiterals|Json::Option::ParseStringKeys);
     CORRADE_VERIFY(json);
 
-    std::ostringstream out;
+    Containers::String out;
     Error redirectError{&out};
     json->root()["that"];
-    CORRADE_COMPARE(out.str(), "Utility::JsonToken::operator[](): key that not found\n");
+    CORRADE_COMPARE(out, "Utility::JsonToken::operator[](): key that not found\n");
 }
 
 void JsonTest::findObjectKeyNotObject() {
@@ -3527,11 +3524,11 @@ void JsonTest::findObjectKeyNotObject() {
     Containers::Optional<Json> json = Json::fromString("[]", Json::Option::ParseLiterals);
     CORRADE_VERIFY(json);
 
-    std::ostringstream out;
+    Containers::String out;
     Error redirectError{&out};
     json->root().find("this");
     json->root()["this"];
-    CORRADE_COMPARE(out.str(),
+    CORRADE_COMPARE(out,
         "Utility::JsonToken::find(): token is a parsed Utility::JsonToken::Type::Array, expected a parsed object\n"
         /* operator[]() delegates to find(), so the error is the same */
         "Utility::JsonToken::find(): token is a parsed Utility::JsonToken::Type::Array, expected a parsed object\n");
@@ -3543,11 +3540,11 @@ void JsonTest::findObjectKeyNotParsed() {
     Containers::Optional<Json> json = Json::fromString("{}");
     CORRADE_VERIFY(json);
 
-    std::ostringstream out;
+    Containers::String out;
     Error redirectError{&out};
     json->root().find("this");
     json->root()["this"];
-    CORRADE_COMPARE(out.str(),
+    CORRADE_COMPARE(out,
         "Utility::JsonToken::find(): token is an unparsed Utility::JsonToken::Type::Object, expected a parsed object\n"
         /* operator[]() delegates to find(), so the error is the same */
         "Utility::JsonToken::find(): token is an unparsed Utility::JsonToken::Type::Object, expected a parsed object\n");
@@ -3566,11 +3563,11 @@ void JsonTest::findObjectKeyKeyNotParsed() {
     CORRADE_VERIFY(json->parseStrings(json->tokens()[1]));
     CORRADE_VERIFY(json->parseStrings(json->tokens()[6]));
 
-    std::ostringstream out;
+    Containers::String out;
     Error redirectError{&out};
     json->root().find("this");
     json->root()["this"];
-    CORRADE_COMPARE(out.str(),
+    CORRADE_COMPARE(out,
         "Utility::JsonToken::find(): key string isn't parsed\n"
         /* operator[]() delegates to find(), so the error is the same */
         "Utility::JsonToken::find(): key string isn't parsed\n");
@@ -3604,10 +3601,10 @@ void JsonTest::findArrayIndexNotFound() {
     ])", Json::Option::ParseLiterals);
     CORRADE_VERIFY(json);
 
-    std::ostringstream out;
+    Containers::String out;
     Error redirectError{&out};
     json->root()[3];
-    CORRADE_COMPARE(out.str(), "Utility::JsonToken::operator[](): index 3 not found\n");
+    CORRADE_COMPARE(out, "Utility::JsonToken::operator[](): index 3 not found\n");
 }
 
 void JsonTest::findArrayIndexNotArray() {
@@ -3616,11 +3613,11 @@ void JsonTest::findArrayIndexNotArray() {
     Containers::Optional<Json> json = Json::fromString("{}", Json::Option::ParseLiterals);
     CORRADE_VERIFY(json);
 
-    std::ostringstream out;
+    Containers::String out;
     Error redirectError{&out};
     json->root().find(1);
     json->root()[1];
-    CORRADE_COMPARE(out.str(),
+    CORRADE_COMPARE(out,
         "Utility::JsonToken::find(): token is a parsed Utility::JsonToken::Type::Object, expected a parsed array\n"
         /* operator[]() delegates to find(), so the error is the same */
         "Utility::JsonToken::find(): token is a parsed Utility::JsonToken::Type::Object, expected a parsed array\n");
@@ -3632,11 +3629,11 @@ void JsonTest::findArrayIndexNotParsed() {
     Containers::Optional<Json> json = Json::fromString("[]");
     CORRADE_VERIFY(json);
 
-    std::ostringstream out;
+    Containers::String out;
     Error redirectError{&out};
     json->root().find(1);
     json->root()[1];
-    CORRADE_COMPARE(out.str(),
+    CORRADE_COMPARE(out,
         "Utility::JsonToken::find(): token is an unparsed Utility::JsonToken::Type::Array, expected a parsed array\n"
         /* operator[]() delegates to find(), so the error is the same */
         "Utility::JsonToken::find(): token is an unparsed Utility::JsonToken::Type::Array, expected a parsed array\n");
@@ -3689,11 +3686,11 @@ void JsonTest::commonArrayTypeNotArray() {
     Containers::Optional<Json> json = Json::fromString("35");
     CORRADE_VERIFY(json);
 
-    std::ostringstream out;
+    Containers::String out;
     Error redirectError{&out};
     json->root().commonArrayType();
     json->root().commonParsedArrayType();
-    CORRADE_COMPARE(out.str(),
+    CORRADE_COMPARE(out,
         "Utility::JsonToken::commonArrayType(): token is a Utility::JsonToken::Type::Number, expected an array\n"
         "Utility::JsonToken::commonParsedArrayType(): token is a Utility::JsonToken::Type::Number, expected an array\n");
 }
@@ -3704,7 +3701,7 @@ void JsonTest::asTypeWrongType() {
     Containers::Optional<Json> json = Json::fromString("[{}]", Json::Option::ParseLiterals);
     CORRADE_VERIFY(json);
 
-    std::ostringstream out;
+    Containers::String out;
     Error redirectError{&out};
     json->tokens()[0].asObject();
     json->tokens()[1].asArray();
@@ -3731,7 +3728,7 @@ void JsonTest::asTypeWrongType() {
         "Utility::JsonToken::asLong(): token is a Utility::JsonToken::Type::Object parsed as Utility::JsonToken::ParsedType::Other\n"
         "Utility::JsonToken::asSize(): token is a Utility::JsonToken::Type::Object parsed as Utility::JsonToken::ParsedType::Other\n"
         "Utility::JsonToken::asString(): token is a parsed Utility::JsonToken::Type::Object\n";
-    CORRADE_COMPARE(out.str(), expected);
+    CORRADE_COMPARE(out, expected);
 }
 
 void JsonTest::asTypeNotParsed() {
@@ -3742,7 +3739,7 @@ void JsonTest::asTypeNotParsed() {
     ])");
     CORRADE_VERIFY(json);
 
-    std::ostringstream out;
+    Containers::String out;
     Error redirectError{&out};
     json->tokens()[5].asObject();
     json->tokens()[0].asArray();
@@ -3769,7 +3766,7 @@ void JsonTest::asTypeNotParsed() {
         "Utility::JsonToken::asLong(): token is a Utility::JsonToken::Type::Number parsed as Utility::JsonToken::ParsedType::None\n"
         "Utility::JsonToken::asSize(): token is a Utility::JsonToken::Type::Number parsed as Utility::JsonToken::ParsedType::None\n"
         "Utility::JsonToken::asString(): token is an unparsed Utility::JsonToken::Type::String\n";
-    CORRADE_COMPARE(out.str(), expected);
+    CORRADE_COMPARE(out, expected);
 }
 
 void JsonTest::asTypeWrongParsedType() {
@@ -3788,7 +3785,7 @@ void JsonTest::asTypeWrongParsedType() {
 
     /* Deliberately trying to get doubles as floats or ints as longs. Currently
        that fails but might be deemed too restrictive in future and relaxed. */
-    std::ostringstream out;
+    Containers::String out;
     Error redirectError{&out};
     json->tokens()[2].asDouble();
     json->tokens()[1].asFloat();
@@ -3805,7 +3802,7 @@ void JsonTest::asTypeWrongParsedType() {
         "Utility::JsonToken::asUnsignedLong(): token is a Utility::JsonToken::Type::Number parsed as Utility::JsonToken::ParsedType::UnsignedInt\n"
         "Utility::JsonToken::asLong(): token is a Utility::JsonToken::Type::Number parsed as Utility::JsonToken::ParsedType::Int\n"
         "Utility::JsonToken::asSize(): token is a Utility::JsonToken::Type::Number parsed as Utility::JsonToken::ParsedType::Int\n";
-    CORRADE_COMPARE(out.str(), expected);
+    CORRADE_COMPARE(out, expected);
 }
 
 void JsonTest::asBitArray() {
@@ -3844,10 +3841,10 @@ void JsonTest::asBitArrayNotAllSame() {
     ])", Json::Option::ParseLiterals|Json::Option::ParseFloats);
     CORRADE_VERIFY(json);
 
-    std::ostringstream out;
+    Containers::String out;
     Error redirectError{&out};
     json->root().asBitArray();
-    CORRADE_COMPARE(out.str(),
+    CORRADE_COMPARE(out,
         "Utility::JsonToken::asBitArray(): token 2 is a parsed Utility::JsonToken::Type::Number\n");
 }
 
@@ -3862,10 +3859,10 @@ void JsonTest::asBitArrayNotAllParsed() {
     CORRADE_VERIFY(json->parseLiterals(json->tokens()[1]));
     CORRADE_VERIFY(json->parseLiterals(json->tokens()[2]));
 
-    std::ostringstream out;
+    Containers::String out;
     Error redirectError{&out};
     json->root().asBitArray();
-    CORRADE_COMPARE(out.str(),
+    CORRADE_COMPARE(out,
         "Utility::JsonToken::asBitArray(): token 2 is an unparsed Utility::JsonToken::Type::Bool\n");
 }
 
@@ -3877,10 +3874,10 @@ void JsonTest::asBitArrayUnexpectedSize() {
     ])", Json::Option::ParseLiterals);
     CORRADE_VERIFY(json);
 
-    std::ostringstream out;
+    Containers::String out;
     Error redirectError{&out};
     json->root().asBitArray(4);
-    CORRADE_COMPARE(out.str(),
+    CORRADE_COMPARE(out,
         "Utility::JsonToken::asBitArray(): expected a 4-element array, got 3\n");
 }
 
@@ -3907,10 +3904,10 @@ void JsonTest::asDoubleArrayNotAllSame() {
     CORRADE_VERIFY(json->parseDoubles(json->tokens()[1]));
     CORRADE_VERIFY(json->parseDoubles(json->tokens()[2]));
 
-    std::ostringstream out;
+    Containers::String out;
     Error redirectError{&out};
     json->root().asDoubleArray();
-    CORRADE_COMPARE(out.str(),
+    CORRADE_COMPARE(out,
         "Utility::JsonToken::asDoubleArray(): token 2 is a Utility::JsonToken::Type::Number parsed as Utility::JsonToken::ParsedType::None\n");
 }
 
@@ -3923,10 +3920,10 @@ void JsonTest::asDoubleArrayUnexpectedSize() {
     CORRADE_VERIFY(json);
     CORRADE_VERIFY(json->parseDoubles(json->root()));
 
-    std::ostringstream out;
+    Containers::String out;
     Error redirectError{&out};
     json->root().asDoubleArray(4);
-    CORRADE_COMPARE(out.str(),
+    CORRADE_COMPARE(out,
         "Utility::JsonToken::asDoubleArray(): expected a 4-element array, got 3\n");
 }
 
@@ -3953,10 +3950,10 @@ void JsonTest::asFloatArrayNotAllSame() {
     CORRADE_VERIFY(json->parseFloats(json->tokens()[1]));
     CORRADE_VERIFY(json->parseFloats(json->tokens()[2]));
 
-    std::ostringstream out;
+    Containers::String out;
     Error redirectError{&out};
     json->root().asFloatArray();
-    CORRADE_COMPARE(out.str(),
+    CORRADE_COMPARE(out,
         "Utility::JsonToken::asFloatArray(): token 2 is a Utility::JsonToken::Type::Number parsed as Utility::JsonToken::ParsedType::None\n");
 }
 
@@ -3969,10 +3966,10 @@ void JsonTest::asFloatArrayUnexpectedSize() {
     CORRADE_VERIFY(json);
     CORRADE_VERIFY(json->parseFloats(json->root()));
 
-    std::ostringstream out;
+    Containers::String out;
     Error redirectError{&out};
     json->root().asFloatArray(4);
-    CORRADE_COMPARE(out.str(),
+    CORRADE_COMPARE(out,
         "Utility::JsonToken::asFloatArray(): expected a 4-element array, got 3\n");
 }
 
@@ -3999,10 +3996,10 @@ void JsonTest::asUnsignedIntArrayNotAllSame() {
     CORRADE_VERIFY(json->parseUnsignedInts(json->tokens()[1]));
     CORRADE_VERIFY(json->parseUnsignedInts(json->tokens()[2]));
 
-    std::ostringstream out;
+    Containers::String out;
     Error redirectError{&out};
     json->root().asUnsignedIntArray();
-    CORRADE_COMPARE(out.str(),
+    CORRADE_COMPARE(out,
         "Utility::JsonToken::asUnsignedIntArray(): token 2 is a Utility::JsonToken::Type::Number parsed as Utility::JsonToken::ParsedType::None\n");
 }
 
@@ -4015,10 +4012,10 @@ void JsonTest::asUnsignedIntArrayUnexpectedSize() {
     CORRADE_VERIFY(json);
     CORRADE_VERIFY(json->parseUnsignedInts(json->root()));
 
-    std::ostringstream out;
+    Containers::String out;
     Error redirectError{&out};
     json->root().asUnsignedIntArray(4);
-    CORRADE_COMPARE(out.str(),
+    CORRADE_COMPARE(out,
         "Utility::JsonToken::asUnsignedIntArray(): expected a 4-element array, got 3\n");
 }
 
@@ -4045,10 +4042,10 @@ void JsonTest::asIntArrayNotAllSame() {
     CORRADE_VERIFY(json->parseInts(json->tokens()[1]));
     CORRADE_VERIFY(json->parseInts(json->tokens()[2]));
 
-    std::ostringstream out;
+    Containers::String out;
     Error redirectError{&out};
     json->root().asIntArray();
-    CORRADE_COMPARE(out.str(),
+    CORRADE_COMPARE(out,
         "Utility::JsonToken::asIntArray(): token 2 is a Utility::JsonToken::Type::Number parsed as Utility::JsonToken::ParsedType::None\n");
 }
 
@@ -4061,10 +4058,10 @@ void JsonTest::asIntArrayUnexpectedSize() {
     CORRADE_VERIFY(json);
     CORRADE_VERIFY(json->parseInts(json->root()));
 
-    std::ostringstream out;
+    Containers::String out;
     Error redirectError{&out};
     json->root().asIntArray(4);
-    CORRADE_COMPARE(out.str(),
+    CORRADE_COMPARE(out,
         "Utility::JsonToken::asIntArray(): expected a 4-element array, got 3\n");
 }
 
@@ -4091,10 +4088,10 @@ void JsonTest::asUnsignedLongArrayNotAllSame() {
     CORRADE_VERIFY(json->parseUnsignedLongs(json->tokens()[1]));
     CORRADE_VERIFY(json->parseUnsignedLongs(json->tokens()[2]));
 
-    std::ostringstream out;
+    Containers::String out;
     Error redirectError{&out};
     json->root().asUnsignedLongArray();
-    CORRADE_COMPARE(out.str(),
+    CORRADE_COMPARE(out,
         "Utility::JsonToken::asUnsignedLongArray(): token 2 is a Utility::JsonToken::Type::Number parsed as Utility::JsonToken::ParsedType::None\n");
 }
 
@@ -4107,10 +4104,10 @@ void JsonTest::asUnsignedLongArrayUnexpectedSize() {
     CORRADE_VERIFY(json);
     CORRADE_VERIFY(json->parseUnsignedLongs(json->root()));
 
-    std::ostringstream out;
+    Containers::String out;
     Error redirectError{&out};
     json->root().asUnsignedLongArray(4);
-    CORRADE_COMPARE(out.str(),
+    CORRADE_COMPARE(out,
         "Utility::JsonToken::asUnsignedLongArray(): expected a 4-element array, got 3\n");
 }
 
@@ -4137,10 +4134,10 @@ void JsonTest::asLongArrayNotAllSame() {
     CORRADE_VERIFY(json->parseLongs(json->tokens()[1]));
     CORRADE_VERIFY(json->parseLongs(json->tokens()[2]));
 
-    std::ostringstream out;
+    Containers::String out;
     Error redirectError{&out};
     json->root().asLongArray();
-    CORRADE_COMPARE(out.str(),
+    CORRADE_COMPARE(out,
         "Utility::JsonToken::asLongArray(): token 2 is a Utility::JsonToken::Type::Number parsed as Utility::JsonToken::ParsedType::None\n");
 }
 
@@ -4153,10 +4150,10 @@ void JsonTest::asLongArrayUnexpectedSize() {
     CORRADE_VERIFY(json);
     CORRADE_VERIFY(json->parseLongs(json->root()));
 
-    std::ostringstream out;
+    Containers::String out;
     Error redirectError{&out};
     json->root().asLongArray(4);
-    CORRADE_COMPARE(out.str(),
+    CORRADE_COMPARE(out,
         "Utility::JsonToken::asLongArray(): expected a 4-element array, got 3\n");
 }
 
@@ -4183,14 +4180,14 @@ void JsonTest::asSizeArrayNotAllSame() {
     CORRADE_VERIFY(json->parseSizes(json->tokens()[1]));
     CORRADE_VERIFY(json->parseSizes(json->tokens()[2]));
 
-    std::ostringstream out;
+    Containers::String out;
     Error redirectError{&out};
     json->root().asSizeArray();
     #ifndef CORRADE_TARGET_32BIT
-    CORRADE_COMPARE(out.str(),
+    CORRADE_COMPARE(out,
         "Utility::JsonToken::asUnsignedLongArray(): token 2 is a Utility::JsonToken::Type::Number parsed as Utility::JsonToken::ParsedType::None\n");
     #else
-    CORRADE_COMPARE(out.str(),
+    CORRADE_COMPARE(out,
         "Utility::JsonToken::asUnsignedIntArray(): token 2 is a Utility::JsonToken::Type::Number parsed as Utility::JsonToken::ParsedType::None\n");
     #endif
 }
@@ -4204,14 +4201,14 @@ void JsonTest::asSizeArrayUnexpectedSize() {
     CORRADE_VERIFY(json);
     CORRADE_VERIFY(json->parseSizes(json->root()));
 
-    std::ostringstream out;
+    Containers::String out;
     Error redirectError{&out};
     json->root().asSizeArray(4);
     #ifndef CORRADE_TARGET_32BIT
-    CORRADE_COMPARE(out.str(),
+    CORRADE_COMPARE(out,
         "Utility::JsonToken::asUnsignedLongArray(): expected a 4-element array, got 3\n");
     #else
-    CORRADE_COMPARE(out.str(),
+    CORRADE_COMPARE(out,
         "Utility::JsonToken::asUnsignedIntArray(): expected a 4-element array, got 3\n");
     #endif
 }
@@ -4247,10 +4244,10 @@ void JsonTest::asStringArrayNotAllSame() {
     ])", Json::Option::ParseLiterals|Json::Option::ParseStrings);
     CORRADE_VERIFY(json);
 
-    std::ostringstream out;
+    Containers::String out;
     Error redirectError{&out};
     json->root().asStringArray();
-    CORRADE_COMPARE(out.str(),
+    CORRADE_COMPARE(out,
         "Utility::JsonToken::asStringArray(): token 2 is a parsed Utility::JsonToken::Type::Bool\n");
 }
 
@@ -4264,10 +4261,10 @@ void JsonTest::asStringArrayNotAllParsed() {
     CORRADE_VERIFY(json->parseStrings(json->tokens()[1]));
     CORRADE_VERIFY(json->parseStrings(json->tokens()[2]));
 
-    std::ostringstream out;
+    Containers::String out;
     Error redirectError{&out};
     json->root().asStringArray();
-    CORRADE_COMPARE(out.str(),
+    CORRADE_COMPARE(out,
         "Utility::JsonToken::asStringArray(): token 2 is an unparsed Utility::JsonToken::Type::String\n");
 }
 
@@ -4279,10 +4276,10 @@ void JsonTest::asStringArrayUnexpectedSize() {
     ])", Json::Option::ParseLiterals|Json::Option::ParseStrings);
     CORRADE_VERIFY(json);
 
-    std::ostringstream out;
+    Containers::String out;
     Error redirectError{&out};
     json->root().asStringArray(4);
-    CORRADE_COMPARE(out.str(),
+    CORRADE_COMPARE(out,
         "Utility::JsonToken::asStringArray(): expected a 4-element array, got 3\n");
 }
 
@@ -4292,7 +4289,7 @@ void JsonTest::asTypeArrayNotArray() {
     Containers::Optional<Json> json = Json::fromString("{}", Json::Option::ParseLiterals);
     CORRADE_VERIFY(json);
 
-    std::ostringstream out;
+    Containers::String out;
     Error redirectError{&out};
     json->root().asBitArray();
     json->root().asDoubleArray();
@@ -4317,7 +4314,7 @@ void JsonTest::asTypeArrayNotArray() {
         "Utility::JsonToken::asUnsignedIntArray(): token is a parsed Utility::JsonToken::Type::Object\n"
         #endif
         "Utility::JsonToken::asStringArray(): token is a parsed Utility::JsonToken::Type::Object\n";
-    CORRADE_COMPARE(out.str(), expected);
+    CORRADE_COMPARE(out, expected);
 }
 
 void JsonTest::asTypeArrayNotParsed() {
@@ -4326,7 +4323,7 @@ void JsonTest::asTypeArrayNotParsed() {
     Containers::Optional<Json> json = Json::fromString("[]");
     CORRADE_VERIFY(json);
 
-    std::ostringstream out;
+    Containers::String out;
     Error redirectError{&out};
     json->root().asBitArray();
     json->root().asDoubleArray();
@@ -4351,11 +4348,11 @@ void JsonTest::asTypeArrayNotParsed() {
         "Utility::JsonToken::asUnsignedIntArray(): token is an unparsed Utility::JsonToken::Type::Array\n"
         #endif
         "Utility::JsonToken::asStringArray(): token is an unparsed Utility::JsonToken::Type::Array\n";
-    CORRADE_COMPARE(out.str(), expected);
+    CORRADE_COMPARE(out, expected);
 }
 
 void JsonTest::fromStringFilenameOffsetError() {
-    std::ostringstream out;
+    Containers::String out;
     Error redirectError{&out};
     /* Also verify that empty filename behaves the same as no filename passed */
     CORRADE_VERIFY(!Json::fromString("{35: false}"));
@@ -4363,7 +4360,7 @@ void JsonTest::fromStringFilenameOffsetError() {
     CORRADE_VERIFY(!Json::fromString("{35: false}", "fail.json"));
     CORRADE_VERIFY(!Json::fromString("{35: false}", "fail.json", 17));
     CORRADE_VERIFY(!Json::fromString("{35: false}", "fail.json", 17, 25));
-    CORRADE_COMPARE(out.str(),
+    CORRADE_COMPARE(out,
         "Utility::Json: expected \" or } but got 3 at <in>:1:2\n"
         "Utility::Json: expected \" or } but got 3 at <in>:1:2\n"
         "Utility::Json: expected \" or } but got 3 at fail.json:1:2\n"
@@ -4373,11 +4370,11 @@ void JsonTest::fromStringFilenameOffsetError() {
 }
 
 void JsonTest::fromStringFilenameOffsetErrorSubsequentLine() {
-    std::ostringstream out;
+    Containers::String out;
     Error redirectError{&out};
     CORRADE_VERIFY(!Json::fromString("{\n  35: false}", "fail.json"));
     CORRADE_VERIFY(!Json::fromString("{\n  35: false}", "fail.json", 17, 25));
-    CORRADE_COMPARE(out.str(),
+    CORRADE_COMPARE(out,
         "Utility::Json: expected \" or } but got 3 at fail.json:2:3\n"
         /* The column offset should get ignored for second and subsequent
            lines */
@@ -4385,11 +4382,11 @@ void JsonTest::fromStringFilenameOffsetErrorSubsequentLine() {
 }
 
 void JsonTest::fromStringFilenameOffsetParseOptionError() {
-    std::ostringstream out;
+    Containers::String out;
     Error redirectError{&out};
     CORRADE_VERIFY(!Json::fromString("[-haha]", Json::Option::ParseDoubles, "fail.json"));
     CORRADE_VERIFY(!Json::fromString("[-haha]", Json::Option::ParseDoubles, "fail.json", 17, 25));
-    CORRADE_COMPARE(out.str(),
+    CORRADE_COMPARE(out,
         "Utility::Json::parseDoubles(): invalid floating-point literal -haha at fail.json:1:2\n"
         /* Counting from 1, so the offset doesn't get used as-is */
         "Utility::Json::parseDoubles(): invalid floating-point literal -haha at fail.json:18:27\n");
@@ -4402,11 +4399,11 @@ void JsonTest::fromStringFilenameOffsetParseError() {
     CORRADE_VERIFY(json);
     CORRADE_COMPARE(json->tokens().size(), 2);
 
-    std::ostringstream out;
+    Containers::String out;
     Error redirectError{&out};
     CORRADE_VERIFY(!json->parseDoubles(json->root()));
     CORRADE_VERIFY(!json->parseDouble(json->tokens()[1]));
-    CORRADE_COMPARE(out.str(),
+    CORRADE_COMPARE(out,
         "Utility::Json::parseDoubles(): invalid floating-point literal -haha at fail.json:18:27\n"
         /* Counting from 1, so the offset doesn't get used as-is */
         "Utility::Json::parseDouble(): invalid floating-point literal -haha at fail.json:18:27\n");
@@ -4428,11 +4425,11 @@ void JsonTest::fromFile() {
 }
 
 void JsonTest::fromFileReadError() {
-    std::ostringstream out;
+    Containers::String out;
     Error redirectError{&out};
     CORRADE_VERIFY(!Json::fromFile("nonexistent"));
     /* There's an error from Path::read() before */
-    CORRADE_COMPARE_AS(out.str(),
+    CORRADE_COMPARE_AS(out,
         "\nUtility::Json::fromFile(): can't read nonexistent\n",
         TestSuite::Compare::StringHasSuffix);
 }
@@ -4441,11 +4438,11 @@ void JsonTest::fromFileOptionReadError() {
     /* The options parameter is a separate file loading code path, test it as
        well */
 
-    std::ostringstream out;
+    Containers::String out;
     Error redirectError{&out};
     CORRADE_VERIFY(!Json::fromFile("nonexistent", Json::Option::ParseStrings));
     /* There's an error from Path::read() before */
-    CORRADE_COMPARE_AS(out.str(),
+    CORRADE_COMPARE_AS(out,
         "\nUtility::Json::fromFile(): can't read nonexistent\n",
         TestSuite::Compare::StringHasSuffix);
 }
@@ -4453,19 +4450,19 @@ void JsonTest::fromFileOptionReadError() {
 void JsonTest::fromFileError() {
     Containers::String filename = Path::join(JSON_TEST_DIR, "error.json");
 
-    std::ostringstream out;
+    Containers::String out;
     Error redirectError{&out};
     CORRADE_VERIFY(!Json::fromFile(filename));
-    CORRADE_COMPARE(out.str(), formatString("Utility::Json: expected a value but got ] at {}:3:1\n", filename));
+    CORRADE_COMPARE(out, format("Utility::Json: expected a value but got ] at {}:3:1\n", filename));
 }
 
 void JsonTest::fromFileParseOptionError() {
     Containers::String filename = Path::join(JSON_TEST_DIR, "parse-error.json");
 
-    std::ostringstream out;
+    Containers::String out;
     Error redirectError{&out};
     CORRADE_VERIFY(!Json::fromFile(filename, Json::Option::ParseDoubles));
-    CORRADE_COMPARE(out.str(), formatString("Utility::Json::parseDoubles(): invalid floating-point literal -haha at {}:2:5\n", filename));
+    CORRADE_COMPARE(out, format("Utility::Json::parseDoubles(): invalid floating-point literal -haha at {}:2:5\n", filename));
 }
 
 void JsonTest::fromFileParseError() {
@@ -4476,11 +4473,11 @@ void JsonTest::fromFileParseError() {
     CORRADE_VERIFY(json);
     CORRADE_COMPARE(json->tokens().size(), 2);
 
-    std::ostringstream out;
+    Containers::String out;
     Error redirectError{&out};
     CORRADE_VERIFY(!json->parseDoubles(json->root()));
     CORRADE_VERIFY(!json->parseDouble(json->tokens()[1]));
-    CORRADE_COMPARE(out.str(), formatString(
+    CORRADE_COMPARE(out, format(
         "Utility::Json::parseDoubles(): invalid floating-point literal -haha at {0}:2:5\n"
         "Utility::Json::parseDouble(): invalid floating-point literal -haha at {0}:2:5\n", filename));
 }
@@ -4520,15 +4517,15 @@ void JsonTest::constructMove() {
 }
 
 void JsonTest::debugTokenType() {
-    std::ostringstream out;
+    Containers::String out;
     Debug{&out} << JsonToken::Type::Number << JsonToken::Type(0xdeadbabedeadbabe);
-    CORRADE_COMPARE(out.str(), "Utility::JsonToken::Type::Number Utility::JsonToken::Type(0xdeadbabedeadbabe)\n");
+    CORRADE_COMPARE(out, "Utility::JsonToken::Type::Number Utility::JsonToken::Type(0xdeadbabedeadbabe)\n");
 }
 
 void JsonTest::debugTokenParsedType() {
-    std::ostringstream out;
+    Containers::String out;
     Debug{&out} << JsonToken::ParsedType::UnsignedInt << JsonToken::ParsedType(0xdeadbabedeadbabeull);
-    CORRADE_COMPARE(out.str(), "Utility::JsonToken::ParsedType::UnsignedInt Utility::JsonToken::ParsedType(0xdeadbabedeadbabe)\n");
+    CORRADE_COMPARE(out, "Utility::JsonToken::ParsedType::UnsignedInt Utility::JsonToken::ParsedType(0xdeadbabedeadbabe)\n");
 }
 
 }}}}

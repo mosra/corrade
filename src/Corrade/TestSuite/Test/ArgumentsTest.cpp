@@ -29,7 +29,6 @@
 #include "Corrade/Containers/StringStl.h" /** @todo drop once Arguments is <string>-free */
 #include "Corrade/TestSuite/Tester.h"
 #include "Corrade/Utility/Arguments.h"
-#include "Corrade/Utility/DebugStl.h"
 
 namespace Corrade { namespace TestSuite { namespace Test { namespace {
 

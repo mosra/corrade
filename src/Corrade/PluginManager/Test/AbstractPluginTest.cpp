@@ -31,7 +31,7 @@
 #include "Corrade/TestSuite/Compare/Container.h"
 #include "Corrade/TestSuite/Compare/Numeric.h"
 #include "Corrade/Utility/ConfigurationGroup.h"
-#include "Corrade/Utility/DebugStl.h"
+#include "Corrade/Utility/DebugStl.h" /** @todo remove once Configuration is std::string-free */
 
 #include "animals/Canary.h"
 

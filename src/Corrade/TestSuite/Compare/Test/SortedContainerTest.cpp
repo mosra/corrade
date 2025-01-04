@@ -24,12 +24,11 @@
     DEALINGS IN THE SOFTWARE.
 */
 
-#include <sstream>
 #include <unordered_set>
 
 #include "Corrade/Containers/Array.h"
 #include "Corrade/Containers/Reference.h"
-#include "Corrade/Containers/StringStl.h"
+#include "Corrade/Containers/String.h"
 #include "Corrade/TestSuite/Tester.h"
 #include "Corrade/TestSuite/Compare/SortedContainer.h"
 #include "Corrade/TestSuite/Compare/String.h"
@@ -124,27 +123,31 @@ void SortedContainerTest::differentSize() {
     Containers::Array<int> a{InPlaceInit, {1, 2, 4, 3}};
     Containers::Array<int> b;
 
+    /* The string gets fully written only on destruction or with a newline at
+       the end */
+    Containers::String out;
     {
-        std::stringstream out;
         Debug redirectOutput{&out};
         Comparator<Compare::SortedContainer<Containers::Array<int>>> compare;
         ComparisonStatusFlags flags = compare(a, b);
         CORRADE_COMPARE(flags, ComparisonStatusFlag::Failed);
         compare.printMessage(flags, redirectOutput, "a", "b");
-        CORRADE_COMPARE_AS(out.str(),
-            "Containers a and b have different size, actual 4 but 0 expected.",
-            TestSuite::Compare::StringHasPrefix);
-    } {
-        std::stringstream out;
+    }
+    CORRADE_COMPARE_AS(out,
+        "Containers a and b have different size, actual 4 but 0 expected.",
+        TestSuite::Compare::StringHasPrefix);
+
+    {
+        out = {};
         Debug redirectOutput{&out};
         Comparator<Compare::SortedContainer<Containers::Array<int>>> compare;
         ComparisonStatusFlags flags = compare(b, a);
         CORRADE_COMPARE(flags, ComparisonStatusFlag::Failed);
         compare.printMessage(flags, redirectOutput, "b", "a");
-        CORRADE_COMPARE_AS(out.str(),
-            "Containers b and a have different size, actual 0 but 4 expected.",
-            TestSuite::Compare::StringHasPrefix);
     }
+    CORRADE_COMPARE_AS(out,
+        "Containers b and a have different size, actual 0 but 4 expected.",
+        TestSuite::Compare::StringHasPrefix);
 }
 
 struct Int {

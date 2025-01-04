@@ -25,16 +25,15 @@
 */
 
 #include <set>      /* for unique allocation counting in a benchmark */
-#include <sstream>
 #include <vector>   /* for benchmark against STL */
 
 #include "Corrade/Containers/GrowableArray.h"
-#include "Corrade/Containers/StringStl.h"
+#include "Corrade/Containers/String.h"
 #include "Corrade/TestSuite/Tester.h"
 #include "Corrade/TestSuite/Compare/Container.h"
 #include "Corrade/TestSuite/Compare/Numeric.h"
 #include "Corrade/TestSuite/Compare/String.h"
-#include "Corrade/Utility/DebugStl.h"
+#include "Corrade/Utility/Format.h"
 
 /* No __has_feature on GCC: https://gcc.gnu.org/bugzilla/show_bug.cgi?id=60512
    Using a dedicated macro instead: https://stackoverflow.com/a/34814667 */
@@ -1733,7 +1732,7 @@ struct VerboseMovable {
 };
 
 void GrowableArrayTest::insertShiftOperationOrder() {
-    std::ostringstream out;
+    Containers::String out;
     Debug redirectOutput{&out};
     {
         Array<VerboseMovable> a;
@@ -1749,7 +1748,7 @@ void GrowableArrayTest::insertShiftOperationOrder() {
         new(&a[1]) VerboseMovable{6};
         new(&a[2]) VerboseMovable{7};
     }
-    CORRADE_COMPARE(out.str(),
+    CORRADE_COMPARE(out,
         "Constructing 1\n"
         "Constructing 2\n"
         "Constructing 3\n"
@@ -1773,7 +1772,7 @@ void GrowableArrayTest::insertShiftOperationOrder() {
 }
 
 void GrowableArrayTest::insertShiftOperationOrderNoOp() {
-    std::ostringstream out;
+    Containers::String out;
     Debug redirectOutput{&out};
     {
         Array<VerboseMovable> a;
@@ -1785,7 +1784,7 @@ void GrowableArrayTest::insertShiftOperationOrderNoOp() {
         /* This does nothing, so no loop should get entered */
         arrayInsert(a, 1, Corrade::NoInit, 0);
     }
-    CORRADE_COMPARE(out.str(),
+    CORRADE_COMPARE(out,
         "Constructing 1\n"
         "Constructing 2\n"
         "Constructing 3\n"
@@ -1798,7 +1797,7 @@ void GrowableArrayTest::insertShiftOperationOrderNoOverlap() {
     /* Compared to insertShiftOperationOrder(), this isn't doing any move
        assignments */
 
-    std::ostringstream out;
+    Containers::String out;
     Debug redirectOutput{&out};
     {
         Array<VerboseMovable> a;
@@ -1815,7 +1814,7 @@ void GrowableArrayTest::insertShiftOperationOrderNoOverlap() {
         new(&a[4]) VerboseMovable{7};
         new(&a[5]) VerboseMovable{8};
     }
-    CORRADE_COMPARE(out.str(),
+    CORRADE_COMPARE(out,
         "Constructing 1\n"
         "Constructing 2\n"
         "Constructing 3\n"
@@ -1843,10 +1842,10 @@ void GrowableArrayTest::insertInvalid() {
 
     Array<int> a{5};
 
-    std::ostringstream out;
+    Containers::String out;
     Error redirectError{&out};
     arrayInsert(a, 6, 7);
-    CORRADE_COMPARE(out.str(), "Containers::arrayInsert(): can't insert at index 6 into an array of size 5\n");
+    CORRADE_COMPARE(out, "Containers::arrayInsert(): can't insert at index 6 into an array of size 5\n");
 }
 
 void GrowableArrayTest::appendGrowRatio() {
@@ -2546,7 +2545,7 @@ template<class T> void GrowableArrayTest::removeSuffixAllGrowable() {
 }
 
 void GrowableArrayTest::removeShiftOperationOrder() {
-    std::ostringstream out;
+    Containers::String out;
     Debug redirectOutput{&out};
     {
         Array<VerboseMovable> a;
@@ -2560,7 +2559,7 @@ void GrowableArrayTest::removeShiftOperationOrder() {
 
         arrayRemove(a, 1, 2);
     }
-    CORRADE_COMPARE(out.str(),
+    CORRADE_COMPARE(out,
         "Constructing 1\n"
         "Constructing 2\n"
         "Constructing 3\n"
@@ -2579,7 +2578,7 @@ void GrowableArrayTest::removeShiftOperationOrder() {
 }
 
 void GrowableArrayTest::removeShiftOperationOrderNoOp() {
-    std::ostringstream out;
+    Containers::String out;
     Debug redirectOutput{&out};
     {
         Array<VerboseMovable> a;
@@ -2591,7 +2590,7 @@ void GrowableArrayTest::removeShiftOperationOrderNoOp() {
         /* This does nothing, so no loop should get entered */
         arrayRemove(a, 1, 0);
     }
-    CORRADE_COMPARE(out.str(),
+    CORRADE_COMPARE(out,
         "Constructing 1\n"
         "Constructing 2\n"
         "Constructing 3\n"
@@ -2604,7 +2603,7 @@ void GrowableArrayTest::removeShiftOperationOrderNoOverlap() {
     /* Compared to removeShiftOperationOrder(), this has one item that's
        directly destructed without being moved anywhere */
 
-    std::ostringstream out;
+    Containers::String out;
     Debug redirectOutput{&out};
     {
         Array<VerboseMovable> a;
@@ -2618,7 +2617,7 @@ void GrowableArrayTest::removeShiftOperationOrderNoOverlap() {
 
         arrayRemove(a, 1, 3);
     }
-    CORRADE_COMPARE(out.str(),
+    CORRADE_COMPARE(out,
         "Constructing 1\n"
         "Constructing 2\n"
         "Constructing 3\n"
@@ -2636,7 +2635,7 @@ void GrowableArrayTest::removeShiftOperationOrderNoOverlap() {
 }
 
 void GrowableArrayTest::removeUnorderedShiftOperationOrder() {
-    std::ostringstream out;
+    Containers::String out;
     Debug redirectOutput{&out};
     {
         Array<VerboseMovable> a;
@@ -2650,7 +2649,7 @@ void GrowableArrayTest::removeUnorderedShiftOperationOrder() {
 
         arrayRemoveUnordered(a, 1, 2);
     }
-    CORRADE_COMPARE(out.str(),
+    CORRADE_COMPARE(out,
         "Constructing 1\n"
         "Constructing 2\n"
         "Constructing 3\n"
@@ -2668,7 +2667,7 @@ void GrowableArrayTest::removeUnorderedShiftOperationOrder() {
 }
 
 void GrowableArrayTest::removeUnorderedShiftOperationOrderNoOp() {
-    std::ostringstream out;
+    Containers::String out;
     Debug redirectOutput{&out};
     {
         Array<VerboseMovable> a;
@@ -2680,7 +2679,7 @@ void GrowableArrayTest::removeUnorderedShiftOperationOrderNoOp() {
         /* This does nothing, so no loop should get entered */
         arrayRemoveUnordered(a, 1, 0);
     }
-    CORRADE_COMPARE(out.str(),
+    CORRADE_COMPARE(out,
         "Constructing 1\n"
         "Constructing 2\n"
         "Constructing 3\n"
@@ -2695,7 +2694,7 @@ void GrowableArrayTest::removeUnorderedShiftOperationOrderNoOverlap() {
        moved anywhere. The observed behavior is the same as with
        removeShiftOperationOrderNoOverlap(). */
 
-    std::ostringstream out;
+    Containers::String out;
     Debug redirectOutput{&out};
     {
         Array<VerboseMovable> a;
@@ -2709,7 +2708,7 @@ void GrowableArrayTest::removeUnorderedShiftOperationOrderNoOverlap() {
 
         arrayRemoveUnordered(a, 1, 3);
     }
-    CORRADE_COMPARE(out.str(),
+    CORRADE_COMPARE(out,
         "Constructing 1\n"
         "Constructing 2\n"
         "Constructing 3\n"
@@ -2731,14 +2730,14 @@ void GrowableArrayTest::removeInvalid() {
 
     Array<int> a{4};
 
-    std::ostringstream out;
+    Containers::String out;
     Error redirectOutput{&out};
     arrayRemove(a, 4, 1);
     arrayRemove(a, 2, 3);
     arrayRemoveUnordered(a, 4, 1);
     arrayRemoveUnordered(a, 2, 3);
     arrayRemoveSuffix(a, 5);
-    CORRADE_COMPARE(out.str(),
+    CORRADE_COMPARE(out,
         "Containers::arrayRemove(): can't remove 1 elements at index 4 from an array of size 4\n"
         "Containers::arrayRemove(): can't remove 3 elements at index 2 from an array of size 4\n"
         "Containers::arrayRemoveUnordered(): can't remove 1 elements at index 4 from an array of size 4\n"
@@ -2824,7 +2823,7 @@ void GrowableArrayTest::mallocFailed() {
 
     Array<char> a;
 
-    std::ostringstream out;
+    Containers::String out;
     Error redirectOutput{&out};
     #if defined(CORRADE_TARGET_GCC) && !defined(CORRADE_TARGET_CLANG) && __GNUC__ >= 7
     #pragma GCC diagnostic push
@@ -2835,9 +2834,9 @@ void GrowableArrayTest::mallocFailed() {
     #pragma GCC diagnostic pop
     #endif
     #ifndef CORRADE_TARGET_32BIT
-    CORRADE_COMPARE(out.str(), "Containers::ArrayMallocAllocator: can't allocate 18446744073709551615 bytes\n");
+    CORRADE_COMPARE(out, "Containers::ArrayMallocAllocator: can't allocate 18446744073709551615 bytes\n");
     #else
-    CORRADE_COMPARE(out.str(), "Containers::ArrayMallocAllocator: can't allocate 4294967295 bytes\n");
+    CORRADE_COMPARE(out, "Containers::ArrayMallocAllocator: can't allocate 4294967295 bytes\n");
     #endif
 }
 
@@ -2850,7 +2849,7 @@ void GrowableArrayTest::reallocFailed() {
     Array<char> a;
     arrayAppend(a, '3');
 
-    std::ostringstream out;
+    Containers::String out;
     Error redirectOutput{&out};
     #if defined(CORRADE_TARGET_GCC) && !defined(CORRADE_TARGET_CLANG) && __GNUC__ >= 7
     #pragma GCC diagnostic push
@@ -2861,9 +2860,9 @@ void GrowableArrayTest::reallocFailed() {
     #pragma GCC diagnostic pop
     #endif
     #ifndef CORRADE_TARGET_32BIT
-    CORRADE_COMPARE(out.str(), "Containers::ArrayMallocAllocator: can't reallocate 18446744073709551615 bytes\n");
+    CORRADE_COMPARE(out, "Containers::ArrayMallocAllocator: can't reallocate 18446744073709551615 bytes\n");
     #else
-    CORRADE_COMPARE(out.str(), "Containers::ArrayMallocAllocator: can't reallocate 4294967295 bytes\n");
+    CORRADE_COMPARE(out, "Containers::ArrayMallocAllocator: can't reallocate 4294967295 bytes\n");
     #endif
 }
 
@@ -3156,10 +3155,10 @@ void GrowableArrayTest::castNonTrivial() {
     Array<char> a;
     arrayResize<char, ArrayNewAllocator<char>>(a, 10);
 
-    std::ostringstream out;
+    Containers::String out;
     Error redirectError{&out};
     arrayAllocatorCast<std::uint16_t>(Utility::move(a));
-    CORRADE_COMPARE(out.str(),
+    CORRADE_COMPARE(out,
         "Containers::arrayAllocatorCast(): the array has to use the ArrayMallocAllocator or a derivative\n");
 }
 
@@ -3168,10 +3167,10 @@ void GrowableArrayTest::castNonGrowable() {
 
     Array<char> a{10};
 
-    std::ostringstream out;
+    Containers::String out;
     Error redirectError{&out};
     arrayAllocatorCast<std::uint16_t>(Utility::move(a));
-    CORRADE_COMPARE(out.str(),
+    CORRADE_COMPARE(out,
         "Containers::arrayAllocatorCast(): the array has to use the ArrayMallocAllocator or a derivative\n");
 }
 
@@ -3181,10 +3180,10 @@ void GrowableArrayTest::castInvalid() {
     Array<char> a;
     arrayResize(a, 10);
 
-    std::ostringstream out;
+    Containers::String out;
     Error redirectError{&out};
     arrayAllocatorCast<std::uint32_t>(Utility::move(a));
-    CORRADE_COMPARE(out.str(),
+    CORRADE_COMPARE(out,
         "Containers::arrayAllocatorCast(): can't reinterpret 10 1-byte items into a 4-byte type\n");
 }
 
@@ -3406,7 +3405,7 @@ template<std::size_t alignment> struct alignas(alignment) Aligned {
 };
 
 template<template<class> class Allocator, std::size_t alignment> void GrowableArrayTest::allocationAlignment() {
-    setTestCaseTemplateName({AllocatorName<Allocator>::name(), std::to_string(alignment)});
+    setTestCaseTemplateName({AllocatorName<Allocator>::name(), Utility::format("{}", alignment)});
 
     if(alignment > Implementation::DefaultAllocationAlignment)
         CORRADE_SKIP(alignment << Debug::nospace << "-byte alignment is larger than platform default allocation alignment, skipping");
@@ -3483,7 +3482,7 @@ void GrowableArrayTest::appendInsertArrayElement() {
         a = Array<int>{Corrade::NoInit, 10};
     }
 
-    std::ostringstream out;
+    Containers::String out;
     Error redirectError{&out};
     /* Beginning of the array */
     arrayAppend(a, a[0]);
@@ -3502,7 +3501,7 @@ void GrowableArrayTest::appendInsertArrayElement() {
     arrayAppend(a, Utility::move(a.data()[data.capacityEnd]));
     arrayInsert(a, 0, a.data()[data.capacityEnd]);
     arrayInsert(a, 0, Utility::move(a.data()[data.capacityEnd]));
-    CORRADE_COMPARE_AS(out.str(),
+    CORRADE_COMPARE_AS(out,
         "Containers::arrayAppend(): use the list variant to append values from within the array itself\n"
         "Containers::arrayAppend(): use the list variant to append values from within the array itself\n"
         "Containers::arrayInsert(): use the list variant to insert values from within the array itself\n"
@@ -3590,13 +3589,13 @@ void GrowableArrayTest::insertArraySliceIntoItself() {
     arrayInsert(a, 5, a.slice(5, 9));
     arrayInsert(a, 9, a.slice(5, 9));
 
-    std::stringstream out;
+    Containers::String out;
     Error redirectError{&out};
     arrayInsert(a, 3, a.slice(2, 5));
     arrayInsert(a, 4, a.slice(2, 5));
     arrayInsert(a, 6, a.slice(5, 9));
     arrayInsert(a, 8, a.slice(5, 9));
-    CORRADE_COMPARE_AS(out.str(),
+    CORRADE_COMPARE_AS(out,
         "Containers::arrayInsert(): attempting to insert a slice [2:5] into itself at index 3\n"
         "Containers::arrayInsert(): attempting to insert a slice [2:5] into itself at index 4\n"
         "Containers::arrayInsert(): attempting to insert a slice [5:9] into itself at index 6\n"

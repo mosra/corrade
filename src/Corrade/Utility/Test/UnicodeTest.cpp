@@ -24,18 +24,15 @@
     DEALINGS IN THE SOFTWARE.
 */
 
-#include <sstream>
-
 #include "Corrade/Containers/Array.h"
 #include "Corrade/Containers/Optional.h"
 #include "Corrade/Containers/Pair.h"
-#include "Corrade/Containers/StringStl.h" /** @todo remove when <sstream> is gone */
+#include "Corrade/Containers/String.h"
 #include "Corrade/Containers/StringView.h"
 #include "Corrade/Containers/Triple.h"
 #include "Corrade/TestSuite/Tester.h"
 #include "Corrade/TestSuite/Compare/Container.h"
 #include "Corrade/TestSuite/Compare/String.h"
-#include "Corrade/Utility/DebugStl.h" /** @todo remove when <sstream> is gone */
 #include "Corrade/Utility/Unicode.h"
 
 #ifdef CORRADE_TARGET_WINDOWS
@@ -218,11 +215,11 @@ void UnicodeTest::currentUtf8Error() {
 void UnicodeTest::currentUtf8Invalid() {
     CORRADE_SKIP_IF_NO_DEBUG_ASSERT();
 
-    std::ostringstream out;
+    Containers::String out;
     Error redirectError{&out};
     Unicode::currentChar("", 0);
     Unicode::currentChar("hello", 5);
-    CORRADE_COMPARE_AS(out.str(),
+    CORRADE_COMPARE_AS(out,
         "Utility::Unicode::currentChar(): expected cursor to be less than 0 but got 0\n"
         "Utility::Unicode::currentChar(): expected cursor to be less than 5 but got 5\n",
         TestSuite::Compare::String);
@@ -283,11 +280,11 @@ void UnicodeTest::nextUtf8Error() {
 void UnicodeTest::nextUtf8Invalid() {
     CORRADE_SKIP_IF_NO_DEBUG_ASSERT();
 
-    std::ostringstream out;
+    Containers::String out;
     Error redirectError{&out};
     Unicode::nextChar("", 0);
     Unicode::nextChar("hello", 5);
-    CORRADE_COMPARE_AS(out.str(),
+    CORRADE_COMPARE_AS(out,
         "Utility::Unicode::nextChar(): expected cursor to be less than 0 but got 0\n"
         "Utility::Unicode::nextChar(): expected cursor to be less than 5 but got 5\n",
         TestSuite::Compare::String);
@@ -379,12 +376,12 @@ void UnicodeTest::prevUtf8Error() {
 void UnicodeTest::prevUtf8Invalid() {
     CORRADE_SKIP_IF_NO_DEBUG_ASSERT();
 
-    std::ostringstream out;
+    Containers::String out;
     Error redirectError{&out};
     Unicode::prevChar("", 0);
     Unicode::prevChar("a", 0);
     Unicode::prevChar("hello", 6);
-    CORRADE_COMPARE_AS(out.str(),
+    CORRADE_COMPARE_AS(out,
         "Utility::Unicode::prevChar(): expected cursor to be greater than 0 and less than or equal to 0 but got 0\n"
         "Utility::Unicode::prevChar(): expected cursor to be greater than 0 and less than or equal to 1 but got 0\n"
         "Utility::Unicode::prevChar(): expected cursor to be greater than 0 and less than or equal to 5 but got 6\n",

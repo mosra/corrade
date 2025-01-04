@@ -29,8 +29,6 @@
    functions are forward-declared so it should work. */
 #include "Corrade/Containers/ArrayTuple.h"
 
-#include <sstream>
-
 #include "Corrade/Containers/Array.h"
 #include "Corrade/Containers/BitArrayView.h"
 #include "Corrade/Containers/StridedArrayView.h"
@@ -39,7 +37,6 @@
 #include "Corrade/TestSuite/Tester.h"
 #include "Corrade/TestSuite/Compare/Container.h"
 #include "Corrade/TestSuite/Compare/Numeric.h"
-#include "Corrade/Utility/DebugStl.h"
 #include "Corrade/Utility/Format.h"
 
 namespace Corrade { namespace Containers { namespace Test { namespace {
@@ -945,13 +942,13 @@ void ArrayTupleTest::constructStringInvalidFlags() {
 
     MutableStringView string;
 
-    std::ostringstream out;
+    Containers::String out;
     Error redirectError{&out};
     ArrayTuple{
         {Corrade::ValueInit, 3, string, StringViewFlag::Global},
         {Corrade::NoInit, 3, string, StringViewFlag::NullTerminated|StringViewFlag::Global},
     };
-    CORRADE_COMPARE(out.str(),
+    CORRADE_COMPARE(out,
         "Containers::ArrayTuple: Containers::StringViewFlag::Global not allowed for a string view\n"
         "Containers::ArrayTuple: Containers::StringViewFlag::Global not allowed for a string view\n");
 }
@@ -1190,11 +1187,11 @@ void ArrayTupleTest::convertArrayInvalid() {
         }
     };
 
-    std::ostringstream out;
+    Containers::String out;
     Error redirectError{&out};
     Array<char> a = Utility::move(nonTrivialData);
     Array<char> b = Utility::move(nonTrivialDeleter);
-    CORRADE_COMPARE(out.str(),
+    CORRADE_COMPARE(out,
         "Containers::ArrayTuple: conversion to Array allowed only with trivially destructible types and a stateless destructor\n"
         "Containers::ArrayTuple: conversion to Array allowed only with trivially destructible types and a stateless destructor\n");
 }
