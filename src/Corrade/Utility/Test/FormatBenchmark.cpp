@@ -26,7 +26,7 @@
 
 #include <sstream>
 
-#include "Corrade/Containers/StringView.h"
+#include "Corrade/Containers/String.h"
 #include "Corrade/TestSuite/Tester.h"
 #include "Corrade/Utility/DebugStl.h"
 #include "Corrade/Utility/Format.h"
@@ -39,24 +39,28 @@ struct FormatBenchmark: TestSuite::Tester {
     void format();
     void snprintf();
     void sstream();
-    void debug();
+    void debugSstream();
+    void debugString();
 
     void floatFormat();
     void floatSnprintf();
     void floatSstream();
-    void floatDebug();
+    void floatDebugSstream();
+    void floatDebugString();
 };
 
 FormatBenchmark::FormatBenchmark() {
     addBenchmarks({&FormatBenchmark::format,
                    &FormatBenchmark::snprintf,
                    &FormatBenchmark::sstream,
-                   &FormatBenchmark::debug,
+                   &FormatBenchmark::debugSstream,
+                   &FormatBenchmark::debugString,
 
                    &FormatBenchmark::floatFormat,
                    &FormatBenchmark::floatSnprintf,
                    &FormatBenchmark::floatSstream,
-                   &FormatBenchmark::floatDebug}, 50);
+                   &FormatBenchmark::floatDebugSstream,
+                   &FormatBenchmark::floatDebugString}, 50);
 }
 
 void FormatBenchmark::format() {
@@ -90,7 +94,7 @@ void FormatBenchmark::sstream() {
     CORRADE_COMPARE(out.str(), "hello, people! 42 + 1337 = 1379 = 1337 + 42");
 }
 
-void FormatBenchmark::debug() {
+void FormatBenchmark::debugSstream() {
     std::ostringstream out;
 
     CORRADE_BENCHMARK(1000) {
@@ -101,6 +105,19 @@ void FormatBenchmark::debug() {
     }
 
     CORRADE_COMPARE(out.str(), "hello, people! 42 + 1337 = 1379 = 1337 + 42");
+}
+
+void FormatBenchmark::debugString() {
+    Containers::String out;
+
+    CORRADE_BENCHMARK(1000) {
+        out = {};
+        Debug{&out, Debug::Flag::NoNewlineAtTheEnd}
+            << "hello," << "people" << Debug::nospace << "!" << 42 << "+"
+            << 1337 << "=" << 42 + 1337 << "=" << 1337 << "+" << 42;
+    }
+
+    CORRADE_COMPARE(out, "hello, people! 42 + 1337 = 1379 = 1337 + 42");
 }
 
 void FormatBenchmark::floatFormat() {
@@ -134,7 +151,7 @@ void FormatBenchmark::floatSstream() {
     CORRADE_COMPARE(out.str(), "hello, people! 4.2 + 13.37 = 17.57 = 13.37 + 4.2");
 }
 
-void FormatBenchmark::floatDebug() {
+void FormatBenchmark::floatDebugSstream() {
     std::ostringstream out;
 
     CORRADE_BENCHMARK(1000) {
@@ -145,6 +162,19 @@ void FormatBenchmark::floatDebug() {
     }
 
     CORRADE_COMPARE(out.str(), "hello, people! 4.2 + 13.37 = 17.57 = 13.37 + 4.2");
+}
+
+void FormatBenchmark::floatDebugString() {
+    Containers::String out;
+
+    CORRADE_BENCHMARK(1000) {
+        out = {};
+        Debug{&out, Debug::Flag::NoNewlineAtTheEnd}
+            << "hello," << "people" << Debug::nospace << "!" << 4.2 << "+"
+            << 13.37 << "=" << 4.2 + 13.37 << "=" << 13.37 << "+" << 4.2;
+    }
+
+    CORRADE_COMPARE(out, "hello, people! 4.2 + 13.37 = 17.57 = 13.37 + 4.2");
 }
 
 }}}}
