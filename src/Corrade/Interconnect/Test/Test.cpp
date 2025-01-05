@@ -610,13 +610,27 @@ void Test::emitterMultipleInheritance() {
 
     postman.newDiamondCladMessage(10, "ahoy");
     postman.newMessage(5, "hello");
-    CORRADE_COMPARE_AS(mailbox.messages, (Containers::StringIterable{
-        "hello", "<>ahoy<>"
-    }), TestSuite::Compare::SortedContainer);
-    CORRADE_COMPARE(mailbox.money, 15);
+
+    {
+        #if defined(CORRADE_TARGET_MSVC) && !defined(CORRADE_TARGET_CLANG_CL) && _MSC_VER >= 1930
+        /* This worked back when it was a `const std::string&`. I suppose with
+           a string view that's copied by value and/or a significantly smaller
+           generated code for the string concatenation it somehow fell under a
+           threshold for some new optimization to kick in, making the connnect
+           and emit each operate with an entirely different function. Or
+           something. Given all other pain with these, I think the library is
+           unsalvageable in its current form. */
+        CORRADE_EXPECT_FAIL("MSVC 2022 doesn't correctly emit the signal with non-virtual multiple inheritance.");
+        #endif
+        CORRADE_COMPARE_AS(mailbox.messages, (Containers::StringIterable{
+            "hello", "<>ahoy<>"
+        }), TestSuite::Compare::SortedContainer);
+        CORRADE_COMPARE(mailbox.money, 15);
+    }
 
     CORRADE_VERIFY(postman.hasSignalConnections(&Diamond::newMessage));
     postman.disconnectSignal(&Diamond::newMessage);
+    /* But then this says true on MSVC 2022?! What's going on?? */
     CORRADE_VERIFY(postman.hasSignalConnections(&Diamond::newDiamondCladMessage));
     postman.disconnectSignal(&Diamond::newDiamondCladMessage);
     CORRADE_VERIFY(!postman.hasSignalConnections());
