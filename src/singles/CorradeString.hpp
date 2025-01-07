@@ -34,9 +34,8 @@
 
     The STL compatibility bits are included as well --- opt-in by specifying
     either `#define CORRADE_STRING_STL_COMPATIBILITY` or
-    `#define CORRADE_STRING_STL_VIEW_COMPATIBILITY` before including the file
-    in both the headers and the implementation. Including it multiple times
-    with different macros defined works too.
+    `#define CORRADE_STRING_STL_VIEW_COMPATIBILITY` before including the file.
+    Including it multiple times with different macros defined works too.
 
     v2020.06-1687-g6b5f (2024-06-29)
     -   New, SIMD-optimized count() API
@@ -150,6 +149,7 @@ template<class, class> class Pair;
 /* Include <string> directly, don't bother with forward-declarations here */
 #include <string>
 #pragma ACME enable Corrade_Utility_StlForwardString_h
+#pragma ACME disable CORRADE_STRING_STL_INLINE
 #include "Corrade/Containers/StringStl.h"
 #endif
 // TODO CORRADE_STRING_STL_HASH_COMPATIBILITY once AbstractHash is <string>-free
@@ -217,7 +217,4 @@ template<class, class> class Pair;
 #endif
 #include "Corrade/Containers/StringView.cpp"
 #include "Corrade/Containers/String.cpp"
-#ifdef CORRADE_STRING_STL_COMPATIBILITY
-#include "Corrade/Containers/StringStl.cpp"
-#endif
 #endif

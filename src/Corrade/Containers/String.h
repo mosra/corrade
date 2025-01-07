@@ -298,8 +298,8 @@ unordered containers.
     @cpp #define CORRADE_STRING_STL_COMPATIBILITY @ce and for
     @ref std::string_view by compiling as C++17 and specifying
     @cpp #define CORRADE_STRING_STL_VIEW_COMPATIBILITY @ce before including the
-    file in both the headers and the implementation. Including it multiple
-    times with different macros defined works as well.
+    file. Including it multiple times with different macros defined works as
+    well.
 
 @experimental
 */
