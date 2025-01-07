@@ -44,6 +44,18 @@
 #ifdef __clang__
 #define CORRADE_TARGET_CLANG
 #endif
+/* We need just CORRADE_CONSTEXPR14 from Macros.h, but that one relies on
+   CORRADE_CXX_STANDARD which thus has to be defined early enough */
+#ifdef _MSC_VER
+#ifdef _MSVC_LANG
+#define CORRADE_CXX_STANDARD _MSVC_LANG
+#else
+#define CORRADE_CXX_STANDARD 201103L
+#endif
+#else
+#define CORRADE_CXX_STANDARD __cplusplus
+#endif
+#pragma ACME disable CORRADE_CONSTEXPR14
 
 #include "Corrade/Containers/Triple.h"
 #ifdef CORRADE_TRIPLE_STL_COMPATIBILITY
@@ -55,15 +67,6 @@
 /* CORRADE_TARGET_LIBSTDCXX, CORRADE_TARGET_LIBCXX and
    CORRADE_TARGET_DINKUMWARE is needed for the StlForwardTupleSize.h header
    needed by StructuredBindings */
-#ifdef _MSC_VER
-#ifdef _MSVC_LANG
-#define CORRADE_CXX_STANDARD _MSVC_LANG
-#else
-#define CORRADE_CXX_STANDARD 201103L
-#endif
-#else
-#define CORRADE_CXX_STANDARD __cplusplus
-#endif
 #if CORRADE_CXX_STANDARD >= 202002
 #include <version>
 #else
