@@ -60,6 +60,12 @@
 #ifdef __APPLE__
 #define CORRADE_TARGET_APPLE
 #endif
+/* We need CORRADE_MSVC2017_COMPATIBILITY from configure.h, which is a
+   #cmakedefine there so it wouldn't be pulled in below. Equivalent to the
+   version check in UseCorrade.cmake. */
+#if defined(_MSC_VER) && _MSC_VER < 1920
+#define CORRADE_MSVC2017_COMPATIBILITY
+#endif
 
 /* Supply the configure.h template instead to avoid using baked-in defines,
    remove parts that aren't used here */
