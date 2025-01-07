@@ -81,6 +81,9 @@
 #define CORRADE_TARGET_CLANG
 #endif
 
+/* We need just CORRADE_CONSTEXPR14 from Macros.h */
+#pragma ACME disable CORRADE_CONSTEXPR14
+
 /* From Containers.h we need just the strided array view forward declarations,
    the array view ones are again already in CorradeArrayView.h. */
 #pragma ACME enable Corrade_Containers_Containers_h
