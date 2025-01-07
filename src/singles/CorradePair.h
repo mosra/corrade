@@ -19,6 +19,9 @@
     `#define CORRADE_PAIR_STL_COMPATIBILITY` before including the file.
     Including it multiple times with different macros defined works too.
 
+    v2020.06-1846-gc4cdf (2025-01-07)
+    -   Non-const C++17 structured bindings are now constexpr as well
+    -   Structured bindings of const types now work even w/o <utility>
     v2020.06-1687-g6b5f (2024-06-29)
     -   Added explicit conversion constructors
     -   Structured bindings on C++17

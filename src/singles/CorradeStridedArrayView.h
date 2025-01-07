@@ -20,6 +20,11 @@
     `#define CORRADE_STRUCTURED_BINDINGS` before including the file. Including
     it multiple times with different macros defined works too.
 
+    v2020.06-1846-gc4cdf (2025-01-07)
+    -   Worked around an issue where certain new Clang versions would do an OOB
+        access with negative strides on 32-bit builds (such as on Emscripten)
+    -   Fixed StridedDimensions structured bindings constexpr signature
+    -   Structured bindings of const types now work even w/o <utility>
     v2020.06-1687-g6b5f (2024-06-29)
     -   Structured bindings for StridedDimensions on C++17
     v2020.06-1454-gfc3b7 (2023-08-27)

@@ -18,6 +18,12 @@
     ASan enabled, you can `#define CORRADE_CONTAINERS_NO_SANITIZER_ANNOTATIONS`
     to disable them.
 
+    v2020.06-1846-gc4cdf (2025-01-07)
+    -   List-taking arrayAppend() and arrayInsert(), when passed a slice of the
+        array itself, now correctly perform a copy within the array even if it
+        gets reallocated in the process
+    -   Added arrayClear()
+    -   SFINAE is now done in template args as that's simpler for the compiler
     v2020.06-1687-g6b5f (2024-06-29)
     -   Minor cleanup, some macro logic is now moved to CorradeArrayView.h
     v2020.06-1507-gfbd9 (2023-09-13)

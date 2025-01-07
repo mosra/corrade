@@ -13,6 +13,10 @@
     -   GitHub project page — https://github.com/mosra/corrade
     -   GitHub Singles repository — https://github.com/mosra/magnum-singles
 
+    v2020.06-1846-gc4cdf (2025-01-07)
+    -   Fixed an issue where a Function<T()> used in a function argument would
+        be ambiguous with an overload having Function<T(...)> of any number of
+        arguments
     v2020.06-1631-g9001f (2024-05-17)
     -   Initial release
 

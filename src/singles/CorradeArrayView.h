@@ -22,6 +22,9 @@
     `#define CORRADE_ARRAYVIEW_STL_SPAN_COMPATIBILITY` before including the
     file. Including it multiple times with different macros defined works too.
 
+    v2020.06-1846-gc4cdf (2025-01-07)
+    -   Added arraySize() overload for arrays as struct members
+    -   Structured bindings of const types now work even w/o <utility>
     v2020.06-1687-g6b5f (2024-06-29)
     -   Structured bindings for StaticArrayView on C++17
     v2020.06-1502-g147e (2023-09-11)

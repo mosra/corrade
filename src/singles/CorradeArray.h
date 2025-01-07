@@ -22,9 +22,14 @@
     before including the file. Including it multiple times with different
     macros defined works too.
 
+    v2020.06-1846-gc4cdf (2025-01-07)
+    -   StaticArray default constructor and constructors from a C array are now
+        implicit
+    -   SFINAE is now done in template args as that's simpler for the compiler
+    -   Structured bindings of const types now work even w/o <utility>
     v2020.06-1687-g6b5f (2024-06-29)
     -   Ability to InPlaceInit-construct an Array from an ArrayView, in
-        addition to  std::initializer_list
+        addition to std::initializer_list
     -   StaticArray is now trivially copyable and constexpr if the underlying
         type is
     -   Structured bindings for StaticArray on C++17
