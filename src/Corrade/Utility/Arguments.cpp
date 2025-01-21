@@ -106,13 +106,11 @@ struct Arguments::Entry {
     std::size_t id;
 };
 
-#ifndef DOXYGEN_GENERATING_OUTPUT
 enum class Arguments::InternalFlag: std::uint8_t {
     /* Keep in sync with public flags */
     IgnoreUnknownOptions = 1 << 0,
     Parsed = 1 << 7
 };
-#endif
 
 Arguments::Entry::Entry(Type type, char shortKey, std::string key, std::string helpKey, std::string defaultValue, std::size_t id): type(type), shortKey(shortKey), key(std::move(key)), defaultValue(std::move(defaultValue)), id(id) {
     if(type == Type::NamedArgument || type == Type::Option || type == Type::ArrayOption)
@@ -1204,7 +1202,6 @@ inline std::string Arguments::keyName(const Entry& entry) const {
         entry.helpKey : "--" + entry.key;
 }
 
-#ifndef DOXYGEN_GENERATING_OUTPUT
 Debug& operator<<(Debug& debug, const Arguments::ParseError value) {
     debug << "Utility::Arguments::ParseError" << Debug::nospace;
 
@@ -1226,6 +1223,5 @@ Debug& operator<<(Debug& debug, const Arguments::ParseError value) {
 
     return debug << "(" << Debug::nospace << Debug::hex << std::uint8_t(value) << Debug::nospace << ")";
 }
-#endif
 
 }}

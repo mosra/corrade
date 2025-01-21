@@ -44,7 +44,6 @@
 
 namespace Corrade { namespace Utility {
 
-#ifndef DOXYGEN_GENERATING_OUTPUT
 enum class FileWatcher::InternalFlag: std::uint8_t {
     /* Keep in sync with Flag */
     IgnoreErrors = std::uint8_t(FileWatcher::Flag::IgnoreErrors),
@@ -52,7 +51,6 @@ enum class FileWatcher::InternalFlag: std::uint8_t {
 
     Valid = 1 << 7
 };
-#endif
 
 FileWatcher::FileWatcher(const Containers::StringView filename, Flags flags):
     #if defined(CORRADE_TARGET_UNIX) || defined(CORRADE_TARGET_EMSCRIPTEN)
@@ -167,7 +165,6 @@ bool FileWatcher::hasChanged() {
     return false;
 }
 
-#ifndef DOXYGEN_GENERATING_OUTPUT
 Debug& operator<<(Debug& debug, FileWatcher::Flag value) {
     switch(value) {
         /* LCOV_EXCL_START */
@@ -186,6 +183,5 @@ Debug& operator<<(Debug& debug, FileWatcher::Flags value) {
         FileWatcher::Flag::IgnoreErrors,
         FileWatcher::Flag::IgnoreChangeIfEmpty});
 }
-#endif
 
 }}

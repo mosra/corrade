@@ -57,7 +57,6 @@ struct Comparator<Compare::File>::State {
         actualContents, expectedContents;
 };
 
-#ifndef DOXYGEN_GENERATING_OUTPUT
 Comparator<Compare::File>::Comparator(const Containers::StringView pathPrefix): _state{InPlaceInit} {
     _state->actualResult = Result::ReadError;
     _state->expectedResult = Result::ReadError;
@@ -128,7 +127,6 @@ void Comparator<Compare::File>::saveDiagnostic(ComparisonStatusFlags, Utility::D
     if(Utility::Path::write(filename, _state->actualContents))
         out << "->" << filename;
 }
-#endif
 
 namespace Compare {
 

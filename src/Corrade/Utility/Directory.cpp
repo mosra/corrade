@@ -106,19 +106,17 @@ std::string current() {
     return out ? std::string{*out} : std::string{};
 }
 
-#if defined(DOXYGEN_GENERATING_OUTPUT) || defined(CORRADE_TARGET_UNIX) || (defined(CORRADE_TARGET_WINDOWS) && !defined(CORRADE_TARGET_WINDOWS_RT))
+#if defined(CORRADE_TARGET_UNIX) || (defined(CORRADE_TARGET_WINDOWS) && !defined(CORRADE_TARGET_WINDOWS_RT))
 std::string libraryLocation(const void* address) {
     Containers::Optional<Containers::String> out = Path::libraryLocation(address);
     return out ? std::string{*out} : std::string{};
 }
 
-#ifndef DOXYGEN_GENERATING_OUTPUT
 std::string libraryLocation(Path::Implementation::FunctionPointer address) {
     CORRADE_IGNORE_DEPRECATED_PUSH
     return libraryLocation(address.address);
     CORRADE_IGNORE_DEPRECATED_POP
 }
-#endif
 #endif
 
 std::string executableLocation() {

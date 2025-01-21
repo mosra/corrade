@@ -233,7 +233,7 @@ struct PathTest: TestSuite::Tester {
     void copy100MReadWrite();
     void copy100MReadWriteString();
     void copy100MCopy();
-    #if defined(DOXYGEN_GENERATING_OUTPUT) || defined(CORRADE_TARGET_UNIX) || (defined(CORRADE_TARGET_WINDOWS) && !defined(CORRADE_TARGET_WINDOWS_RT))
+    #if defined(CORRADE_TARGET_UNIX) || (defined(CORRADE_TARGET_WINDOWS) && !defined(CORRADE_TARGET_WINDOWS_RT))
     void copy100MMap();
     #endif
     #endif
@@ -436,7 +436,7 @@ PathTest::PathTest() {
         &PathTest::copy100MReadWrite,
         &PathTest::copy100MReadWriteString,
         &PathTest::copy100MCopy,
-        #if defined(DOXYGEN_GENERATING_OUTPUT) || defined(CORRADE_TARGET_UNIX) || (defined(CORRADE_TARGET_WINDOWS) && !defined(CORRADE_TARGET_WINDOWS_RT))
+        #if defined(CORRADE_TARGET_UNIX) || (defined(CORRADE_TARGET_WINDOWS) && !defined(CORRADE_TARGET_WINDOWS_RT))
         &PathTest::copy100MMap
         #endif
         }, 5,
@@ -3207,7 +3207,7 @@ void PathTest::copy100MCopy() {
         Path::copy(input, output);
 }
 
-#if defined(DOXYGEN_GENERATING_OUTPUT) || defined(CORRADE_TARGET_UNIX) || (defined(CORRADE_TARGET_WINDOWS) && !defined(CORRADE_TARGET_WINDOWS_RT))
+#if defined(CORRADE_TARGET_UNIX) || (defined(CORRADE_TARGET_WINDOWS) && !defined(CORRADE_TARGET_WINDOWS_RT))
 void PathTest::copy100MMap() {
     Containers::String input = Path::join(_writeTestDir, "copyBenchmarkSource.dat");
     CORRADE_VERIFY(Path::exists(input));

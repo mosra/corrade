@@ -660,7 +660,6 @@ TweakableState Tweakable::update() {
     return state;
 }
 
-#ifndef DOXYGEN_GENERATING_OUTPUT
 Debug& operator<<(Debug& debug, const TweakableState value) {
     switch(value) {
         /* LCOV_EXCL_START */
@@ -675,6 +674,5 @@ Debug& operator<<(Debug& debug, const TweakableState value) {
 
     return debug << "Utility::TweakableState(" << Debug::nospace << Debug::hex << std::uint8_t(value) << Debug::nospace << ")";
 }
-#endif
 
 }}

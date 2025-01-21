@@ -129,7 +129,6 @@ namespace Implementation {
     template struct FloatConfigurationValue<long double>;
 }
 
-#ifndef DOXYGEN_GENERATING_OUTPUT
 std::string ConfigurationValue<std::string>::fromString(const std::string& value, ConfigurationValueFlags) {
     return value;
 }
@@ -150,6 +149,5 @@ char32_t ConfigurationValue<char32_t>::fromString(const std::string& value, Conf
 std::string ConfigurationValue<char32_t>::toString(const char32_t value, ConfigurationValueFlags) {
     return ConfigurationValue<unsigned long long>::toString(value, ConfigurationValueFlag::Hex|ConfigurationValueFlag::Uppercase);
 }
-#endif
 
 }}

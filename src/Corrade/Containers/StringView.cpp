@@ -1387,7 +1387,6 @@ template<class T> BasicStringView<T> BasicStringView<T>::trimmedSuffix() const {
     #endif
 }
 
-#ifndef DOXYGEN_GENERATING_OUTPUT
 template class
     /* GCC needs the export macro on the class definition (and here it warns
        that the type is already defined so the export is ignored), while Clang
@@ -1401,7 +1400,6 @@ template class
     CORRADE_UTILITY_EXPORT
     #endif
     BasicStringView<const char>;
-#endif
 
 bool operator==(const StringView a, const StringView b) {
     /* Not using the size() accessor to speed up debug builds */

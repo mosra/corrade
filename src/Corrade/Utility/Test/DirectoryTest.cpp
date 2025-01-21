@@ -198,7 +198,7 @@ struct DirectoryTest: TestSuite::Tester {
     void copy100MReadWrite();
     void copy100MReadWriteString();
     void copy100MCopy();
-    #if defined(DOXYGEN_GENERATING_OUTPUT) || defined(CORRADE_TARGET_UNIX) || (defined(CORRADE_TARGET_WINDOWS) && !defined(CORRADE_TARGET_WINDOWS_RT))
+    #if defined(CORRADE_TARGET_UNIX) || (defined(CORRADE_TARGET_WINDOWS) && !defined(CORRADE_TARGET_WINDOWS_RT))
     void copy100MMap();
     #endif
     #endif
@@ -358,7 +358,7 @@ DirectoryTest::DirectoryTest() {
         &DirectoryTest::copy100MReadWrite,
         &DirectoryTest::copy100MReadWriteString,
         &DirectoryTest::copy100MCopy,
-        #if defined(DOXYGEN_GENERATING_OUTPUT) || defined(CORRADE_TARGET_UNIX) || (defined(CORRADE_TARGET_WINDOWS) && !defined(CORRADE_TARGET_WINDOWS_RT))
+        #if defined(CORRADE_TARGET_UNIX) || (defined(CORRADE_TARGET_WINDOWS) && !defined(CORRADE_TARGET_WINDOWS_RT))
         &DirectoryTest::copy100MMap
         #endif
         }, 5,
@@ -2238,7 +2238,7 @@ void DirectoryTest::copy100MCopy() {
         Directory::copy(input, output);
 }
 
-#if defined(DOXYGEN_GENERATING_OUTPUT) || defined(CORRADE_TARGET_UNIX) || (defined(CORRADE_TARGET_WINDOWS) && !defined(CORRADE_TARGET_WINDOWS_RT))
+#if defined(CORRADE_TARGET_UNIX) || (defined(CORRADE_TARGET_WINDOWS) && !defined(CORRADE_TARGET_WINDOWS_RT))
 void DirectoryTest::copy100MMap() {
     std::string input = Directory::join(_writeTestDir, "copyBenchmarkSource.dat");
     std::string output = Directory::join(_writeTestDir, "copyDestination.dat");

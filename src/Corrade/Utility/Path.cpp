@@ -524,7 +524,7 @@ bool move(Containers::StringView from, Containers::StringView to) {
     #endif
 }
 
-#if defined(DOXYGEN_GENERATING_OUTPUT) || defined(CORRADE_TARGET_UNIX) || (defined(CORRADE_TARGET_WINDOWS) && !defined(CORRADE_TARGET_WINDOWS_RT))
+#if defined(CORRADE_TARGET_UNIX) || (defined(CORRADE_TARGET_WINDOWS) && !defined(CORRADE_TARGET_WINDOWS_RT))
 Containers::Optional<Containers::String> libraryLocation(const void* address) {
     /* Linux (and macOS as well, even though Linux man pages don't mention that) */
     #ifdef CORRADE_TARGET_UNIX
@@ -557,11 +557,9 @@ Containers::Optional<Containers::String> libraryLocation(const void* address) {
     #endif
 }
 
-#ifndef DOXYGEN_GENERATING_OUTPUT
 Containers::Optional<Containers::String> libraryLocation(Implementation::FunctionPointer address) {
     return libraryLocation(address.address);
 }
-#endif
 #endif
 
 Containers::Optional<Containers::String> executableLocation() {

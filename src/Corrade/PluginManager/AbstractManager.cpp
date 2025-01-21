@@ -1162,7 +1162,6 @@ Plugin::Plugin(const StaticPlugin& staticPlugin, Utility::Configuration&& config
 
 }
 
-#ifndef DOXYGEN_GENERATING_OUTPUT
 Utility::Debug& operator<<(Utility::Debug& debug, LoadState value) {
     switch(value) {
         /* LCOV_EXCL_START */
@@ -1210,7 +1209,5 @@ Utility::Debug& operator<<(Utility::Debug& debug, const LoadStates value) {
         #endif
         });
 }
-
-#endif
 
 }}

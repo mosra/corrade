@@ -585,12 +585,14 @@ Debug::Debug(Containers::String* const output, const Flags flags): Debug{output 
     _internalFlags |= InternalFlag::OwnedStream;
 }
 
-#if !defined(DOXYGEN_GENERATING_OUTPUT) && defined(CORRADE_SOURCE_LOCATION_BUILTINS_SUPPORTED)
+#ifdef CORRADE_SOURCE_LOCATION_BUILTINS_SUPPORTED
 namespace Implementation {
+
 DebugSourceLocation::DebugSourceLocation(Debug&& debug, const char* file, int line): debug{&debug} {
     debug._sourceLocationFile = file;
     debug._sourceLocationLine = line;
 }
+
 }
 #endif
 
@@ -809,8 +811,6 @@ Debug& Debug::operator<<(std::nullptr_t) {
     return print("nullptr");
 }
 
-#ifndef DOXYGEN_GENERATING_OUTPUT
-/* Doxygen can't match this to the declaration, eh. */
 Debug& operator<<(Debug& debug, Debug::Color value) {
     switch(value) {
         /* LCOV_EXCL_START */
@@ -861,10 +861,7 @@ Debug& operator<<(Debug& debug, Debug::Flags value) {
         /* Space reserved for Bin and Oct */
         Debug::Flag::Hex});
 }
-#endif
 
-/* For some reason Doxygen can't match these with the declaration in DebugStl.h */
-#ifndef DOXYGEN_GENERATING_OUTPUT
 /** @todo when we get rid of iostreams, make this inline in DebugStl.h so we
     don't bloat our binaries with STL symbols */
 Debug& Implementation::debugPrintStlString(Debug& debug, const std::string& value) {
@@ -874,6 +871,5 @@ Debug& Implementation::debugPrintStlString(Debug& debug, const std::string& valu
 Debug& operator<<(Debug& debug, Implementation::DebugOstreamFallback&& value) {
     return debug.print(value);
 }
-#endif
 
 }}
