@@ -26,6 +26,7 @@
 
 #include "Corrade/Containers/ArrayView.h" /* ArrayView conversion in Path::write() */
 #include "Corrade/Containers/Optional.h"
+#include "Corrade/Containers/String.h"
 #include "Corrade/TestSuite/Tester.h"
 #include "Corrade/TestSuite/Compare/String.h"
 #include "Corrade/Utility/FileWatcher.h"

@@ -25,6 +25,7 @@
 */
 
 #include <functional>
+#include <string>
 
 #include "Corrade/Containers/GrowableArray.h"
 #include "Corrade/Containers/String.h"
