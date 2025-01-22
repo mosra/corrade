@@ -56,24 +56,40 @@ information.
 #ifndef DOXYGEN_GENERATING_OUTPUT
 namespace Corrade { namespace Containers { namespace Implementation {
 
-template<> struct CORRADE_UTILITY_EXPORT StringConverter<std::string> {
+template<> struct
+#ifdef CORRADE_BUILD_DEPRECATED
+CORRADE_UTILITY_EXPORT
+#endif
+StringConverter<std::string> {
     static String from(const std::string& other);
     static std::string to(const String& other);
 };
 
-template<> struct CORRADE_UTILITY_EXPORT StringViewConverter<const char, std::string> {
+template<> struct
+#ifdef CORRADE_BUILD_DEPRECATED
+CORRADE_UTILITY_EXPORT
+#endif
+StringViewConverter<const char, std::string> {
     static StringView from(const std::string& other);
     static std::string to(StringView other);
 };
 
-template<> struct CORRADE_UTILITY_EXPORT StringViewConverter<char, std::string> {
+template<> struct
+#ifdef CORRADE_BUILD_DEPRECATED
+CORRADE_UTILITY_EXPORT
+#endif
+StringViewConverter<char, std::string> {
     static MutableStringView from(std::string& other);
     static std::string to(MutableStringView other);
 };
 
 #ifndef CORRADE_SINGLES_NO_ADVANCED_STRING_APIS
 template<class> struct StringIterableConverter;
-template<> struct CORRADE_UTILITY_EXPORT StringIterableConverter<std::string> {
+template<> struct
+#ifdef CORRADE_BUILD_DEPRECATED
+CORRADE_UTILITY_EXPORT
+#endif
+StringIterableConverter<std::string> {
     static StringView accessor(const void* data, const void*, std::ptrdiff_t, std::size_t);
 };
 #endif
