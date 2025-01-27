@@ -601,6 +601,8 @@ namespace Corrade {
 -   The @ref corrade-rc "corrade-rc" utility now embeds a version identifier in
     generated output to prevent use of a stale binary in case it's for example
     bundled for cross-compiling (see [mosra/magnum#656](https://github.com/mosra/magnum/issues/656))
+-   The Linux ThreadSanitizer CI build was updated to work with ASLR again
+    (see [mosra/corrade#191](https://github.com/mosra/corrade/pull/191))
 
 @subsection corrade-changelog-latest-bugfixes Bug fixes
 
