@@ -94,8 +94,11 @@ for further information.
 CREDITS
 =======
 
-See the [CREDITS.md](CREDITS.md) file for details. Big thanks to everyone
-involved!
+[Detailed contributor list](https://doc.magnum.graphics/corrade/corrade-credits-contributors.html)
+is maintained in the documentation. Big thanks to everyone involved!
+
+There's also a list of [third party components](https://doc.magnum.graphics/corrade/corrade-credits-third-party.html)
+that affect public use of the project.
 
 LICENSE
 =======
