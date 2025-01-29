@@ -554,6 +554,10 @@ function(corrade_add_test test_name)
                     set(${test_name}_LINK_FLAGS )
                 endif()
                 set_target_properties(${test_name} PROPERTIES LINK_FLAGS "${${test_name}_LINK_FLAGS} --embed-file ${absolute_file}@/${output_filename}")
+                # TODO according to CMake docs, this only works with Makefile
+                #   and Ninja generators, not for example VS or Xcode. Which
+                #   should be mostly fine I guess?
+                set_property(TARGET ${test_name} APPEND PROPERTY LINK_DEPENDS ${input_filename})
             endforeach()
 
             # Generate the runner file, first replacing ${test_name} with
