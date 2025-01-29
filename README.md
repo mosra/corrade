@@ -8,7 +8,6 @@ things.
 [![Build Status](https://circleci.com/gh/mosra/corrade.svg?style=shield)](https://circleci.com/gh/mosra/corrade)
 [![Build Status](https://ci.appveyor.com/api/projects/status/afjjlsgtk6jjxulp/branch/master?svg=true)](https://ci.appveyor.com/project/mosra/corrade/branch/master)
 [![Coverage Status](https://codecov.io/gh/mosra/corrade/branch/master/graph/badge.svg)](https://codecov.io/gh/mosra/corrade)
-[![Hunter Package](https://img.shields.io/badge/hunter-corrade-lightgrey.svg)](https://hunter.readthedocs.io/en/latest/packages/pkg/corrade.html)
 [![MIT License](https://img.shields.io/badge/License-MIT-green.svg)](https://opensource.org/licenses/MIT)
 
 -   Project homepage — https://magnum.graphics/corrade/
