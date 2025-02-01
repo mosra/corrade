@@ -57,6 +57,7 @@ set(CorradeContainers_HEADERS
     Pointer.h
     PointerStl.h
     Reference.h
+    ReferenceStl.h
     ScopeGuard.h
     sequenceHelpers.h
     StaticArray.h
