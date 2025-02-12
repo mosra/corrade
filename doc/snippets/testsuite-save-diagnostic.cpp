@@ -24,7 +24,6 @@
     DEALINGS IN THE SOFTWARE.
 */
 
-#include "Corrade/Containers/Pair.h"
 #include "Corrade/Containers/String.h"
 #include "Corrade/TestSuite/Tester.h"
 #include "Corrade/Utility/DebugStl.h"
@@ -48,7 +47,7 @@ template<> class Comparator<FileContents> {
         }
 
         void saveDiagnostic(ComparisonStatusFlags, Utility::Debug& out, Containers::StringView path) {
-            out << "->" << Utility::Path::join(path, Utility::Path::split(_expectedFilename).first());
+            out << "->" << Utility::Path::join(path, Utility::Path::filename(_expectedFilename));
         }
 
     private:
