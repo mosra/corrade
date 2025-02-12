@@ -28,7 +28,6 @@
 
 #include "Corrade/Containers/Array.h"
 #include "Corrade/Containers/GrowableArray.h"
-#include "Corrade/Containers/Pair.h"
 #include "Corrade/PluginManager/AbstractManager.h"
 #include "Corrade/PluginManager/PluginMetadata.h"
 #include "Corrade/Utility/ConfigurationGroup.h"
@@ -151,7 +150,7 @@ Containers::Array<Containers::String> implicitPluginSearchPaths(const Containers
     arrayAppend(out, Utility::Path::join("../PlugIns"_s, relativePath));
     #endif
     if(libraryLocation)
-        arrayAppend(out, Utility::Path::join(Utility::Path::split(libraryLocation).first(), relativePath));
+        arrayAppend(out, Utility::Path::join(Utility::Path::path(libraryLocation), relativePath));
     #ifndef CORRADE_TARGET_WINDOWS
     arrayAppend(out, Utility::Path::join("../lib"_s, relativePath));
     #endif

@@ -35,7 +35,6 @@
 #include "Corrade/Containers/GrowableArray.h"
 #include "Corrade/Containers/EnumSet.hpp"
 #include "Corrade/Containers/Optional.h"
-#include "Corrade/Containers/Pair.h"
 #include "Corrade/Containers/Reference.h"
 #include "Corrade/Containers/StringIterable.h"
 #include "Corrade/Containers/Implementation/RawForwardList.h"
@@ -289,7 +288,7 @@ AbstractManager::AbstractManager(const Containers::StringView pluginInterface, c
 
         const Containers::Optional<Containers::String> executableLocation = Utility::Path::executableLocation();
         CORRADE_INTERNAL_ASSERT(executableLocation);
-        const Containers::StringView executableDir = Utility::Path::split(*executableLocation).first();
+        const Containers::StringView executableDir = Utility::Path::path(*executableLocation);
         for(const Containers::StringView path: pluginSearchPaths) {
             const Containers::String fullPath = Utility::Path::join(executableDir, path);
             if(!Utility::Path::exists(fullPath)) continue;
@@ -523,7 +522,7 @@ LoadState AbstractManager::load(const Containers::StringView plugin) {
     /* File path passed, load directly */
     if(plugin.hasSuffix(_state->pluginSuffix)) {
         /* Dig plugin name from filename and verify it's not loaded at the moment */
-        const Containers::StringView filename = Utility::Path::split(plugin).second();
+        const Containers::StringView filename = Utility::Path::filename(plugin);
         const Containers::StringView name = filename.exceptSuffix(_state->pluginSuffix.size());
         /* std::map::find() would allocate a new String in order to find it,
            unfortunately as the name slice is not null-terminated we can't
@@ -539,7 +538,7 @@ LoadState AbstractManager::load(const Containers::StringView plugin) {
            don't crap the alias state. If there's already a registered
            plugin of this name, replace it. */
         Containers::Pointer<Implementation::Plugin> data{InPlaceInit, name,
-            _state->pluginMetadataSuffix ? Utility::Path::join(Utility::Path::split(plugin).first(), name + _state->pluginMetadataSuffix) : Containers::String{}};
+            _state->pluginMetadataSuffix ? Utility::Path::join(Utility::Path::path(plugin), name + _state->pluginMetadataSuffix) : Containers::String{}};
         /* Explicitly join the filename with current working directory, since
            that's how the metadata were loaded above. Without that, the OS APIs
            would search in LD_LIBRARY_PATH and C:/Windows/system32 and
@@ -1074,7 +1073,7 @@ Containers::Pointer<AbstractPlugin> AbstractManager::loadAndInstantiateInternal(
     #ifndef CORRADE_PLUGINMANAGER_NO_DYNAMIC_PLUGIN_SUPPORT
     /* If file path passed, instantiate extracted name instead */
     if(Containers::StringView{plugin}.hasSuffix(_state->pluginSuffix)) {
-        const Containers::StringView name = Utility::Path::split(plugin).second().exceptSuffix(_state->pluginSuffix);
+        const Containers::StringView name = Utility::Path::filename(plugin).exceptSuffix(_state->pluginSuffix);
         auto found = _state->aliases.find(name);
         CORRADE_INTERNAL_ASSERT(found != _state->aliases.end());
         return Containers::pointer(static_cast<AbstractPlugin*>(found->second.instancer(*this, name)));

@@ -541,9 +541,9 @@ PathTest::PathTest() {
         && std::getenv("SIMULATOR_UDID")
         #endif
     ) {
-        _testDir = Path::join(Path::split(*Path::executableLocation()).first(), "PathTestFiles");
-        _testDirSymlink = Path::join(Path::split(*Path::executableLocation()).first(), "PathTestFilesSymlink");
-        _testDirUtf8 = Path::join(Path::split(*Path::executableLocation()).first(), "PathTestFilesUtf8");
+        _testDir = Path::join(Path::path(*Path::executableLocation()), "PathTestFiles");
+        _testDirSymlink = Path::join(Path::path(*Path::executableLocation()), "PathTestFilesSymlink");
+        _testDirUtf8 = Path::join(Path::path(*Path::executableLocation()), "PathTestFilesUtf8");
         _writeTestDir = Path::join(*Path::homeDirectory(), "Library/Caches");
     } else
     #endif
@@ -1479,7 +1479,7 @@ void PathTest::libraryLocation() {
             #endif
             #endif
             ;
-        CORRADE_VERIFY(Path::exists(Path::join(Path::split(*libraryLocation).first(), testSuiteLibraryName)));
+        CORRADE_VERIFY(Path::exists(Path::join(Path::path(*libraryLocation), testSuiteLibraryName)));
     }
 
     /* It shouldn't contain null bytes anywhere, especially not at the end. But
@@ -1578,13 +1578,13 @@ void PathTest::executableLocation() {
             "CTest is not able to run XCTest executables properly in the simulator.");
         #endif
 
-        CORRADE_VERIFY(Path::exists(Path::join(Path::split(*executableLocation).first(), "Info.plist")));
+        CORRADE_VERIFY(Path::exists(Path::join(Path::path(*executableLocation), "Info.plist")));
     } else
     #endif
 
     /* On Emscripten we should have access to the bundled files */
     #ifdef CORRADE_TARGET_EMSCRIPTEN
-    CORRADE_VERIFY(Path::exists(Path::join(Path::split(*executableLocation).first(), "PathTestFiles")));
+    CORRADE_VERIFY(Path::exists(Path::join(Path::path(*executableLocation), "PathTestFiles")));
 
     /* On Android we can't be sure about anything, so just test that the
        executable exists and it has access to the bundled files */
@@ -1593,16 +1593,16 @@ void PathTest::executableLocation() {
     CORRADE_COMPARE_AS(*executableLocation,
         "UtilityPathTest",
         TestSuite::Compare::StringContains);
-    CORRADE_VERIFY(Path::exists(Path::join(Path::split(*executableLocation).first(), "PathTestFiles")));
+    CORRADE_VERIFY(Path::exists(Path::join(Path::path(*executableLocation), "PathTestFiles")));
 
     /* Otherwise it should contain other executables and libraries as we put
        all together */
     #else
     {
         #ifndef CORRADE_TARGET_WINDOWS
-        CORRADE_VERIFY(Path::exists(Path::join(Path::split(*executableLocation).first(), "corrade-rc")));
+        CORRADE_VERIFY(Path::exists(Path::join(Path::path(*executableLocation), "corrade-rc")));
         #else
-        CORRADE_VERIFY(Path::exists(Path::join(Path::split(*executableLocation).first(), "corrade-rc.exe")));
+        CORRADE_VERIFY(Path::exists(Path::join(Path::path(*executableLocation), "corrade-rc.exe")));
         #endif
     }
     #endif
@@ -1693,13 +1693,13 @@ void PathTest::configurationDirectory() {
         "Corrade",
         TestSuite::Compare::StringHasSuffix);
     if(System::isSandboxed())
-        CORRADE_VERIFY(Path::exists(Path::join(Path::split(Path::split(*configurationDirectory).first()).first(), "Caches")));
+        CORRADE_VERIFY(Path::exists(Path::join(Path::path(Path::path(*configurationDirectory)), "Caches")));
     else
         /* App Store is not present on *some* Travis VMs since 2018-08-05.
            CrashReporter is. */
         CORRADE_VERIFY(
-            Path::exists(Path::join(Path::split(*configurationDirectory).first(), "App Store")) ||
-            Path::exists(Path::join(Path::split(*configurationDirectory).first(), "CrashReporter")));
+            Path::exists(Path::join(Path::path(*configurationDirectory), "App Store")) ||
+            Path::exists(Path::join(Path::path(*configurationDirectory), "CrashReporter")));
 
     /* On Linux verify that the parent dir contains `autostart` directory,
        something from GTK or something from Qt. Ugly and hacky, but it's the
@@ -1710,9 +1710,9 @@ void PathTest::configurationDirectory() {
         "corrade",
         TestSuite::Compare::StringHasSuffix);
     CORRADE_VERIFY(
-        Path::exists(Path::join(Path::split(*configurationDirectory).first(), "autostart")) ||
-        Path::exists(Path::join(Path::split(*configurationDirectory).first(), "dconf")) ||
-        Path::exists(Path::join(Path::split(*configurationDirectory).first(), "Trolltech.conf")));
+        Path::exists(Path::join(Path::path(*configurationDirectory), "autostart")) ||
+        Path::exists(Path::join(Path::path(*configurationDirectory), "dconf")) ||
+        Path::exists(Path::join(Path::path(*configurationDirectory), "Trolltech.conf")));
 
     /* Emscripten -- just compare to hardcoded value */
     #elif defined(CORRADE_TARGET_EMSCRIPTEN)
@@ -1725,7 +1725,7 @@ void PathTest::configurationDirectory() {
     CORRADE_COMPARE_AS(*configurationDirectory,
         "Corrade",
         TestSuite::Compare::StringHasSuffix);
-    CORRADE_VERIFY(Path::exists(Path::join(Path::split(*configurationDirectory).first(), "Microsoft")));
+    CORRADE_VERIFY(Path::exists(Path::join(Path::path(*configurationDirectory), "Microsoft")));
 
     /* No idea elsewhere */
     #else

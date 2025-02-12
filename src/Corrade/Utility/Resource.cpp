@@ -227,7 +227,7 @@ Containers::StringView Resource::getString(const Containers::StringView filename
             if(name != filename) continue;
 
             /* Load the file */
-            Containers::Optional<Containers::String> data = Path::readString(Path::join(Path::split(_overrideGroup->conf.filename()).first(), file->value("filename")));
+            Containers::Optional<Containers::String> data = Path::readString(Path::join(Path::path(_overrideGroup->conf.filename()), file->value("filename")));
             if(!data) {
                 Error{} << "Utility::Resource::get(): cannot open file" << file->value<Containers::StringView>("filename") << "from overridden group";
                 break;

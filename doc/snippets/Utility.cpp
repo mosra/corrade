@@ -1122,7 +1122,7 @@ int main(int argc, char** argv) {
 /* [Resource-override] */
 Utility::Resource::overrideGroup("game-data", Utility::Path::join(
     /* Assuming resources.conf is next to this C++ source file */
-    Utility::Path::split(Utility::Path::fromNativeSeparators(__FILE__)).first(),
+    Utility::Path::path(Utility::Path::fromNativeSeparators(__FILE__)),
     "resources.conf"
 ));
 

@@ -30,7 +30,6 @@
 
 #include "Corrade/Containers/ArrayView.h"
 #include "Corrade/Containers/Optional.h"
-#include "Corrade/Containers/Pair.h"
 #include "Corrade/Containers/String.h"
 #include "Corrade/TestSuite/Comparator.h"
 #include "Corrade/Utility/Math.h"
@@ -123,7 +122,7 @@ void Comparator<Compare::File>::printMessage(ComparisonStatusFlags, Utility::Deb
 }
 
 void Comparator<Compare::File>::saveDiagnostic(ComparisonStatusFlags, Utility::Debug& out, const Containers::StringView path) {
-    Containers::String filename = Utility::Path::join(path, Utility::Path::split(_state->expectedFilename).second());
+    Containers::String filename = Utility::Path::join(path, Utility::Path::filename(_state->expectedFilename));
     if(Utility::Path::write(filename, _state->actualContents))
         out << "->" << filename;
 }

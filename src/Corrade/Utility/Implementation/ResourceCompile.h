@@ -322,7 +322,7 @@ Containers::String resourceCompileFrom(const Containers::StringView name, const 
         return {};
     }
 
-    const Containers::StringView path = Path::split(configurationFile).first();
+    const Containers::StringView path = Path::path(configurationFile);
     const Configuration conf(configurationFile, Configuration::Flag::ReadOnly);
 
     /* Group name */

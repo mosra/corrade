@@ -109,7 +109,7 @@ void Comparator<Compare::StringToFile>::printMessage(ComparisonStatusFlags, Util
 }
 
 void Comparator<Compare::StringToFile>::saveDiagnostic(ComparisonStatusFlags, Utility::Debug& out, const Containers::StringView path) {
-    Containers::String filename = Utility::Path::join(path, Utility::Path::split(_state->filename).second());
+    Containers::String filename = Utility::Path::join(path, Utility::Path::filename(_state->filename));
     if(Utility::Path::write(filename, _state->actualContents))
         out << "->" << filename;
 }

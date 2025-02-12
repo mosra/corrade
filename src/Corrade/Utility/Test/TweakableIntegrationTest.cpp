@@ -88,7 +88,7 @@ TweakableIntegrationTest::TweakableIntegrationTest() {
 
     Path::make(TWEAKABLE_WRITE_TEST_DIR);
     _thisWriteableFile = Path::join(TWEAKABLE_WRITE_TEST_DIR, "TweakableIntegrationTest.cpp");
-    _thisReadablePath = Path::split(Path::fromNativeSeparators(__FILE__)).first();
+    _thisReadablePath = Path::path(Path::fromNativeSeparators(__FILE__));
 }
 
 void TweakableIntegrationTest::setup() {
