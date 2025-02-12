@@ -6,8 +6,7 @@
     https://doc.magnum.graphics/corrade/classCorrade_1_1Containers_1_1BasicString.html
     https://doc.magnum.graphics/corrade/classCorrade_1_1Containers_1_1BasicStringView.html
 
-    Depends on CorradeEnumSet.h, the implementation depends on CorradePair.h
-    and CorradeCpu.hpp.
+    Depends on CorradeEnumSet.h, the implementation depends on CorradeCpu.hpp.
 
     This is a single-header library generated from the Corrade project. With
     the goal being easy integration, it's deliberately free of all comments
@@ -144,7 +143,6 @@ namespace Corrade { namespace Containers {
 class String;
 template<class> class BasicStringView;
 typedef BasicStringView<const char> StringView;
-template<class, class> class Pair;
 
 }}
 #endif
@@ -195,13 +193,10 @@ template<class, class> class Pair;
 #pragma ACME disable CORRADE_PASSTHROUGH
 #pragma ACME disable CORRADE_UNUSED
 
-/* CorradePair.h and CorradeCpu.hpp is a dependency for the implementation,
-   remove all of Cpu.h and hide everything it already includes */
-#pragma ACME noexpand CorradePair.h
+/* CorradeCpu.hpp is a dependency for the implementation, remove all of Cpu.h
+   and hide everything it already includes */
 #pragma ACME noexpand CorradeCpu.hpp
-#pragma ACME enable Corrade_Containers_Pair_h
 #pragma ACME enable Corrade_Cpu_h
-#include "CorradePair.h"
 #include "CorradeCpu.hpp"
 
 /* Extracted from StringView.cpp as otherwise the includes don't stay inside

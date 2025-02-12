@@ -1410,7 +1410,11 @@ class CORRADE_UTILITY_EXPORT String {
         CORRADE_UTILITY_LOCAL void construct(const char* data, std::size_t size);
         CORRADE_UTILITY_LOCAL void copyConstruct(const String& other);
         CORRADE_UTILITY_LOCAL void destruct();
-        CORRADE_UTILITY_LOCAL Pair<const char*, std::size_t> dataInternal() const;
+        struct Data {
+            const char* data;
+            std::size_t size;
+        };
+        CORRADE_UTILITY_LOCAL Data dataInternal() const;
 
         MutableStringView sliceSizePointerInternal(char* begin, std::size_t size);
         StringView sliceSizePointerInternal(const char* begin, std::size_t size) const;

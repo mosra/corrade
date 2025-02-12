@@ -57,7 +57,7 @@ Growable APIs for @ref Containers::Array | [CorradeGrowableArray.h](https://gith
 @ref Containers::Pointer    | [CorradePointer.h](https://github.com/mosra/magnum-singles/tree/master/CorradePointer.h)
 @ref Containers::Reference  | [CorradeReference.h](https://github.com/mosra/magnum-singles/tree/master/CorradeReference.h)
 @ref Containers::ScopeGuard | [CorradeScopeGuard.h](https://github.com/mosra/magnum-singles/tree/master/CorradeScopeGuard.h)
-@ref Containers::String, \n @ref Containers::BasicStringView "Containers::StringView", \n @ref Containers::MutableStringView | [CorradeString.hpp](https://github.com/mosra/magnum-singles/tree/master/CorradeString.hpp), depends on `CorradeEnumSet.h`; the implementation additionally depends on `CorradeCpu.hpp` and `CorradePair.h`
+@ref Containers::String, \n @ref Containers::BasicStringView "Containers::StringView", \n @ref Containers::MutableStringView | [CorradeString.hpp](https://github.com/mosra/magnum-singles/tree/master/CorradeString.hpp), depends on `CorradeEnumSet.h`; the implementation additionally depends on `CorradeCpu.hpp`
 @ref Containers::Triple     | [CorradePointer.h](https://github.com/mosra/magnum-singles/tree/master/CorradeTriple.h)
 @ref Corrade::Cpu           | [CorradeCpu.hpp](https://github.com/mosra/magnum-singles/tree/master/CorradeCpu.hpp)
 @ref Corrade/Utility/StlForwardArray.h | [CorradeStlForwardArray.h](https://github.com/mosra/magnum-singles/tree/master/CorradeStlForwardArray.h)
