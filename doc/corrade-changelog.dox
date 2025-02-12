@@ -761,7 +761,8 @@ namespace Corrade {
         @relativeref{Utility::Path,toNativeSeparators()}
     -   @cpp Utility::Directory::path() @ce and @cpp filename() @ce is
         deprecated in favor of @ref Utility::Path::split() that returns both
-        parts together
+        parts together, @ref Utility::Path::path() and
+        @ref Utility::Path::filename()
     -   @cpp Utility::Directory::splitExtension() @ce is deprecated in favor of
         @ref Utility::Path::splitExtension()
     -   @cpp Utility::Directory::join() @ce is deprecated in favor of

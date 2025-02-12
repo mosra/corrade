@@ -50,11 +50,11 @@ std::string toNativeSeparators(const std::string& path) {
 }
 
 std::string path(const std::string& filename) {
-    return Path::split(filename).first();
+    return Path::path(filename);
 }
 
 std::string filename(const std::string& filename) {
-    return Path::split(filename).second();
+    return Path::filename(filename);
 }
 
 std::pair<std::string, std::string> splitExtension(const std::string& filename) {

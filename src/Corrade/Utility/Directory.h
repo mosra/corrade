@@ -93,15 +93,16 @@ CORRADE_DEPRECATED("use Path::toNativeSeparators() instead") CORRADE_UTILITY_EXP
 
 /**
 @brief Extract path from filename
-@m_deprecated_since_latest Use @ref Path::split() instead.
+@m_deprecated_since_latest Use @ref Path::split() or @ref Path::path() instead.
 */
-CORRADE_DEPRECATED("use Path::split() instead") CORRADE_UTILITY_EXPORT std::string path(const std::string& filename);
+CORRADE_DEPRECATED("use Path::split() or Path::path() instead") CORRADE_UTILITY_EXPORT std::string path(const std::string& filename);
 
 /**
 @brief Extract filename (without path) from filename
-@m_deprecated_since_latest Use @ref Path::split() instead.
+@m_deprecated_since_latest Use @ref Path::split() or @ref Path::filename()
+    instead.
 */
-CORRADE_DEPRECATED("use Path::split() instead") CORRADE_UTILITY_EXPORT std::string filename(const std::string& filename);
+CORRADE_DEPRECATED("use Path::split() or Path::filename() instead") CORRADE_UTILITY_EXPORT std::string filename(const std::string& filename);
 
 /**
 @brief Split basename and extension

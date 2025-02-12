@@ -76,6 +76,7 @@ struct PathTest: TestSuite::Tester {
     void toNativeSeparators();
     void toNativeSeparatorsRvalue();
 
+    /* Tests also path() and filename() */
     void split();
     void splitFlags();
     void splitExtension();
@@ -624,6 +625,8 @@ void PathTest::split() {
     setTestCaseDescription(data.name);
 
     CORRADE_COMPARE(Path::split(data.path), data.expected);
+    CORRADE_COMPARE(Path::path(data.path), data.expected.first());
+    CORRADE_COMPARE(Path::filename(data.path), data.expected.second());
 }
 
 void PathTest::splitFlags() {
@@ -634,6 +637,14 @@ void PathTest::splitFlags() {
     CORRADE_COMPARE(a, data.expected);
     CORRADE_COMPARE(a.first().flags(), data.expectedFlagsPath);
     CORRADE_COMPARE(a.second().flags(), data.expectedFlagsFilename);
+
+    Containers::StringView path = Path::path(data.path);
+    CORRADE_COMPARE(path, data.expected.first());
+    CORRADE_COMPARE(path.flags(), data.expectedFlagsPath);
+
+    Containers::StringView filename = Path::filename(data.path);
+    CORRADE_COMPARE(filename, data.expected.second());
+    CORRADE_COMPARE(filename.flags(), data.expectedFlagsFilename);
 }
 
 void PathTest::splitExtension() {

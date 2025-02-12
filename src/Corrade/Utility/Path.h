@@ -124,11 +124,32 @@ For example:
 The implementation expects forward slashes as directory separators. Use
 @ref fromNativeSeparators() to convert from a platform-specific format.
 @ref Containers::StringViewFlags of the input are propagated the same way as
-with @ref Containers::StringView::slice().
+with @ref Containers::StringView::slice(). If you need just one side of the
+output, use @ref path() or @ref filename().
 @see @ref join(), @ref splitExtension(),
     @ref Containers::StringView::partition()
 */
 CORRADE_UTILITY_EXPORT Containers::Pair<Containers::StringView, Containers::StringView> split(Containers::StringView path);
+
+/**
+@brief Extract path from a filename
+@m_since_latest
+
+Equivalent to the first element of the pair returned by @ref split(), e.g.
+returning @cpp "path/to" @ce for a @cpp "path/to/file" @ce. See the function
+documentation for detailed behavior.
+*/
+CORRADE_UTILITY_EXPORT Containers::StringView path(Containers::StringView filename);
+
+/**
+@brief Extract filename from a path
+@m_since_latest
+
+Equivalent to the second element of the pair returned by @ref split(), e.g.
+returning @cpp "file" @ce for a @cpp "path/to/file" @ce. See the function
+documentation for detailed behavior.
+*/
+CORRADE_UTILITY_EXPORT Containers::StringView filename(Containers::StringView path);
 
 /**
 @brief Split basename and extension

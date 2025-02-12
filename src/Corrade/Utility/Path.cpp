@@ -165,6 +165,19 @@ Containers::Pair<Containers::StringView, Containers::StringView> split(const Con
     return {path.prefix(head == "/"_s || head == "//"_s ? found.end() : found.begin()), path.suffix(found.end())};
 }
 
+Containers::StringView path(const Containers::StringView filename) {
+    /* Strictly speaking, constructing and then extracting the pair is
+       unnecessary overhead, but dealing with the special cases in two places
+       would only make it more prone to bugs with questionable perf benefits,
+       so don't. */
+    return split(filename).first();
+}
+
+Containers::StringView filename(const Containers::StringView path) {
+    /* Same here */
+    return split(path).second();
+}
+
 Containers::Pair<Containers::StringView, Containers::StringView> splitExtension(const Containers::StringView path) {
     /* Take the suffix after the last slash as the filename, or the whole path
        if it's not there */
