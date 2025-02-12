@@ -265,15 +265,83 @@ struct PathTest: TestSuite::Tester {
         _writeTestDir;
 };
 
+using namespace Containers::Literals;
+
+const struct {
+    const char* name;
+    const char* path;
+    Containers::Pair<Containers::StringView, Containers::StringView> expected;
+} SplitData[]{
+    /* In case you're not sure about the behavior, cross-check with Python's
+       os.path.split(). */
+    {"empty", "",
+        {"", ""}},
+    {"no path", "foo.txt",
+        {"", "foo.txt"}},
+    {"no filename", ".config/corrade/",
+        {".config/corrade", ""}},
+    {"common case", "foo/bar/map.conf",
+        {"foo/bar", "map.conf"}},
+    {"absolute path", "/foo/bar/map.conf",
+        {"/foo/bar", "map.conf"}},
+    {"absolute network path", "//computer/foo/bar/map.conf",
+        {"//computer/foo/bar", "map.conf"}},
+    {"absolute path with no filename", "/root",
+        {"/", "root"}},
+    {"root slash alone doesn't get dropped", "/",
+        {"/", ""}},
+    {"absolute network path with no filename", "//computer",
+        {"//", "computer"}},
+    {"double root slash alone doesn't get dropped either", "//",
+        {"//", ""}},
+};
+
+const struct {
+    const char* name;
+    Containers::StringView path;
+    Containers::Pair<Containers::StringView, Containers::StringView> expected;
+    Containers::StringViewFlags expectedFlagsPath;
+    Containers::StringViewFlags expectedFlagsFilename;
+} SplitFlagsData[]{
+    {"empty should preserve both null-terminated flags",
+        ""_s, {"", ""},
+        Containers::StringViewFlag::Global|Containers::StringViewFlag::NullTerminated,
+        Containers::StringViewFlag::Global|Containers::StringViewFlag::NullTerminated},
+    {"filename only the second",
+        "/path"_s, {"/", "path"},
+        Containers::StringViewFlag::Global,
+        Containers::StringViewFlag::Global|Containers::StringViewFlag::NullTerminated},
+    {"path alone only the second as / gets dropped",
+        "path/"_s, {"path", ""},
+        Containers::StringViewFlag::Global,
+        Containers::StringViewFlag::Global|Containers::StringViewFlag::NullTerminated},
+    {"root alone both",
+        "/"_s, {"/", ""},
+        Containers::StringViewFlag::Global|Containers::StringViewFlag::NullTerminated,
+        Containers::StringViewFlag::Global|Containers::StringViewFlag::NullTerminated},
+    {"non-literal should not become global",
+        "path/file.txt", {"path", "file.txt"},
+        {},
+        Containers::StringViewFlag::NullTerminated},
+    {"non-null-terminated should not become such",
+        "path/file.txt!"_s.exceptSuffix(1), {"path", "file.txt"},
+        Containers::StringViewFlag::Global,
+        Containers::StringViewFlag::Global},
+};
+
 PathTest::PathTest() {
     addTests({&PathTest::fromNativeSeparators,
               &PathTest::fromNativeSeparatorsRvalue,
               &PathTest::toNativeSeparators,
-              &PathTest::toNativeSeparatorsRvalue,
+              &PathTest::toNativeSeparatorsRvalue});
 
-              &PathTest::split,
-              &PathTest::splitFlags,
-              &PathTest::splitExtension,
+    addInstancedTests({&PathTest::split},
+        Containers::arraySize(SplitData));
+
+    addInstancedTests({&PathTest::splitFlags},
+        Containers::arraySize(SplitFlagsData));
+
+    addTests({&PathTest::splitExtension,
               &PathTest::splitExtensionFlags,
 
               &PathTest::join,
@@ -492,8 +560,6 @@ PathTest::PathTest() {
         Path::remove(Path::join(_writeTestDir, "copyBenchmarkSource.dat"));
 }
 
-using namespace Containers::Literals;
-
 void PathTest::fromNativeSeparators() {
     Containers::String nativeSeparators = Path::fromNativeSeparators("put\\ that/somewhere\\ else");
     #ifdef CORRADE_TARGET_WINDOWS
@@ -554,82 +620,20 @@ void PathTest::toNativeSeparatorsRvalue() {
 }
 
 void PathTest::split() {
-    /* In case you're not sure about the behavior, cross-check with Python's
-       os.path.split(). */
+    auto&& data = SplitData[testCaseInstanceId()];
+    setTestCaseDescription(data.name);
 
-    /* Empty */
-    CORRADE_COMPARE(Path::split(""),
-        Containers::pair(""_s, ""_s));
-
-    /* No path */
-    CORRADE_COMPARE(Path::split("foo.txt"),
-        Containers::pair(""_s, "foo.txt"_s));
-
-    /* No filename */
-    CORRADE_COMPARE(Path::split(".config/corrade/"),
-        Containers::pair(".config/corrade"_s, ""_s));
-
-    /* Common case */
-    CORRADE_COMPARE(Path::split("foo/bar/map.conf"),
-        Containers::pair("foo/bar"_s, "map.conf"_s));
-
-    /* Absolute path */
-    CORRADE_COMPARE(Path::split("/foo/bar/map.conf"),
-        Containers::pair("/foo/bar"_s, "map.conf"_s));
-
-    /* Absolute network path */
-    CORRADE_COMPARE(Path::split("//computer/foo/bar/map.conf"),
-        Containers::pair("//computer/foo/bar"_s, "map.conf"_s));
-
-    /* Not dropping the root slash */
-    CORRADE_COMPARE(Path::split("/root"),
-        Containers::pair("/"_s, "root"_s));
-    CORRADE_COMPARE(Path::split("/"),
-        Containers::pair("/"_s, ""_s));
-
-    /* Not dropping the double root slash */
-    CORRADE_COMPARE(Path::split("//computer"),
-        Containers::pair("//"_s, "computer"_s));
-    CORRADE_COMPARE(Path::split("//"),
-        Containers::pair("//"_s, ""_s));
+    CORRADE_COMPARE(Path::split(data.path), data.expected);
 }
 
 void PathTest::splitFlags() {
-    /* Empty should preserve both null-terminated flags */
-    {
-        Containers::Pair<Containers::StringView, Containers::StringView> a = Path::split(""_s);
-        CORRADE_COMPARE(a, Containers::pair(""_s, ""_s));
-        CORRADE_COMPARE(a.first().flags(), Containers::StringViewFlag::Global|Containers::StringViewFlag::NullTerminated);
-        CORRADE_COMPARE(a.second().flags(), Containers::StringViewFlag::Global|Containers::StringViewFlag::NullTerminated);
+    auto&& data = SplitFlagsData[testCaseInstanceId()];
+    setTestCaseDescription(data.name);
 
-    /* Filename only the second */
-    } {
-        Containers::Pair<Containers::StringView, Containers::StringView> a = Path::split("/path"_s);
-        CORRADE_COMPARE(a, Containers::pair("/"_s, "path"_s));
-        CORRADE_COMPARE(a.first().flags(), Containers::StringViewFlag::Global);
-        CORRADE_COMPARE(a.second().flags(), Containers::StringViewFlag::Global|Containers::StringViewFlag::NullTerminated);
-
-    /* Path alone only the second as / gets dropped */
-    } {
-        Containers::Pair<Containers::StringView, Containers::StringView> a = Path::split("path/"_s);
-        CORRADE_COMPARE(a, Containers::pair("path"_s, ""_s));
-        CORRADE_COMPARE(a.first().flags(), Containers::StringViewFlag::Global);
-        CORRADE_COMPARE(a.second().flags(), Containers::StringViewFlag::Global|Containers::StringViewFlag::NullTerminated);
-
-    /* Root alone both */
-    } {
-        Containers::Pair<Containers::StringView, Containers::StringView> a = Path::split("/"_s);
-        CORRADE_COMPARE(a, Containers::pair("/"_s, ""_s));
-        CORRADE_COMPARE(a.first().flags(), Containers::StringViewFlag::Global|Containers::StringViewFlag::NullTerminated);
-        CORRADE_COMPARE(a.second().flags(), Containers::StringViewFlag::Global|Containers::StringViewFlag::NullTerminated);
-
-    /* Non-literal should not be global */
-    } {
-        Containers::Pair<Containers::StringView, Containers::StringView> a = Path::split("path/file.txt");
-        CORRADE_COMPARE(a, Containers::pair("path"_s, "file.txt"_s));
-        CORRADE_COMPARE(a.first().flags(), Containers::StringViewFlags{});
-        CORRADE_COMPARE(a.second().flags(), Containers::StringViewFlag::NullTerminated);
-    }
+    Containers::Pair<Containers::StringView, Containers::StringView> a = Path::split(data.path);
+    CORRADE_COMPARE(a, data.expected);
+    CORRADE_COMPARE(a.first().flags(), data.expectedFlagsPath);
+    CORRADE_COMPARE(a.second().flags(), data.expectedFlagsFilename);
 }
 
 void PathTest::splitExtension() {
