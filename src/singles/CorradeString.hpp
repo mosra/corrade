@@ -36,6 +36,8 @@
     `#define CORRADE_STRING_STL_VIEW_COMPATIBILITY` before including the file.
     Including it multiple times with different macros defined works too.
 
+    v2020.06-1864-g8b00 (2025-02-12)
+    -   Removed dependency on Containers::Pair
     v2020.06-1846-gc4cdf (2025-01-07)
     -   Fixed embarrassing bugs in the NEON and WASM SIMD code paths for find()
     -   SFINAE is now done in template args as that's simpler for the compiler
