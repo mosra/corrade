@@ -420,6 +420,7 @@ template<unsigned dimensions, class T> class StridedArrayView {
          * @brief Construct from a @ref StridedArrayView of smaller dimension count
          * @m_since_latest
          *
+         * Enabled only if @cpp T @ce is either @cpp U @ce or @cpp const U @ce.
          * The extra dimensions are added at the front, with sizes being
          * @cpp 1 @ce and strides equal to size times stride of @p other in the
          * first dimension. For example, a 1D view that represents an image row
@@ -430,15 +431,15 @@ template<unsigned dimensions, class T> class StridedArrayView {
          * To reduce dimension count you can use @ref operator[](), potentially
          * in combination with @ref transposed().
          */
-        template<unsigned lessDimensions
+        template<unsigned lessDimensions, class U
             #ifndef DOXYGEN_GENERATING_OUTPUT
             /* MSVC needs the (), otherwise it gets totally confused and starts
                complaining that "error C2947: expecting '>' to terminate
                template-parameter-list, found '>'". HAHA. (TBH, parsing this is
                a hell.) */
-            , class = typename std::enable_if<(lessDimensions < dimensions)>::type
+            , class = typename std::enable_if<(lessDimensions < dimensions) && (std::is_same<T, U>::value || std::is_same<T, const U>::value)>::type
             #endif
-        > /*implicit*/ StridedArrayView(const StridedArrayView<lessDimensions, T>& other) noexcept;
+        > /*implicit*/ StridedArrayView(const StridedArrayView<lessDimensions, U>& other) noexcept;
 
         /**
          * @brief Construct from a @ref ArrayView
@@ -2191,7 +2192,7 @@ template<unsigned dimensions> constexpr StridedArrayView<dimensions, const void>
     #endif
     member)}, _size{size}, _stride{stride} {}
 
-template<unsigned dimensions, class T> template<unsigned lessDimensions, class> StridedArrayView<dimensions, T>::StridedArrayView(const StridedArrayView<lessDimensions, T>& other) noexcept: _data{other._data}, _size{Corrade::NoInit}, _stride{Corrade::NoInit} {
+template<unsigned dimensions, class T> template<unsigned lessDimensions, class U, class> StridedArrayView<dimensions, T>::StridedArrayView(const StridedArrayView<lessDimensions, U>& other) noexcept: _data{other._data}, _size{Corrade::NoInit}, _stride{Corrade::NoInit} {
     /* Set size and stride in the extra dimensions */
     constexpr std::size_t extraDimensions = dimensions - lessDimensions;
     /* See StridedElement::get() for why a ptrdiff_t cast is needed. Tho in

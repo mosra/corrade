@@ -1953,6 +1953,32 @@ void StridedArrayViewTest::construct3DFromLessDimensions() {
     CORRADE_VERIFY(std::is_nothrow_constructible<StridedArrayView3Di, StridedArrayView1Di>::value);
     /* Construction the other way shouldn't be possible */
     CORRADE_VERIFY(!std::is_constructible<StridedArrayView1Di, StridedArrayView3Di>::value);
+
+    /* Constructing a const view from a mutable with less dimensions should
+       also be possible */
+    ConstStridedArrayView3Di ca3 = a;
+    CORRADE_COMPARE(ca3.data(), &data[0]);
+    CORRADE_COMPARE(ca3.size(), (Size3D{1, 1, 6}));
+    CORRADE_COMPARE(ca3.stride(), (Stride3D{24, 24, 4}));
+    CORRADE_COMPARE(ca3[0][0][3], -1);
+
+    ConstStridedArrayView3Di cb3 = b;
+    CORRADE_COMPARE(cb3.data(), &data[0]);
+    CORRADE_COMPARE(cb3.size(), (Size3D{1, 3, 2}));
+    CORRADE_COMPARE(cb3.stride(), (Stride3D{24, 8, 4}));
+    CORRADE_COMPARE(cb3[0][0][1], 3);
+    CORRADE_COMPARE(cb3[0][1][0], 5);
+    CORRADE_COMPARE(cb3[0][1][1], -1);
+    CORRADE_COMPARE(cb3[0][2][1], 15);
+
+    CORRADE_VERIFY(std::is_nothrow_constructible<StridedArrayView3Di, StridedArrayView1Di>::value);
+    CORRADE_VERIFY(std::is_nothrow_constructible<ConstStridedArrayView3Di, StridedArrayView1Di>::value);
+    /* Construction the other way shouldn't be possible */
+    CORRADE_VERIFY(!std::is_constructible<StridedArrayView1Di, StridedArrayView3Di>::value);
+    /* Construction of a mutable view from a const or another type shouldn't be
+       possible either */
+    CORRADE_VERIFY(!std::is_constructible<StridedArrayView3Di, ConstStridedArrayView1Di>::value);
+    CORRADE_VERIFY(!std::is_constructible<StridedArrayView3Di, StridedArrayView1D<float>>::value);
 }
 
 /* Without a corresponding SFINAE check in the std::nullptr_t constructor, this
