@@ -80,6 +80,32 @@ namespace Implementation {
         return view._stride;
     }
     #endif
+
+    /* Used by the member function slice() variant that doesn't deal with
+       overloads, to figure out what return type the non-overloaded function
+       has. These also implicitly ensure that non-const functions are called
+       only on non-const types. For const types it'd be looking for a
+       `const Foo, R&(Foo::*)()` specialization, which doesn't exist. Mutable
+       functions on mutable types and const functions on const types are
+       handled by the other four slice() overloads already. */
+    template<class T, class U> struct StridedArrayViewSliceResultOf;
+    template<class T, class R> struct StridedArrayViewSliceResultOf<T, R&(T::*)() const> {
+        typedef R Type;
+    };
+    template<class T, class R> struct StridedArrayViewSliceResultOf<T, R&(T::*)() const &> {
+        typedef R Type;
+    };
+
+    /* GCC 4.8 is_member_function_pointer doesn't give true for & and const &
+       overloads, making those to the data overload of slice() instead. See the
+       sliceRvalueOverloadedMemberFunctionPointer() test for a repro case. */
+    #if defined(CORRADE_TARGET_GCC) && !defined(CORRADE_TARGET_CLANG) && __GNUC__ < 5
+    template<class T> struct IsMemberFunctionPointer: std::false_type {};
+    template<class T, class R, class ...Args> struct IsMemberFunctionPointer<R(T::*)(Args...)>: std::true_type {};
+    template<class T, class R, class ...Args> struct IsMemberFunctionPointer<R(T::*)(Args...) &>: std::true_type {};
+    template<class T, class R, class ...Args> struct IsMemberFunctionPointer<R(T::*)(Args...) const>: std::true_type {};
+    template<class T, class R, class ...Args> struct IsMemberFunctionPointer<R(T::*)(Args...) const &>: std::true_type {};
+    #endif
 }
 #endif
 
@@ -698,7 +724,17 @@ template<unsigned dimensions, class T> class StridedArrayView {
         #ifdef DOXYGEN_GENERATING_OUTPUT
         template<class U> StridedArrayView<dimensions, typename std::conditional<std::is_const<T>::value, const U, U>::type> slice(U T::*member) const;
         #else
-        template<class U, class V = T> auto slice(U V::*member) const -> typename std::enable_if<(std::is_class<V>::value || std::is_union<V>::value) && !std::is_member_function_pointer<decltype(member)>::value, StridedArrayView<dimensions, typename std::conditional<std::is_const<T>::value, const U, U>::type>>::type {
+        template<class U, class V = T> auto slice(U V::*member) const -> typename std::enable_if<(std::is_class<V>::value || std::is_union<V>::value) &&
+            #if defined(CORRADE_TARGET_GCC) && !defined(CORRADE_TARGET_CLANG) && __GNUC__ < 5
+            /* GCC 4.8 is_member_function_pointer doesn't give true for & and
+               const & overloads, making those to go here instead. See the
+               sliceRvalueOverloadedMemberFunctionPointer() test for a repro
+               case. */
+            !Implementation::IsMemberFunctionPointer<decltype(member)>::value
+            #else
+            !std::is_member_function_pointer<decltype(member)>::value
+            #endif
+        , StridedArrayView<dimensions, typename std::conditional<std::is_const<T>::value, const U, U>::type>>::type {
             return StridedArrayView<dimensions, typename std::conditional<std::is_const<T>::value, const U, U>::type>{_size, _stride, &(static_cast<T*>(_data)->*member)};
         }
         #endif
@@ -714,13 +750,6 @@ template<unsigned dimensions, class T> class StridedArrayView {
          *
          * Expects the function to return a reference to the class data members
          * (i.e., the returned offset being less than @cpp sizeof(T) @ce).
-         *
-         * @note To prevent ambiguous overload errors, a @cpp const @ce
-         *      overload is always picked on a @cpp const @ce view and a
-         *      non-const overload on a mutable view. This implies that it's
-         *      not possible to slice to a @cpp const @ce function on a mutable
-         *      view --- instead convert the view to a @cpp const @ce type
-         *      first and then perform the slice.
          *
          * @attention Note that in order to get the offset, the member function
          *      is internally executed on a zeroed-out piece of memory. Thus
@@ -751,6 +780,12 @@ template<unsigned dimensions, class T> class StridedArrayView {
         template<class U, class V = T> typename std::enable_if<(std::is_class<V>::value || std::is_union<V>::value) && !std::is_const<T>::value, StridedArrayView<dimensions, U>>::type slice(U&(V::*memberFunction)() &) const;
         template<class U, class V = T> typename std::enable_if<(std::is_class<V>::value || std::is_union<V>::value) && std::is_const<T>::value, StridedArrayView<dimensions, const U>>::type slice(const U&(V::*memberFunction)() const) const;
         template<class U, class V = T> typename std::enable_if<(std::is_class<V>::value || std::is_union<V>::value) && std::is_const<T>::value, StridedArrayView<dimensions, const U>>::type slice(const U&(V::*memberFunction)() const &) const;
+        /* While the four variants above deal with overloaded functions,
+           restricting const functions to const types and non-const functions
+           to non-const types to avoid ambiguity, this overload is then what
+           non-overloaded functions (const functions on non-const types, in
+           particular) will fall back to. */
+        template<class U> auto slice(U&& memberFunction) const -> StridedArrayView<dimensions, typename Implementation::StridedArrayViewSliceResultOf<T, U>::Type>;
         #endif
 
         /**
@@ -2391,6 +2426,14 @@ template<unsigned dimensions, class T> template<class U, class V> typename std::
 
 template<unsigned dimensions, class T> template<class U, class V> typename std::enable_if<(std::is_class<V>::value || std::is_union<V>::value) && std::is_const<T>::value, StridedArrayView<dimensions, const U>>::type StridedArrayView<dimensions, T>::slice(const U&(V::*memberFunction)() const &) const {
     return StridedArrayView<dimensions, const U>{_size, _stride, reinterpret_cast<const U*>(static_cast<ArithmeticType*>(_data) +
+        /* The T is needed to avoid accidentally passing a member function
+           pointer of a complately different type */
+        memberFunctionSliceOffset<T>(memberFunction))
+    };
+}
+
+template<unsigned dimensions, class T> template<class U> auto StridedArrayView<dimensions, T>::slice(U&& memberFunction) const ->  StridedArrayView<dimensions, typename Implementation::StridedArrayViewSliceResultOf<T, U>::Type> {
+    return StridedArrayView<dimensions, typename Implementation::StridedArrayViewSliceResultOf<T, U>::Type>{_size, _stride, reinterpret_cast<typename Implementation::StridedArrayViewSliceResultOf<T, U>::Type*>(static_cast<ArithmeticType*>(_data) +
         /* The T is needed to avoid accidentally passing a member function
            pointer of a complately different type */
         memberFunctionSliceOffset<T>(memberFunction))

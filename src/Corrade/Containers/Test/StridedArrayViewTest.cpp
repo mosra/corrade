@@ -3412,13 +3412,11 @@ void StridedArrayViewTest::sliceConstOverloadedMemberFunctionPointer() {
         public:
             /*implicit*/ Data(float first, short second): _first{first}, _second{second} {}
 
-            /* Clang complains these functions are unused, but without them the
-               _first member would be unused as well, and that one is vital to
-               test proper offset calculation, so leave them. */
-            CORRADE_UNUSED float& first() { return _first; }
-            CORRADE_UNUSED const float& first() const { return _first; }
             short& second() { return _second; }
             const short& second() const { return _second; }
+
+            float& firstNonOverloaded() { return _first; }
+            const short& secondNonOverloaded() const { return _second; }
         private:
             float _first;
             short _second;
@@ -3449,6 +3447,41 @@ void StridedArrayViewTest::sliceConstOverloadedMemberFunctionPointer() {
     CORRADE_COMPARE_AS(csecond,
         Containers::stridedArrayView<short>({3, 11}),
         TestSuite::Compare::Container);
+
+    /* Check that all const combinations of non-overloaded functions work as
+       well, not just mutable functions on mutable types and const functions on
+       const types */
+    auto firstNonOverloaded = view.slice(&Data::firstNonOverloaded);
+    auto secondNonOverloaded = view.slice(&Data::secondNonOverloaded);
+    auto csecondNonOverloaded = cview.slice(&Data::secondNonOverloaded);
+    CORRADE_VERIFY(std::is_same<decltype(firstNonOverloaded), Containers::StridedArrayView1D<float>>::value);
+    CORRADE_VERIFY(std::is_same<decltype(secondNonOverloaded), Containers::StridedArrayView1D<const short>>::value);
+    CORRADE_VERIFY(std::is_same<decltype(csecondNonOverloaded), Containers::StridedArrayView1D<const short>>::value);
+    CORRADE_COMPARE(firstNonOverloaded.data(), reinterpret_cast<const char*>(data));
+    CORRADE_COMPARE(secondNonOverloaded.data(), reinterpret_cast<const char*>(data) + 4);
+    CORRADE_COMPARE(csecondNonOverloaded.data(), reinterpret_cast<const char*>(data) + 4);
+    CORRADE_COMPARE(firstNonOverloaded.size(), 2);
+    CORRADE_COMPARE(secondNonOverloaded.size(), 2);
+    CORRADE_COMPARE(csecondNonOverloaded.size(), 2);
+    CORRADE_COMPARE(firstNonOverloaded.stride(), sizeof(Data));
+    CORRADE_COMPARE(secondNonOverloaded.stride(), sizeof(Data));
+    CORRADE_COMPARE(csecondNonOverloaded.stride(), sizeof(Data));
+    CORRADE_COMPARE_AS(firstNonOverloaded,
+        Containers::stridedArrayView<float>({1.5f, -0.5f}),
+        TestSuite::Compare::Container);
+    CORRADE_COMPARE_AS(secondNonOverloaded,
+        Containers::stridedArrayView<short>({3, 11}),
+        TestSuite::Compare::Container);
+    CORRADE_COMPARE_AS(csecondNonOverloaded,
+        Containers::stridedArrayView<short>({3, 11}),
+        TestSuite::Compare::Container);
+
+    /* This shouldn't even compile since it's asking for a mutable function on
+       a const type. And it's fine to be a hard error, but should be a "no
+       matching overload" rather than a compile error somewhere inside */
+    #if 0
+    cview.slice(&Data::firstNonOverloaded);
+    #endif
 }
 
 void StridedArrayViewTest::sliceRvalueOverloadedMemberFunctionPointer() {
@@ -3458,13 +3491,6 @@ void StridedArrayViewTest::sliceRvalueOverloadedMemberFunctionPointer() {
         public:
             /*implicit*/ Data(float first, short second): _first{first}, _second{second} {}
 
-            /* Clang complains these functions are unused, but without them the
-               _first member would be unused as well, and that one is vital to
-               test proper offset calculation, so leave them. */
-            CORRADE_UNUSED float& first() & { return _first; }
-            CORRADE_UNUSED float&& first() && { return Utility::move(_first); }
-            CORRADE_UNUSED const float& first() const & { return _first; }
-            CORRADE_UNUSED const float&& first() const && { return Utility::move(_first); }
             short& second() & { return _second; }
             /* Clang complains this function is unused. But its presence is
                vital to the test case, so leave it. */
@@ -3473,6 +3499,9 @@ void StridedArrayViewTest::sliceRvalueOverloadedMemberFunctionPointer() {
             /* Clang complains this function is unused. But its presence is
                vital to the test case, so leave it. */
             CORRADE_UNUSED const short&& second() const && { return Utility::move(_second); }
+
+            float& firstNonOverloaded() & { return _first; }
+            const short& secondNonOverloaded() const & { return _second; }
         private:
             float _first;
             short _second;
@@ -3513,6 +3542,41 @@ void StridedArrayViewTest::sliceRvalueOverloadedMemberFunctionPointer() {
     CORRADE_COMPARE_AS(csecond,
         Containers::stridedArrayView<short>({3, 11}),
         TestSuite::Compare::Container);
+
+    /* Check that all const combinations of non-overloaded functions work as
+       well, not just mutable functions on mutable types and const functions on
+       const types */
+    auto firstNonOverloaded = view.slice(&Data::firstNonOverloaded);
+    auto secondNonOverloaded = view.slice(&Data::secondNonOverloaded);
+    auto csecondNonOverloaded = cview.slice(&Data::secondNonOverloaded);
+    CORRADE_VERIFY(std::is_same<decltype(firstNonOverloaded), Containers::StridedArrayView1D<float>>::value);
+    CORRADE_VERIFY(std::is_same<decltype(secondNonOverloaded), Containers::StridedArrayView1D<const short>>::value);
+    CORRADE_VERIFY(std::is_same<decltype(csecondNonOverloaded), Containers::StridedArrayView1D<const short>>::value);
+    CORRADE_COMPARE(firstNonOverloaded.data(), reinterpret_cast<const char*>(data));
+    CORRADE_COMPARE(secondNonOverloaded.data(), reinterpret_cast<const char*>(data) + 4);
+    CORRADE_COMPARE(csecondNonOverloaded.data(), reinterpret_cast<const char*>(data) + 4);
+    CORRADE_COMPARE(firstNonOverloaded.size(), 2);
+    CORRADE_COMPARE(secondNonOverloaded.size(), 2);
+    CORRADE_COMPARE(csecondNonOverloaded.size(), 2);
+    CORRADE_COMPARE(firstNonOverloaded.stride(), sizeof(Data));
+    CORRADE_COMPARE(secondNonOverloaded.stride(), sizeof(Data));
+    CORRADE_COMPARE(csecondNonOverloaded.stride(), sizeof(Data));
+    CORRADE_COMPARE_AS(firstNonOverloaded,
+        Containers::stridedArrayView<float>({1.5f, -0.5f}),
+        TestSuite::Compare::Container);
+    CORRADE_COMPARE_AS(secondNonOverloaded,
+        Containers::stridedArrayView<short>({3, 11}),
+        TestSuite::Compare::Container);
+    CORRADE_COMPARE_AS(csecondNonOverloaded,
+        Containers::stridedArrayView<short>({3, 11}),
+        TestSuite::Compare::Container);
+
+    /* This shouldn't even compile since it's asking for a mutable function on
+       a const type. And it's fine to be a hard error, but should be a "no
+       matching overload" rather than a compile error somewhere inside */
+    #if 0
+    cview.slice(&Data::firstNonOverloaded);
+    #endif
 }
 
 void StridedArrayViewTest::sliceMemberFunctionPointerDerived() {
@@ -3619,6 +3683,7 @@ void StridedArrayViewTest::sliceMemberFunctionPointerReturningOffsetOutOfRange()
             /* UB, hello! */
             float& first() { return *(&_first + 1); }
             const float& first() const { return *(&_first - 1); }
+            const float& firstNonOverloaded() const { return *(&_first - 1); }
         private:
             float _first;
     };
@@ -3631,8 +3696,14 @@ void StridedArrayViewTest::sliceMemberFunctionPointerReturningOffsetOutOfRange()
     Error redirectError{&out};
     view.slice(&Data::first);
     cview.slice(&Data::first);
+    /* Just to verify the fifth overload calls to the same helper as all
+       others */
+    view.slice(&Data::firstNonOverloaded);
+    cview.slice(&Data::firstNonOverloaded);
     CORRADE_COMPARE(out,
         "Containers::StridedArrayView::slice(): member function slice returned offset 4 for a 4-byte type\n"
+        "Containers::StridedArrayView::slice(): member function slice returned offset -4 for a 4-byte type\n"
+        "Containers::StridedArrayView::slice(): member function slice returned offset -4 for a 4-byte type\n"
         "Containers::StridedArrayView::slice(): member function slice returned offset -4 for a 4-byte type\n");
 }
 
