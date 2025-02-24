@@ -915,7 +915,7 @@ LoadState AbstractManager::unloadInternal(Implementation::Plugin& plugin) {
         for(AbstractPlugin* const instance: plugin.instances)
             if(!instance->canBeDeleted()) {
                 Utility::Error{} << "PluginManager::Manager::unload(): plugin"
-                    << plugin.name << "is currently used and cannot be deleted";
+                    << plugin.name << "has a live instance which cannot be automatically deleted";
                 return LoadState::Used;
             }
 

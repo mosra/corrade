@@ -699,7 +699,7 @@ void ManagerTest::dynamicPlugin() {
         Containers::String out;
         Error redirectError{&out};
         CORRADE_COMPARE(manager.unload("Dog"), LoadState::Used);
-        CORRADE_COMPARE(out, "PluginManager::Manager::unload(): plugin Dog is currently used and cannot be deleted\n");
+        CORRADE_COMPARE(out, "PluginManager::Manager::unload(): plugin Dog has a live instance which cannot be automatically deleted\n");
         CORRADE_COMPARE(manager.loadState("Dog"), LoadState::Loaded);
     }
 
