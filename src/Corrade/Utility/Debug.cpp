@@ -197,9 +197,10 @@ DebugGlobals debugGlobals{
    called from. To avoid #ifdef hell in code below, the debugGlobals are
    redefined to return a value from this uniqueness-ensuring function. */
 #if defined(CORRADE_TARGET_WINDOWS) && defined(CORRADE_BUILD_STATIC_UNIQUE_GLOBALS) && !defined(CORRADE_TARGET_WINDOWS_RT)
-/* Clang-CL complains that the function has a return type incompatible with C.
-   I don't care, I only need an unmangled name to look up later at runtime. */
-#ifdef CORRADE_TARGET_CLANG_CL
+/* MinGW Clang and Clang-CL complains that the function has a return type
+   incompatible with C. I don't care, I only need an unmangled name to look up
+   later at runtime. */
+#if defined(CORRADE_TARGET_CLANG_CL) || (defined(CORRADE_TARGET_MINGW) && defined(CORRADE_TARGET_CLANG))
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wreturn-type-c-linkage"
 #endif
