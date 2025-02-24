@@ -1,7 +1,7 @@
 > *corrade* (v.) — “To scrape together, to gather together from various sources”
 
-Corrade is a multiplatform utility library written in C++11/C++14. It's used as
-a base for the [Magnum graphics engine](https://magnum.graphics/), among other
+Corrade is a multiplatform utility library written in C++11. It's used as a
+base for the [Magnum graphics engine](https://magnum.graphics/), among other
 things.
 
 [![Join the chat at https://gitter.im/mosra/magnum](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/mosra/magnum?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
