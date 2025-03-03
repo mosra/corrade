@@ -20,6 +20,8 @@
     `#define CORRADE_STRUCTURED_BINDINGS` before including the file. Including
     it multiple times with different macros defined works too.
 
+    v2020.06-1872-gbf086 (2025-03-03)
+    -   Fixed slice() to work for non-overloaded member functions
     v2020.06-1846-gc4cdf (2025-01-07)
     -   Worked around an issue where certain new Clang versions would do an OOB
         access with negative strides on 32-bit builds (such as on Emscripten)
