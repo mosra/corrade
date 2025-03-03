@@ -40,7 +40,6 @@
 
 namespace Corrade { namespace Containers {
 
-#if !defined(CORRADE_SINGLES_NO_ARRAYTUPLE_COMPATIBILITY) || !defined(CORRADE_SINGLES_NO_PYTHON_COMPATIBILITY)
 namespace Implementation {
     #ifndef CORRADE_SINGLES_NO_ARRAYTUPLE_COMPATIBILITY
     /* So ArrayTuple can update the data pointer. Returning a T*& instead of a
@@ -80,7 +79,6 @@ namespace Implementation {
         return view._stride;
     }
     #endif
-
     /* Used by the member function slice() variant that doesn't deal with
        overloads, to figure out what return type the non-overloaded function
        has. These also implicitly ensure that non-const functions are called
@@ -95,7 +93,6 @@ namespace Implementation {
     template<class T, class R> struct StridedArrayViewSliceResultOf<T, R&(T::*)() const &> {
         typedef R Type;
     };
-
     /* GCC 4.8 is_member_function_pointer doesn't give true for & and const &
        overloads, making those to the data overload of slice() instead. See the
        sliceRvalueOverloadedMemberFunctionPointer() test for a repro case. */
@@ -107,7 +104,6 @@ namespace Implementation {
     template<class T, class R, class ...Args> struct IsMemberFunctionPointer<R(T::*)(Args...) const &>: std::true_type {};
     #endif
 }
-#endif
 
 /**
 @brief Multi-dimensional array view with size and stride information
