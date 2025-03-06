@@ -759,6 +759,24 @@ Expects that the @p filename is in UTF-8. If it's already
 directly, otherwise a null-terminated copy is allocated first. On Windows the
 path is instead first converted to UTF-16 using @ref Unicode::widen() and then
 passed to system APIs.
+
+@m_class{m-block m-warning}
+
+@par Reading and writing a file while it's mapped
+    On @ref CORRADE_TARGET_UNIX "Unix"-like systems it's possible to write to a
+    file that's currently mapped with this function and the changes will be
+    reflected to the mapping. The mapped size however cannot change --- if the
+    file gets longer, the additional data will not be present in the mapping,
+    if it gets shorter, the suffix gets filled with @cpp '\0' @ce bytes.
+@par
+    On @ref CORRADE_TARGET_WINDOWS "Windows" it's not possible to open a file
+    for writing while it's mapped with this function. Doing so will result in
+    an *Invalid Argument* error.
+@par
+    Opening a file for reading while it's mapped with this function works on
+    all platforms and gives back the same contents as the (potentially updated)
+    mapped memory.
+
 @see @ref mapRead(), @ref mapWrite(), @ref read(), @ref write()
 @partialsupport Available only on @ref CORRADE_TARGET_UNIX "Unix" and non-RT
     @ref CORRADE_TARGET_WINDOWS "Windows" platforms.
@@ -781,6 +799,24 @@ Expects that the @p filename is in UTF-8. If it's already
 directly, otherwise a null-terminated copy is allocated first. On Windows the
 path is instead first converted to UTF-16 using @ref Unicode::widen() and then
 passed to system APIs.
+
+@m_class{m-block m-warning}
+
+@par Reading and writing a file while it's mapped
+    On @ref CORRADE_TARGET_UNIX "Unix"-like systems it's possible to write to a
+    file that's currently mapped for reading with this function and the changes
+    will be reflected to the mapping. The mapped size however cannot change ---
+    if the file gets longer, the additional data will not be present in the
+    mapping, if it gets shorter, the suffix gets filled with @cpp '\0' @ce
+    bytes.
+@par
+    On @ref CORRADE_TARGET_WINDOWS "Windows" it's not possible to open a file
+    for writing while it's mapped for reading with this function. Doing so will
+    result in a *Permission denied* error.
+@par
+    Opening a file for reading while it's mapped with this function works on
+    all platforms.
+
 @see @ref map(), @ref mapWrite(), @ref read()
 @partialsupport Available only on @ref CORRADE_TARGET_UNIX "Unix" and non-RT
     @ref CORRADE_TARGET_WINDOWS "Windows" platforms.
@@ -805,6 +841,25 @@ Expects that the @p filename is in UTF-8. If it's already
 directly, otherwise a null-terminated copy is allocated first. On Windows the
 path is instead first converted to UTF-16 using @ref Unicode::widen() and then
 passed to system APIs.
+
+@m_class{m-block m-warning}
+
+@par Reading and writing a file while it's mapped
+    On @ref CORRADE_TARGET_UNIX "Unix"-like systems it's possible to write to a
+    file that's currently mapped for writing with this function and the changes
+    will be reflected to the mapping. The mapped size however cannot change ---
+    if the file gets longer, the additional data will not be present in the
+    mapping, if it gets shorter, the suffix gets filled with @cpp '\0' @ce
+    bytes.
+@par
+    On @ref CORRADE_TARGET_WINDOWS "Windows" it's not possible to open a file
+    for writing while it's mapped for writing with this function. Doing so will
+    result in an *Invalid Argument* error.
+@par
+    Opening a file for reading while it's mapped with this function works on
+    all platforms and gives back the same contents as the mapped memory, i.e.
+    filled with @cpp '\0' @ce bytes where it wasn't subsequently updated.
+
 @see @ref map(), @ref mapRead(), @ref read(), @ref write()
 @partialsupport Available only on @ref CORRADE_TARGET_UNIX "Unix" and non-RT
     @ref CORRADE_TARGET_WINDOWS "Windows" platforms.

@@ -260,6 +260,10 @@ struct PathTest: TestSuite::Tester {
     void mapWriteNonNullTerminated();
     void mapWriteUtf8();
 
+    #if defined(CORRADE_TARGET_UNIX) || (defined(CORRADE_TARGET_WINDOWS) && !defined(CORRADE_TARGET_WINDOWS_RT))
+    void readWriteWhileMapped();
+    #endif
+
     Containers::String _testDir,
         _testDirSymlink,
         _testDirUtf8,
@@ -329,6 +333,136 @@ const struct {
         Containers::StringViewFlag::Global,
         Containers::StringViewFlag::Global},
 };
+
+#if defined(CORRADE_TARGET_UNIX) || (defined(CORRADE_TARGET_WINDOWS) && !defined(CORRADE_TARGET_WINDOWS_RT))
+Containers::Optional<Containers::Array<const char, Path::MapDeleter>> writeWhileMappedMap(Containers::StringView filename, std::size_t) {
+    Containers::Optional<Containers::Array<char, Path::MapDeleter>> mapped = Path::map(filename);
+    if(!mapped)
+        return {};
+    /* The compiler may execute the expressions in {} in an arbitrary order,
+       potentially leading to release() clearing size or deleter before they'd
+       be queried, explicitly get them first */
+    std::size_t size = mapped->size();
+    Path::MapDeleter deleter = mapped->deleter();
+    return Containers::Optional<Containers::Array<const char, Path::MapDeleter>>{InPlaceInit, mapped->release(), size, deleter};
+}
+
+Containers::Optional<Containers::Array<const char, Path::MapDeleter>> writeWhileMappedMapRead(Containers::StringView filename, std::size_t) {
+    return Path::mapRead(filename);
+}
+
+Containers::Optional<Containers::Array<const char, Path::MapDeleter>> writeWhileMappedMapWrite(Containers::StringView filename, std::size_t size) {
+    Containers::Optional<Containers::Array<char, Path::MapDeleter>> mapped = Path::mapWrite(filename, size);
+    if(!mapped)
+        return {};
+    /* The compiler may execute the expressions in {} in an arbitrary order,
+       potentially leading to release() clearing deleter before it'd be
+       queried, explicitly get it first. Size is same as passed. */
+    Path::MapDeleter deleter = mapped->deleter();
+    return Containers::Optional<Containers::Array<const char, Path::MapDeleter>>{InPlaceInit, mapped->release(), size, deleter};
+}
+
+const struct {
+    const char* name;
+    Containers::Optional<Containers::Array<const char, Path::MapDeleter>>(*map)(Containers::StringView, std::size_t);
+    bool canModify;
+    Containers::StringView expectedBefore;
+    Containers::StringView write;
+    Containers::StringView expectedAfter;
+    Containers::StringView expectedFileAfterModification;
+} ReadWriteWhileMappedData[]{
+    {"same size, map", writeWhileMappedMap, true,
+        "hello this is a file",
+        "HELLO THIS IS A FILE",
+        "HELLO THIS IS A FILE",
+        #ifndef CORRADE_TARGET_WINDOWS
+        "YELLO THIS IS A FILE"
+        #else
+        "Yello this is a file"
+        #endif
+    },
+    {"same size, mapRead", writeWhileMappedMapRead, false,
+        "hello this is a file",
+        "HELLO THIS IS A FILE",
+        "HELLO THIS IS A FILE",
+        #ifndef CORRADE_TARGET_WINDOWS
+        "HELLO THIS IS A FILE"
+        #else
+        "hello this is a file"
+        #endif
+    },
+    {"same size, mapWrite", writeWhileMappedMapWrite, true,
+        "\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0"_s,
+        "HELLO THIS IS A FILE",
+        "HELLO THIS IS A FILE",
+        #ifndef CORRADE_TARGET_WINDOWS
+        "YELLO THIS IS A FILE"
+        #else
+        "Y\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0"_s
+        #endif
+    },
+    {"shorter, map", writeWhileMappedMap, true,
+        "hello this is a file",
+        "HELLO THIS IS A FI",
+        "HELLO THIS IS A FI\0\0"_s,
+        #ifndef CORRADE_TARGET_WINDOWS
+        "YELLO THIS IS A FI"
+        #else
+        "Yello this is a file"
+        #endif
+    },
+    {"shorter, mapRead", writeWhileMappedMapRead, false,
+        "hello this is a file",
+        "HELLO THIS IS A FI",
+        "HELLO THIS IS A FI\0\0"_s,
+        #ifndef CORRADE_TARGET_WINDOWS
+        "HELLO THIS IS A FI"
+        #else
+        "hello this is a file"
+        #endif
+    },
+    {"shorter, mapWrite", writeWhileMappedMapWrite, true,
+        "\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0"_s,
+        "HELLO THIS IS A FI",
+        "HELLO THIS IS A FI\0\0"_s,
+        #ifndef CORRADE_TARGET_WINDOWS
+        "YELLO THIS IS A FI"
+        #else
+        "Y\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0"_s
+        #endif
+    },
+    {"longer, map", writeWhileMappedMap, true,
+        "hello this is a file",
+        "HELLO THIS IS A FILE!!",
+        "HELLO THIS IS A FILE",
+        #ifndef CORRADE_TARGET_WINDOWS
+        "YELLO THIS IS A FILE!!"
+        #else
+        "Yello this is a file"
+        #endif
+    },
+    {"longer, mapRead", writeWhileMappedMapRead, false,
+        "hello this is a file",
+        "HELLO THIS IS A FILE!!",
+        "HELLO THIS IS A FILE",
+        #ifndef CORRADE_TARGET_WINDOWS
+        "HELLO THIS IS A FILE!!"
+        #else
+        "hello this is a file"
+        #endif
+    },
+    {"longer, mapWrite", writeWhileMappedMapWrite, true,
+        "\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0"_s,
+        "HELLO THIS IS A FILE!!",
+        "HELLO THIS IS A FILE",
+        #ifndef CORRADE_TARGET_WINDOWS
+        "YELLO THIS IS A FILE!!"
+        #else
+        "Y\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0"_s
+        #endif
+    },
+};
+#endif
 
 PathTest::PathTest() {
     addTests({&PathTest::fromNativeSeparators,
@@ -533,6 +667,11 @@ PathTest::PathTest() {
               &PathTest::mapWriteNoPermission,
               &PathTest::mapWriteNonNullTerminated,
               &PathTest::mapWriteUtf8});
+
+    #if defined(CORRADE_TARGET_UNIX) || (defined(CORRADE_TARGET_WINDOWS) && !defined(CORRADE_TARGET_WINDOWS_RT))
+    addInstancedTests({&PathTest::readWriteWhileMapped},
+        Containers::arraySize(ReadWriteWhileMappedData));
+    #endif
 
     #ifdef CORRADE_TARGET_APPLE
     if(System::isSandboxed()
@@ -3582,6 +3721,64 @@ void PathTest::mapWriteUtf8() {
     CORRADE_SKIP("Not implemented on this platform.");
     #endif
 }
+
+#if defined(CORRADE_TARGET_UNIX) || (defined(CORRADE_TARGET_WINDOWS) && !defined(CORRADE_TARGET_WINDOWS_RT))
+void PathTest::readWriteWhileMapped() {
+    auto&& data = ReadWriteWhileMappedData[testCaseInstanceId()];
+    setTestCaseDescription(data.name);
+
+    Containers::String filename = Path::join(_writeTestDir, "writeWhileMapped");
+    Containers::StringView initial = "hello this is a file"_s;
+    CORRADE_VERIFY(Path::write(filename, initial));
+
+    {
+        Containers::Optional<Containers::Array<const char, Path::MapDeleter>> mappedFile = data.map(filename, initial.size());
+        CORRADE_VERIFY(mappedFile);
+        CORRADE_COMPARE(mappedFile->size(), data.expectedBefore.size());
+        CORRADE_COMPARE(Containers::StringView{*mappedFile}, data.expectedBefore);
+
+        {
+            #ifdef CORRADE_TARGET_WINDOWS
+            CORRADE_EXPECT_FAIL("It's not possible to write to a file that's currently mapped on Windows.");
+            #endif
+            CORRADE_VERIFY(Path::write(filename, data.write));
+            #ifndef CORRADE_TARGET_WINDOWS
+            CORRADE_COMPARE(Containers::StringView{*mappedFile}, data.expectedAfter);
+            #endif
+        }
+
+        /* Reading the file while it's mapped should work and give back exactly
+           what was written, not the potentially cut / extended memory that's
+           exposed to the mapped file. On Windows it gives back the original
+           contents since the write failed. */
+        #ifndef CORRADE_TARGET_WINDOWS
+        CORRADE_COMPARE_AS(filename,
+            data.write,
+            TestSuite::Compare::FileToString);
+        #else
+        CORRADE_COMPARE_AS(filename,
+            data.expectedBefore,
+            TestSuite::Compare::FileToString);
+        #endif
+
+        /* Modify the mapping, if it's not mapped for just reading */
+        if(data.canModify)
+            const_cast<char&>(mappedFile->front()) = 'Y';
+
+        /* Reading again after modification should reflect the modification. On
+           Windows it's the original contents modified, reflected in the test
+           instance data already */
+        CORRADE_COMPARE_AS(filename,
+            data.expectedFileAfterModification,
+            TestSuite::Compare::FileToString);
+    }
+
+    /* Reading the file after unmapping should work the same way */
+    CORRADE_COMPARE_AS(filename,
+        data.expectedFileAfterModification,
+        TestSuite::Compare::FileToString);
+}
+#endif
 
 }}}}
 
