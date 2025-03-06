@@ -89,10 +89,13 @@ mergeInto(LibraryManager.library, {
        for example. */
     corradeUtilityIsTty: function(output) {
         if(typeof process !== 'undefined') {
+            /* Cannot use process.stdout.isTTY because the closure compiler
+               turns that into crap, which then makes this return `undefined`,
+               which then is interpreted as `false` */
             if(output == 1)
-                return process.stdout.isTTY;
+                return process.stdout['isTTY'];
             else if(output == 2)
-                return process.stderr.isTTY;
+                return process.stderr['isTTY'];
         }
         return false;
     }
