@@ -539,6 +539,23 @@ if(CORRADE_BUILD_DEPRECATED AND CORRADE_INCLUDE_INSTALL_PREFIX AND NOT CORRADE_I
     set(CORRADE_INCLUDE_INSTALL_DIR ${CORRADE_INCLUDE_INSTALL_PREFIX}/${CORRADE_INCLUDE_INSTALL_DIR})
 endif()
 
+# Separate install dirs for debug and release plugins
+set(CORRADE_PLUGINS_DEBUG_BINARY_INSTALL_DIR ${CORRADE_BINARY_INSTALL_DIR}/corrade-d)
+set(CORRADE_PLUGINS_DEBUG_LIBRARY_INSTALL_DIR ${CORRADE_LIBRARY_INSTALL_DIR}/corrade-d)
+set(CORRADE_PLUGINS_RELEASE_BINARY_INSTALL_DIR ${CORRADE_BINARY_INSTALL_DIR}/corrade)
+set(CORRADE_PLUGINS_RELEASE_LIBRARY_INSTALL_DIR ${CORRADE_LIBRARY_INSTALL_DIR}/corrade)
+
+# Make these paths configurable from outside. This is *not* PATH, because CMake
+# always converts the path to an absolute location internally, making it
+# impossible to specify relative paths there. Sorry in advance for not having
+# the dir selection button in CMake GUI.
+set(CORRADE_PLUGINS_DEBUG_DIR ""
+    CACHE STRING "Base directory where to look for Corrade plugins for debug builds")
+set(CORRADE_PLUGINS_RELEASE_DIR ""
+    CACHE STRING "Base directory where to look for Corrade plugins for release builds")
+set(CORRADE_PLUGINS_DIR ""
+    CACHE STRING "Base directory where to look for Corrade plugins")
+
 # Library version. CORRADE_VERSION_YEAR/MONTH is used in
 # src/Corrade/CMakeLists.txt to generate the version.h header.
 set(CORRADE_LIBRARY_VERSION 2.4)

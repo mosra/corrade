@@ -127,6 +127,14 @@ following:
 -   `Corrade_FOUND` --- Whether the base library was found
 -   `CORRADE_LIB_SUFFIX_MODULE` --- Path to `CorradeLibSuffix.cmake` module,
     which tries to autodetect the `LIB_SUFFIX` variable
+-   `CORRADE_PLUGINS_DEBUG_DIR` --- Base directory with dynamic plugins for
+    debug builds, defaults to `corrade-d/` subdirectory of dir where Corrade libraries were found
+-   `CORRADE_PLUGINS_RELEASE_DIR` --- Base directory with dynamic plugins for
+    release builds, defaults to `corrade/` subdirectory of dir where Corrade
+    libraries were found
+-   `CORRADE_PLUGINS_DIR` --- Base directory with dynamic plugins, defaults to
+    `CORRADE_PLUGINS_RELEASE_DIR` in release builds and multi-configuration
+    builds or to `CORRADE_PLUGINS_DEBUG_DIR` in debug builds
 
 This command will try to find only the base library, not the optional
 components, which are:

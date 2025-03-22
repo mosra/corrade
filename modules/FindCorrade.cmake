@@ -9,8 +9,18 @@
 # This module tries to find the base Corrade library and then defines the
 # following:
 #
-#  Corrade_FOUND                  - Whether the base library was found
-#  CORRADE_LIB_SUFFIX_MODULE      - Path to CorradeLibSuffix.cmake module
+#  Corrade_FOUND                - Whether the base library was found
+#  CORRADE_LIB_SUFFIX_MODULE    - Path to CorradeLibSuffix.cmake module
+#  CORRADE_PLUGINS_DEBUG_DIR    - Base directory with dynamic plugins for
+#   debug builds, defaults to corrade-d/ subdirectory of dir where Corrade
+#   libraries were found
+#  CORRADE_PLUGINS_RELEASE_DIR  - Base directory with dynamic plugins for
+#   release builds, defaults to corrade/ subdirectory of dir where Corrade
+#   libraries were found
+#  CORRADE_PLUGINS_DIR          - Base directory with dynamic plugins,
+#   defaults to :variable:`CORRADE_PLUGINS_RELEASE_DIR` in release builds and
+#   multi-configuration builds or to :variable:`CORRADE_PLUGINS_DEBUG_DIR` in
+#   debug builds
 #
 # This command will try to find only the base library, not the optional
 # components, which are:
@@ -137,6 +147,14 @@
 #   C++11, 14, 17 or 20 in cases where it's not possible to use
 #   :prop_tgt:`CORRADE_CXX_STANDARD`. Not defined if a standard switch is
 #   already present in :variable:`CMAKE_CXX_FLAGS`.
+#  CORRADE_BINARY_INSTALL_DIR   - Binary installation directory
+#  CORRADE_LIBRARY_INSTALL_DIR  - Library installation directory
+#  CORRADE_PLUGINS_[DEBUG|RELEASE]_BINARY_INSTALL_DIR - Plugin binary
+#   installation directory
+#  CORRADE_PLUGINS_[DEBUG|RELEASE]_LIBRARY_INSTALL_DIR - Plugin library
+#   installation directory
+#  CORRADE_INCLUDE_INSTALL_DIR  - Header installation directory
+#  CORRADE_PLUGINS_INCLUDE_INSTALL_DIR - Plugin header installation directory
 #
 # Corrade provides these macros and functions:
 #
@@ -736,6 +754,7 @@ if(NOT CMAKE_VERSION VERSION_LESS 3.16)
     set(_CORRADE_REASON_FAILURE_MESSAGE REASON_FAILURE_MESSAGE "${_CORRADE_REASON_FAILURE_MESSAGE}")
 endif()
 
+# Complete the check with also all components
 include(FindPackageHandleStandardArgs)
 find_package_handle_standard_args(Corrade REQUIRED_VARS
     CORRADE_INCLUDE_DIR
@@ -744,11 +763,18 @@ find_package_handle_standard_args(Corrade REQUIRED_VARS
     HANDLE_COMPONENTS
     ${_CORRADE_REASON_FAILURE_MESSAGE})
 
-# Finalize the finding process
 include(${CORRADE_USE_MODULE})
 
+# Installation dirs
+include(${CORRADE_LIB_SUFFIX_MODULE})
+set(CORRADE_BINARY_INSTALL_DIR bin)
+set(CORRADE_LIBRARY_INSTALL_DIR lib${LIB_SUFFIX})
 set(CORRADE_INCLUDE_INSTALL_DIR include/Corrade)
-
+set(CORRADE_PLUGINS_INCLUDE_INSTALL_DIR include/CorradePlugins)
+set(CORRADE_PLUGINS_DEBUG_BINARY_INSTALL_DIR ${CORRADE_BINARY_INSTALL_DIR}/corrade-d)
+set(CORRADE_PLUGINS_DEBUG_LIBRARY_INSTALL_DIR ${CORRADE_LIBRARY_INSTALL_DIR}/corrade-d)
+set(CORRADE_PLUGINS_RELEASE_BINARY_INSTALL_DIR ${CORRADE_BINARY_INSTALL_DIR}/corrade)
+set(CORRADE_PLUGINS_RELEASE_LIBRARY_INSTALL_DIR ${CORRADE_LIBRARY_INSTALL_DIR}/corrade)
 if(CORRADE_BUILD_DEPRECATED AND CORRADE_INCLUDE_INSTALL_PREFIX AND NOT CORRADE_INCLUDE_INSTALL_PREFIX STREQUAL ".")
     message(DEPRECATION "CORRADE_INCLUDE_INSTALL_PREFIX is obsolete as its primary use was for old Android NDK versions. Please switch to the NDK r19+ layout instead of using this variable and recreate your build directory to get rid of this warning.")
     set(CORRADE_INCLUDE_INSTALL_DIR ${CORRADE_INCLUDE_INSTALL_PREFIX}/${CORRADE_INCLUDE_INSTALL_DIR})
