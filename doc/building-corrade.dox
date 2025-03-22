@@ -531,6 +531,8 @@ By default the library is built with everything included. Using the following
 `CORRADE_WITH_*` CMake options you can specify which parts will be built and
 which not:
 
+-   `CORRADE_WITH_FILESYSTEM` --- Build the @ref Filesystem library. Enables
+    also building of the PluginManager library.
 -   `CORRADE_WITH_INTERCONNECT` --- Build the @ref Interconnect library.
     Enables also building of the Utility library.
 -   `CORRADE_WITH_MAIN` --- build The @ref main "Main" library. Enabled
@@ -673,6 +675,16 @@ compatibility if `CORRADE_BUILD_DEPRECATED` isn't disabled.
     this was used to handle that case. Nowadays please use NDK r19 and newer,
     with the unified sysroot layout. Defaults to ``.``. If a relative path is
     used, it's relative to `CMAKE_INSTALL_PREFIX`.
+
+Various plugin interfaces search for plugins in locations and order documented
+in @ref PluginManager::implicitPluginSearchPaths() and equivalent functions in
+plugin interfaces. In most cases the implicit behavior does the right
+thing, but if you need to override those, use the `CORRADE_PLUGINS_DIR`,
+`CORRADE_PLUGINS_DEBUG_DIR` and `CORRADE_PLUGINS_RELEASE_DIR` CMake variables.
+Those are empty by default, which means no hardcoded path is used. Another
+option is supplying the plugin search path to the @ref PluginManager::Manager
+constructor either using the same CMake variables (passed through to
+preprocessor, see @ref corrade-cmake) or via any other means.
 
 @subsection building-corrade-tests Building and running tests
 

@@ -201,8 +201,9 @@ elseif(WIN32)
     endif()
 endif()
 
+option(CORRADE_WITH_FILESYSTEM "Build Filesystem library" ON)
 option(CORRADE_WITH_INTERCONNECT "Build Interconnect library" ON)
-option(CORRADE_WITH_PLUGINMANAGER "Build PluginManager library" ON)
+cmake_dependent_option(CORRADE_WITH_PLUGINMANAGER "Build PluginManager library" ON "NOT CORRADE_WITH_FILESYSTEM" ON)
 option(CORRADE_WITH_TESTSUITE "Build TestSuite library" ON)
 cmake_dependent_option(CORRADE_WITH_UTILITY "Build Utility library" ON "NOT CORRADE_WITH_INTERCONNECT;NOT CORRADE_WITH_PLUGINMANAGER;NOT CORRADE_WITH_TESTSUITE" ON)
 # If we're crosscompiling and the native executable is found, we can skip
@@ -537,6 +538,40 @@ if(CORRADE_BUILD_DEPRECATED AND CORRADE_INCLUDE_INSTALL_PREFIX AND NOT CORRADE_I
     set(CORRADE_DATA_INSTALL_DIR ${CORRADE_INCLUDE_INSTALL_PREFIX}/${CORRADE_DATA_INSTALL_DIR})
     set(CORRADE_CMAKE_MODULE_INSTALL_DIR ${CORRADE_INCLUDE_INSTALL_PREFIX}/${CORRADE_CMAKE_MODULE_INSTALL_DIR})
     set(CORRADE_INCLUDE_INSTALL_DIR ${CORRADE_INCLUDE_INSTALL_PREFIX}/${CORRADE_INCLUDE_INSTALL_DIR})
+endif()
+
+# Separate install dirs for debug and release plugins
+set(CORRADE_PLUGINS_DEBUG_BINARY_INSTALL_DIR ${CORRADE_BINARY_INSTALL_DIR}/corrade-d)
+set(CORRADE_PLUGINS_DEBUG_LIBRARY_INSTALL_DIR ${CORRADE_LIBRARY_INSTALL_DIR}/corrade-d)
+set(CORRADE_PLUGINS_RELEASE_BINARY_INSTALL_DIR ${CORRADE_BINARY_INSTALL_DIR}/corrade)
+set(CORRADE_PLUGINS_RELEASE_LIBRARY_INSTALL_DIR ${CORRADE_LIBRARY_INSTALL_DIR}/corrade)
+
+set(CORRADE_PLUGINS_FILESYSTEM_DEBUG_BINARY_INSTALL_DIR ${CORRADE_PLUGINS_DEBUG_BINARY_INSTALL_DIR}/filesystems)
+set(CORRADE_PLUGINS_FILESYSTEM_DEBUG_LIBRARY_INSTALL_DIR ${CORRADE_PLUGINS_DEBUG_LIBRARY_INSTALL_DIR}/filesystems)
+set(CORRADE_PLUGINS_FILESYSTEM_RELEASE_BINARY_INSTALL_DIR ${CORRADE_PLUGINS_RELEASE_BINARY_INSTALL_DIR}/filesystems)
+set(CORRADE_PLUGINS_FILESYSTEM_RELEASE_LIBRARY_INSTALL_DIR ${CORRADE_PLUGINS_RELEASE_LIBRARY_INSTALL_DIR}/filesystems)
+
+# Make these paths configurable from outside. This is *not* PATH, because CMake
+# always converts the path to an absolute location internally, making it
+# impossible to specify relative paths there. Sorry in advance for not having
+# the dir selection button in CMake GUI.
+set(CORRADE_PLUGINS_DEBUG_DIR ""
+    CACHE STRING "Base directory where to look for Corrade plugins for debug builds")
+set(CORRADE_PLUGINS_RELEASE_DIR ""
+    CACHE STRING "Base directory where to look for Corrade plugins for release builds")
+set(CORRADE_PLUGINS_DIR ""
+    CACHE STRING "Base directory where to look for Corrade plugins")
+
+# Plugin directories. Set only if the above are non-empty. otherwise empty as
+# well.
+if(CORRADE_PLUGINS_DIR)
+    set(CORRADE_PLUGINS_FILESYSTEM_DIR ${CORRADE_PLUGINS_DIR}/filesystems)
+endif()
+if(CORRADE_PLUGINS_DEBUG_DIR)
+    set(CORRADE_PLUGINS_FILESYSTEM_DEBUG_DIR ${CORRADE_PLUGINS_DEBUG_DIR}/filesystems)
+endif()
+if(CORRADE_PLUGINS_RELEASE_DIR)
+    set(CORRADE_PLUGINS_FILESYSTEM_RELEASE_DIR ${CORRADE_PLUGINS_RELEASE_DIR}/filesystems)
 endif()
 
 # Library version. CORRADE_VERSION_YEAR/MONTH is used in
