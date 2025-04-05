@@ -165,6 +165,7 @@ struct StridedArrayViewTest: TestSuite::Tester {
     void construct3DFromStaticViewVoid();
     void construct3DFromStaticViewConstVoid();
     void construct3DDerived();
+    void construct3DFrom2DWithArrayType();
     void construct3DFromLessDimensions();
 
     void constructZeroNullPointerAmbiguity();
@@ -390,6 +391,7 @@ StridedArrayViewTest::StridedArrayViewTest() {
               &StridedArrayViewTest::construct3DFromStaticViewVoid,
               &StridedArrayViewTest::construct3DFromStaticViewConstVoid,
               &StridedArrayViewTest::construct3DDerived,
+              &StridedArrayViewTest::construct3DFrom2DWithArrayType,
               &StridedArrayViewTest::construct3DFromLessDimensions,
 
               &StridedArrayViewTest::constructZeroNullPointerAmbiguity,
@@ -1930,6 +1932,56 @@ void StridedArrayViewTest::construct3DDerived() {
     CORRADE_COMPARE(cav.stride(), (Stride2D{2, 2}));
 
     CORRADE_VERIFY(std::is_nothrow_constructible<Containers::StridedArrayView3D<Base>, Containers::StridedArrayView3D<Derived>>::value);
+}
+
+void StridedArrayViewTest::construct3DFrom2DWithArrayType() {
+    int data[2*3][5]{
+        {2, 3, 1, 7, 12},
+        {5, 1, 7, 12, -1},
+        {1, 7, 12, 22, 15},
+
+        {1, 7, -17, 12, 7},
+        {9, 19, 1, 7, 12},
+        {1, 7, 12, 4, 8}
+    };
+
+    /* Done the hard way just for comparison */
+    StridedArrayView3Di a{data, &data[0][0], {2, 3, 5}, {3*5*4, 5*4, 4}};
+    CORRADE_COMPARE(a[0][2][4], 15);
+    CORRADE_COMPARE(a[1][0][2], -17);
+
+    /* This is apparently possible */
+    StridedArrayView2D<int[5]> b{data, {2, 3}};
+    CORRADE_COMPARE(b.data(), &data[0]);
+    CORRADE_COMPARE(b.stride(), (Stride2D{3*5*4, 5*4}));
+    CORRADE_COMPARE(b[0][2][4], 15);
+    CORRADE_COMPARE(b[1][0][2], -17);
+
+    /* And now this is too */
+    StridedArrayView3Di b3 = b;
+    CORRADE_COMPARE(b3.data(), &data[0]);
+    CORRADE_COMPARE(b3.size(), (Size3D{2, 3, 5}));
+    CORRADE_COMPARE(b3.stride(), (Stride3D{3*5*4, 5*4, 4}));
+    CORRADE_COMPARE(b3[0][2][4], 15);
+    CORRADE_COMPARE(b3[1][0][2], -17);
+
+    /* Constructing a const view from a mutable with an array type of one
+       dimension less should also be possible */
+    ConstStridedArrayView3Di cb3 = b;
+    CORRADE_COMPARE(cb3.data(), &data[0]);
+    CORRADE_COMPARE(cb3.size(), (Size3D{2, 3, 5}));
+    CORRADE_COMPARE(cb3.stride(), (Stride3D{3*5*4, 5*4, 4}));
+    CORRADE_COMPARE(cb3[0][2][4], 15);
+    CORRADE_COMPARE(cb3[1][0][2], -17);
+
+    CORRADE_VERIFY(std::is_nothrow_constructible<StridedArrayView3Di, StridedArrayView2D<int[5]>>::value);
+    CORRADE_VERIFY(std::is_nothrow_constructible<ConstStridedArrayView3Di, StridedArrayView2D<int[5]>>::value);
+    /* Construction the other way shouldn't be possible */
+    CORRADE_VERIFY(!std::is_constructible<StridedArrayView1Di, StridedArrayView3Di>::value);
+    /* Construction of a mutable view from a const or another type shouldn't be
+       possible either */
+    CORRADE_VERIFY(!std::is_constructible<StridedArrayView3Di, StridedArrayView2D<const int[5]>>::value);
+    CORRADE_VERIFY(!std::is_constructible<StridedArrayView3Di, StridedArrayView2D<float[5]>>::value);
 }
 
 void StridedArrayViewTest::construct3DFromLessDimensions() {

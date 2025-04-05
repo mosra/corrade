@@ -413,6 +413,25 @@ template<unsigned dimensions, class T> class StridedArrayView {
         }
 
         /**
+         * @brief Construct from a @ref StridedArrayView of one dimension less containing an array type
+         * @m_since_latest
+         *
+         * Enabled only if @cpp T @ce is either @cpp U @ce or @cpp const U @ce.
+         * One extra dimension is added at the back, the type array size
+         * becomes the last dimension size and @cpp sizeof(T) @ce
+         * becomes the last dimension stride.
+         */
+        /* Somehow using `size` makes it conflicts with size() on GCC when
+           matching the definition with this declaration. The constructor with
+           U(&data)[size] above doesn't have a problem with that because it's
+           defined inline. */
+        template<std::size_t size_, class U
+            #ifndef DOXYGEN_GENERATING_OUTPUT
+            , class =typename std::enable_if<std::is_same<T, U>::value || std::is_same<T, const U>::value>::type
+            #endif
+        > /*implicit*/ StridedArrayView(const StridedArrayView<dimensions - 1, U[size_]>& other) noexcept;
+
+        /**
          * @brief Construct from a @ref StridedArrayView of smaller dimension count
          * @m_since_latest
          *
@@ -2198,6 +2217,16 @@ template<unsigned dimensions> constexpr StridedArrayView<dimensions, const void>
     static_cast<void>(data),
     #endif
     member)}, _size{size}, _stride{stride} {}
+
+template<unsigned dimensions, class T> template<std::size_t size_, class U, class> StridedArrayView<dimensions, T>::StridedArrayView(const StridedArrayView<dimensions - 1, U[size_]>& other) noexcept: _data{other._data}, _size{Corrade::NoInit}, _stride{Corrade::NoInit} {
+    /* Copy size and stride in the existing dimensions */
+    for(std::size_t i = 0; i != dimensions - 1; ++i) {
+        _size._data[i] = other._size._data[i];
+        _stride._data[i] = other._stride._data[i];
+    }
+    _size._data[dimensions - 1] = size_;
+    _stride._data[dimensions - 1] = sizeof(T);
+}
 
 template<unsigned dimensions, class T> template<unsigned lessDimensions, class U, class> StridedArrayView<dimensions, T>::StridedArrayView(const StridedArrayView<lessDimensions, U>& other) noexcept: _data{other._data}, _size{Corrade::NoInit}, _stride{Corrade::NoInit} {
     /* Set size and stride in the extra dimensions */

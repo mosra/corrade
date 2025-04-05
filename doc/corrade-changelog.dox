@@ -301,7 +301,8 @@ namespace Corrade {
     and @ref Containers::StaticArray::StaticArray(InPlaceInitT, T(&&)[size])
     for more convenience with in-place creation of arrays of complex types.
 -   Added a @ref Containers::StridedArrayView constructor from a strided view
-    with less dimensions
+    with less dimensions, and from a strided view with an array type of one
+    dimension less
 -   Added a @ref Containers::stridedArrayView(ArrayView<T>, std::size_t, std::ptrdiff_t)
     helper to complement @ref Containers::stridedArrayView(ArrayView<typename StridedArrayView1D<T>::ErasedType>, T*, std::size_t, std::ptrdiff_t)
 -   @ref Containers::Array::Array(InPlaceInitT, std::initializer_list<T>)
