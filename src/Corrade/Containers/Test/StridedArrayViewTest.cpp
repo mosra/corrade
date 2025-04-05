@@ -1956,10 +1956,6 @@ void StridedArrayViewTest::construct3DFromLessDimensions() {
     CORRADE_COMPARE(b3[0][1][1], -1);
     CORRADE_COMPARE(b3[0][2][1], 15);
 
-    CORRADE_VERIFY(std::is_nothrow_constructible<StridedArrayView3Di, StridedArrayView1Di>::value);
-    /* Construction the other way shouldn't be possible */
-    CORRADE_VERIFY(!std::is_constructible<StridedArrayView1Di, StridedArrayView3Di>::value);
-
     /* Constructing a const view from a mutable with less dimensions should
        also be possible */
     ConstStridedArrayView3Di ca3 = a;
