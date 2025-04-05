@@ -282,6 +282,9 @@ struct StridedArrayViewTest: TestSuite::Tester {
     void castInflateVoidZeroStride();
     void castInflateVoidNegativeStride();
     void castInflateVoidInvalid();
+
+    void size();
+    void size3D();
 };
 
 typedef StridedArrayView1D<int> StridedArrayView1Di;
@@ -505,7 +508,10 @@ StridedArrayViewTest::StridedArrayViewTest() {
               &StridedArrayViewTest::castInflateVoid,
               &StridedArrayViewTest::castInflateVoidZeroStride,
               &StridedArrayViewTest::castInflateVoidNegativeStride,
-              &StridedArrayViewTest::castInflateVoidInvalid});
+              &StridedArrayViewTest::castInflateVoidInvalid,
+
+              &StridedArrayViewTest::size,
+              &StridedArrayViewTest::size3D});
 }
 
 void StridedArrayViewTest::constructDefault() {
@@ -4754,6 +4760,18 @@ void StridedArrayViewTest::castInflateVoidInvalid() {
     CORRADE_COMPARE(out,
         "Containers::arrayCast(): can't fit 3 4-byte items into a stride of 6\n"
         "Containers::arrayCast(): can't fit a 4-byte type into a stride of 2\n");
+}
+
+void StridedArrayViewTest::size() {
+    int data[17];
+    StridedArrayView1D<int> view{data};
+    CORRADE_COMPARE(arraySize(view), 17);
+}
+
+void StridedArrayViewTest::size3D() {
+    int data[17*7*13];
+    StridedArrayView3D<int> view{data, {17, 7, 13}};
+    CORRADE_COMPARE(arraySize(view), 17);
 }
 
 }}}}

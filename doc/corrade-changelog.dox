@@ -339,6 +339,8 @@ namespace Corrade {
     is
 -   Added a @ref Containers::arraySize(U(T::*)[size_]) overload for array
     members
+-   Added a @ref Containers::arraySize(const StridedArrayView<dimensions, T>&)
+    overload for feature parity with other array (view) containers
 
 @subsubsection corrade-changelog-latest-changes-pluginmanager PluginManager library
 

@@ -2011,6 +2011,17 @@ template<unsigned newDimensions, class U, unsigned dimensions> StridedArrayView<
     return StridedArrayView<newDimensions, U>{out._size, out._stride, const_cast<void*>(out._data)};
 }
 
+/** @relatesalso StridedArrayView
+@brief Array size
+@m_since_latest
+
+Returns size of the first dimension. See @ref arraySize(ArrayView<T>) for more
+information.
+*/
+template<unsigned dimensions, class T> std::size_t arraySize(const StridedArrayView<dimensions, T>& view) {
+    return Size<dimensions>{view.size()}[0];
+}
+
 /**
 @brief Strided array view iterator
 
