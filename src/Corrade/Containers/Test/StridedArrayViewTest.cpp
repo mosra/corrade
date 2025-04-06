@@ -238,6 +238,7 @@ struct StridedArrayViewTest: TestSuite::Tester {
     void sliceRvalueOverloadedMemberFunctionPointer();
     void sliceMemberFunctionPointerDerived();
     void sliceMemberFunctionPointerEmptyView();
+    void sliceMemberFunctionPointerArrayType();
     void sliceMemberFunctionPointerReturningOffsetOutOfRange();
 
     void sliceBit();
@@ -466,6 +467,7 @@ StridedArrayViewTest::StridedArrayViewTest() {
               &StridedArrayViewTest::sliceRvalueOverloadedMemberFunctionPointer,
               &StridedArrayViewTest::sliceMemberFunctionPointerDerived,
               &StridedArrayViewTest::sliceMemberFunctionPointerEmptyView,
+              &StridedArrayViewTest::sliceMemberFunctionPointerArrayType,
               &StridedArrayViewTest::sliceMemberFunctionPointerReturningOffsetOutOfRange,
 
               &StridedArrayViewTest::sliceBit,
@@ -3753,6 +3755,69 @@ void StridedArrayViewTest::sliceMemberFunctionPointerEmptyView() {
     CORRADE_COMPARE(csecond.size(), 0);
     CORRADE_COMPARE(second.stride(), 0);
     CORRADE_COMPARE(csecond.stride(), 0);
+}
+
+void StridedArrayViewTest::sliceMemberFunctionPointerArrayType() {
+    /* MSVC 2015 to 2022 (and likely any future version as well) ICEs when
+       trying to call a member function pointer with an array return type. The
+       only workaround is reinterpret_cast'ing the pointer to a
+       non-array-reference return type. */
+
+    struct Data {
+        public:
+            /*implicit*/ Data(float a, float b, float c, float d, float e): floats{a, b, c, d, e} {}
+
+            auto data() -> float(&)[5] { return floats; }
+            auto dataLvalue() & -> float(&)[5] { return floats; }
+            auto dataConst() const -> const float(&)[5] { return floats; }
+            auto dataConstLvalue() const & -> const float(&)[5] { return floats; }
+
+            double something;
+            int other;
+            float floats[5];
+    };
+
+    Data data[]{
+        {1.5f, 0.3f, 3.14f, 2.7f, 0.1f},
+        {2.3f, -7.6f, 0.2f, -1.1f, 0.0f}
+    };
+    Containers::StridedArrayView1D<Data> view = data;
+
+    /* Verify that all four variants work and return a correct offset */
+    int i = 0;
+    for(Containers::StridedArrayView1D<float[5]> view5: {
+        view.slice(&Data::data),
+        view.slice(&Data::dataLvalue)
+    }) {
+        CORRADE_ITERATION(i++);
+        CORRADE_COMPARE(view5.data(), reinterpret_cast<const char*>(data) + 12);
+        CORRADE_COMPARE(view5.size(), 2);
+        CORRADE_COMPARE(view5.stride(), sizeof(Data));
+        CORRADE_COMPARE(view5[0][1], 0.3f);
+        CORRADE_COMPARE(view5[1][3], -1.1f);
+    }
+
+    int j = 0;
+    for(Containers::StridedArrayView1D<const float[5]> view5: {
+        view.slice(&Data::dataConst),
+        view.slice(&Data::dataConstLvalue)
+    }) {
+        CORRADE_ITERATION(j++);
+        CORRADE_COMPARE(view5.data(), reinterpret_cast<const char*>(data) + 12);
+        CORRADE_COMPARE(view5.size(), 2);
+        CORRADE_COMPARE(view5.stride(), sizeof(Data));
+        CORRADE_COMPARE(view5[0][1], 0.3f);
+        CORRADE_COMPARE(view5[1][3], -1.1f);
+    }
+
+    /* Verify that direct member slice "just works" without crashing or
+       workarounds */
+    Containers::StridedArrayView1D<float[5]> viewDirect = view.slice(&Data::floats);
+    CORRADE_COMPARE(viewDirect.data(), reinterpret_cast<const char*>(data) + 12);
+    CORRADE_COMPARE(viewDirect.size(), 2);
+    CORRADE_COMPARE(viewDirect.stride(), sizeof(Data));
+    CORRADE_COMPARE(viewDirect[0][1], 0.3f);
+    CORRADE_COMPARE(viewDirect[1][3], -1.1f);
 }
 
 void StridedArrayViewTest::sliceMemberFunctionPointerReturningOffsetOutOfRange() {

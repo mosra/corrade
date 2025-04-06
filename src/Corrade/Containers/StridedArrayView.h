@@ -2434,6 +2434,29 @@ template<class T, class U, class V> std::size_t memberFunctionSliceOffset(V U::*
     return offset;
 }
 
+/* MSVC 2015 to 2022 (and likely any future version as well) ICEs when trying
+   to call a member function pointer with an array return type. The only
+   workaround is reinterpret_cast'ing the pointer to a non-array-reference
+   return type. See StridedArrayViewTest::sliceMemberFunctionPointerArrayType()
+   for a corresponding test, note that on Clang and GCC this produces an
+   "incompatible function cast" warning. It should be fine however, since it
+   returns just a memory address in both cases, which we then use to calculate
+   the member offset. */
+#if defined(CORRADE_TARGET_MSVC) && !defined(CORRADE_TARGET_CLANG_CL)
+template<class T, class U, class V, std::size_t size> std::size_t memberFunctionSliceOffset(V(&(U::*memberFunction)())[size]) {
+    return memberFunctionSliceOffset<T, U>(reinterpret_cast<V&(U::*)()>(memberFunction));
+}
+template<class T, class U, class V, std::size_t size> std::size_t memberFunctionSliceOffset(V(&(U::*memberFunction)() &)[size]) {
+    return memberFunctionSliceOffset<T, U>(reinterpret_cast<V&(U::*)() &>(memberFunction));
+}
+template<class T, class U, class V, std::size_t size> std::size_t memberFunctionSliceOffset(V(&(U::*memberFunction)() const)[size]) {
+    return memberFunctionSliceOffset<T, U>(reinterpret_cast<V&(U::*)() const>(memberFunction));
+}
+template<class T, class U, class V, std::size_t size> std::size_t memberFunctionSliceOffset(V(&(U::*memberFunction)() const &)[size]) {
+    return memberFunctionSliceOffset<T, U>(reinterpret_cast<V&(U::*)() const &>(memberFunction));
+}
+#endif
+
 }
 
 #ifndef DOXYGEN_GENERATING_OUTPUT
