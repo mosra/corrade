@@ -48,9 +48,9 @@ namespace Implementation {
 template<std::size_t size_, class T, bool trivial> struct StaticArrayData;
 template<std::size_t size_, class T> struct StaticArrayData<size_, T, true> {
     /* Here we additionally deal with types that have a NoInit constructor */
-    template<class U = T, typename std::enable_if<!std::is_constructible<U, Corrade::NoInitT>::value>::type* = nullptr> explicit StaticArrayData(Corrade::NoInitT) {}
-    template<class U = T, typename std::enable_if<std::is_constructible<U, Corrade::NoInitT>::value>::type* = nullptr> explicit StaticArrayData(Corrade::NoInitT): StaticArrayData{Corrade::NoInit, typename GenerateSequence<size_>::Type{}} {}
-    template<std::size_t... sequence, class U = T, typename std::enable_if<std::is_constructible<U, Corrade::NoInitT>::value>::type* = nullptr> explicit StaticArrayData(Corrade::NoInitT noInit, Sequence<sequence...>): _data{T{(&noInit)[0*sequence]}...} {}
+    template<class U = T, typename std::enable_if<!std::is_constructible<U, Corrade::NoInitT>::value, int>::type = 0> explicit StaticArrayData(Corrade::NoInitT) {}
+    template<class U = T, typename std::enable_if<std::is_constructible<U, Corrade::NoInitT>::value, int>::type = 0> explicit StaticArrayData(Corrade::NoInitT): StaticArrayData{Corrade::NoInit, typename GenerateSequence<size_>::Type{}} {}
+    template<std::size_t... sequence, class U = T, typename std::enable_if<std::is_constructible<U, Corrade::NoInitT>::value, int>::type = 0> explicit StaticArrayData(Corrade::NoInitT noInit, Sequence<sequence...>): _data{T{(&noInit)[0*sequence]}...} {}
 
     /* Compared to StaticArrayData<size_, T, false> it does the right thing by
        default. MSVC 2015, 2019 and 2022 (but not 2017, _MSC_VER=191x)
@@ -63,8 +63,8 @@ template<std::size_t size_, class T> struct StaticArrayData<size_, T, true> {
     #if !defined(CORRADE_TARGET_MSVC) || defined(CORRADE_TARGET_CLANG) || (_MSC_VER >= 1910 && _MSC_VER < 1920)
     constexpr explicit StaticArrayData(Corrade::DefaultInitT) {}
     #else
-    template<class U = T, typename std::enable_if<std::is_trivially_constructible<U>::value>::type* = nullptr> explicit StaticArrayData(Corrade::DefaultInitT) {}
-    template<class U = T, typename std::enable_if<!std::is_trivially_constructible<U>::value>::type* = nullptr> constexpr explicit StaticArrayData(Corrade::DefaultInitT): _data{} {}
+    template<class U = T, typename std::enable_if<std::is_trivially_constructible<U>::value, int>::type = 0> explicit StaticArrayData(Corrade::DefaultInitT) {}
+    template<class U = T, typename std::enable_if<!std::is_trivially_constructible<U>::value, int>::type = 0> constexpr explicit StaticArrayData(Corrade::DefaultInitT): _data{} {}
     #endif
 
     /* Compared to StaticArrayData<size_, T, false>, there's no way to trigger
@@ -453,7 +453,7 @@ template<std::size_t size_, class T> class StaticArray: Implementation::StaticAr
         #ifdef DOXYGEN_GENERATING_OUTPUT
         template<class ...Args> constexpr /*implicit*/ StaticArray(Args&&... args);
         #else
-        template<class First, class ...Next, class = typename std::enable_if<std::is_convertible<First&&, T>::value>::type> constexpr /*implicit*/ StaticArray(First&& first, Next&&... next): Implementation::StaticArrayDataFor<size_, T>{Corrade::InPlaceInit, Utility::forward<First>(first), Utility::forward<Next>(next)...} {
+        template<class First, class ...Next, typename std::enable_if<std::is_convertible<First&&, T>::value, int>::type = 0> constexpr /*implicit*/ StaticArray(First&& first, Next&&... next): Implementation::StaticArrayDataFor<size_, T>{Corrade::InPlaceInit, Utility::forward<First>(first), Utility::forward<Next>(next)...} {
             static_assert(sizeof...(next) + 1 == size_, "Containers::StaticArray: wrong number of initializers");
         }
         #endif
@@ -631,8 +631,8 @@ template<std::size_t size_, class T> class StaticArray: Implementation::StaticAr
            builtin operator[] for pointers if an int or ssize_t is used due to
            the implicit pointer conversion. Sigh. */
         /** @todo clean up once implicit pointer conversion is removed */
-        template<class U, class = typename std::enable_if<std::is_convertible<U, std::size_t>::value>::type> T& operator[](U i);
-        template<class U, class = typename std::enable_if<std::is_convertible<U, std::size_t>::value>::type> constexpr const T& operator[](U i) const;
+        template<class U, typename std::enable_if<std::is_convertible<U, std::size_t>::value, int>::type = 0> T& operator[](U i);
+        template<class U, typename std::enable_if<std::is_convertible<U, std::size_t>::value, int>::type = 0> constexpr const T& operator[](U i) const;
         #endif
 
         /**
@@ -673,7 +673,7 @@ template<std::size_t size_, class T> class StaticArray: Implementation::StaticAr
         /* To avoid ambiguity when calling sliceSize(0, ...). FFS, zero as null
            pointer was deprecated in C++11 already, why is this still a
            problem?! */
-        template<class U, class = typename std::enable_if<std::is_convertible<U, T*>::value && !std::is_convertible<U, std::size_t>::value>::type> ArrayView<T> sliceSize(U begin, std::size_t size) {
+        template<class U, typename std::enable_if<std::is_convertible<U, T*>::value && !std::is_convertible<U, std::size_t>::value, int>::type = 0> ArrayView<T> sliceSize(U begin, std::size_t size) {
             return ArrayView<T>{*this}.sliceSize(begin, size);
         }
         #endif
@@ -687,7 +687,7 @@ template<std::size_t size_, class T> class StaticArray: Implementation::StaticAr
         /* To avoid ambiguity when calling sliceSize(0, ...). FFS, zero as null
            pointer was deprecated in C++11 already, why is this still a
            problem?! */
-        template<class U, class = typename std::enable_if<std::is_convertible<U, const T*>::value && !std::is_convertible<U, std::size_t>::value>::type> constexpr ArrayView<const T> sliceSize(const U begin, std::size_t size) const {
+        template<class U, typename std::enable_if<std::is_convertible<U, const T*>::value && !std::is_convertible<U, std::size_t>::value, int>::type = 0> constexpr ArrayView<const T> sliceSize(const U begin, std::size_t size) const {
             return ArrayView<const T>{*this}.sliceSize(begin, size);
         }
         #endif
@@ -717,7 +717,7 @@ template<std::size_t size_, class T> class StaticArray: Implementation::StaticAr
         /* To avoid ambiguity when calling slice<size>(0). FFS, zero as null
            pointer was deprecated in C++11 already, why is this still a
            problem?! */
-        template<std::size_t size__, class U, class = typename std::enable_if<std::is_convertible<U, T*>::value && !std::is_convertible<U, std::size_t>::value>::type> StaticArrayView<size__, T> slice(U begin) {
+        template<std::size_t size__, class U, typename std::enable_if<std::is_convertible<U, T*>::value && !std::is_convertible<U, std::size_t>::value, int>::type = 0> StaticArrayView<size__, T> slice(U begin) {
             return ArrayView<T>(*this).template slice<size__>(begin);
         }
         #endif
@@ -728,7 +728,7 @@ template<std::size_t size_, class T> class StaticArray: Implementation::StaticAr
         /* To avoid ambiguity when calling slice<size>(0). FFS, zero as null
            pointer was deprecated in C++11 already, why is this still a
            problem?! */
-        template<std::size_t size__, class U, class = typename std::enable_if<std::is_convertible<U, const T*>::value && !std::is_convertible<U, std::size_t>::value>::type> constexpr StaticArrayView<size__, const T> slice(U begin) const {
+        template<std::size_t size__, class U, typename std::enable_if<std::is_convertible<U, const T*>::value && !std::is_convertible<U, std::size_t>::value, int>::type = 0> constexpr StaticArrayView<size__, const T> slice(U begin) const {
             return ArrayView<const T>(*this).template slice<size__>(begin);
         }
         #endif
@@ -787,7 +787,7 @@ template<std::size_t size_, class T> class StaticArray: Implementation::StaticAr
         #else
         /* To avoid ambiguity when calling prefix(0). FFS, zero as null pointer
            was deprecated in C++11 already, why is this still a problem?! */
-        template<class U, class = typename std::enable_if<std::is_convertible<U, T*>::value && !std::is_convertible<U, std::size_t>::value>::type> ArrayView<T> prefix(U end) {
+        template<class U, typename std::enable_if<std::is_convertible<U, T*>::value && !std::is_convertible<U, std::size_t>::value, int>::type = 0> ArrayView<T> prefix(U end) {
             return ArrayView<T>(*this).prefix(end);
         }
         #endif
@@ -797,7 +797,7 @@ template<std::size_t size_, class T> class StaticArray: Implementation::StaticAr
         #else
         /* To avoid ambiguity when calling prefix(0). FFS, zero as null pointer
            was deprecated in C++11 already, why is this still a problem?! */
-        template<class U, class = typename std::enable_if<std::is_convertible<U, const T*>::value && !std::is_convertible<U, std::size_t>::value>::type> constexpr ArrayView<const T> prefix(U end) const {
+        template<class U, typename std::enable_if<std::is_convertible<U, const T*>::value && !std::is_convertible<U, std::size_t>::value, int>::type = 0> constexpr ArrayView<const T> prefix(U end) const {
             return ArrayView<const T>(*this).prefix(end);
         }
         #endif
@@ -1182,12 +1182,12 @@ template<std::size_t size_, class T> StaticArrayData<size_, T, false>& StaticArr
 }
 
 #ifndef DOXYGEN_GENERATING_OUTPUT
-template<std::size_t size_, class T> template<class U, class> constexpr const T& StaticArray<size_, T>::operator[](const U i) const {
+template<std::size_t size_, class T> template<class U, typename std::enable_if<std::is_convertible<U, std::size_t>::value, int>::type> constexpr const T& StaticArray<size_, T>::operator[](const U i) const {
     return CORRADE_CONSTEXPR_DEBUG_ASSERT(std::size_t(i) < size_,
         "Containers::StaticArray::operator[](): index" << i << "out of range for" << size_ << "elements"), this->_data[i];
 }
 
-template<std::size_t size_, class T> template<class U, class> T& StaticArray<size_, T>::operator[](const U i) {
+template<std::size_t size_, class T> template<class U, typename std::enable_if<std::is_convertible<U, std::size_t>::value, int>::type> T& StaticArray<size_, T>::operator[](const U i) {
     return const_cast<T&>(static_cast<const StaticArray<size_, T>&>(*this)[i]);
 }
 #endif

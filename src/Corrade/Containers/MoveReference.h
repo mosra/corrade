@@ -80,7 +80,11 @@ template<class T> class MoveReference {
          *
          * Expects that @p T is a base of @p U.
          */
-        template<class U, class = typename std::enable_if<std::is_base_of<T, U>::value>::type> /*implicit*/ MoveReference(MoveReference<U> other) noexcept: _reference{other._reference} {}
+        template<class U
+            #ifndef DOXYGEN_GENERATING_OUTPUT
+            , class = typename std::enable_if<std::is_base_of<T, U>::value>::type
+            #endif
+        > /*implicit*/ MoveReference(MoveReference<U> other) noexcept: _reference{other._reference} {}
 
         /** @brief Underlying reference */
         /*implicit*/ operator T&() const { return *_reference; }

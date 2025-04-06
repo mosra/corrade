@@ -223,7 +223,11 @@ class EnumSet {
 Works only with @ref EnumSet, not with @ref BigEnumSet.
 @see @ref std::underlying_type
 */
-template<class T, class = typename std::enable_if<std::is_enum<T>::value>::type> constexpr typename std::underlying_type<T>::type enumCastUnderlyingType(T value) {
+template<class T
+    #ifndef DOXYGEN_GENERATING_OUTPUT
+    , class = typename std::enable_if<std::is_enum<T>::value>::type
+    #endif
+> constexpr typename std::underlying_type<T>::type enumCastUnderlyingType(T value) {
     return typename std::underlying_type<T>::type(value);
 }
 

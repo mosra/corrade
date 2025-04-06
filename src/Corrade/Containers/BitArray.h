@@ -136,8 +136,7 @@ class CORRADE_UTILITY_EXPORT BitArray {
            constructZeroNullPointerAmbiguity() test for more info. FFS, zero as
            null pointer was deprecated in C++11 already, why is this still a
            problem?! */
-        template<class T, class = typename std::enable_if<std::is_same<std::nullptr_t, T>::value>::type> /*implicit*/ BitArray(T) noexcept: _data{}, _sizeOffset{}, _deleter{} {}
-
+        template<class T, typename std::enable_if<std::is_same<std::nullptr_t, T>::value, int>::type = 0> /*implicit*/ BitArray(T) noexcept: _data{}, _sizeOffset{}, _deleter{} {}
         /*implicit*/ BitArray() noexcept: _data{}, _sizeOffset{}, _deleter{} {}
         #endif
 

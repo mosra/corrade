@@ -221,7 +221,7 @@ template<unsigned dimensions, class T> class StridedDimensions {
          * Enabled only for the one-dimensional case.
          */
         #ifndef DOXYGEN_GENERATING_OUTPUT
-        template<unsigned d = dimensions, class = typename std::enable_if<d == 1>::type>
+        template<unsigned d = dimensions, typename std::enable_if<d == 1, int>::type = 0>
         #endif
         constexpr /*implicit*/ operator T() const { return _data[0]; }
 

@@ -165,8 +165,8 @@ template<class F, class S, class T> class Triple {
          */
         explicit Triple(Corrade::NoInitT) noexcept;
         #else
-        template<class F_ = F, class = typename std::enable_if<std::is_standard_layout<F_>::value && std::is_standard_layout<S>::value && std::is_standard_layout<T>::value && std::is_trivial<F_>::value && std::is_trivial<S>::value && std::is_trivial<T>::value>::type> explicit Triple(Corrade::NoInitT) noexcept {}
-        template<class F_ = F, class S_ = S, class = typename std::enable_if<std::is_constructible<F_, Corrade::NoInitT>::value && std::is_constructible<S_, Corrade::NoInitT>::value && std::is_constructible<T, Corrade::NoInitT>::value>::type> explicit Triple(Corrade::NoInitT) noexcept(std::is_nothrow_constructible<F, Corrade::NoInitT>::value && std::is_nothrow_constructible<S, Corrade::NoInitT>::value && std::is_nothrow_constructible<T, Corrade::NoInitT>::value): _first{Corrade::NoInit}, _second{Corrade::NoInit}, _third{Corrade::NoInit} {}
+        template<class F_ = F, typename std::enable_if<std::is_standard_layout<F_>::value && std::is_standard_layout<S>::value && std::is_standard_layout<T>::value && std::is_trivial<F_>::value && std::is_trivial<S>::value && std::is_trivial<T>::value, int>::type = 0> explicit Triple(Corrade::NoInitT) noexcept {}
+        template<class F_ = F, typename std::enable_if<std::is_constructible<F_, Corrade::NoInitT>::value && std::is_constructible<S, Corrade::NoInitT>::value && std::is_constructible<T, Corrade::NoInitT>::value, int>::type = 0> explicit Triple(Corrade::NoInitT) noexcept(std::is_nothrow_constructible<F, Corrade::NoInitT>::value && std::is_nothrow_constructible<S, Corrade::NoInitT>::value && std::is_nothrow_constructible<T, Corrade::NoInitT>::value): _first{Corrade::NoInit}, _second{Corrade::NoInit}, _third{Corrade::NoInit} {}
         #endif
 
         /**
@@ -273,7 +273,11 @@ template<class F, class S, class T> class Triple {
             {}
 
         /** @brief Copy-construct a triple from another of different type */
-        template<class OtherF, class OtherS, class OtherT, class = typename std::enable_if<std::is_constructible<F, const OtherF&>::value && std::is_constructible<S, const OtherS&>::value && std::is_constructible<T, const OtherT&>::value>::type> constexpr explicit Triple(const Triple<OtherF, OtherS, OtherT>& other) noexcept(std::is_nothrow_constructible<F, const OtherF&>::value && std::is_nothrow_constructible<S, const OtherS&>::value && std::is_nothrow_constructible<T, const OtherT&>::value):
+        template<class OtherF, class OtherS, class OtherT
+            #ifndef DOXYGEN_GENERATING_OUTPUT
+            , typename std::enable_if<std::is_constructible<F, const OtherF&>::value && std::is_constructible<S, const OtherS&>::value && std::is_constructible<T, const OtherT&>::value, int>::type = 0
+            #endif
+        > constexpr explicit Triple(const Triple<OtherF, OtherS, OtherT>& other) noexcept(std::is_nothrow_constructible<F, const OtherF&>::value && std::is_nothrow_constructible<S, const OtherS&>::value && std::is_nothrow_constructible<T, const OtherT&>::value):
             /* Explicit T() to avoid warnings for int-to-float conversion etc.,
                as that's a desirable use case here (and the constructor is
                explicit because of that). Using () instead of {} alone doesn't
@@ -289,7 +293,11 @@ template<class F, class S, class T> class Triple {
             {}
 
         /** @brief Move-construct a triple from another of different type */
-        template<class OtherF, class OtherS, class OtherT, class = typename std::enable_if<std::is_constructible<F, OtherF&&>::value && std::is_constructible<S, OtherS&&>::value && std::is_constructible<T, OtherT&&>::value>::type> constexpr explicit Triple(Triple<OtherF, OtherS, OtherT>&& other) noexcept(std::is_nothrow_constructible<F, OtherF&&>::value && std::is_nothrow_constructible<S, OtherS&&>::value && std::is_nothrow_constructible<T, OtherT&&>::value):
+        template<class OtherF, class OtherS, class OtherT
+            #ifndef DOXYGEN_GENERATING_OUTPUT
+            , typename std::enable_if<std::is_constructible<F, OtherF&&>::value && std::is_constructible<S, OtherS&&>::value && std::is_constructible<T, OtherT&&>::value, int>::type = 0
+            #endif
+        > constexpr explicit Triple(Triple<OtherF, OtherS, OtherT>&& other) noexcept(std::is_nothrow_constructible<F, OtherF&&>::value && std::is_nothrow_constructible<S, OtherS&&>::value && std::is_nothrow_constructible<T, OtherT&&>::value):
             /* Explicit T() to avoid conversion warnings, similar to above;
                GCC 4.8 special case also similarly to above although
                copyMoveConstructPlainStruct() cannot really test it (see there
@@ -383,31 +391,31 @@ template<class F, class S, class T> class Triple {
            as well. There doesn't seem to be a way to call those directly, and
            I can't find any practical use of std::tuple_size, tuple_element etc
            on C++11 and C++14, so this is defined only for newer standards. */
-        template<std::size_t index, typename std::enable_if<index == 0, F>::type* = nullptr> constexpr friend const F& get(const Triple<F, S, T>& value) {
+        template<std::size_t index, typename std::enable_if<index == 0, int>::type = 0> constexpr friend const F& get(const Triple<F, S, T>& value) {
             return value._first;
         }
-        template<std::size_t index, typename std::enable_if<index == 0, F>::type* = nullptr> CORRADE_CONSTEXPR14 friend F& get(Triple<F, S, T>& value) {
+        template<std::size_t index, typename std::enable_if<index == 0, int>::type = 0> CORRADE_CONSTEXPR14 friend F& get(Triple<F, S, T>& value) {
             return value._first;
         }
-        template<std::size_t index, typename std::enable_if<index == 0, F>::type* = nullptr> CORRADE_CONSTEXPR14 friend F&& get(Triple<F, S, T>&& value) {
+        template<std::size_t index, typename std::enable_if<index == 0, int>::type = 0> CORRADE_CONSTEXPR14 friend F&& get(Triple<F, S, T>&& value) {
             return Utility::move(value._first);
         }
-        template<std::size_t index, typename std::enable_if<index == 1, S>::type* = nullptr> constexpr friend const S& get(const Triple<F, S, T>& value) {
+        template<std::size_t index, typename std::enable_if<index == 1, int>::type = 0> constexpr friend const S& get(const Triple<F, S, T>& value) {
             return value._second;
         }
-        template<std::size_t index, typename std::enable_if<index == 1, S>::type* = nullptr> CORRADE_CONSTEXPR14 friend S& get(Triple<F, S, T>& value) {
+        template<std::size_t index, typename std::enable_if<index == 1, int>::type = 0> CORRADE_CONSTEXPR14 friend S& get(Triple<F, S, T>& value) {
             return value._second;
         }
-        template<std::size_t index, typename std::enable_if<index == 1, S>::type* = nullptr> CORRADE_CONSTEXPR14 friend S&& get(Triple<F, S, T>&& value) {
+        template<std::size_t index, typename std::enable_if<index == 1, int>::type = 0> CORRADE_CONSTEXPR14 friend S&& get(Triple<F, S, T>&& value) {
             return Utility::move(value._second);
         }
-        template<std::size_t index, typename std::enable_if<index == 2, T>::type* = nullptr> constexpr friend const T& get(const Triple<F, S, T>& value) {
+        template<std::size_t index, typename std::enable_if<index == 2, int>::type = 0> constexpr friend const T& get(const Triple<F, S, T>& value) {
             return value._third;
         }
-        template<std::size_t index, typename std::enable_if<index == 2, T>::type* = nullptr> CORRADE_CONSTEXPR14 friend T& get(Triple<F, S, T>& value) {
+        template<std::size_t index, typename std::enable_if<index == 2, int>::type = 0> CORRADE_CONSTEXPR14 friend T& get(Triple<F, S, T>& value) {
             return value._third;
         }
-        template<std::size_t index, typename std::enable_if<index == 2, T>::type* = nullptr> CORRADE_CONSTEXPR14 friend T&& get(Triple<F, S, T>&& value) {
+        template<std::size_t index, typename std::enable_if<index == 2, int>::type = 0> CORRADE_CONSTEXPR14 friend T&& get(Triple<F, S, T>&& value) {
             return Utility::move(value._third);
         }
         #endif

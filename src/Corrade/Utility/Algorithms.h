@@ -173,6 +173,7 @@ neither C nor C++ allows array assignment:
 @snippet Utility.cpp Algorithms-copy-C-array
 */
 template<class To, class ToView = decltype(Implementation::arrayViewTypeFor(std::declval<To&&>()))
+    #ifndef DOXYGEN_GENERATING_OUTPUT
     /* On Clang, MSVC and GCC 5 to 10, this overload is somehow getting picked
        for a Containers::ArrayView<const void> argument, attempting to
        materialize std::initializer_list<void> and dying with "forming a
@@ -185,6 +186,7 @@ template<class To, class ToView = decltype(Implementation::arrayViewTypeFor(std:
        below, otherwise you'll get linker errors. */
     #if defined(CORRADE_TARGET_CLANG) || defined(CORRADE_TARGET_MSVC) || (defined(CORRADE_TARGET_GCC) && __GNUC__ >= 5)
     , class = typename std::enable_if<!std::is_same<typename std::remove_const<typename ToView::Type>::type, void>::value>::type
+    #endif
     #endif
 > void copy(std::initializer_list<typename ToView::Type> src, To&& dst);
 

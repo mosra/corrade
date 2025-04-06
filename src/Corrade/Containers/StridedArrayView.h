@@ -320,8 +320,7 @@ template<unsigned dimensions, class T> class StridedArrayView {
            constructZeroNullPointerAmbiguity() test for more info. FFS, zero as
            null pointer was deprecated in C++11 already, why is this still a
            problem?! */
-        template<class U, class = typename std::enable_if<std::is_same<std::nullptr_t, U>::value>::type> constexpr /*implicit*/ StridedArrayView(U) noexcept: _data{}, _size{}, _stride{} {}
-
+        template<class U, typename std::enable_if<std::is_same<std::nullptr_t, U>::value, int>::type = 0> constexpr /*implicit*/ StridedArrayView(U) noexcept: _data{}, _size{}, _stride{} {}
         constexpr /*implicit*/ StridedArrayView() noexcept: _data{}, _size{}, _stride{} {}
         #endif
 
@@ -375,7 +374,7 @@ template<unsigned dimensions, class T> class StridedArrayView {
          * @see @ref stridedArrayView(T*, std::size_t)
          */
         #ifndef DOXYGEN_GENERATING_OUTPUT
-        template<unsigned d = dimensions, class = typename std::enable_if<d == 1>::type>
+        template<unsigned d = dimensions, typename std::enable_if<d == 1, int>::type = 0>
         #endif
         constexpr /*implicit*/ StridedArrayView(T* data, std::size_t size) noexcept: _data{data}, _size{size}, _stride{sizeof(T)} {}
 
@@ -388,12 +387,11 @@ template<unsigned dimensions, class T> class StridedArrayView {
          * the same size; stride is implicitly set to @cpp sizeof(T) @ce.
          * @see @ref stridedArrayView(T(&)[size])
          */
-        #ifdef DOXYGEN_GENERATING_OUTPUT
-        template<class U, std::size_t size>
-        #else
-        template<class U, std::size_t size, unsigned d = dimensions, class = typename std::enable_if<d == 1 && std::is_convertible<U*, T*>::value>::type>
-        #endif
-        constexpr /*implicit*/ StridedArrayView(U(&data)[size]) noexcept: _data{data}, _size{size}, _stride{sizeof(T)} {
+        template<class U, std::size_t size
+            #ifndef DOXYGEN_GENERATING_OUTPUT
+            , unsigned d = dimensions, typename std::enable_if<d == 1 && std::is_convertible<U*, T*>::value, int>::type = 0
+            #endif
+        > constexpr /*implicit*/ StridedArrayView(U(&data)[size]) noexcept: _data{data}, _size{size}, _stride{sizeof(T)} {
             static_assert(sizeof(T) == sizeof(U), "type sizes are not compatible");
         }
 
@@ -403,12 +401,11 @@ template<unsigned dimensions, class T> class StridedArrayView {
          * Enabled only if @cpp T* @ce is implicitly convertible to @cpp U* @ce.
          * Expects that both types have the same size.
          */
-        #ifdef DOXYGEN_GENERATING_OUTPUT
-        template<class U>
-        #else
-        template<class U, class = typename std::enable_if<std::is_convertible<U*, T*>::value>::type>
-        #endif
-        constexpr /*implicit*/ StridedArrayView(const StridedArrayView<dimensions, U>& view) noexcept: _data{view._data}, _size{view._size}, _stride{view._stride} {
+        template<class U
+            #ifndef DOXYGEN_GENERATING_OUTPUT
+            , typename std::enable_if<std::is_convertible<U*, T*>::value, int>::type = 0
+            #endif
+        > constexpr /*implicit*/ StridedArrayView(const StridedArrayView<dimensions, U>& view) noexcept: _data{view._data}, _size{view._size}, _stride{view._stride} {
             static_assert(sizeof(T) == sizeof(U), "type sizes are not compatible");
         }
 
@@ -427,7 +424,7 @@ template<unsigned dimensions, class T> class StridedArrayView {
            defined inline. */
         template<std::size_t size_, class U
             #ifndef DOXYGEN_GENERATING_OUTPUT
-            , class =typename std::enable_if<std::is_same<T, U>::value || std::is_same<T, const U>::value>::type
+            , typename std::enable_if<std::is_same<T, U>::value || std::is_same<T, const U>::value, int>::type = 0
             #endif
         > /*implicit*/ StridedArrayView(const StridedArrayView<dimensions - 1, U[size_]>& other) noexcept;
 
@@ -452,7 +449,7 @@ template<unsigned dimensions, class T> class StridedArrayView {
                complaining that "error C2947: expecting '>' to terminate
                template-parameter-list, found '>'". HAHA. (TBH, parsing this is
                a hell.) */
-            , class = typename std::enable_if<(lessDimensions < dimensions) && (std::is_same<T, U>::value || std::is_same<T, const U>::value)>::type
+            , typename std::enable_if<(lessDimensions < dimensions) && (std::is_same<T, U>::value || std::is_same<T, const U>::value), int>::type = 0
             #endif
         > /*implicit*/ StridedArrayView(const StridedArrayView<lessDimensions, U>& other) noexcept;
 
@@ -466,7 +463,7 @@ template<unsigned dimensions, class T> class StridedArrayView {
          */
         template<class U
             #ifndef DOXYGEN_GENERATING_OUTPUT
-            , unsigned d = dimensions, class = typename std::enable_if<d == 1 && std::is_convertible<U*, T*>::value>::type
+            , unsigned d = dimensions, typename std::enable_if<d == 1 && std::is_convertible<U*, T*>::value, int>::type = 0
             #endif
         > constexpr /*implicit*/ StridedArrayView(ArrayView<U> view) noexcept: _data{view.data()}, _size{view.size()}, _stride{sizeof(T)} {
             static_assert(sizeof(T) == sizeof(U), "type sizes are not compatible");
@@ -482,7 +479,7 @@ template<unsigned dimensions, class T> class StridedArrayView {
          */
         template<std::size_t size, class U
             #ifndef DOXYGEN_GENERATING_OUTPUT
-            , unsigned d = dimensions, class = typename std::enable_if<d == 1 && std::is_convertible<U*, T*>::value>::type
+            , unsigned d = dimensions, typename std::enable_if<d == 1 && std::is_convertible<U*, T*>::value, int>::type = 0
             #endif
         > constexpr /*implicit*/ StridedArrayView(StaticArrayView<size, U> view) noexcept: _data{view.data()}, _size{size}, _stride{sizeof(T)} {
             static_assert(sizeof(U) == sizeof(T), "type sizes are not compatible");
@@ -1185,8 +1182,7 @@ template<unsigned dimensions> class StridedArrayView<dimensions, void> {
            constructZeroNullPointerAmbiguity() test for more info. FFS, zero as
            null pointer was deprecated in C++11 already, why is this still a
            problem?! */
-        template<class U, class = typename std::enable_if<std::is_same<std::nullptr_t, U>::value>::type> constexpr /*implicit*/ StridedArrayView(U) noexcept: _data{}, _size{}, _stride{} {}
-
+        template<class U, typename std::enable_if<std::is_same<std::nullptr_t, U>::value, int>::type = 0> constexpr /*implicit*/ StridedArrayView(U) noexcept: _data{}, _size{}, _stride{} {}
         constexpr /*implicit*/ StridedArrayView() noexcept: _data{}, _size{}, _stride{} {}
         #endif
 
@@ -1226,12 +1222,11 @@ template<unsigned dimensions> class StridedArrayView<dimensions, void> {
          * Enabled only on one-dimensional views. Stride is implicitly set to
          * @cpp sizeof(T) @ce.
          */
-        #ifdef DOXYGEN_GENERATING_OUTPUT
-        template<class T>
-        #else
-        template<class T, unsigned d = dimensions, class = typename std::enable_if<d == 1>::type>
-        #endif
-        constexpr /*implicit*/ StridedArrayView(T* data, std::size_t size) noexcept: _data{data}, _size{size}, _stride{sizeof(T)} {}
+        template<class T
+            #ifndef DOXYGEN_GENERATING_OUTPUT
+            , unsigned d = dimensions, typename std::enable_if<d == 1, int>::type = 0
+            #endif
+        > constexpr /*implicit*/ StridedArrayView(T* data, std::size_t size) noexcept: _data{data}, _size{size}, _stride{sizeof(T)} {}
 
         /**
          * @brief Construct a void view on a fixed-size array
@@ -1242,14 +1237,14 @@ template<unsigned dimensions> class StridedArrayView<dimensions, void> {
          */
         template<class T, std::size_t size
             #ifndef DOXYGEN_GENERATING_OUTPUT
-            , unsigned d = dimensions, class = typename std::enable_if<d == 1 && !std::is_const<T>::value>::type
+            , unsigned d = dimensions, typename std::enable_if<d == 1 && !std::is_const<T>::value, int>::type = 0
             #endif
         > constexpr /*implicit*/ StridedArrayView(T(&data)[size]) noexcept: _data{data}, _size{size}, _stride{sizeof(T)} {}
 
         /** @brief Construct a void view on any @ref StridedArrayView */
         template<class T
             #ifndef DOXYGEN_GENERATING_OUTPUT
-            , class = typename std::enable_if<!std::is_const<T>::value>::type
+            , typename std::enable_if<!std::is_const<T>::value, int>::type = 0
             #endif
         > constexpr /*implicit*/ StridedArrayView(StridedArrayView<dimensions, T> view) noexcept: _data{view._data}, _size{view._size}, _stride{view._stride} {}
 
@@ -1261,7 +1256,7 @@ template<unsigned dimensions> class StridedArrayView<dimensions, void> {
          */
         template<class T
             #ifndef DOXYGEN_GENERATING_OUTPUT
-            , unsigned d = dimensions, class = typename std::enable_if<d == 1 && !std::is_const<T>::value>::type
+            , unsigned d = dimensions, typename std::enable_if<d == 1 && !std::is_const<T>::value, int>::type = 0
             #endif
         > constexpr /*implicit*/ StridedArrayView(ArrayView<T> view) noexcept: _data{view.data()}, _size{view.size()}, _stride{sizeof(T)} {}
 
@@ -1273,7 +1268,7 @@ template<unsigned dimensions> class StridedArrayView<dimensions, void> {
          */
         template<std::size_t size, class T
             #ifndef DOXYGEN_GENERATING_OUTPUT
-            , unsigned d = dimensions, class = typename std::enable_if<d == 1 && !std::is_const<T>::value>::type
+            , unsigned d = dimensions, typename std::enable_if<d == 1 && !std::is_const<T>::value, int>::type = 0
             #endif
         > constexpr /*implicit*/ StridedArrayView(StaticArrayView<size, T> view) noexcept: _data{view.data()}, _size{size}, _stride{sizeof(T)} {}
 
@@ -1437,8 +1432,7 @@ template<unsigned dimensions> class StridedArrayView<dimensions, const void> {
            constructZeroNullPointerAmbiguity() test for more info. FFS, zero as
            null pointer was deprecated in C++11 already, why is this still a
            problem?! */
-        template<class U, class = typename std::enable_if<std::is_same<std::nullptr_t, U>::value>::type> constexpr /*implicit*/ StridedArrayView(U) noexcept: _data{}, _size{}, _stride{} {}
-
+        template<class U, typename std::enable_if<std::is_same<std::nullptr_t, U>::value, int>::type = 0> constexpr /*implicit*/ StridedArrayView(U) noexcept: _data{}, _size{}, _stride{} {}
         constexpr /*implicit*/ StridedArrayView() noexcept: _data{}, _size{}, _stride{} {}
         #endif
 
@@ -1478,12 +1472,11 @@ template<unsigned dimensions> class StridedArrayView<dimensions, const void> {
          * Enabled only on one-dimensional views. Stride is implicitly set to
          * @cpp sizeof(T) @ce.
          */
-        #ifdef DOXYGEN_GENERATING_OUTPUT
-        template<class T>
-        #else
-        template<class T, unsigned d = dimensions, class = typename std::enable_if<d == 1>::type>
-        #endif
-        constexpr /*implicit*/ StridedArrayView(T* data, std::size_t size) noexcept: _data{data}, _size{size}, _stride{sizeof(T)} {}
+        template<class T
+            #ifndef DOXYGEN_GENERATING_OUTPUT
+            , unsigned d = dimensions, typename std::enable_if<d == 1, int>::type = 0
+            #endif
+        > constexpr /*implicit*/ StridedArrayView(T* data, std::size_t size) noexcept: _data{data}, _size{size}, _stride{sizeof(T)} {}
 
         /**
          * @brief Construct a const void view on a fixed-size array
@@ -1492,12 +1485,11 @@ template<unsigned dimensions> class StridedArrayView<dimensions, const void> {
          * Enabled only on one-dimensional views. Size is set to @p size,
          * stride is to @cpp sizeof(T) @ce.
          */
-        #ifdef DOXYGEN_GENERATING_OUTPUT
-        template<class T, std::size_t size>
-        #else
-        template<class T, std::size_t size, unsigned d = dimensions, class = typename std::enable_if<d == 1>::type>
-        #endif
-        constexpr /*implicit*/ StridedArrayView(T(&data)[size]) noexcept: _data{data}, _size{size}, _stride{sizeof(T)} {}
+        template<class T, std::size_t size
+            #ifndef DOXYGEN_GENERATING_OUTPUT
+            , unsigned d = dimensions, typename std::enable_if<d == 1, int>::type = 0
+            #endif
+        > constexpr /*implicit*/ StridedArrayView(T(&data)[size]) noexcept: _data{data}, _size{size}, _stride{sizeof(T)} {}
 
         /** @brief Construct a const void view on any @ref StridedArrayView */
         template<class T> constexpr /*implicit*/ StridedArrayView(StridedArrayView<dimensions, T> view) noexcept: _data{view._data}, _size{view._size}, _stride{view._stride} {}
@@ -1508,12 +1500,11 @@ template<unsigned dimensions> class StridedArrayView<dimensions, const void> {
          * Enabled only on one-dimensional views. Size is set to @p view's
          * size, stride is to @cpp sizeof(T) @ce.
          */
-        #ifdef DOXYGEN_GENERATING_OUTPUT
-        template<class T>
-        #else
-        template<class T, unsigned d = dimensions, class = typename std::enable_if<d == 1>::type>
-        #endif
-        constexpr /*implicit*/ StridedArrayView(ArrayView<T> view) noexcept: _data{view.data()}, _size{view.size()}, _stride{sizeof(T)} {}
+        template<class T
+            #ifndef DOXYGEN_GENERATING_OUTPUT
+            , unsigned d = dimensions, typename std::enable_if<d == 1, int>::type = 0
+            #endif
+        > constexpr /*implicit*/ StridedArrayView(ArrayView<T> view) noexcept: _data{view.data()}, _size{view.size()}, _stride{sizeof(T)} {}
 
         /**
          * @brief Construct a const void view on any @ref StaticArrayView
@@ -1521,12 +1512,11 @@ template<unsigned dimensions> class StridedArrayView<dimensions, const void> {
          * Enabled only on one-dimensional views. Size is set to @p view's
          * size, stride is to @cpp sizeof(T) @ce.
          */
-        #ifdef DOXYGEN_GENERATING_OUTPUT
-        template<std::size_t size, class T>
-        #else
-        template<std::size_t size, class T, unsigned d = dimensions, class = typename std::enable_if<d == 1>::type>
-        #endif
-        constexpr /*implicit*/ StridedArrayView(StaticArrayView<size, T> view) noexcept: _data{view.data()}, _size{size}, _stride{sizeof(T)} {}
+        template<std::size_t size, class T
+            #ifndef DOXYGEN_GENERATING_OUTPUT
+            , unsigned d = dimensions, typename std::enable_if<d == 1, int>::type = 0
+            #endif
+        > constexpr /*implicit*/ StridedArrayView(StaticArrayView<size, T> view) noexcept: _data{view.data()}, _size{size}, _stride{sizeof(T)} {}
 
         /**
          * @brief Construct a view on an external type
@@ -2218,7 +2208,7 @@ template<unsigned dimensions> constexpr StridedArrayView<dimensions, const void>
     #endif
     member)}, _size{size}, _stride{stride} {}
 
-template<unsigned dimensions, class T> template<std::size_t size_, class U, class> StridedArrayView<dimensions, T>::StridedArrayView(const StridedArrayView<dimensions - 1, U[size_]>& other) noexcept: _data{other._data}, _size{Corrade::NoInit}, _stride{Corrade::NoInit} {
+template<unsigned dimensions, class T> template<std::size_t size_, class U, typename std::enable_if<std::is_same<T, U>::value || std::is_same<T, const U>::value, int>::type> StridedArrayView<dimensions, T>::StridedArrayView(const StridedArrayView<dimensions - 1, U[size_]>& other) noexcept: _data{other._data}, _size{Corrade::NoInit}, _stride{Corrade::NoInit} {
     /* Copy size and stride in the existing dimensions */
     for(std::size_t i = 0; i != dimensions - 1; ++i) {
         _size._data[i] = other._size._data[i];
@@ -2228,7 +2218,7 @@ template<unsigned dimensions, class T> template<std::size_t size_, class U, clas
     _stride._data[dimensions - 1] = sizeof(T);
 }
 
-template<unsigned dimensions, class T> template<unsigned lessDimensions, class U, class> StridedArrayView<dimensions, T>::StridedArrayView(const StridedArrayView<lessDimensions, U>& other) noexcept: _data{other._data}, _size{Corrade::NoInit}, _stride{Corrade::NoInit} {
+template<unsigned dimensions, class T> template<unsigned lessDimensions, class U, typename std::enable_if<(lessDimensions < dimensions) && (std::is_same<T, U>::value || std::is_same<T, const U>::value), int>::type> StridedArrayView<dimensions, T>::StridedArrayView(const StridedArrayView<lessDimensions, U>& other) noexcept: _data{other._data}, _size{Corrade::NoInit}, _stride{Corrade::NoInit} {
     /* Set size and stride in the extra dimensions */
     constexpr std::size_t extraDimensions = dimensions - lessDimensions;
     /* See StridedElement::get() for why a ptrdiff_t cast is needed. Tho in

@@ -290,7 +290,7 @@ template<class T> class ArrayView {
            constructZeroNullPointerAmbiguity() test for more info. FFS, zero as
            null pointer was deprecated in C++11 already, why is this still a
            problem?! */
-        template<class U, class = typename std::enable_if<std::is_same<std::nullptr_t, U>::value>::type> constexpr /*implicit*/ ArrayView(U) noexcept: _data{}, _size{} {}
+        template<class U, typename std::enable_if<std::is_same<std::nullptr_t, U>::value, int>::type = 0> constexpr /*implicit*/ ArrayView(U) noexcept: _data{}, _size{} {}
 
         constexpr /*implicit*/ ArrayView() noexcept: _data{}, _size{} {}
         #endif
@@ -312,12 +312,11 @@ template<class T> class ArrayView {
          * Expects that both types have the same size.
          * @see @ref arrayView(T(&)[size])
          */
-        #ifdef DOXYGEN_GENERATING_OUTPUT
-        template<class U, std::size_t size>
-        #else
-        template<class U, std::size_t size, class = typename std::enable_if<std::is_convertible<U*, T*>::value>::type>
-        #endif
-        constexpr /*implicit*/ ArrayView(U(&data)[size]) noexcept: _data{data}, _size{size} {
+        template<class U, std::size_t size
+            #ifndef DOXYGEN_GENERATING_OUTPUT
+            , typename std::enable_if<std::is_convertible<U*, T*>::value, int>::type = 0
+            #endif
+        > constexpr /*implicit*/ ArrayView(U(&data)[size]) noexcept: _data{data}, _size{size} {
             static_assert(sizeof(T) == sizeof(U), "type sizes are not compatible");
         }
 
@@ -327,12 +326,11 @@ template<class T> class ArrayView {
          * Enabled only if @cpp T* @ce is implicitly convertible to @cpp U* @ce.
          * Expects that both types have the same size.
          */
-        #ifdef DOXYGEN_GENERATING_OUTPUT
-        template<class U>
-        #else
-        template<class U, class = typename std::enable_if<std::is_convertible<U*, T*>::value>::type>
-        #endif
-        constexpr /*implicit*/ ArrayView(ArrayView<U> view) noexcept: _data{view}, _size{view.size()} {
+        template<class U
+            #ifndef DOXYGEN_GENERATING_OUTPUT
+            , typename std::enable_if<std::is_convertible<U*, T*>::value, int>::type = 0
+            #endif
+        > constexpr /*implicit*/ ArrayView(ArrayView<U> view) noexcept: _data{view}, _size{view.size()} {
             static_assert(sizeof(T) == sizeof(U), "type sizes are not compatible");
         }
 
@@ -343,12 +341,11 @@ template<class T> class ArrayView {
          * Expects that both types have the same size.
          * @see @ref arrayView(StaticArrayView<size, T>)
          */
-        #ifdef DOXYGEN_GENERATING_OUTPUT
-        template<std::size_t size, class U>
-        #else
-        template<std::size_t size, class U, class = typename std::enable_if<std::is_convertible<U*, T*>::value>::type>
-        #endif
-        constexpr /*implicit*/ ArrayView(StaticArrayView<size, U> view) noexcept: _data{view}, _size{size} {
+        template<std::size_t size, class U
+            #ifndef DOXYGEN_GENERATING_OUTPUT
+            , typename std::enable_if<std::is_convertible<U*, T*>::value, int>::type = 0
+            #endif
+        > constexpr /*implicit*/ ArrayView(StaticArrayView<size, U> view) noexcept: _data{view}, _size{size} {
             static_assert(sizeof(U) == sizeof(T), "type sizes are not compatible");
         }
 
@@ -458,7 +455,7 @@ template<class T> class ArrayView {
            builtin operator[] for pointers if an int or ssize_t is used due to
            the implicit pointer conversion. Sigh. */
         /** @todo clean up once implicit pointer conversion is removed */
-        template<class U, class = typename std::enable_if<std::is_convertible<U, std::size_t>::value>::type> constexpr T& operator[](U i) const;
+        template<class U, typename std::enable_if<std::is_convertible<U, std::size_t>::value, int>::type = 0> constexpr T& operator[](U i) const;
         #endif
 
         /**
@@ -492,7 +489,7 @@ template<class T> class ArrayView {
         /* To avoid ambiguity when calling sliceSize(0, ...). FFS, zero as null
            pointer was deprecated in C++11 already, why is this still a
            problem?! */
-        template<class U, class = typename std::enable_if<std::is_convertible<U, T*>::value && !std::is_convertible<U, std::size_t>::value>::type> constexpr ArrayView<T> sliceSize(U begin, std::size_t size) const {
+        template<class U, typename std::enable_if<std::is_convertible<U, T*>::value && !std::is_convertible<U, std::size_t>::value, int>::type = 0> constexpr ArrayView<T> sliceSize(U begin, std::size_t size) const {
             return slice(begin, begin + size);
         }
         #endif
@@ -518,7 +515,7 @@ template<class T> class ArrayView {
         /* To avoid ambiguity when calling slice<size>(0). FFS, zero as null
            pointer was deprecated in C++11 already, why is this still a
            problem?! */
-        template<std::size_t size_, class U, class = typename std::enable_if<std::is_convertible<U, T*>::value && !std::is_convertible<U, std::size_t>::value>::type> constexpr StaticArrayView<size_, T> slice(U begin) const;
+        template<std::size_t size_, class U, typename std::enable_if<std::is_convertible<U, T*>::value && !std::is_convertible<U, std::size_t>::value, int>::type = 0> constexpr StaticArrayView<size_, T> slice(U begin) const;
         #endif
 
         /** @overload */
@@ -558,7 +555,7 @@ template<class T> class ArrayView {
         #else
         /* To avoid ambiguity when calling prefix(0). FFS, zero as null pointer
            was deprecated in C++11 already, why is this still a problem?! */
-        template<class U, class = typename std::enable_if<std::is_convertible<U, T*>::value && !std::is_convertible<U, std::size_t>::value>::type> constexpr ArrayView<T> prefix(U end) const {
+        template<class U, typename std::enable_if<std::is_convertible<U, T*>::value && !std::is_convertible<U, std::size_t>::value, int>::type = 0> constexpr ArrayView<T> prefix(U end) const {
             return static_cast<T*>(end) ? slice(_data, end) : nullptr;
         }
         #endif
@@ -719,8 +716,7 @@ template<> class ArrayView<void> {
            constructZeroNullPointerAmbiguity() test for more info. FFS, zero as
            null pointer was deprecated in C++11 already, why is this still a
            problem?! */
-        template<class U, class = typename std::enable_if<std::is_same<std::nullptr_t, U>::value>::type> constexpr /*implicit*/ ArrayView(U) noexcept: _data{}, _size{} {}
-
+        template<class U, typename std::enable_if<std::is_same<std::nullptr_t, U>::value, int>::type = 0> constexpr /*implicit*/ ArrayView(U) noexcept: _data{}, _size{} {}
         constexpr /*implicit*/ ArrayView() noexcept: _data{}, _size{} {}
         #endif
 
@@ -748,21 +744,21 @@ template<> class ArrayView<void> {
          */
         template<class T, std::size_t size
             #ifndef DOXYGEN_GENERATING_OUTPUT
-            , class = typename std::enable_if<!std::is_const<T>::value>::type
+            , typename std::enable_if<!std::is_const<T>::value, int>::type = 0
             #endif
         > constexpr /*implicit*/ ArrayView(T(&data)[size]) noexcept: _data(data), _size(size*sizeof(T)) {}
 
         /** @brief Construct a void view on any @ref ArrayView */
         template<class T
             #ifndef DOXYGEN_GENERATING_OUTPUT
-            , class = typename std::enable_if<!std::is_const<T>::value>::type
+            , typename std::enable_if<!std::is_const<T>::value, int>::type = 0
             #endif
         > constexpr /*implicit*/ ArrayView(ArrayView<T> array) noexcept: _data(array), _size(array.size()*sizeof(T)) {}
 
         /** @brief Construct a void view on any @ref StaticArrayView */
         template<std::size_t size, class T
             #ifndef DOXYGEN_GENERATING_OUTPUT
-            , class = typename std::enable_if<!std::is_const<T>::value>::type
+            , typename std::enable_if<!std::is_const<T>::value, int>::type = 0
             #endif
         > constexpr /*implicit*/ ArrayView(const StaticArrayView<size, T>& array) noexcept: _data{array}, _size{size*sizeof(T)} {}
 
@@ -857,8 +853,7 @@ template<> class ArrayView<const void> {
            constructZeroNullPointerAmbiguity() test for more info. FFS, zero as
            null pointer was deprecated in C++11 already, why is this still a
            problem?! */
-        template<class U, class = typename std::enable_if<std::is_same<std::nullptr_t, U>::value>::type> constexpr /*implicit*/ ArrayView(U) noexcept: _data{}, _size{} {}
-
+        template<class U, typename std::enable_if<std::is_same<std::nullptr_t, U>::value, int>::type = 0> constexpr /*implicit*/ ArrayView(U) noexcept: _data{}, _size{} {}
         constexpr /*implicit*/ ArrayView() noexcept: _data{}, _size{} {}
         #endif
 
@@ -1181,8 +1176,7 @@ template<std::size_t size_, class T> class StaticArrayView {
            constructZeroNullPointerAmbiguity() test for more info. FFS, zero as
            null pointer was deprecated in C++11 already, why is this still a
            problem?! */
-        template<class U, class = U, class = typename std::enable_if<std::is_same<std::nullptr_t, U>::value>::type> constexpr /*implicit*/ StaticArrayView(U) noexcept: _data{} {}
-
+        template<class U, class = U, typename std::enable_if<std::is_same<std::nullptr_t, U>::value, int>::type = 0> constexpr /*implicit*/ StaticArrayView(U) noexcept: _data{} {}
         constexpr /*implicit*/ StaticArrayView() noexcept: _data{} {}
         #endif
 
@@ -1199,7 +1193,7 @@ template<std::size_t size_, class T> class StaticArrayView {
         #ifdef DOXYGEN_GENERATING_OUTPUT
         constexpr explicit StaticArrayView(T* data)
         #else
-        template<class U, class = typename std::enable_if<std::is_pointer<U>::value && !std::is_same<U, T(&)[size_]>::value>::type> constexpr explicit StaticArrayView(U data)
+        template<class U, typename std::enable_if<std::is_pointer<U>::value && !std::is_same<U, T(&)[size_]>::value, int>::type = 0> constexpr explicit StaticArrayView(U data)
         #endif
         noexcept: _data(data) {}
 
@@ -1211,12 +1205,11 @@ template<std::size_t size_, class T> class StaticArrayView {
          * Expects that both types have the same size.
          * @see @ref staticArrayView(T(&)[size])
          */
-        #ifdef DOXYGEN_GENERATING_OUTPUT
-        template<class U>
-        #else
-        template<class U, class = typename std::enable_if<std::is_convertible<U*, T*>::value>::type>
-        #endif
-        constexpr /*implicit*/ StaticArrayView(U(&data)[size_]) noexcept: _data{data} {
+        template<class U
+            #ifndef DOXYGEN_GENERATING_OUTPUT
+            , typename std::enable_if<std::is_convertible<U*, T*>::value, int>::type = 0
+            #endif
+        > constexpr /*implicit*/ StaticArrayView(U(&data)[size_]) noexcept: _data{data} {
             static_assert(sizeof(T) == sizeof(U), "type sizes are not compatible");
         }
 
@@ -1226,12 +1219,11 @@ template<std::size_t size_, class T> class StaticArrayView {
          * Enabled only if @cpp T* @ce is implicitly convertible to @cpp U* @ce.
          * Expects that both types have the same size.
          */
-        #ifdef DOXYGEN_GENERATING_OUTPUT
-        template<class U>
-        #else
-        template<class U, class = typename std::enable_if<std::is_convertible<U*, T*>::value>::type>
-        #endif
-        constexpr /*implicit*/ StaticArrayView(StaticArrayView<size_, U> view) noexcept: _data{view} {
+        template<class U
+            #ifndef DOXYGEN_GENERATING_OUTPUT
+            , typename std::enable_if<std::is_convertible<U*, T*>::value, int>::type = 0
+            #endif
+        > constexpr /*implicit*/ StaticArrayView(StaticArrayView<size_, U> view) noexcept: _data{view} {
             static_assert(sizeof(T) == sizeof(U), "type sizes are not compatible");
         }
 
@@ -1342,7 +1334,7 @@ template<std::size_t size_, class T> class StaticArrayView {
            builtin operator[] for pointers if an int or ssize_t is used due to
            the implicit pointer conversion. Sigh. */
         /** @todo clean up once implicit pointer conversion is removed */
-        template<class U, class = typename std::enable_if<std::is_convertible<U, std::size_t>::value>::type> constexpr T& operator[](U i) const;
+        template<class U, typename std::enable_if<std::is_convertible<U, std::size_t>::value, int>::type = 0> constexpr T& operator[](U i) const;
         #endif
 
         /** @copydoc ArrayView::slice(T*, T*) const */
@@ -1364,7 +1356,7 @@ template<std::size_t size_, class T> class StaticArrayView {
         /* To avoid ambiguity when calling sliceSize(0, ...). FFS, zero as null
            pointer was deprecated in C++11 already, why is this still a
            problem?! */
-        template<class U, class = typename std::enable_if<std::is_convertible<U, T*>::value && !std::is_convertible<U, std::size_t>::value>::type> constexpr ArrayView<T> sliceSize(U begin, std::size_t size) const {
+        template<class U, typename std::enable_if<std::is_convertible<U, T*>::value && !std::is_convertible<U, std::size_t>::value, int>::type = 0> constexpr ArrayView<T> sliceSize(U begin, std::size_t size) const {
             return ArrayView<T>(*this).sliceSize(begin, size);
         }
         #endif
@@ -1384,7 +1376,7 @@ template<std::size_t size_, class T> class StaticArrayView {
         /* To avoid ambiguity when calling slice<size>(0). FFS, zero as null
            pointer was deprecated in C++11 already, why is this still a
            problem?! */
-        template<std::size_t size__, class U, class = typename std::enable_if<std::is_convertible<U, T*>::value && !std::is_convertible<U, std::size_t>::value>::type> constexpr StaticArrayView<size__, T> slice(U begin) const {
+        template<std::size_t size__, class U, typename std::enable_if<std::is_convertible<U, T*>::value && !std::is_convertible<U, std::size_t>::value, int>::type = 0> constexpr StaticArrayView<size__, T> slice(U begin) const {
             return ArrayView<T>(*this).template slice<size__>(begin);
         }
         #endif
@@ -1420,7 +1412,7 @@ template<std::size_t size_, class T> class StaticArrayView {
         #else
         /* To avoid ambiguity when calling prefix(0). FFS, zero as null pointer
            was deprecated in C++11 already, why is this still a problem?! */
-        template<class U, class = typename std::enable_if<std::is_convertible<U, T*>::value && !std::is_convertible<U, std::size_t>::value>::type> constexpr ArrayView<T> prefix(U end) const {
+        template<class U, typename std::enable_if<std::is_convertible<U, T*>::value && !std::is_convertible<U, std::size_t>::value, int>::type = 0> constexpr ArrayView<T> prefix(U end) const {
             return ArrayView<T>(*this).prefix(end);
         }
         #endif
@@ -1663,7 +1655,7 @@ template<class T> constexpr T& ArrayView<T>::back() const {
     return CORRADE_CONSTEXPR_DEBUG_ASSERT(_size, "Containers::ArrayView::back(): view is empty"), _data[_size - 1];
 }
 
-template<class T> template<class U, class> constexpr T& ArrayView<T>::operator[](const U i) const {
+template<class T> template<class U, typename std::enable_if<std::is_convertible<U, std::size_t>::value, int>::type> constexpr T& ArrayView<T>::operator[](const U i) const {
     return CORRADE_CONSTEXPR_DEBUG_ASSERT(std::size_t(i) < _size,
         "Containers::ArrayView::operator[](): index" << i << "out of range for" << _size << "elements"), _data[i];
 }
@@ -1700,13 +1692,13 @@ template<std::size_t size_, class T> constexpr T& StaticArrayView<size_, T>::bac
     return _data[size_ - 1];
 }
 
-template<std::size_t size_, class T> template<class U, class> constexpr T& StaticArrayView<size_, T>::operator[](const U i) const {
+template<std::size_t size_, class T> template<class U, typename std::enable_if<std::is_convertible<U, std::size_t>::value, int>::type> constexpr T& StaticArrayView<size_, T>::operator[](const U i) const {
     return CORRADE_CONSTEXPR_DEBUG_ASSERT(std::size_t(i) < size_,
         "Containers::StaticArrayView::operator[](): index" << i << "out of range for" << size_ << "elements"), _data[i];
 }
 
 #ifndef DOXYGEN_GENERATING_OUTPUT
-template<class T> template<std::size_t size_, class U, class> constexpr StaticArrayView<size_, T> ArrayView<T>::slice(const U begin) const {
+template<class T> template<std::size_t size_, class U, typename std::enable_if<std::is_convertible<U, T*>::value && !std::is_convertible<U, std::size_t>::value, int>::type> constexpr StaticArrayView<size_, T> ArrayView<T>::slice(const U begin) const {
     return CORRADE_CONSTEXPR_DEBUG_ASSERT(_data <= begin && begin + size_ <= _data + _size,
             "Containers::ArrayView::slice(): slice ["
             << Utility::Debug::nospace << begin - _data

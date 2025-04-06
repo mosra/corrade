@@ -82,7 +82,11 @@ template<class T> class AnyReference {
          * Expects that @p T is a base of @p U. The @ref isRvalue() state is
          * copied from @p other unchanged.
          */
-        template<class U, class = typename std::enable_if<std::is_base_of<T, U>::value>::type> /*implicit*/ AnyReference(AnyReference<U> other) noexcept: _reference{other._reference}, _isRvalue{other._isRvalue} {}
+        template<class U
+            #ifndef DOXYGEN_GENERATING_OUTPUT
+            , typename std::enable_if<std::is_base_of<T, U>::value, int>::type = 0
+            #endif
+        > /*implicit*/ AnyReference(AnyReference<U> other) noexcept: _reference{other._reference}, _isRvalue{other._isRvalue} {}
 
         /** @brief Underlying reference */
         /*implicit*/ operator T&() const { return *_reference; }

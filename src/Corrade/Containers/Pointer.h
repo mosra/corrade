@@ -196,8 +196,7 @@ template<class T> class Pointer {
            constructZeroNullPointerAmbiguity() test for more info. FFS, zero as
            null pointer was deprecated in C++11 already, why is this still a
            problem?! */
-        template<class U, class = typename std::enable_if<std::is_same<std::nullptr_t, U>::value>::type> /*implicit*/ Pointer(U) noexcept: _pointer{} {}
-
+        template<class U, typename std::enable_if<std::is_same<std::nullptr_t, U>::value, int>::type = 0> /*implicit*/ Pointer(U) noexcept: _pointer{} {}
         /*implicit*/ Pointer() noexcept: _pointer{} {}
         #endif
 
@@ -232,7 +231,11 @@ template<class T> class Pointer {
          * virtual destructor. For downcasting (base to derived) use
          * @ref pointerCast(). Calls @ref release() on @p other.
          */
-        template<class U, class = typename std::enable_if<std::is_base_of<T, U>::value>::type> /*implicit*/ Pointer(Pointer<U>&& other) noexcept: _pointer{other.release()} {
+        template<class U
+            #ifndef DOXYGEN_GENERATING_OUTPUT
+            , typename std::enable_if<std::is_base_of<T, U>::value, int>::type = 0
+            #endif
+        > /*implicit*/ Pointer(Pointer<U>&& other) noexcept: _pointer{other.release()} {
             static_assert(std::is_trivially_destructible<U>::value || std::has_virtual_destructor<T>::value, "the derived type should be trivially destructible or the base type should have a virtual destructor");
         }
 

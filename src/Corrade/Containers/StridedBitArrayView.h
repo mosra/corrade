@@ -184,8 +184,7 @@ template<unsigned dimensions, class T> class BasicStridedBitArrayView {
            constructZeroNullPointerAmbiguity() test for more info. FFS, zero as
            null pointer was deprecated in C++11 already, why is this still a
            problem?! */
-        template<class U, class = typename std::enable_if<std::is_same<std::nullptr_t, U>::value>::type> constexpr /*implicit*/ BasicStridedBitArrayView(U) noexcept: _data{}, _sizeOffset{}, _stride{} {}
-
+        template<class U, typename std::enable_if<std::is_same<std::nullptr_t, U>::value, int>::type = 0> constexpr /*implicit*/ BasicStridedBitArrayView(U) noexcept: _data{}, _sizeOffset{}, _stride{} {}
         constexpr /*implicit*/ BasicStridedBitArrayView() noexcept: _data{}, _sizeOffset{}, _stride{} {}
         #endif
 
@@ -244,7 +243,11 @@ template<unsigned dimensions, class T> class BasicStridedBitArrayView {
            interpreted as something completely different by accident. */
 
         /** @brief Construct a @ref StridedBitArrayView from a @ref MutableStridedBitArrayView */
-        template<class U, class = typename std::enable_if<std::is_same<const U, T>::value>::type> constexpr /*implicit*/ BasicStridedBitArrayView(const BasicStridedBitArrayView<dimensions, U>& mutable_) noexcept: _data{mutable_._data}, _sizeOffset{mutable_._sizeOffset}, _stride{mutable_._stride} {}
+        template<class U
+            #ifndef DOXYGEN_GENERATING_OUTPUT
+            , typename std::enable_if<std::is_same<const U, T>::value, int>::type = 0
+            #endif
+        > constexpr /*implicit*/ BasicStridedBitArrayView(const BasicStridedBitArrayView<dimensions, U>& mutable_) noexcept: _data{mutable_._data}, _sizeOffset{mutable_._sizeOffset}, _stride{mutable_._stride} {}
 
         /**
          * @brief Construct from a @ref StridedBitArrayView of smaller dimension count
@@ -265,7 +268,7 @@ template<unsigned dimensions, class T> class BasicStridedBitArrayView {
                complaining that "error C2947: expecting '>' to terminate
                template-parameter-list, found '>'". HAHA. (TBH, parsing this is
                a hell.) */
-            , class = typename std::enable_if<(lessDimensions < dimensions)>::type
+            , typename std::enable_if<(lessDimensions < dimensions), int>::type = 0
             #endif
         > /*implicit*/ BasicStridedBitArrayView(const BasicStridedBitArrayView<lessDimensions, T>& other) noexcept;
 
@@ -278,7 +281,7 @@ template<unsigned dimensions, class T> class BasicStridedBitArrayView {
          */
         template<class U
             #ifndef DOXYGEN_GENERATING_OUTPUT
-            , unsigned d = dimensions, class = typename std::enable_if<d == 1 && std::is_convertible<U*, T*>::value>::type
+            , unsigned d = dimensions, typename std::enable_if<d == 1 && std::is_convertible<U*, T*>::value, int>::type = 0
             #endif
         > constexpr /*implicit*/ BasicStridedBitArrayView(BasicBitArrayView<U> view) noexcept: _data{view.data()}, _sizeOffset{view.size() << 3 | view.offset()}, _stride{1} {}
 
@@ -414,7 +417,7 @@ template<unsigned dimensions, class T> class BasicStridedBitArrayView {
          *      @ref set(std::size_t, bool) const
          */
         #ifndef DOXYGEN_GENERATING_OUTPUT
-        template<class U = T, class = typename std::enable_if<!std::is_const<U>::value && dimensions == 1>::type>
+        template<class U = T, typename std::enable_if<!std::is_const<U>::value && dimensions == 1, int>::type = 0>
         #endif
         void set(std::size_t i) const;
 
@@ -428,7 +431,7 @@ template<unsigned dimensions, class T> class BasicStridedBitArrayView {
          *      @ref set(const Size<dimensions>&, bool) const
          */
         #ifndef DOXYGEN_GENERATING_OUTPUT
-        template<class U = T, class = typename std::enable_if<!std::is_const<U>::value>::type>
+        template<class U = T, typename std::enable_if<!std::is_const<U>::value, int>::type = 0>
         #endif
         void set(const Size<dimensions>& i) const;
 
@@ -442,7 +445,7 @@ template<unsigned dimensions, class T> class BasicStridedBitArrayView {
          * @see @ref operator[](std::size_t) const, @ref set(std::size_t) const
          */
         #ifndef DOXYGEN_GENERATING_OUTPUT
-        template<class U = T, class = typename std::enable_if<!std::is_const<U>::value && dimensions == 1>::type>
+        template<class U = T, typename std::enable_if<!std::is_const<U>::value && dimensions == 1, int>::type = 0>
         #endif
         void reset(std::size_t i) const;
 
@@ -455,7 +458,7 @@ template<unsigned dimensions, class T> class BasicStridedBitArrayView {
          *      @ref set(const Size<dimensions>&) const
          */
         #ifndef DOXYGEN_GENERATING_OUTPUT
-        template<class U = T, class = typename std::enable_if<!std::is_const<U>::value>::type>
+        template<class U = T, typename std::enable_if<!std::is_const<U>::value, int>::type = 0>
         #endif
         void reset(const Size<dimensions>& i) const;
 
@@ -471,7 +474,7 @@ template<unsigned dimensions, class T> class BasicStridedBitArrayView {
          * @see @ref operator[](std::size_t) const
          */
         #ifndef DOXYGEN_GENERATING_OUTPUT
-        template<class U = T, class = typename std::enable_if<!std::is_const<U>::value && dimensions == 1>::type>
+        template<class U = T, typename std::enable_if<!std::is_const<U>::value && dimensions == 1, int>::type = 0>
         #endif
         void set(std::size_t i, bool value) const;
 
@@ -485,7 +488,7 @@ template<unsigned dimensions, class T> class BasicStridedBitArrayView {
          * @see @ref operator[](const Size<dimensions>&) const
          */
         #ifndef DOXYGEN_GENERATING_OUTPUT
-        template<class U = T, class = typename std::enable_if<!std::is_const<U>::value>::type>
+        template<class U = T, typename std::enable_if<!std::is_const<U>::value, int>::type = 0>
         #endif
         void set(const Size<dimensions>& i, bool value) const;
 
@@ -966,7 +969,7 @@ template<unsigned dimensions, class T> constexpr BasicStridedBitArrayView<dimens
     _stride{stride} {}
 
 #ifndef DOXYGEN_GENERATING_OUTPUT
-template<unsigned dimensions, class T> template<unsigned lessDimensions, class> BasicStridedBitArrayView<dimensions, T>::BasicStridedBitArrayView(const BasicStridedBitArrayView<lessDimensions, T>& other) noexcept: _data{other._data}, _sizeOffset{Corrade::NoInit}, _stride{Corrade::NoInit} {
+template<unsigned dimensions, class T> template<unsigned lessDimensions, typename std::enable_if<(lessDimensions < dimensions), int>::type> BasicStridedBitArrayView<dimensions, T>::BasicStridedBitArrayView(const BasicStridedBitArrayView<lessDimensions, T>& other) noexcept: _data{other._data}, _sizeOffset{Corrade::NoInit}, _stride{Corrade::NoInit} {
     /* Set size and stride in the extra dimensions */
     constexpr std::size_t extraDimensions = dimensions - lessDimensions;
     /* See StridedBitElement::get() for why a ptrdiff_t cast is needed. Tho in
@@ -1082,7 +1085,8 @@ template<unsigned dimensions, class T> bool BasicStridedBitArrayView<dimensions,
     return static_cast<T*>(_data)[offsetInBits >> 3] & (1 << (offsetInBits & 0x07));
 }
 
-template<unsigned dimensions, class T> template<class U, class> inline void BasicStridedBitArrayView<dimensions, T>::set(std::size_t i) const {
+#ifndef DOXYGEN_GENERATING_OUTPUT
+template<unsigned dimensions, class T> template<class U, typename std::enable_if<!std::is_const<U>::value && dimensions == 1, int>::type> inline void BasicStridedBitArrayView<dimensions, T>::set(std::size_t i) const {
     CORRADE_DEBUG_ASSERT(i < _sizeOffset._data[0] >> 3,
         "Containers::StridedBitArrayView::set(): index" << i << "out of range for" << (_sizeOffset._data[0] >> 3) << "bits", );
     /* See StridedBitElement::get() for why a ptrdiff_t cast is needed. Tho in
@@ -1092,7 +1096,7 @@ template<unsigned dimensions, class T> template<class U, class> inline void Basi
     static_cast<T*>(_data)[offsetInBits >> 3] |= (1 << (offsetInBits & 0x07));
 }
 
-template<unsigned dimensions, class T> template<class U, class> void BasicStridedBitArrayView<dimensions, T>::set(const Size<dimensions>& i) const {
+template<unsigned dimensions, class T> template<class U, typename std::enable_if<!std::is_const<U>::value, int>::type> void BasicStridedBitArrayView<dimensions, T>::set(const Size<dimensions>& i) const {
     std::ptrdiff_t offsetInBits = _sizeOffset._data[0] & 0x07;
     for(std::size_t j = 0; j != dimensions; ++j) {
         CORRADE_DEBUG_ASSERT(i._data[j] < _sizeOffset._data[j] >> 3,
@@ -1106,7 +1110,7 @@ template<unsigned dimensions, class T> template<class U, class> void BasicStride
     static_cast<T*>(_data)[offsetInBits >> 3] |= (1 << (offsetInBits & 0x07));
 }
 
-template<unsigned dimensions, class T> template<class U, class> inline void BasicStridedBitArrayView<dimensions, T>::reset(std::size_t i) const {
+template<unsigned dimensions, class T> template<class U, typename std::enable_if<!std::is_const<U>::value && dimensions == 1, int>::type> inline void BasicStridedBitArrayView<dimensions, T>::reset(std::size_t i) const {
     CORRADE_DEBUG_ASSERT(i < _sizeOffset._data[0] >> 3,
         "Containers::StridedBitArrayView::reset(): index" << i << "out of range for" << (_sizeOffset._data[0] >> 3) << "bits", );
     /* See StridedBitElement::get() for why a ptrdiff_t cast is needed. Tho in
@@ -1116,7 +1120,7 @@ template<unsigned dimensions, class T> template<class U, class> inline void Basi
     static_cast<T*>(_data)[offsetInBits >> 3] &= ~(1 << (offsetInBits & 0x07));
 }
 
-template<unsigned dimensions, class T> template<class U, class> void BasicStridedBitArrayView<dimensions, T>::reset(const Size<dimensions>& i) const {
+template<unsigned dimensions, class T> template<class U, typename std::enable_if<!std::is_const<U>::value, int>::type> void BasicStridedBitArrayView<dimensions, T>::reset(const Size<dimensions>& i) const {
     std::ptrdiff_t offsetInBits = _sizeOffset._data[0] & 0x07;
     for(std::size_t j = 0; j != dimensions; ++j) {
         CORRADE_DEBUG_ASSERT(i._data[j] < _sizeOffset._data[j] >> 3,
@@ -1130,7 +1134,7 @@ template<unsigned dimensions, class T> template<class U, class> void BasicStride
     static_cast<T*>(_data)[offsetInBits >> 3] &= ~(1 << (offsetInBits & 0x07));
 }
 
-template<unsigned dimensions, class T> template<class U, class> inline void BasicStridedBitArrayView<dimensions, T>::set(std::size_t i, bool value) const {
+template<unsigned dimensions, class T> template<class U, typename std::enable_if<!std::is_const<U>::value && dimensions == 1, int>::type> inline void BasicStridedBitArrayView<dimensions, T>::set(std::size_t i, bool value) const {
     CORRADE_DEBUG_ASSERT(i < _sizeOffset._data[0] >> 3,
         "Containers::StridedBitArrayView::set(): index" << i << "out of range for" << (_sizeOffset._data[0] >> 3) << "bits", );
     /* See StridedBitElement::get() for why a ptrdiff_t cast is needed. Tho in
@@ -1142,7 +1146,7 @@ template<unsigned dimensions, class T> template<class U, class> inline void Basi
     byte ^= (-char(value) ^ byte) & (1 << (offsetInBits & 0x07));
 }
 
-template<unsigned dimensions, class T> template<class U, class> void BasicStridedBitArrayView<dimensions, T>::set(const Size<dimensions>& i, bool value) const {
+template<unsigned dimensions, class T> template<class U, typename std::enable_if<!std::is_const<U>::value, int>::type> void BasicStridedBitArrayView<dimensions, T>::set(const Size<dimensions>& i, bool value) const {
     std::ptrdiff_t offsetInBits = _sizeOffset._data[0] & 0x07;
     for(std::size_t j = 0; j != dimensions; ++j) {
         CORRADE_DEBUG_ASSERT(i._data[j] < _sizeOffset._data[j] >> 3,
@@ -1157,6 +1161,7 @@ template<unsigned dimensions, class T> template<class U, class> void BasicStride
     char& byte = static_cast<T*>(_data)[offsetInBits >> 3];
     byte ^= (-char(value) ^ byte) & (1 << (offsetInBits & 0x07));
 }
+#endif
 
 template<unsigned dimensions, class T> BasicStridedBitArrayView<dimensions, T> BasicStridedBitArrayView<dimensions, T>::slice(const std::size_t begin, const std::size_t end) const {
     CORRADE_DEBUG_ASSERT(begin <= end && end <= (_sizeOffset._data[0] >> 3),

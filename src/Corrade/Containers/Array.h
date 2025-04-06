@@ -356,7 +356,7 @@ class Array {
            See the constructZeroNullPointerAmbiguity() test for more info. FFS,
            zero as null pointer was deprecated in C++11 already, why is this
            still a problem?! */
-        template<class U, class = typename std::enable_if<std::is_same<std::nullptr_t, U>::value>::type> /*implicit*/ Array(U) noexcept: _data{nullptr}, _size{0}, _deleter{} {}
+        template<class U, typename std::enable_if<std::is_same<std::nullptr_t, U>::value, int>::type = 0> /*implicit*/ Array(U) noexcept: _data{nullptr}, _size{0}, _deleter{} {}
 
         /*implicit*/ Array() noexcept: _data(nullptr), _size(0), _deleter{} {}
         #endif
@@ -656,8 +656,8 @@ class Array {
            builtin operator[] for pointers if an int or ssize_t is used due to
            the implicit pointer conversion. Sigh. */
         /** @todo clean up once implicit pointer conversion is removed */
-        template<class U, class = typename std::enable_if<std::is_convertible<U, std::size_t>::value>::type> T& operator[](U i);
-        template<class U, class = typename std::enable_if<std::is_convertible<U, std::size_t>::value>::type> const T& operator[](U i) const;
+        template<class U, typename std::enable_if<std::is_convertible<U, std::size_t>::value, int>::type = 0> T& operator[](U i);
+        template<class U, typename std::enable_if<std::is_convertible<U, std::size_t>::value, int>::type = 0> const T& operator[](U i) const;
         #endif
 
         /**
@@ -697,7 +697,7 @@ class Array {
         /* To avoid ambiguity when calling sliceSize(0, ...). FFS, zero as null
            pointer was deprecated in C++11 already, why is this still a
            problem?! */
-        template<class U, class = typename std::enable_if<std::is_convertible<U, T*>::value && !std::is_convertible<U, std::size_t>::value>::type> ArrayView<T> sliceSize(U begin, std::size_t size) {
+        template<class U, typename std::enable_if<std::is_convertible<U, T*>::value && !std::is_convertible<U, std::size_t>::value, int>::type = 0> ArrayView<T> sliceSize(U begin, std::size_t size) {
             return ArrayView<T>{*this}.sliceSize(begin, size);
         }
         #endif
@@ -711,7 +711,7 @@ class Array {
         /* To avoid ambiguity when calling sliceSize(0, ...). FFS, zero as null
            pointer was deprecated in C++11 already, why is this still a
            problem?! */
-        template<class U, class = typename std::enable_if<std::is_convertible<U, const T*>::value && !std::is_convertible<U, std::size_t>::value>::type> ArrayView<const T> sliceSize(const U begin, std::size_t size) const {
+        template<class U, typename std::enable_if<std::is_convertible<U, const T*>::value && !std::is_convertible<U, std::size_t>::value, int>::type = 0> ArrayView<const T> sliceSize(const U begin, std::size_t size) const {
             return ArrayView<const T>{*this}.sliceSize(begin, size);
         }
         #endif
@@ -741,7 +741,7 @@ class Array {
         /* To avoid ambiguity when calling slice<size>(0). FFS, zero as null
            pointer was deprecated in C++11 already, why is this still a
            problem?! */
-        template<std::size_t size_, class U, class = typename std::enable_if<std::is_convertible<U, T*>::value && !std::is_convertible<U, std::size_t>::value>::type> StaticArrayView<size_, T> slice(U begin) {
+        template<std::size_t size_, class U, typename std::enable_if<std::is_convertible<U, T*>::value && !std::is_convertible<U, std::size_t>::value, int>::type = 0> StaticArrayView<size_, T> slice(U begin) {
             return ArrayView<T>(*this).template slice<size_>(begin);
         }
         #endif
@@ -752,7 +752,7 @@ class Array {
         /* To avoid ambiguity when calling slice<size>(0). FFS, zero as null
            pointer was deprecated in C++11 already, why is this still a
            problem?! */
-        template<std::size_t size_, class U, class = typename std::enable_if<std::is_convertible<U, const T*>::value && !std::is_convertible<U, std::size_t>::value>::type> StaticArrayView<size_, const T> slice(U begin) const {
+        template<std::size_t size_, class U, typename std::enable_if<std::is_convertible<U, const T*>::value && !std::is_convertible<U, std::size_t>::value, int>::type = 0> StaticArrayView<size_, const T> slice(U begin) const {
             return ArrayView<const T>(*this).template slice<size_>(begin);
         }
         #endif
@@ -811,7 +811,7 @@ class Array {
         #else
         /* To avoid ambiguity when calling prefix(0). FFS, zero as null pointer
            was deprecated in C++11 already, why is this still a problem?! */
-        template<class U, class = typename std::enable_if<std::is_convertible<U, T*>::value && !std::is_convertible<U, std::size_t>::value>::type>
+        template<class U, typename std::enable_if<std::is_convertible<U, T*>::value && !std::is_convertible<U, std::size_t>::value, int>::type = 0>
         ArrayView<T> prefix(U end) {
             return ArrayView<T>(*this).prefix(end);
         }
@@ -822,7 +822,7 @@ class Array {
         #else
         /* To avoid ambiguity when calling prefix(0). FFS, zero as null pointer
            was deprecated in C++11 already, why is this still a problem?! */
-        template<class U, class = typename std::enable_if<std::is_convertible<U, const T*>::value && !std::is_convertible<U, std::size_t>::value>::type>
+        template<class U, typename std::enable_if<std::is_convertible<U, const T*>::value && !std::is_convertible<U, std::size_t>::value, int>::type = 0>
         ArrayView<const T> prefix(U end) const {
             return ArrayView<const T>(*this).prefix(end);
         }
@@ -1091,7 +1091,7 @@ template<class T, class D> inline Array<T, D>& Array<T, D>::operator=(Array<T, D
 }
 
 #ifndef DOXYGEN_GENERATING_OUTPUT
-template<class T, class D> template<class U, class> const T& Array<T, D>::operator[](const U i) const {
+template<class T, class D> template<class U, typename std::enable_if<std::is_convertible<U, std::size_t>::value, int>::type> const T& Array<T, D>::operator[](const U i) const {
     CORRADE_DEBUG_ASSERT(std::size_t(i) < _size,
         "Containers::Array::operator[](): index" << i << "out of range for" << _size << "elements", _data[0]);
     return _data[i];
@@ -1109,7 +1109,7 @@ template<class T, class D> const T& Array<T, D>::back() const {
 }
 
 #ifndef DOXYGEN_GENERATING_OUTPUT
-template<class T, class D> template<class U, class> T& Array<T, D>::operator[](const U i) {
+template<class T, class D> template<class U, typename std::enable_if<std::is_convertible<U, std::size_t>::value, int>::type> T& Array<T, D>::operator[](const U i) {
     return const_cast<T&>(static_cast<const Array<T, D>&>(*this)[i]);
 }
 #endif

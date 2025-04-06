@@ -369,8 +369,7 @@ BasicStringView {
            constructZeroNullPointerAmbiguity() test for more info. FFS, zero as
            null pointer was deprecated in C++11 already, why is this still a
            problem?! */
-        template<class U, class = typename std::enable_if<std::is_same<std::nullptr_t, U>::value>::type> constexpr /*implicit*/ BasicStringView(U) noexcept: _data{}, _sizePlusFlags{std::size_t(StringViewFlag::Global)} {}
-
+        template<class U, typename std::enable_if<std::is_same<std::nullptr_t, U>::value, int>::type = 0> constexpr /*implicit*/ BasicStringView(U) noexcept: _data{}, _sizePlusFlags{std::size_t(StringViewFlag::Global)} {}
         constexpr /*implicit*/ BasicStringView() noexcept: _data{}, _sizePlusFlags{std::size_t(StringViewFlag::Global)} {}
         #endif
 
@@ -430,7 +429,11 @@ BasicStringView {
          * null-terminated view with @ref String::nullTerminatedView() or
          * @ref String::nullTerminatedGlobalView().
          */
-        template<class U = T, class = typename std::enable_if<std::is_const<U>::value>::type> /*implicit*/ BasicStringView(const String& data) noexcept;
+        template<class U = T
+            #ifndef DOXYGEN_GENERATING_OUTPUT
+            , typename std::enable_if<std::is_const<U>::value, int>::type = 0
+            #endif
+        > /*implicit*/ BasicStringView(const String& data) noexcept;
 
         #ifndef CORRADE_SINGLES_NO_ADVANCED_STRING_APIS
         /**
@@ -465,7 +468,11 @@ BasicStringView {
         #endif
 
         /** @brief Construct a @ref StringView from a @ref MutableStringView */
-        template<class U, class = typename std::enable_if<std::is_same<const U, T>::value>::type> constexpr /*implicit*/ BasicStringView(BasicStringView<U> mutable_) noexcept: _data{mutable_._data}, _sizePlusFlags{mutable_._sizePlusFlags} {}
+        template<class U
+            #ifndef DOXYGEN_GENERATING_OUTPUT
+            , typename std::enable_if<std::is_same<const U, T>::value, int>::type = 0
+            #endif
+        > constexpr /*implicit*/ BasicStringView(BasicStringView<U> mutable_) noexcept: _data{mutable_._data}, _sizePlusFlags{mutable_._sizePlusFlags} {}
 
         /**
          * @brief Construct from a null-terminated C string
@@ -492,7 +499,7 @@ BasicStringView {
            constructZeroNullPointerAmbiguity() test for more info. FFS, zero as
            null pointer was deprecated in C++11 already, why is this still a
            problem?! */
-        template<class U, class = typename std::enable_if<std::is_pointer<U>::value && std::is_convertible<const U&, T*>::value>::type> /*implicit*/ BasicStringView(U data, StringViewFlags extraFlags = {}) noexcept: BasicStringView{data, extraFlags, nullptr} {}
+        template<class U, typename std::enable_if<std::is_pointer<U>::value && std::is_convertible<const U&, T*>::value, int>::type = 0> /*implicit*/ BasicStringView(U data, StringViewFlags extraFlags = {}) noexcept: BasicStringView{data, extraFlags, nullptr} {}
         #endif
 
         /**
@@ -646,7 +653,7 @@ BasicStringView {
         /* To avoid ambiguity when calling sliceSize(0, ...). FFS, zero as null
            pointer was deprecated in C++11 already, why is this still a
            problem?! */
-        template<class U, class = typename std::enable_if<std::is_convertible<U, T*>::value && !std::is_convertible<U, std::size_t>::value>::type> constexpr BasicStringView<T> sliceSize(U begin, std::size_t size) const {
+        template<class U, typename std::enable_if<std::is_convertible<U, T*>::value && !std::is_convertible<U, std::size_t>::value, int>::type = 0> constexpr BasicStringView<T> sliceSize(U begin, std::size_t size) const {
             return slice(begin, begin + size);
         }
         #endif
@@ -669,7 +676,7 @@ BasicStringView {
         #else
         /* To avoid ambiguity when calling prefix(0). FFS, zero as null pointer
            was deprecated in C++11 already, why is this still a problem?! */
-        template<class U, class = typename std::enable_if<std::is_convertible<U, T*>::value && !std::is_convertible<U, std::size_t>::value>::type> constexpr BasicStringView<T> prefix(U end) const {
+        template<class U, typename std::enable_if<std::is_convertible<U, T*>::value && !std::is_convertible<U, std::size_t>::value, int>::type = 0> constexpr BasicStringView<T> prefix(U end) const {
             return static_cast<T*>(end) ? slice(_data, end) : BasicStringView<T>{};
         }
         #endif
@@ -959,7 +966,7 @@ BasicStringView {
          */
         BasicStringView<T> exceptPrefix(char prefix) const = delete;
         #else
-        template<class = typename std::enable_if<std::is_same<typename std::decay<T>::type, char>::value>::type> BasicStringView<T> exceptPrefix(T&& prefix) const = delete;
+        template<typename std::enable_if<std::is_same<typename std::decay<T>::type, char>::value, int>::type = 0> BasicStringView<T> exceptPrefix(T&& prefix) const = delete;
         #endif
 
         #ifdef CORRADE_BUILD_DEPRECATED
@@ -997,7 +1004,7 @@ BasicStringView {
          */
         BasicStringView<T> exceptSuffix(char suffix) const = delete;
         #else
-        template<class = typename std::enable_if<std::is_same<typename std::decay<T>::type, char>::value>::type> BasicStringView<T> exceptSuffix(T&& suffix) const = delete;
+        template<typename std::enable_if<std::is_same<typename std::decay<T>::type, char>::value, int>::type = 0> BasicStringView<T> exceptSuffix(T&& suffix) const = delete;
         #endif
 
         #ifdef CORRADE_BUILD_DEPRECATED
@@ -1345,7 +1352,7 @@ BasicStringView {
            for details; arguments in a flipped order to avoid accidental
            ambiguity. The ArrayView type is a template to avoid having to
            include ArrayView.h. */
-        template<class U, class = typename std::enable_if<std::is_same<T, U>::value>::type> constexpr explicit BasicStringView(StringViewFlags flags, ArrayView<U> data) noexcept: BasicStringView{data.data(), data.size(), flags} {}
+        template<class U, typename std::enable_if<std::is_same<T, U>::value, int>::type = 0> constexpr explicit BasicStringView(StringViewFlags flags, ArrayView<U> data) noexcept: BasicStringView{data.data(), data.size(), flags} {}
         #endif
 
         /* Used by the char* constructor, delinlined because it calls into

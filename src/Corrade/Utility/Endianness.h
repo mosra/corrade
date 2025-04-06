@@ -122,7 +122,7 @@ template<class ...T> void swapInPlace(T&... values);
 #else
 inline void swapInPlace() {}
 /* to avoid the StridedArrayView overloads being taken by this one */
-template<class T, class ...U, class = typename std::enable_if<!IsIterable<T>::value>::type> inline void swapInPlace(T& first, U&... next) {
+template<class T, class ...U, typename std::enable_if<!IsIterable<T>::value, int>::type = 0> inline void swapInPlace(T& first, U&... next) {
     Implementation::swapInPlace(first);
     swapInPlace(next...);
 }
@@ -169,7 +169,7 @@ systems does nothing.
 template<class ...T> void bigEndianInPlace(T&... values);
 #else
 /* to avoid the StridedArrayView overloads being taken by this one */
-template<class T, class ...U, class = typename std::enable_if<!IsIterable<T>::value>::type> inline void bigEndianInPlace(T& first, U&...
+template<class T, class ...U, typename std::enable_if<!IsIterable<T>::value, int>::type = 0> inline void bigEndianInPlace(T& first, U&...
         #ifndef CORRADE_TARGET_BIG_ENDIAN
         next
         #endif
@@ -210,7 +210,7 @@ systems does nothing.
 template<class ...T> void littleEndianInPlace(T&... values);
 #else
 /* to avoid the StridedArrayView overloads being taken by this one */
-template<class T, class ...U, class = typename std::enable_if<!IsIterable<T>::value>::type> inline void littleEndianInPlace(T& first, U&...
+template<class T, class ...U, typename std::enable_if<!IsIterable<T>::value, int>::type = 0> inline void littleEndianInPlace(T& first, U&...
         #ifdef CORRADE_TARGET_BIG_ENDIAN
         next
         #endif

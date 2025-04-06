@@ -413,7 +413,7 @@ class CORRADE_UTILITY_EXPORT String {
            constructZeroNullPointerAmbiguity() test for more info. FFS, zero as
            null pointer was deprecated in C++11 already, why is this still a
            problem?! */
-        template<class T, class = typename std::enable_if<std::is_convertible<T, const char*>::value && !std::is_convertible<T, std::size_t>::value>::type> /*implicit*/ String(T data): String{nullptr, nullptr, nullptr, data} {}
+        template<class T, typename std::enable_if<std::is_convertible<T, const char*>::value && !std::is_convertible<T, std::size_t>::value, int>::type = 0> /*implicit*/ String(T data): String{nullptr, nullptr, nullptr, data} {}
         #endif
 
         /**
@@ -543,7 +543,7 @@ class CORRADE_UTILITY_EXPORT String {
         #else
         /* Gets ambigous when calling String{ptr, 0}. FFS, zero as null pointer
            was deprecated in C++11 already, why is this still a problem?! */
-        template<class T, class = typename std::enable_if<std::is_convertible<T, Deleter>::value && !std::is_convertible<T, std::size_t>::value, const char*>::type> String(const char* data, T deleter) noexcept: String{deleter, nullptr, const_cast<char*>(data)} {}
+        template<class T, typename std::enable_if<std::is_convertible<T, Deleter>::value && !std::is_convertible<T, std::size_t>::value, int>::type = 0> String(const char* data, T deleter) noexcept: String{deleter, nullptr, const_cast<char*>(data)} {}
         #endif
 
         /**
@@ -846,7 +846,7 @@ class CORRADE_UTILITY_EXPORT String {
         /* To avoid ambiguity when calling sliceSize(0, ...). FFS, zero as null
            pointer was deprecated in C++11 already, why is this still a
            problem?! */
-        template<class T, class = typename std::enable_if<std::is_convertible<T, char*>::value && !std::is_convertible<T, std::size_t>::value>::type> MutableStringView sliceSize(T begin, std::size_t size) {
+        template<class T, typename std::enable_if<std::is_convertible<T, char*>::value && !std::is_convertible<T, std::size_t>::value, int>::type = 0> MutableStringView sliceSize(T begin, std::size_t size) {
             return sliceSizePointerInternal(begin, size);
         }
         #endif
@@ -856,7 +856,7 @@ class CORRADE_UTILITY_EXPORT String {
         /* To avoid ambiguity when calling sliceSize(0, ...). FFS, zero as null
            pointer was deprecated in C++11 already, why is this still a
            problem?! */
-        template<class T, class = typename std::enable_if<std::is_convertible<T, const char*>::value && !std::is_convertible<T, std::size_t>::value>::type> StringView sliceSize(T begin, std::size_t size) const {
+        template<class T, typename std::enable_if<std::is_convertible<T, const char*>::value && !std::is_convertible<T, std::size_t>::value, int>::type = 0> StringView sliceSize(T begin, std::size_t size) const {
             return sliceSizePointerInternal(begin, size);
         }
         #endif
@@ -876,7 +876,7 @@ class CORRADE_UTILITY_EXPORT String {
         /* To avoid ambiguity when calling sliceSize(0, ...). FFS, zero as null
            pointer was deprecated in C++11 already, why is this still a
            problem?! */
-        template<class T, class = typename std::enable_if<std::is_convertible<T, char*>::value && !std::is_convertible<T, std::size_t>::value>::type> MutableStringView prefix(T end) {
+        template<class T, typename std::enable_if<std::is_convertible<T, char*>::value && !std::is_convertible<T, std::size_t>::value, int>::type = 0> MutableStringView prefix(T end) {
             return prefixPointerInternal(end);
         }
         #endif
@@ -886,7 +886,7 @@ class CORRADE_UTILITY_EXPORT String {
         /* To avoid ambiguity when calling sliceSize(0, ...). FFS, zero as null
            pointer was deprecated in C++11 already, why is this still a
            problem?! */
-        template<class T, class = typename std::enable_if<std::is_convertible<T, const char*>::value && !std::is_convertible<T, std::size_t>::value>::type> StringView prefix(T end) const {
+        template<class T, typename std::enable_if<std::is_convertible<T, const char*>::value && !std::is_convertible<T, std::size_t>::value, int>::type = 0> StringView prefix(T end) const {
             return prefixPointerInternal(end);
         }
         #endif
@@ -1135,8 +1135,8 @@ class CORRADE_UTILITY_EXPORT String {
         MutableStringView exceptPrefix(char prefix) = delete;
         StringView exceptPrefix(char prefix) const = delete; /**< @overload */
         #else
-        template<class T, class = typename std::enable_if<std::is_same<typename std::decay<T>::type, char>::value>::type> MutableStringView exceptPrefix(T&& prefix) = delete;
-        template<class T, class = typename std::enable_if<std::is_same<typename std::decay<T>::type, char>::value>::type> StringView exceptPrefix(T&& prefix) const = delete;
+        template<class T, typename std::enable_if<std::is_same<typename std::decay<T>::type, char>::value, int>::type = 0> MutableStringView exceptPrefix(T&& prefix) = delete;
+        template<class T, typename std::enable_if<std::is_same<typename std::decay<T>::type, char>::value, int>::type = 0> StringView exceptPrefix(T&& prefix) const = delete;
         #endif
 
         #ifdef CORRADE_BUILD_DEPRECATED
@@ -1180,8 +1180,8 @@ class CORRADE_UTILITY_EXPORT String {
         MutableStringView exceptSuffix(char suffix) = delete;
         StringView exceptSuffix(char suffix) const = delete; /**< @overload */
         #else
-        template<class T, class = typename std::enable_if<std::is_same<typename std::decay<T>::type, char>::value>::type> MutableStringView exceptSuffix(T&& suffix) = delete;
-        template<class T, class = typename std::enable_if<std::is_same<typename std::decay<T>::type, char>::value>::type> StringView exceptSuffix(T&& suffix) const = delete;
+        template<class T, typename std::enable_if<std::is_same<typename std::decay<T>::type, char>::value, int>::type = 0> MutableStringView exceptSuffix(T&& suffix) = delete;
+        template<class T, typename std::enable_if<std::is_same<typename std::decay<T>::type, char>::value, int>::type = 0> StringView exceptSuffix(T&& suffix) const = delete;
         #endif
 
         #ifdef CORRADE_BUILD_DEPRECATED

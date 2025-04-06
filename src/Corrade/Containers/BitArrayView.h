@@ -132,8 +132,7 @@ template<class T> class BasicBitArrayView {
            constructZeroNullPointerAmbiguity() test for more info. FFS, zero as
            null pointer was deprecated in C++11 already, why is this still a
            problem?! */
-        template<class U, class = typename std::enable_if<std::is_same<std::nullptr_t, U>::value>::type> constexpr /*implicit*/ BasicBitArrayView(U) noexcept: _data{}, _sizeOffset{} {}
-
+        template<class U, typename std::enable_if<std::is_same<std::nullptr_t, U>::value, int>::type = 0> constexpr /*implicit*/ BasicBitArrayView(U) noexcept: _data{}, _sizeOffset{} {}
         constexpr /*implicit*/ BasicBitArrayView() noexcept: _data{}, _sizeOffset{} {}
         #endif
 
@@ -150,7 +149,7 @@ template<class T> class BasicBitArrayView {
            size limits, so no size asserts */
         template<std::size_t size, class U
             #ifndef DOXYGEN_GENERATING_OUTPUT
-            , class = typename std::enable_if<std::is_convertible<U*, ErasedType*>::value>::type
+            , typename std::enable_if<std::is_convertible<U*, ErasedType*>::value, int>::type = 0
             #endif
         > constexpr /*implicit*/ BasicBitArrayView(U(&data)[size]) noexcept: _data{data}, _sizeOffset{sizeof(U)*8*size << 3} {}
 
@@ -176,12 +175,25 @@ template<class T> class BasicBitArrayView {
          */
         template<std::size_t dataSize, class U
             #ifndef DOXYGEN_GENERATING_OUTPUT
+            /* GCC doesn't like BasicBitArrayView<T>::ErasedType* used in the
+               SFINAE in the separate declaration, so I have to unwrap the
+               typedef there. OTOH MSVC 2015 cannot match the value parameter
+               at all, only a type parameter. Don't need to prevent any
+               ambiguity with this constructor so it's fine. */
+            #ifndef CORRADE_MSVC2015_COMPATIBILITY
+            , typename std::enable_if<std::is_convertible<U*, ErasedType*>::value, int>::type = 0
+            #else
             , class = typename std::enable_if<std::is_convertible<U*, ErasedType*>::value>::type
+            #endif
             #endif
         > constexpr /*implicit*/ BasicBitArrayView(U(&data)[dataSize], std::size_t offset, std::size_t size) noexcept;
 
         /** @brief Construct a @ref BitArrayView from a @ref MutableBitArrayView */
-        template<class U, class = typename std::enable_if<std::is_same<const U, T>::value>::type> constexpr /*implicit*/ BasicBitArrayView(BasicBitArrayView<U> mutable_) noexcept: _data{mutable_._data}, _sizeOffset{mutable_._sizeOffset} {}
+        template<class U
+            #ifndef DOXYGEN_GENERATING_OUTPUT
+            , typename std::enable_if<std::is_same<const U, T>::value, int>::type = 0
+            #endif
+        > constexpr /*implicit*/ BasicBitArrayView(BasicBitArrayView<U> mutable_) noexcept: _data{mutable_._data}, _sizeOffset{mutable_._sizeOffset} {}
 
         /* No bool conversion operator right now, as it's yet unclear what
            semantic should it have -- return false if it's nullptr, if the size
@@ -237,7 +249,7 @@ template<class T> class BasicBitArrayView {
          *      @ref set(std::size_t, bool) const, @ref setAll()
          */
         #ifndef DOXYGEN_GENERATING_OUTPUT
-        template<class U = T, class = typename std::enable_if<!std::is_const<U>::value>::type>
+        template<class U = T, typename std::enable_if<!std::is_const<U>::value, int>::type = 0>
         #endif
         void set(std::size_t i) const;
 
@@ -250,7 +262,7 @@ template<class T> class BasicBitArrayView {
          *      @ref set(std::size_t) const
          */
         #ifndef DOXYGEN_GENERATING_OUTPUT
-        template<class U = T, class = typename std::enable_if<!std::is_const<U>::value>::type>
+        template<class U = T, typename std::enable_if<!std::is_const<U>::value, int>::type = 0>
         #endif
         void setAll() const;
 
@@ -262,7 +274,7 @@ template<class T> class BasicBitArrayView {
          * @see @ref operator[](), @ref set(), @ref resetAll()
          */
         #ifndef DOXYGEN_GENERATING_OUTPUT
-        template<class U = T, class = typename std::enable_if<!std::is_const<U>::value>::type>
+        template<class U = T, typename std::enable_if<!std::is_const<U>::value, int>::type = 0>
         #endif
         void reset(std::size_t i) const;
 
@@ -274,7 +286,7 @@ template<class T> class BasicBitArrayView {
          * @see @ref setAll(), @ref reset(std::size_t) const
          */
         #ifndef DOXYGEN_GENERATING_OUTPUT
-        template<class U = T, class = typename std::enable_if<!std::is_const<U>::value>::type>
+        template<class U = T, typename std::enable_if<!std::is_const<U>::value, int>::type = 0>
         #endif
         void resetAll() const;
 
@@ -288,7 +300,7 @@ template<class T> class BasicBitArrayView {
          * @see @ref operator[](), @ref setAll(bool) const
          */
         #ifndef DOXYGEN_GENERATING_OUTPUT
-        template<class U = T, class = typename std::enable_if<!std::is_const<U>::value>::type>
+        template<class U = T, typename std::enable_if<!std::is_const<U>::value, int>::type = 0>
         #endif
         void set(std::size_t i, bool value) const;
 
@@ -302,7 +314,7 @@ template<class T> class BasicBitArrayView {
          * @see @ref set(std::size_t, bool) const
          */
         #ifndef DOXYGEN_GENERATING_OUTPUT
-        template<class U = T, class = typename std::enable_if<!std::is_const<U>::value>::type>
+        template<class U = T, typename std::enable_if<!std::is_const<U>::value, int>::type = 0>
         #endif
         void setAll(bool value) const { value ? setAll() : resetAll(); }
 
@@ -467,8 +479,15 @@ template<class T> constexpr BasicBitArrayView<T>::BasicBitArrayView(ErasedType* 
     #endif
     size << 3 | offset)} {}
 
+#ifndef DOXYGEN_GENERATING_OUTPUT
+/* GCC doesn't like BasicBitArrayView<T>::ErasedType* used in the SFINAE, so I
+   have to unwrap the typedef here. OTOH MSVC 2015 cannot match the value
+   parameter at all, only a type parameter. Don't need to prevent any ambiguity
+   with this constructor so it's fine. */
 template<class T> template<std::size_t dataSize, class U
-    #ifndef DOXYGEN_GENERATING_OUTPUT
+    #ifndef CORRADE_MSVC2015_COMPATIBILITY
+    , typename std::enable_if<std::is_convertible<U*, typename std::conditional<std::is_const<T>::value, const void, void>::type*>::value, int>::type
+    #else
     , class
     #endif
 > constexpr BasicBitArrayView<T>::BasicBitArrayView(U(&data)[dataSize], const std::size_t offset, const std::size_t size) noexcept: BasicBitArrayView{static_cast<ErasedType*>(data), offset, (
@@ -490,25 +509,26 @@ template<class T> inline bool BasicBitArrayView<T>::operator[](std::size_t i) co
     return static_cast<T*>(_data)[((_sizeOffset & 0x07) + i) >> 3] & (1 << ((_sizeOffset + i) & 0x7));
 }
 
-template<class T> template<class U, class> inline void BasicBitArrayView<T>::set(std::size_t i) const {
+template<class T> template<class U, typename std::enable_if<!std::is_const<U>::value, int>::type> inline void BasicBitArrayView<T>::set(std::size_t i) const {
     CORRADE_DEBUG_ASSERT(i < (_sizeOffset >> 3),
         "Containers::BitArrayView::set(): index" << i << "out of range for" << (_sizeOffset >> 3) << "bits", );
     static_cast<T*>(_data)[((_sizeOffset & 0x07) + i) >> 3] |= (1 << ((_sizeOffset + i) & 0x07));
 }
 
-template<class T> template<class U, class> inline void BasicBitArrayView<T>::reset(std::size_t i) const {
+template<class T> template<class U, typename std::enable_if<!std::is_const<U>::value, int>::type> inline void BasicBitArrayView<T>::reset(std::size_t i) const {
     CORRADE_DEBUG_ASSERT(i < (_sizeOffset >> 3),
         "Containers::BitArrayView::reset(): index" << i << "out of range for" << (_sizeOffset >> 3) << "bits", );
     static_cast<T*>(_data)[((_sizeOffset & 0x07) + i) >> 3] &= ~(1 << ((_sizeOffset + i) & 0x07));
 }
 
-template<class T> template<class U, class> inline void BasicBitArrayView<T>::set(std::size_t i, bool value) const {
+template<class T> template<class U, typename std::enable_if<!std::is_const<U>::value, int>::type> inline void BasicBitArrayView<T>::set(std::size_t i, bool value) const {
     CORRADE_DEBUG_ASSERT(i < (_sizeOffset >> 3),
         "Containers::BitArrayView::set(): index" << i << "out of range for" << (_sizeOffset >> 3) << "bits", );
     /* http://graphics.stanford.edu/~seander/bithacks.html#ConditionalSetOrClearBitsWithoutBranching */
     char& byte = static_cast<T*>(_data)[((_sizeOffset & 0x07) + i) >> 3];
     byte ^= (-char(value) ^ byte) & (1 << ((_sizeOffset + i) & 0x07));
 }
+#endif
 
 template<class T> inline BasicBitArrayView<T> BasicBitArrayView<T>::slice(const std::size_t begin, const std::size_t end) const {
     CORRADE_DEBUG_ASSERT(begin <= end && end <= (_sizeOffset >> 3),

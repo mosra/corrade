@@ -134,8 +134,7 @@ class CORRADE_UTILITY_EXPORT StringIterable {
            constructZeroNullPointerAmbiguity() test for more info. FFS, zero as
            null pointer was deprecated in C++11 already, why is this still a
            problem?! */
-        template<class T, class = typename std::enable_if<std::is_same<std::nullptr_t, T>::value>::type> constexpr /*implicit*/ StringIterable(T) noexcept: _data{}, _context{}, _size{}, _stride{}, _accessor{} {}
-
+        template<class T, typename std::enable_if<std::is_same<std::nullptr_t, T>::value, int>::type = 0> constexpr /*implicit*/ StringIterable(T) noexcept: _data{}, _context{}, _size{}, _stride{}, _accessor{} {}
         constexpr /*implicit*/ StringIterable() noexcept: _data{}, _context{}, _size{}, _stride{}, _accessor{} {}
         #endif
 

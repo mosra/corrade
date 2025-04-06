@@ -674,7 +674,7 @@ bool write(Containers::StringView filename, const char* string) = delete;
    ArrayView<const void>). The std::decay is here in order to match both char*
    and char[], and because const char[] decays to char* while const char*
    decays to const char* (FFS!!) i need both. */
-template<class T, class = typename std::enable_if<std::is_same<typename std::decay<T>::type, const char*>::value || std::is_same<typename std::decay<T>::type, char*>::value>::type> bool write(const Containers::StringView& filename, T&& string) = delete;
+template<class T, typename std::enable_if<std::is_same<typename std::decay<T>::type, const char*>::value || std::is_same<typename std::decay<T>::type, char*>::value, int>::type = 0> bool write(const Containers::StringView& filename, T&& string) = delete;
 #endif
 
 /**
@@ -714,7 +714,7 @@ bool append(Containers::StringView filename, const char* string) = delete;
    ArrayView<const void>). The std::decay is here in order to match both char*
    and char[], and because const char[] decays to char* while const char*
    decays to const char* (FFS!!) i need both. */
-template<class T, class = typename std::enable_if<std::is_same<typename std::decay<T>::type, const char*>::value || std::is_same<typename std::decay<T>::type, char*>::value>::type> bool append(const Containers::StringView& filename, T&& string) = delete;
+template<class T, typename std::enable_if<std::is_same<typename std::decay<T>::type, const char*>::value || std::is_same<typename std::decay<T>::type, char*>::value, int>::type = 0> bool append(const Containers::StringView& filename, T&& string) = delete;
 #endif
 
 /**

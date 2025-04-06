@@ -191,7 +191,7 @@ Containers::String narrow(const wchar_t* text);
    storage, its size isn't size of the actual string there.
 
    The return type is templated to avoid unconditionally including String.h. */
-template<class T, class R = Containers::String, class = typename std::enable_if<std::is_same<typename std::decay<T>::type, const wchar_t*>::value || std::is_same<typename std::decay<T>::type, wchar_t*>::value>::type> inline R narrow(T&& text) {
+template<class T, class R = Containers::String, typename std::enable_if<std::is_same<typename std::decay<T>::type, const wchar_t*>::value || std::is_same<typename std::decay<T>::type, wchar_t*>::value, int>::type = 0> inline R narrow(T&& text) {
     return Implementation::narrow(text, -1);
 }
 #endif
