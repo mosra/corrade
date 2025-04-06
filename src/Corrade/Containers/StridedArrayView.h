@@ -2393,7 +2393,7 @@ template<unsigned dimensions, class T> template<unsigned newDimensions> StridedA
     return StridedArrayView<newDimensions, T>{size, stride, data};
 }
 
-namespace {
+namespace Implementation {
 
 template<class T, class U, class V> std::size_t memberFunctionSliceOffset(V U::*memberFunction) {
     /* See StridedArrayViewTest::sliceMemberFunctionPointerDerived() for
@@ -2464,7 +2464,7 @@ template<unsigned dimensions, class T> template<class U, class V> typename std::
     return StridedArrayView<dimensions, U>{_size, _stride, reinterpret_cast<U*>(static_cast<ArithmeticType*>(_data) +
         /* The T is needed to avoid accidentally passing a member function
            pointer of a complately different type */
-        memberFunctionSliceOffset<T>(memberFunction))
+        Implementation::memberFunctionSliceOffset<T>(memberFunction))
     };
 }
 
@@ -2472,7 +2472,7 @@ template<unsigned dimensions, class T> template<class U, class V> typename std::
     return StridedArrayView<dimensions, U>{_size, _stride, reinterpret_cast<U*>(static_cast<ArithmeticType*>(_data) +
         /* The T is needed to avoid accidentally passing a member function
            pointer of a complately different type */
-        memberFunctionSliceOffset<T>(memberFunction))
+        Implementation::memberFunctionSliceOffset<T>(memberFunction))
     };
 }
 
@@ -2480,7 +2480,7 @@ template<unsigned dimensions, class T> template<class U, class V> typename std::
     return StridedArrayView<dimensions, const U>{_size, _stride, reinterpret_cast<const U*>(static_cast<ArithmeticType*>(_data) +
         /* The T is needed to avoid accidentally passing a member function
            pointer of a complately different type */
-        memberFunctionSliceOffset<T>(memberFunction))
+        Implementation::memberFunctionSliceOffset<T>(memberFunction))
     };
 }
 
@@ -2488,7 +2488,7 @@ template<unsigned dimensions, class T> template<class U, class V> typename std::
     return StridedArrayView<dimensions, const U>{_size, _stride, reinterpret_cast<const U*>(static_cast<ArithmeticType*>(_data) +
         /* The T is needed to avoid accidentally passing a member function
            pointer of a complately different type */
-        memberFunctionSliceOffset<T>(memberFunction))
+        Implementation::memberFunctionSliceOffset<T>(memberFunction))
     };
 }
 
@@ -2496,7 +2496,7 @@ template<unsigned dimensions, class T> template<class U> auto StridedArrayView<d
     return StridedArrayView<dimensions, typename Implementation::StridedArrayViewSliceResultOf<T, U>::Type>{_size, _stride, reinterpret_cast<typename Implementation::StridedArrayViewSliceResultOf<T, U>::Type*>(static_cast<ArithmeticType*>(_data) +
         /* The T is needed to avoid accidentally passing a member function
            pointer of a complately different type */
-        memberFunctionSliceOffset<T>(memberFunction))
+        Implementation::memberFunctionSliceOffset<T>(memberFunction))
     };
 }
 #endif
