@@ -741,17 +741,17 @@ template<unsigned dimensions, class T> class StridedArrayView {
            isn't a class or union. OTOH, no need for this to further be SFINAEd
            with is_class<V> or is_union<V>, because the syntax error on its own
            makes this overload not even generated. */
-        template<class U, class V = T> auto slice(U V::*member) const -> typename std::enable_if<
+        template<class U, class V = T, typename std::enable_if<
             #if defined(CORRADE_TARGET_GCC) && !defined(CORRADE_TARGET_CLANG) && __GNUC__ < 5
             /* GCC 4.8 is_member_function_pointer doesn't give true for & and
                const & overloads, making those to go here instead. See the
                sliceRvalueOverloadedMemberFunctionPointer() test for a repro
                case. */
-            !Implementation::IsMemberFunctionPointer<decltype(member)>::value
+            !Implementation::IsMemberFunctionPointer<U V::*>::value
             #else
-            !std::is_member_function_pointer<decltype(member)>::value
+            !std::is_member_function_pointer<U V::*>::value
             #endif
-        , StridedArrayView<dimensions, typename std::conditional<std::is_const<T>::value, const U, U>::type>>::type {
+        , int>::type = 0> auto slice(U V::*member) const -> StridedArrayView<dimensions, typename std::conditional<std::is_const<T>::value, const U, U>::type> {
             return StridedArrayView<dimensions, typename std::conditional<std::is_const<T>::value, const U, U>::type>{_size, _stride, &(static_cast<T*>(_data)->*member)};
         }
         #endif
