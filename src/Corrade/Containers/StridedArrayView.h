@@ -389,7 +389,7 @@ template<unsigned dimensions, class T> class StridedArrayView {
          */
         template<class U, std::size_t size
             #ifndef DOXYGEN_GENERATING_OUTPUT
-            , unsigned d = dimensions, typename std::enable_if<d == 1 && std::is_convertible<U*, T*>::value, int>::type = 0
+            , typename std::enable_if<dimensions == 1 && std::is_convertible<U*, T*>::value, int>::type = 0
             #endif
         > constexpr /*implicit*/ StridedArrayView(U(&data)[size]) noexcept: _data{data}, _size{size}, _stride{sizeof(T)} {
             static_assert(sizeof(T) == sizeof(U), "type sizes are not compatible");
@@ -463,7 +463,7 @@ template<unsigned dimensions, class T> class StridedArrayView {
          */
         template<class U
             #ifndef DOXYGEN_GENERATING_OUTPUT
-            , unsigned d = dimensions, typename std::enable_if<d == 1 && std::is_convertible<U*, T*>::value, int>::type = 0
+            , typename std::enable_if<dimensions == 1 && std::is_convertible<U*, T*>::value, int>::type = 0
             #endif
         > constexpr /*implicit*/ StridedArrayView(ArrayView<U> view) noexcept: _data{view.data()}, _size{view.size()}, _stride{sizeof(T)} {
             static_assert(sizeof(T) == sizeof(U), "type sizes are not compatible");
@@ -479,7 +479,7 @@ template<unsigned dimensions, class T> class StridedArrayView {
          */
         template<std::size_t size, class U
             #ifndef DOXYGEN_GENERATING_OUTPUT
-            , unsigned d = dimensions, typename std::enable_if<d == 1 && std::is_convertible<U*, T*>::value, int>::type = 0
+            , typename std::enable_if<dimensions == 1 && std::is_convertible<U*, T*>::value, int>::type = 0
             #endif
         > constexpr /*implicit*/ StridedArrayView(StaticArrayView<size, U> view) noexcept: _data{view.data()}, _size{size}, _stride{sizeof(T)} {
             static_assert(sizeof(U) == sizeof(T), "type sizes are not compatible");
@@ -1237,7 +1237,7 @@ template<unsigned dimensions> class StridedArrayView<dimensions, void> {
          */
         template<class T, std::size_t size
             #ifndef DOXYGEN_GENERATING_OUTPUT
-            , unsigned d = dimensions, typename std::enable_if<d == 1 && !std::is_const<T>::value, int>::type = 0
+            , typename std::enable_if<dimensions == 1 && !std::is_const<T>::value, int>::type = 0
             #endif
         > constexpr /*implicit*/ StridedArrayView(T(&data)[size]) noexcept: _data{data}, _size{size}, _stride{sizeof(T)} {}
 
@@ -1256,7 +1256,7 @@ template<unsigned dimensions> class StridedArrayView<dimensions, void> {
          */
         template<class T
             #ifndef DOXYGEN_GENERATING_OUTPUT
-            , unsigned d = dimensions, typename std::enable_if<d == 1 && !std::is_const<T>::value, int>::type = 0
+            , typename std::enable_if<dimensions == 1 && !std::is_const<T>::value, int>::type = 0
             #endif
         > constexpr /*implicit*/ StridedArrayView(ArrayView<T> view) noexcept: _data{view.data()}, _size{view.size()}, _stride{sizeof(T)} {}
 
@@ -1268,7 +1268,7 @@ template<unsigned dimensions> class StridedArrayView<dimensions, void> {
          */
         template<std::size_t size, class T
             #ifndef DOXYGEN_GENERATING_OUTPUT
-            , unsigned d = dimensions, typename std::enable_if<d == 1 && !std::is_const<T>::value, int>::type = 0
+            , typename std::enable_if<dimensions == 1 && !std::is_const<T>::value, int>::type = 0
             #endif
         > constexpr /*implicit*/ StridedArrayView(StaticArrayView<size, T> view) noexcept: _data{view.data()}, _size{size}, _stride{sizeof(T)} {}
 
