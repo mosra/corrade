@@ -70,6 +70,13 @@ void DebugStlCpp17Test::stringViewEmpty() {
 
 void DebugStlCpp17Test::filesystemPath() {
     #if __has_include(<filesystem>)
+    /* https://gitlab.kitware.com/cmake/cmake/-/issues/17834 I'm happy that I
+       only need to deal with this shit in a single test and nowhere else. This
+       macro, unlike __GNUC__ <= 8, should cover both the case of GCC and Clang
+       linking to libstdc++. */
+    #if _GLIBCXX_RELEASE <= 8
+    CORRADE_SKIP("libstdc++ 7 and 8 requires -lstdc++fs in order to use std::filesystem. Too annoying, skipping.");
+    #else
     std::ostringstream out;
     /* This type is very special because it has a begin() / end() that return
        std::filesystem::path *again*, so Debug helpfully assumes it's a nested
@@ -100,6 +107,7 @@ void DebugStlCpp17Test::filesystemPath() {
     CORRADE_COMPARE(out.str(), "/home/mosra\n");
     #else
     CORRADE_COMPARE(out.str(), "\"/home/mosra\"\n");
+    #endif
     #endif
     #else
     CORRADE_SKIP("No <filesystem> header in this STL implementation.");
