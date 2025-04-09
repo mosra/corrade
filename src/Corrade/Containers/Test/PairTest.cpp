@@ -341,27 +341,23 @@ void PairTest::constructValueInit() {
 }
 
 void PairTest::constructNoInit() {
-    Pair<float, int> aTrivial{35.0f, 3};
-    new(&aTrivial) Pair<float, int>{Corrade::NoInit};
-    {
-        /* Explicitly check we're not on Clang because certain Clang-based IDEs
-           inherit __GNUC__ if GCC is used instead of leaving it at 4 like
-           Clang itself does */
-        #if defined(CORRADE_TARGET_GCC) && !defined(CORRADE_TARGET_CLANG) && __GNUC__*100 + __GNUC_MINOR__ >= 601 && __OPTIMIZE__
-        CORRADE_EXPECT_FAIL("GCC 6.1+ misoptimizes and overwrites the value.");
-        #endif
-        CORRADE_COMPARE(aTrivial.first(), 35.0f);
-        CORRADE_COMPARE(aTrivial.second(), 3);
-    }
-
+    /* Deliberately not having a default constructor to verify the NoInit one
+       is called */
     struct Foo {
         /*implicit*/ Foo(int a): a{a} {}
         explicit Foo(Corrade::NoInitT) {}
         int a;
     };
 
-    Pair<Foo, Foo> a{15, 36};
-    new(&a) Pair<Foo, Foo>{Corrade::NoInit};
+    /* Testing all four combinations */
+    Pair<float, int> a{35.0f, 3};
+    Pair<float, Foo> b{39.0f, 7};
+    Pair<Foo, float> c{17, 37.0f};
+    Pair<Foo, Foo> d{15, 36};
+    new(&a) Pair<float, int>{Corrade::NoInit};
+    new(&b) Pair<float, Foo>{Corrade::NoInit};
+    new(&c) Pair<Foo, float>{Corrade::NoInit};
+    new(&d) Pair<Foo, Foo>{Corrade::NoInit};
     {
         /* Explicitly check we're not on Clang because certain Clang-based IDEs
            inherit __GNUC__ if GCC is used instead of leaving it at 4 like
@@ -369,18 +365,38 @@ void PairTest::constructNoInit() {
         #if defined(CORRADE_TARGET_GCC) && !defined(CORRADE_TARGET_CLANG) && __GNUC__*100 + __GNUC_MINOR__ >= 601 && __OPTIMIZE__
         CORRADE_EXPECT_FAIL("GCC 6.1+ misoptimizes and overwrites the value.");
         #endif
-        CORRADE_COMPARE(a.first().a, 15);
-        CORRADE_COMPARE(a.second().a, 36);
+        CORRADE_COMPARE(a.first(), 35.0f);
+        CORRADE_COMPARE(a.second(), 3);
+
+        CORRADE_COMPARE(b.first(), 39.0f);
+        CORRADE_COMPARE(b.second().a, 7);
+
+        CORRADE_COMPARE(c.first().a, 17);
+        CORRADE_COMPARE(c.second(), 37.0f);
+
+        CORRADE_COMPARE(d.first().a, 15);
+        CORRADE_COMPARE(d.second().a, 36);
     }
 
+    /* All combinations of trivial and nothrow-constructible types should be
+       marked as such */
     CORRADE_VERIFY(std::is_nothrow_constructible<Pair<int, int>, Corrade::NoInitT>::value);
+    CORRADE_VERIFY(std::is_nothrow_constructible<Pair<int, Copyable>, Corrade::NoInitT>::value);
+    CORRADE_VERIFY(std::is_nothrow_constructible<Pair<Copyable, int>, Corrade::NoInitT>::value);
     CORRADE_VERIFY(std::is_nothrow_constructible<Pair<Copyable, Copyable>, Corrade::NoInitT>::value);
+
+    /* Throwable constructor should be marked as such in all combinations with
+       either nothrow or trivial types */
     CORRADE_VERIFY(!std::is_nothrow_constructible<Pair<Throwable, Copyable>, Corrade::NoInitT>::value);
+    CORRADE_VERIFY(!std::is_nothrow_constructible<Pair<Throwable, int>, Corrade::NoInitT>::value);
+
     CORRADE_VERIFY(!std::is_nothrow_constructible<Pair<Copyable, Throwable>, Corrade::NoInitT>::value);
-    /** @todo test combined trivial & NoInit variants once we figure out how to
-        express the constructor overloads to not conflict with each other */
+    CORRADE_VERIFY(!std::is_nothrow_constructible<Pair<int, Throwable>, Corrade::NoInitT>::value);
 
     /* Implicit construction is not allowed */
+    CORRADE_VERIFY(!std::is_convertible<Corrade::NoInitT, Pair<int, int>>::value);
+    CORRADE_VERIFY(!std::is_convertible<Corrade::NoInitT, Pair<int, Copyable>>::value);
+    CORRADE_VERIFY(!std::is_convertible<Corrade::NoInitT, Pair<Copyable, int>>::value);
     CORRADE_VERIFY(!std::is_convertible<Corrade::NoInitT, Pair<Copyable, Copyable>>::value);
 }
 

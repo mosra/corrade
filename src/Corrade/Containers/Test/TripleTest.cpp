@@ -370,35 +370,31 @@ void TripleTest::constructValueInit() {
 }
 
 void TripleTest::constructNoInit() {
-    Triple<float, int, char> aTrivial{35.0f, 3, 'F'};
-    new(&aTrivial) Triple<float, int, char>{Corrade::NoInit};
-    {
-        /* Explicitly check we're not on Clang because certain Clang-based IDEs
-           inherit __GNUC__ if GCC is used instead of leaving it at 4 like
-           Clang itself does */
-        #if defined(CORRADE_TARGET_GCC) && !defined(CORRADE_TARGET_CLANG) && __GNUC__*100 + __GNUC_MINOR__ >= 601 && __OPTIMIZE__
-        CORRADE_EXPECT_FAIL("GCC 6.1+ misoptimizes and overwrites the value.");
-        #endif
-        CORRADE_COMPARE(aTrivial.first(), 35.0f);
-        CORRADE_COMPARE(aTrivial.second(), 3);
-    } {
-        /* Explicitly check we're not on Clang because certain Clang-based IDEs
-           inherit __GNUC__ if GCC is used instead of leaving it at 4 like
-           Clang itself does */
-        #if defined(CORRADE_TARGET_GCC) && !defined(CORRADE_TARGET_CLANG) && __GNUC__*100 + __GNUC_MINOR__ >= 601 && __OPTIMIZE__
-        CORRADE_EXPECT_FAIL("GCC 6.1+ misoptimizes and leaves the value at random.");
-        #endif
-        CORRADE_COMPARE(aTrivial.third(), 'F');
-    }
-
+    /* Deliberately not having a default constructor to verify the NoInit one
+       is called */
     struct Foo {
         /*implicit*/ Foo(int a): a{a} {}
         explicit Foo(Corrade::NoInitT) {}
         int a;
     };
 
-    Triple<Foo, Foo, Foo> a{15, 36, 72};
-    new(&a) Triple<Foo, Foo, Foo>{Corrade::NoInit};
+    /* Testing all eight combinations */
+    Triple<float, int, double> a{35.0f, 3, 3.14};
+    Triple<int, float, Foo> b{9, 22.0f, 11};
+    Triple<float, Foo, int> c{19.0f, 29, 56};
+    Triple<Foo, float, int> d{16, 23.0f, -15};
+    Triple<float, Foo, Foo> e{13.0f, 76, 41};
+    Triple<Foo, float, Foo> f{12, 29.0f, 34};
+    Triple<Foo, Foo, float> g{17, 33, 37.0f};
+    Triple<Foo, Foo, Foo> h{15, 36, 72};
+    new(&a) Triple<float, int, double>{Corrade::NoInit};
+    new(&b) Triple<int, float, Foo>{Corrade::NoInit};
+    new(&c) Triple<float, Foo, int>{Corrade::NoInit};
+    new(&d) Triple<Foo, float, int>{Corrade::NoInit};
+    new(&e) Triple<float, Foo, Foo>{Corrade::NoInit};
+    new(&f) Triple<Foo, float, Foo>{Corrade::NoInit};
+    new(&g) Triple<Foo, Foo, float>{Corrade::NoInit};
+    new(&h) Triple<Foo, Foo, Foo>{Corrade::NoInit};
     {
         /* Explicitly check we're not on Clang because certain Clang-based IDEs
            inherit __GNUC__ if GCC is used instead of leaving it at 4 like
@@ -406,18 +402,75 @@ void TripleTest::constructNoInit() {
         #if defined(CORRADE_TARGET_GCC) && !defined(CORRADE_TARGET_CLANG) && __GNUC__*100 + __GNUC_MINOR__ >= 601 && __OPTIMIZE__
         CORRADE_EXPECT_FAIL("GCC 6.1+ misoptimizes and overwrites the value.");
         #endif
-        CORRADE_COMPARE(a.first().a, 15);
-        CORRADE_COMPARE(a.second().a, 36);
-        CORRADE_COMPARE(a.third().a, 72);
+        CORRADE_COMPARE(a.first(), 35.0f);
+        CORRADE_COMPARE(a.second(), 3);
+        CORRADE_COMPARE(a.third(), 3.14);
+
+        CORRADE_COMPARE(b.first(), 9);
+        CORRADE_COMPARE(b.second(), 22.0f);
+        CORRADE_COMPARE(b.third().a, 11);
+
+        CORRADE_COMPARE(c.first(), 19.0f);
+        CORRADE_COMPARE(c.second().a, 29);
+        CORRADE_COMPARE(c.third(), 56);
+
+        CORRADE_COMPARE(d.first().a, 16);
+        CORRADE_COMPARE(d.second(), 23.0f);
+        CORRADE_COMPARE(d.third(), -15);
+
+        CORRADE_COMPARE(e.first(), 13.0f);
+        CORRADE_COMPARE(e.second().a, 76);
+        CORRADE_COMPARE(e.third().a, 41);
+
+        CORRADE_COMPARE(f.first().a, 12);
+        CORRADE_COMPARE(f.second(), 29.0f);
+        CORRADE_COMPARE(f.third().a, 34);
+
+        CORRADE_COMPARE(g.first().a, 17);
+        CORRADE_COMPARE(g.second().a, 33);
+        CORRADE_COMPARE(g.third(), 37.0f);
+
+        CORRADE_COMPARE(h.first().a, 15);
+        CORRADE_COMPARE(h.second().a, 36);
+        CORRADE_COMPARE(h.third().a, 72);
     }
 
+    /* All combinations of trivial and nothrow-constructible types should be
+       marked as such */
     CORRADE_VERIFY(std::is_nothrow_constructible<Triple<int, int, int>, Corrade::NoInitT>::value);
+    CORRADE_VERIFY(std::is_nothrow_constructible<Triple<int, int, Copyable>, Corrade::NoInitT>::value);
+    CORRADE_VERIFY(std::is_nothrow_constructible<Triple<int, Copyable, int>, Corrade::NoInitT>::value);
+    CORRADE_VERIFY(std::is_nothrow_constructible<Triple<Copyable, int, int>, Corrade::NoInitT>::value);
+    CORRADE_VERIFY(std::is_nothrow_constructible<Triple<int, Copyable, Copyable>, Corrade::NoInitT>::value);
+    CORRADE_VERIFY(std::is_nothrow_constructible<Triple<Copyable, int, Copyable>, Corrade::NoInitT>::value);
+    CORRADE_VERIFY(std::is_nothrow_constructible<Triple<Copyable, Copyable, int>, Corrade::NoInitT>::value);
     CORRADE_VERIFY(std::is_nothrow_constructible<Triple<Copyable, Copyable, Copyable>, Corrade::NoInitT>::value);
+
+    /* Throwable constructor should be marked as such in all combinations with
+       either nothrow or trivial types */
+    CORRADE_VERIFY(!std::is_nothrow_constructible<Triple<Throwable, int, int>, Corrade::NoInitT>::value);
+    CORRADE_VERIFY(!std::is_nothrow_constructible<Triple<Throwable, int, Copyable>, Corrade::NoInitT>::value);
+    CORRADE_VERIFY(!std::is_nothrow_constructible<Triple<Throwable, Copyable, int>, Corrade::NoInitT>::value);
     CORRADE_VERIFY(!std::is_nothrow_constructible<Triple<Throwable, Copyable, Copyable>, Corrade::NoInitT>::value);
+
+    CORRADE_VERIFY(!std::is_nothrow_constructible<Triple<int, Throwable, int>, Corrade::NoInitT>::value);
+    CORRADE_VERIFY(!std::is_nothrow_constructible<Triple<int, Throwable, Copyable>, Corrade::NoInitT>::value);
+    CORRADE_VERIFY(!std::is_nothrow_constructible<Triple<Copyable, Throwable, int>, Corrade::NoInitT>::value);
     CORRADE_VERIFY(!std::is_nothrow_constructible<Triple<Copyable, Throwable, Copyable>, Corrade::NoInitT>::value);
+
+    CORRADE_VERIFY(!std::is_nothrow_constructible<Triple<int, int, Throwable>, Corrade::NoInitT>::value);
+    CORRADE_VERIFY(!std::is_nothrow_constructible<Triple<int, Copyable, Throwable>, Corrade::NoInitT>::value);
+    CORRADE_VERIFY(!std::is_nothrow_constructible<Triple<Copyable, int, Throwable>, Corrade::NoInitT>::value);
     CORRADE_VERIFY(!std::is_nothrow_constructible<Triple<Copyable, Copyable, Throwable>, Corrade::NoInitT>::value);
 
     /* Implicit construction is not allowed */
+    CORRADE_VERIFY(!std::is_convertible<Corrade::NoInitT, Triple<int, int, int>>::value);
+    CORRADE_VERIFY(!std::is_convertible<Corrade::NoInitT, Triple<int, int, Copyable>>::value);
+    CORRADE_VERIFY(!std::is_convertible<Corrade::NoInitT, Triple<int, Copyable, int>>::value);
+    CORRADE_VERIFY(!std::is_convertible<Corrade::NoInitT, Triple<Copyable, int, int>>::value);
+    CORRADE_VERIFY(!std::is_convertible<Corrade::NoInitT, Triple<int, Copyable, Copyable>>::value);
+    CORRADE_VERIFY(!std::is_convertible<Corrade::NoInitT, Triple<Copyable, int, Copyable>>::value);
+    CORRADE_VERIFY(!std::is_convertible<Corrade::NoInitT, Triple<Copyable, Copyable, int>>::value);
     CORRADE_VERIFY(!std::is_convertible<Corrade::NoInitT, Triple<Copyable, Copyable, Copyable>>::value);
 }
 
