@@ -281,7 +281,7 @@ template<unsigned dimensions, class T> class BasicStridedBitArrayView {
          */
         template<class U
             #ifndef DOXYGEN_GENERATING_OUTPUT
-            , typename std::enable_if<dimensions == 1 && std::is_convertible<U*, T*>::value, int>::type = 0
+            , typename std::enable_if<dimensions == 1 && (std::is_same<T, U>::value || std::is_same<T, const U>::value), int>::type = 0
             #endif
         > constexpr /*implicit*/ BasicStridedBitArrayView(BasicBitArrayView<U> view) noexcept: _data{view.data()}, _sizeOffset{view.size() << 3 | view.offset()}, _stride{1} {}
 
