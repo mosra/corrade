@@ -36,6 +36,9 @@
     `#define CORRADE_STRING_STL_VIEW_COMPATIBILITY` before including the file.
     Including it multiple times with different macros defined works too.
 
+    v2020.06-1890-g77f9f (2025-04-11)
+    -   Include guard for the implementation part to prevent double definitions
+    -   Further cleanup and unification of SFINAE code
     v2020.06-1864-g8b00 (2025-02-12)
     -   Removed dependency on Containers::Pair
     v2020.06-1846-gc4cdf (2025-01-07)

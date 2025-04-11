@@ -23,6 +23,8 @@
     `#define CORRADE_UTILITY_EXPORT` as appropriate. To enable the IFUNC
     functionality, `#define CORRADE_CPU_USE_IFUNC` before including the file.
 
+    v2020.06-1890-g77f9f (2025-04-11)
+    -   Include guard for the implementation part to prevent double definitions
     v2020.06-1846-gc4cdf (2025-01-07)
     -   SFINAE is now done in template args as that's simpler for the compiler
     -   Fixed warnings on ARM with C++20

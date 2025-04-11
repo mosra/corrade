@@ -22,6 +22,8 @@
     before including the file. Including it multiple times with different
     macros defined works too.
 
+    v2020.06-1890-g77f9f (2025-04-11)
+    -   Further cleanup and unification of SFINAE code, no functional change
     v2020.06-1846-gc4cdf (2025-01-07)
     -   StaticArray default constructor and constructors from a C array are now
         implicit

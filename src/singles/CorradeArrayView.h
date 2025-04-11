@@ -22,6 +22,8 @@
     `#define CORRADE_ARRAYVIEW_STL_SPAN_COMPATIBILITY` before including the
     file. Including it multiple times with different macros defined works too.
 
+    v2020.06-1890-g77f9f (2025-04-11)
+    -   Further cleanup and unification of SFINAE code, no functional change
     v2020.06-1846-gc4cdf (2025-01-07)
     -   Added arraySize() overload for arrays as struct members
     -   Structured bindings of const types now work even w/o <utility>

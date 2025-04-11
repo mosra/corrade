@@ -20,6 +20,14 @@
     `#define CORRADE_STRUCTURED_BINDINGS` before including the file. Including
     it multiple times with different macros defined works too.
 
+    v2020.06-1890-g77f9f (2025-04-11)
+    -   Ability to construct StridedArrayView<T> from a StridedArrayView<T[]>
+        of one dimension less
+    -   Cleanup and unification of SFINAE code, it's now done in template args
+        in all cases as that's simpler for the compiler
+    -   Workaround for a MSVC compiler crash when slicing to a member function
+        that returns a C array reference
+    -   Added a missing StridedArrayView arraySize() overload
     v2020.06-1872-gbf086 (2025-03-03)
     -   Fixed slice() to work for non-overloaded member functions
     v2020.06-1846-gc4cdf (2025-01-07)

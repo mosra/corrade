@@ -17,6 +17,8 @@
     `#define CORRADE_POINTER_STL_COMPATIBILITY` before including the file.
     Including it multiple times with different macros defined works too.
 
+    v2020.06-1890-g77f9f (2025-04-11)
+    -   Cleanup and unification of SFINAE code, no functional change
     v2020.06-1687-g6b5f (2024-06-29)
     -   Deleting pointers to incomplete types is now disallowed to prevent
         resource leaks

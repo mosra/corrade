@@ -13,6 +13,8 @@
     -   GitHub project page — https://github.com/mosra/corrade
     -   GitHub Singles repository — https://github.com/mosra/magnum-singles
 
+    v2020.06-1890-g77f9f (2025-04-11)
+    -   Cleanup and unification of SFINAE code, no functional change
     v2020.06-1506-g43e1c (2023-09-13)
     -   Preventing a conflict with the EnumSet declaration in Corrade's
         Containers.h due to default template arguments being used in both
