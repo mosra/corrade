@@ -163,7 +163,18 @@ typedef BasicStringView<const char> StringView;
 // {{includes}}
 #include "Corrade/Containers/StringStlView.h"
 #endif
-#ifdef CORRADE_STRING_IMPLEMENTATION
+/* The extra guard has to be here to prevent double definitions in cases like
+
+    #define CORRADE_STRING_IMPLEMENTATION
+    #include <CorradeString.hpp>
+    #include <SomeOtherLib.h>
+
+   where a hypothetical SomeOtherLib.h contains `#include <CorradeString.hpp>`
+   again. Note that even the stb_* libs don't handle this -- including them
+   twice with the implementation macro defined *will* lead to double
+   definitions. */
+#if defined(CORRADE_STRING_IMPLEMENTATION) && !defined(CorradeString_hpp_implementation)
+#define CorradeString_hpp_implementation
 // {{includes}}
 /* CORRADE_CONSTEXPR{,_DEBUG}_ASSERT already present above. The implementation
    then uses CORRADE_ASSERT, CORRADE_DEBUG_ASSERT,

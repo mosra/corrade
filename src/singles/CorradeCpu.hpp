@@ -100,7 +100,17 @@
 #define CORRADE_UTILITY_EXPORT
 #endif
 #include "Corrade/Cpu.h"
-#ifdef CORRADE_CPU_IMPLEMENTATION
+/* The extra guard has to be here to prevent double definitions in cases like
+
+    #define CORRADE_CPU_IMPLEMENTATION
+    #include <CorradeCpu.hpp>
+    #include <CorradeString.hpp>
+
+   where CorradeString.hpp contains `#include <CorradeCpu.hpp>` again. Note
+   that even the stb_* libs don't handle this -- including them twice with the
+   implementation macro defined *will* lead to double definitions. */
+#if defined(CORRADE_CPU_IMPLEMENTATION) && !defined(CorradeCpu_hpp_implementation)
+#define CorradeCpu_hpp_implementation
 // {{includes}}
 #include "Corrade/Cpu.cpp"
 #endif
