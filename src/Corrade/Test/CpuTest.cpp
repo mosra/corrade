@@ -1605,7 +1605,24 @@ template<> CORRADE_NEVER_INLINE CORRADE_ENABLE(AVX512F) int callInstructionFor<C
 #endif
 #ifdef CORRADE_ENABLE_NEON
 template<> CORRADE_NEVER_INLINE CORRADE_ENABLE(NEON) int callInstructionFor<Cpu::NeonT>() {
+    /* This compiler is just colossal stupidity itself. See for yourself:
+        https://stackoverflow.com/questions/54016821/error-c2078-when-initializing-uint32x4-t-on-arm
+        https://developercommunity.visualstudio.com/t/error-c2078-too-many-initializers-when-using-arm-n/402911
+        https://developercommunity.visualstudio.com/t/static-initialization-arm64-neon-datatypes/1238406
+       I ended up setting the union members manually. The designated
+       initializer thing is also bad, still relying on internal union member
+       naming, and in C++ it requires /std:c++20. Fortunately it's just a test,
+       not code I'd have to update and maintain over a long time. Similar
+       occurences below. */
+    #if defined(CORRADE_TARGET_MSVC) && !defined(CORRADE_TARGET_CLANG)
+    int32x4_t a;
+    a.n128_i32[0] = -10;
+    a.n128_i32[1] = 20;
+    a.n128_i32[2] = -30;
+    a.n128_i32[3] = 40;
+    #else
     int32x4_t a{-10, 20, -30, 40};
+    #endif
 
     /* All instructions NEON */
     union {
@@ -1623,10 +1640,27 @@ template<> CORRADE_NEVER_INLINE CORRADE_ENABLE(NEON) int callInstructionFor<Cpu:
 #endif
 #ifdef CORRADE_ENABLE_NEON_FMA
 template<> CORRADE_NEVER_INLINE CORRADE_ENABLE(NEON_FMA) int callInstructionFor<Cpu::NeonFmaT>() {
-    /* Values from Magnum::Math::Test::FunctionsTest::fma() */
+    /* Values from Magnum::Math::Test::FunctionsTest::fma(). See above for the
+       MSVC insanities. */
+    #if defined(CORRADE_TARGET_MSVC) && !defined(CORRADE_TARGET_CLANG)
+    float32x4_t a, b, c;
+    a.n128_f32[0] = 0.0f;
+    a.n128_f32[1] = 2.0f;
+    a.n128_f32[2] = 1.5f;
+    a.n128_f32[3] = 0.5f;
+    b.n128_f32[0] = 0.0f;
+    b.n128_f32[1] = 3.0f;
+    b.n128_f32[2] = 2.0f;
+    b.n128_f32[3] = -1.0f;
+    c.n128_f32[0] = 0.0f;
+    c.n128_f32[1] = 0.75f;
+    c.n128_f32[2] = 0.25f;
+    c.n128_f32[3] = 0.1f;
+    #else
     float32x4_t a{0.0f,  2.0f,  1.5f,  0.5f};
     float32x4_t b{0.0f,  3.0f,  2.0f, -1.0f};
     float32x4_t c{0.0f, 0.75f, 0.25f,  0.1f};
+    #endif
 
     /* FMA */
     union {
@@ -1644,7 +1678,16 @@ template<> CORRADE_NEVER_INLINE CORRADE_ENABLE(NEON_FMA) int callInstructionFor<
 #endif
 #ifdef CORRADE_ENABLE_NEON_FP16
 template<> CORRADE_NEVER_INLINE CORRADE_ENABLE(NEON_FP16) int callInstructionFor<Cpu::NeonFp16T>() {
+    /* See above for the MSVC insanities */
+    #if defined(CORRADE_TARGET_MSVC) && !defined(CORRADE_TARGET_CLANG)
+    float32x4_t a;
+    a.n128_f32[0] = 5.47f;
+    a.n128_f32[1] = 2.23f;
+    a.n128_f32[2] = 7.62f;
+    a.n128_f32[3] = 0.5f;
+    #else
     float32x4_t a{5.47f, 2.23f, 7.62f, 0.5f};
+    #endif
     float16x4_t b = vcvt_f16_f32(a);
 
     /* FP16 */
@@ -1737,9 +1780,25 @@ int callInstructionMultiple() {
         CORRADE_SKIP("NEON FMA feature not supported");
 
     /* Same as callInstructionFor<Cpu::NeonFmaT>() */
+    #if defined(CORRADE_TARGET_MSVC) && !defined(CORRADE_TARGET_CLANG)
+    float32x4_t a, b, c;
+    a.n128_f32[0] = 0.0f;
+    a.n128_f32[1] = 2.0f;
+    a.n128_f32[2] = 1.5f;
+    a.n128_f32[3] = 0.5f;
+    b.n128_f32[0] = 0.0f;
+    b.n128_f32[1] = 3.0f;
+    b.n128_f32[2] = 2.0f;
+    b.n128_f32[3] = -1.0f;
+    c.n128_f32[0] = 0.0f;
+    c.n128_f32[1] = 0.75f;
+    c.n128_f32[2] = 0.25f;
+    c.n128_f32[3] = 0.1f;
+    #else
     float32x4_t a{0.0f,  2.0f,  1.5f,  0.5f};
     float32x4_t b{0.0f,  3.0f,  2.0f, -1.0f};
     float32x4_t c{0.0f, 0.75f, 0.25f,  0.1f};
+    #endif
 
     union {
         float32x4_t v;
@@ -1853,7 +1912,15 @@ CORRADE_ENABLE_NEON int callInstructionLambda() {
         CORRADE_SKIP("NEON feature not supported");
 
     /* Same as callInstructionFor<Cpu::NeonT>() */
+    #if defined(CORRADE_TARGET_MSVC) && !defined(CORRADE_TARGET_CLANG)
+    int32x4_t a;
+    a.n128_i32[0] = -10;
+    a.n128_i32[1] = 20;
+    a.n128_i32[2] = -30;
+    a.n128_i32[3] = 40;
+    #else
     int32x4_t a{-10, 20, -30, 40};
+    #endif
 
     union {
         int32x4_t v;
@@ -1927,7 +1994,15 @@ CORRADE_ENABLE(NEON) int callInstructionLambdaMultiple() {
         CORRADE_SKIP("NEON feature not supported");
 
     /* Same as callInstructionFor<Cpu::NeonT>() */
+    #if defined(CORRADE_TARGET_MSVC) && !defined(CORRADE_TARGET_CLANG)
+    int32x4_t a;
+    a.n128_i32[0] = -10;
+    a.n128_i32[1] = 20;
+    a.n128_i32[2] = -30;
+    a.n128_i32[3] = 40;
+    #else
     int32x4_t a{-10, 20, -30, 40};
+    #endif
 
     union {
         int32x4_t v;
