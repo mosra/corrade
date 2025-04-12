@@ -998,9 +998,9 @@ void PathTest::isDirectorySymlink() {
     CORRADE_VERIFY(Path::exists(Path::join(_testDirSymlink, "dir-symlink")));
     {
         #if !defined(CORRADE_TARGET_UNIX) && !defined(CORRADE_TARGET_EMSCRIPTEN)
-        /** @todo once implemented, can use Path::size() on file-symlink to
-            detect whether symlinks are preserved in the Git clone */
-        CORRADE_EXPECT_FAIL("Symlink support is implemented on Unix systems and Emscripten only.");
+        /* See PathTest::sizeSymlink() for details */
+        CORRADE_EXPECT_FAIL_IF(Path::size(Path::join(_testDirSymlink, "file-symlink")) != 11,
+            "Symlinks not preserved in the source tree, can't test.");
         #endif
         #if defined(CORRADE_TARGET_IOS) && defined(CORRADE_TESTSUITE_TARGET_XCTEST)
         CORRADE_EXPECT_FAIL_IF(!std::getenv("SIMULATOR_UDID"),
@@ -2058,9 +2058,9 @@ void PathTest::listSkipDirectoriesSymlinks() {
             "CTest is not able to run XCTest executables properly in the simulator.");
         #endif
         #if !defined(CORRADE_TARGET_UNIX) && !defined(CORRADE_TARGET_EMSCRIPTEN)
-        /** @todo once implemented, can use Path::size() on file-symlink to
-            detect whether symlinks are preserved in the Git clone */
-        CORRADE_EXPECT_FAIL("Symlink support is implemented on Unix systems and Emscripten only.");
+        /* See PathTest::sizeSymlink() for details */
+        CORRADE_EXPECT_FAIL_IF(Path::size(Path::join(_testDirSymlink, "file-symlink")) != 11,
+            "Symlinks not preserved in the source tree, can't test.");
         #endif
         CORRADE_COMPARE_AS(*list, Containers::array<Containers::String>({
             "file", "file-symlink"
@@ -2093,9 +2093,9 @@ void PathTest::listSkipFilesSymlinks() {
             "CTest is not able to run XCTest executables properly in the simulator.");
         #endif
         #if !defined(CORRADE_TARGET_UNIX) && !defined(CORRADE_TARGET_EMSCRIPTEN)
-        /** @todo once implemented, can use Path::size() on file-symlink to
-            detect whether symlinks are preserved in the Git clone */
-        CORRADE_EXPECT_FAIL("Symlink support is implemented on Unix systems and Emscripten only.");
+        /* See PathTest::sizeSymlink() for details */
+        CORRADE_EXPECT_FAIL_IF(Path::size(Path::join(_testDirSymlink, "file-symlink")) != 11,
+            "Symlinks not preserved in the source tree, can't test.");
         #endif
         CORRADE_COMPARE_AS(*list, Containers::array<Containers::String>({
             ".", "..", "dir", "dir-symlink"
@@ -2399,6 +2399,9 @@ void PathTest::sizeSymlink() {
     Containers::Optional<std::size_t> size = Path::size(fileSymlink);
     CORRADE_VERIFY(size);
 
+    /* This is also used elsewhere as a CORRADE_EXPECT_FAIL_IF() condition, to
+       expect a symlink treatment failure if the files are not symlinks in the
+       first place */
     if(size != 11)
         CORRADE_SKIP("Symlinks not preserved in the source tree, can't test.");
 

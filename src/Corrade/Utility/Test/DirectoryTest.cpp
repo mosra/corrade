@@ -614,9 +614,9 @@ void DirectoryTest::isDirectorySymlink() {
     CORRADE_VERIFY(Directory::exists(Directory::join(_testDirSymlink, "dir-symlink")));
     {
         #if !defined(CORRADE_TARGET_UNIX) && !defined(CORRADE_TARGET_EMSCRIPTEN)
-        /* Possible on Windows too, but there we'd need to first detect if the
-           Git clone has the symlinks preserved */
-        CORRADE_EXPECT_FAIL("Symlink support is implemented on Unix systems and Emscripten only.");
+        /* See PathTest::sizeSymlink() for details */
+        CORRADE_EXPECT_FAIL_IF(Path::size(Path::join(_testDirSymlink, "file-symlink")) != 11,
+            "Symlinks not preserved in the source tree, can't test.");
         #endif
         #if defined(CORRADE_TARGET_IOS) && defined(CORRADE_TESTSUITE_TARGET_XCTEST)
         CORRADE_EXPECT_FAIL_IF(!std::getenv("SIMULATOR_UDID"),
@@ -1428,9 +1428,9 @@ void DirectoryTest::listSkipDirectoriesSymlinks() {
     #endif
 
     #if !defined(CORRADE_TARGET_UNIX) && !defined(CORRADE_TARGET_EMSCRIPTEN)
-    /* Possible on Windows too, but there we'd need to first detect if the
-       Git clone has the symlinks preserved */
-    CORRADE_EXPECT_FAIL("Symlink support is implemented on Unix systems and Emscripten only.");
+    /* See PathTest::sizeSymlink() for details */
+    CORRADE_EXPECT_FAIL_IF(Path::size(Path::join(_testDirSymlink, "file-symlink")) != 11,
+        "Symlinks not preserved in the source tree, can't test.");
     #endif
     CORRADE_COMPARE_AS(Directory::list(_testDirSymlink, Directory::Flag::SkipDirectories),
         (std::vector<std::string>{"file", "file-symlink"}),
@@ -1455,9 +1455,9 @@ void DirectoryTest::listSkipFilesSymlinks() {
     #endif
 
     #if !defined(CORRADE_TARGET_UNIX) && !defined(CORRADE_TARGET_EMSCRIPTEN)
-    /* Possible on Windows too, but there we'd need to first detect if the
-       Git clone has the symlinks preserved */
-    CORRADE_EXPECT_FAIL("Symlink support is implemented on Unix systems and Emscripten only.");
+    /* See PathTest::sizeSymlink() for details */
+    CORRADE_EXPECT_FAIL_IF(Path::size(Path::join(_testDirSymlink, "file-symlink")) != 11,
+        "Symlinks not preserved in the source tree, can't test.");
     #endif
     CORRADE_COMPARE_AS(Directory::list(_testDirSymlink, Directory::Flag::SkipFiles),
         (std::vector<std::string>{".", "..", "dir", "dir-symlink"}),
