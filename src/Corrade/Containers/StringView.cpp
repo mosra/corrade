@@ -60,6 +60,9 @@
 #endif
 #ifdef CORRADE_ENABLE_NEON
 #include <arm_neon.h>
+#if defined(CORRADE_TARGET_MSVC) && !defined(CORRADE_TARGET_CLANG)
+#include <intrin.h> /* _CountTrailingZeros64() */
+#endif
 #endif
 #ifdef CORRADE_ENABLE_SIMD128
 #include <wasm_simd128.h>
@@ -512,7 +515,19 @@ CORRADE_UTILITY_CPU_MAYBE_UNUSED CORRADE_ENABLE(NEON) typename std::decay<declty
         const uint16x8_t eq16 = vreinterpretq_u16_u8(vceqq_u8(chunk, vn1));
         const uint64x1_t shrn64 = vreinterpret_u64_u8(vshrn_n_u16(eq16, 4));
         if(const uint64_t mask = vget_lane_u64(shrn64, 0))
-            return data + (__builtin_ctzll(mask) >> 2);
+            return data +
+                /* https://learn.microsoft.com/en-us/cpp/intrinsics/arm64-intrinsics
+                   which hopefully just compiles down to the clz instruction.
+                   Clang has only _CountLeadingZeros64() and only since version
+                   18 (https://github.com/llvm/llvm-project/pull/66554), so
+                   keeping to use the GCC builtin there (which is documented to
+                   be undefined for 0, but again hoping it just compiles to clz
+                   which is well-defined for 0). */
+                #if defined(CORRADE_TARGET_MSVC) && !defined(CORRADE_TARGET_CLANG)
+                (_CountTrailingZeros64(mask) >> 2);
+                #else
+                (__builtin_ctzll(mask) >> 2);
+                #endif
     }
 
     /* Go to the next aligned position. If the pointer was already aligned,
@@ -553,13 +568,33 @@ CORRADE_UTILITY_CPU_MAYBE_UNUSED CORRADE_ENABLE(NEON) typename std::decay<declty
            add instead of three ORs and a horizontal add */
         if(vaddvq_u8(vorrq_u8(maskAB, maskCD))) {
             if(const std::uint64_t mask = vgetq_lane_u64(vreinterpretq_u64_u8(maskAB), 0))
-                return i + 0*16 + (__builtin_ctzll(mask) >> 2);
+                return i + 0*16 + /* The clz instruction, see comment above */
+                    #if defined(CORRADE_TARGET_MSVC) && !defined(CORRADE_TARGET_CLANG)
+                    (_CountTrailingZeros64(mask) >> 2);
+                    #else
+                    (__builtin_ctzll(mask) >> 2);
+                    #endif
             if(const std::uint64_t mask = vgetq_lane_u64(vreinterpretq_u64_u8(maskAB), 1))
-                return i + 1*16 + (__builtin_ctzll(mask) >> 2);
+                return i + 1*16 +  /* The clz instruction, see comment above */
+                    #if defined(CORRADE_TARGET_MSVC) && !defined(CORRADE_TARGET_CLANG)
+                    (_CountTrailingZeros64(mask) >> 2);
+                    #else
+                    (__builtin_ctzll(mask) >> 2);
+                    #endif
             if(const std::uint64_t mask = vgetq_lane_u64(vreinterpretq_u64_u8(maskCD), 0))
-                return i + 2*16 + (__builtin_ctzll(mask) >> 2);
+                return i + 2*16 +  /* The clz instruction, see comment above */
+                    #if defined(CORRADE_TARGET_MSVC) && !defined(CORRADE_TARGET_CLANG)
+                    (_CountTrailingZeros64(mask) >> 2);
+                    #else
+                    (__builtin_ctzll(mask) >> 2);
+                    #endif
             if(const std::uint64_t mask = vgetq_lane_u64(vreinterpretq_u64_u8(maskCD), 1))
-                return i + 3*16 + (__builtin_ctzll(mask) >> 2);
+                return i + 3*16 +  /* The clz instruction, see comment above */
+                    #if defined(CORRADE_TARGET_MSVC) && !defined(CORRADE_TARGET_CLANG)
+                    (_CountTrailingZeros64(mask) >> 2);
+                    #else
+                    (__builtin_ctzll(mask) >> 2);
+                    #endif
             CORRADE_INTERNAL_DEBUG_ASSERT_UNREACHABLE(); /* LCOV_EXCL_LINE */
         }
     }
@@ -570,7 +605,12 @@ CORRADE_UTILITY_CPU_MAYBE_UNUSED CORRADE_ENABLE(NEON) typename std::decay<declty
         const uint16x8_t eq16 = vreinterpretq_u16_u8(vceqq_u8(chunk, vn1));
         const uint64x1_t shrn64 = vreinterpret_u64_u8(vshrn_n_u16(eq16, 4));
         if(const uint64_t mask = vget_lane_u64(shrn64, 0))
-            return i + (__builtin_ctzll(mask) >> 2);
+            return i +  /* The clz instruction, see comment above */
+                #if defined(CORRADE_TARGET_MSVC) && !defined(CORRADE_TARGET_CLANG)
+                (_CountTrailingZeros64(mask) >> 2);
+                #else
+                (__builtin_ctzll(mask) >> 2);
+                #endif
     }
 
     /* Handle remaining less than a vector with an unaligned search, again
@@ -582,7 +622,12 @@ CORRADE_UTILITY_CPU_MAYBE_UNUSED CORRADE_ENABLE(NEON) typename std::decay<declty
         const uint16x8_t eq16 = vreinterpretq_u16_u8(vceqq_u8(chunk, vn1));
         const uint64x1_t shrn64 = vreinterpret_u64_u8(vshrn_n_u16(eq16, 4));
         if(const uint64_t mask = vget_lane_u64(shrn64, 0))
-            return i + (__builtin_ctzll(mask) >> 2);
+            return i +  /* The clz instruction, see comment above */
+                #if defined(CORRADE_TARGET_MSVC) && !defined(CORRADE_TARGET_CLANG)
+                (_CountTrailingZeros64(mask) >> 2);
+                #else
+                (__builtin_ctzll(mask) >> 2);
+                #endif
     }
 
     return static_cast<const char*>(nullptr);
