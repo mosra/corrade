@@ -31,6 +31,13 @@ environment:
     APPVEYOR_JOB_NAME: windows-msvc2022
     CONFIGURATION: Debug
   - TARGET: desktop
+    COMPILER: arm64-msvc
+    ANSI_COLORS: ON
+    PLATFORM: x64
+    APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2022
+    APPVEYOR_JOB_NAME: windows-arm64-msvc2022
+    CONFIGURATION: Debug
+  - TARGET: desktop
     COMPILER: msvc
     ANSI_COLORS: ON
     PLATFORM: x64
@@ -119,12 +126,13 @@ install:
 - set PATH=C:/tools;%PATH%
 
 # Codecov uploader and grcov. Used for MinGW and clang-cl.
-- IF "%TARGET%" == "desktop" IF NOT "%COMPILER%" == "msvc" appveyor DownloadFile https://github.com/mozilla/grcov/releases/download/v0.8.20/grcov-x86_64-pc-windows-msvc.zip && 7z x grcov-x86_64-pc-windows-msvc.zip -oC:/tools
-- IF "%TARGET%" == "desktop" IF NOT "%COMPILER%" == "msvc" appveyor DownloadFile https://uploader.codecov.io/latest/windows/codecov.exe -FileName C:/tools/codecov.exe
+- IF "%TARGET%" == "desktop" IF NOT "%COMPILER%" == "msvc" IF NOT "%COMPILER%" == "arm64-msvc" appveyor DownloadFile https://github.com/mozilla/grcov/releases/download/v0.8.20/grcov-x86_64-pc-windows-msvc.zip && 7z x grcov-x86_64-pc-windows-msvc.zip -oC:/tools
+- IF "%TARGET%" == "desktop" IF NOT "%COMPILER%" == "msvc" IF NOT "%COMPILER%" == "arm64-msvc" appveyor DownloadFile https://uploader.codecov.io/latest/windows/codecov.exe -FileName C:/tools/codecov.exe
 
 build_script:
 - IF NOT "%BUILD_STATIC%" == "ON" set BUILD_STATIC=OFF
 - IF "%TARGET%" == "desktop" IF "%COMPILER:~0,4%" == "msvc" call package\ci\appveyor-desktop.bat
+- IF "%TARGET%" == "desktop" IF "%COMPILER%" == "arm64-msvc" call package\ci\appveyor-desktop-arm64.bat
 - IF "%TARGET%" == "desktop" IF "%COMPILER%" == "mingw" call package\ci\appveyor-desktop-mingw.bat
 - IF "%TARGET%" == "rt" call package\ci\appveyor-rt.bat
 
