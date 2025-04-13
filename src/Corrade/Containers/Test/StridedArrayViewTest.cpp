@@ -229,6 +229,7 @@ struct StridedArrayViewTest: TestSuite::Tester {
     void sliceMemberPointerConstData();
     void sliceConstMemberPointer();
     void sliceMemberPointerDerived();
+    void sliceMemberPointerNullView();
     void sliceMemberPointerEmptyView();
 
     void sliceMemberFunctionPointer();
@@ -237,6 +238,7 @@ struct StridedArrayViewTest: TestSuite::Tester {
     void sliceConstOverloadedMemberFunctionPointer();
     void sliceRvalueOverloadedMemberFunctionPointer();
     void sliceMemberFunctionPointerDerived();
+    void sliceMemberFunctionPointerNullView();
     void sliceMemberFunctionPointerEmptyView();
     void sliceMemberFunctionPointerArrayType();
     void sliceMemberFunctionPointerReturningOffsetOutOfRange();
@@ -458,6 +460,7 @@ StridedArrayViewTest::StridedArrayViewTest() {
               &StridedArrayViewTest::sliceMemberPointerConstData,
               &StridedArrayViewTest::sliceConstMemberPointer,
               &StridedArrayViewTest::sliceMemberPointerDerived,
+              &StridedArrayViewTest::sliceMemberPointerNullView,
               &StridedArrayViewTest::sliceMemberPointerEmptyView,
 
               &StridedArrayViewTest::sliceMemberFunctionPointer,
@@ -466,6 +469,7 @@ StridedArrayViewTest::StridedArrayViewTest() {
               &StridedArrayViewTest::sliceConstOverloadedMemberFunctionPointer,
               &StridedArrayViewTest::sliceRvalueOverloadedMemberFunctionPointer,
               &StridedArrayViewTest::sliceMemberFunctionPointerDerived,
+              &StridedArrayViewTest::sliceMemberFunctionPointerNullView,
               &StridedArrayViewTest::sliceMemberFunctionPointerEmptyView,
               &StridedArrayViewTest::sliceMemberFunctionPointerArrayType,
               &StridedArrayViewTest::sliceMemberFunctionPointerReturningOffsetOutOfRange,
@@ -3346,22 +3350,44 @@ void StridedArrayViewTest::sliceMemberPointerDerived() {
         TestSuite::Compare::Container);
 }
 
-void StridedArrayViewTest::sliceMemberPointerEmptyView() {
+void StridedArrayViewTest::sliceMemberPointerNullView() {
     struct Data {
         float first;
         short second;
     };
+    Containers::StridedArrayView1D<Data> view{nullptr, 5};
+    Containers::StridedArrayView1D<const Data> cview{nullptr, 5};
 
-    Containers::StridedArrayView1D<Data> empty;
-    Containers::StridedArrayView1D<const Data> cempty;
-    Containers::StridedArrayView1D<short> second = empty.slice(&Data::second);
-    Containers::StridedArrayView1D<const short> csecond = cempty.slice(&Data::second);
-    CORRADE_COMPARE(second.data(), reinterpret_cast<const void*>(4));
-    CORRADE_COMPARE(csecond.data(), reinterpret_cast<const void*>(4));
+    /* Slicing a null view should still return a null pointer even if the view
+       has non-zero size */
+    Containers::StridedArrayView1D<short> second = view.slice(&Data::second);
+    Containers::StridedArrayView1D<const short> csecond = cview.slice(&Data::second);
+    CORRADE_COMPARE(second.data(), nullptr);
+    CORRADE_COMPARE(csecond.data(), nullptr);
+    CORRADE_COMPARE(second.size(), 5);
+    CORRADE_COMPARE(csecond.size(), 5);
+    CORRADE_COMPARE(second.stride(), 8);
+    CORRADE_COMPARE(csecond.stride(), 8);
+}
+
+void StridedArrayViewTest::sliceMemberPointerEmptyView() {
+    struct Data {
+        float first;
+        short second;
+    } data[1]{};
+    Containers::StridedArrayView1D<Data> view{data, 0};
+    Containers::StridedArrayView1D<const Data> cview{data, 0};
+
+    /* Compared to above, slicing a zero-sized non-null view should apply the
+       offset */
+    Containers::StridedArrayView1D<short> second = view.slice(&Data::second);
+    Containers::StridedArrayView1D<const short> csecond = cview.slice(&Data::second);
+    CORRADE_COMPARE(second.data(), &data->second);
+    CORRADE_COMPARE(csecond.data(), &data->second);
     CORRADE_COMPARE(second.size(), 0);
     CORRADE_COMPARE(csecond.size(), 0);
-    CORRADE_COMPARE(second.stride(), 0);
-    CORRADE_COMPARE(csecond.stride(), 0);
+    CORRADE_COMPARE(second.stride(), 8);
+    CORRADE_COMPARE(csecond.stride(), 8);
 }
 
 void StridedArrayViewTest::sliceMemberFunctionPointer() {
@@ -3703,58 +3729,132 @@ void StridedArrayViewTest::sliceMemberFunctionPointerDerived() {
         TestSuite::Compare::Container);
 }
 
-void StridedArrayViewTest::sliceMemberFunctionPointerEmptyView() {
+void StridedArrayViewTest::sliceMemberFunctionPointerNullView() {
     class Data {
         public:
+            /* The getters should *not* be called in this case at all */
             short& second() {
-                /* Sure, sure, GCC/Clang, but WHAT IF */
-                #if defined(CORRADE_TARGET_GCC) || defined(CORRADE_TARGET_CLANG_CL)
-                #pragma GCC diagnostic push
-                #ifdef CORRADE_TARGET_CLANG
-                #pragma GCC diagnostic ignored "-Wtautological-undefined-compare"
-                #elif __GNUC__ >= 6 /* Warning new since GCC 6 */
-                #pragma GCC diagnostic ignored "-Wnonnull-compare"
-                #endif
-                #endif
-                CORRADE_VERIFY(this != nullptr);
-                #ifdef CORRADE_TARGET_GCC
-                #pragma GCC diagnostic pop
-                #endif
+                CORRADE_EXPECT_FAIL("This shouldn't be called.");
                 return _data[1];
             }
             const short& second() const {
-                /* Sure, sure, GCC/Clang, but WHAT IF */
-                #if defined(CORRADE_TARGET_GCC) || defined(CORRADE_TARGET_CLANG_CL)
-                #pragma GCC diagnostic push
-                #ifdef CORRADE_TARGET_CLANG
-                #pragma GCC diagnostic ignored "-Wtautological-undefined-compare"
-                #elif __GNUC__ >= 6 /* Warning new since GCC 6 */
-                #pragma GCC diagnostic ignored "-Wnonnull-compare"
-                #endif
-                #endif
-                CORRADE_VERIFY(this != nullptr);
-                #ifdef CORRADE_TARGET_GCC
-                #pragma GCC diagnostic pop
-                #endif
+                CORRADE_EXPECT_FAIL("This shouldn't be called.");
+                return _data[1];
+            }
+            short& secondLvalue() & {
+                CORRADE_EXPECT_FAIL("This shouldn't be called.");
+                return _data[1];
+            }
+            const short& secondLvalue() const & {
+                CORRADE_EXPECT_FAIL("This shouldn't be called.");
+                return _data[1];
+            }
+            short& secondNonOverloaded() {
+                CORRADE_EXPECT_FAIL("This shouldn't be called.");
                 return _data[1];
             }
         private:
             short _data[2];
     };
+    Containers::StridedArrayView1D<Data> view{nullptr, 5};
+    Containers::StridedArrayView1D<const Data> cview{nullptr, 5};
 
     /* To capture a correct test case name */
     CORRADE_VERIFY(true);
 
-    Containers::StridedArrayView1D<Data> empty;
-    Containers::StridedArrayView1D<const Data> cempty;
-    Containers::StridedArrayView1D<short> second = empty.slice(&Data::second);
-    Containers::StridedArrayView1D<const short> csecond = cempty.slice(&Data::second);
-    CORRADE_COMPARE(second.data(), reinterpret_cast<const void*>(2));
-    CORRADE_COMPARE(csecond.data(), reinterpret_cast<const void*>(2));
+    /* Slicing a null view should still return a null pointer even if the view
+       has non-zero size */
+    Containers::StridedArrayView1D<short> second = view.slice(&Data::second);
+    Containers::StridedArrayView1D<short> secondLvalue = view.slice(&Data::secondLvalue);
+    Containers::StridedArrayView1D<const short> csecond = cview.slice(&Data::second);
+    Containers::StridedArrayView1D<const short> csecondLvalue = cview.slice(&Data::secondLvalue);
+    Containers::StridedArrayView1D<short> secondNonOverloaded = view.slice(&Data::secondNonOverloaded);
+    CORRADE_COMPARE(second.data(), nullptr);
+    CORRADE_COMPARE(secondLvalue.data(), nullptr);
+    CORRADE_COMPARE(csecond.data(), nullptr);
+    CORRADE_COMPARE(csecondLvalue.data(), nullptr);
+    CORRADE_COMPARE(secondNonOverloaded.data(), nullptr);
+
+    CORRADE_COMPARE(second.size(), 5);
+    CORRADE_COMPARE(secondLvalue.size(), 5);
+    CORRADE_COMPARE(csecond.size(), 5);
+    CORRADE_COMPARE(csecondLvalue.size(), 5);
+    CORRADE_COMPARE(secondNonOverloaded.size(), 5);
+
+    CORRADE_COMPARE(second.stride(), 4);
+    CORRADE_COMPARE(secondLvalue.stride(), 4);
+    CORRADE_COMPARE(csecond.stride(), 4);
+    CORRADE_COMPARE(csecondLvalue.stride(), 4);
+    CORRADE_COMPARE(secondNonOverloaded.stride(), 4);
+}
+
+void StridedArrayViewTest::sliceMemberFunctionPointerEmptyView() {
+    static void* thisNotExpected;
+
+    struct Data {
+        /* Even though the view is non-null, the getters should *not* be called
+           on this pointer pointing to outside of the view */
+        short& second() {
+            CORRADE_VERIFY(this != thisNotExpected);
+            return data[1];
+        }
+        const short& second() const {
+            CORRADE_VERIFY(this != thisNotExpected);
+            return data[1];
+        }
+        short& secondLvalue() & {
+            CORRADE_VERIFY(this != thisNotExpected);
+            return data[1];
+        }
+        const short& secondLvalue() const & {
+            CORRADE_VERIFY(this != thisNotExpected);
+            return data[1];
+        }
+        short& secondNonOverloaded() {
+            CORRADE_VERIFY(this != thisNotExpected);
+            return data[1];
+        }
+
+        /* Ugh. GCC 14 (and possibly other versions) in Release warn that
+           "array subscript ‘int (**)(...)[0]’ is partly outside array bounds
+           of ‘std::conditional<false, const char, char>::type [6]’ {aka
+           ‘char [6]’}" if this has a size less than a pointer. POINTER. No
+           idea where that comes from, since i'm calling a MEMBER FUNCTION
+           POINTER on an char[sizeof(Data)] array. Making the array as large as
+           a pointer "fixes" the warning. */
+        short data[4];
+    } data[1]{};
+    thisNotExpected = data;
+    Containers::StridedArrayView1D<Data> view{data, 0};
+    Containers::StridedArrayView1D<const Data> cview{data, 0};
+
+    /* To capture a correct test case name */
+    CORRADE_VERIFY(true);
+
+    /* Compared to above, slicing a zero-sized non-null view should apply the
+       offset */
+    Containers::StridedArrayView1D<short> second = view.slice(&Data::second);
+    Containers::StridedArrayView1D<short> secondLvalue = view.slice(&Data::secondLvalue);
+    Containers::StridedArrayView1D<const short> csecond = cview.slice(&Data::second);
+    Containers::StridedArrayView1D<const short> csecondLvalue = cview.slice(&Data::secondLvalue);
+    Containers::StridedArrayView1D<short> secondNonOverloaded = view.slice(&Data::secondNonOverloaded);
+    CORRADE_COMPARE(second.data(), &data->data[1]);
+    CORRADE_COMPARE(secondLvalue.data(), &data->data[1]);
+    CORRADE_COMPARE(csecond.data(), &data->data[1]);
+    CORRADE_COMPARE(csecondLvalue.data(), &data->data[1]);
+    CORRADE_COMPARE(secondNonOverloaded.data(), &data->data[1]);
+
     CORRADE_COMPARE(second.size(), 0);
+    CORRADE_COMPARE(secondLvalue.size(), 0);
     CORRADE_COMPARE(csecond.size(), 0);
-    CORRADE_COMPARE(second.stride(), 0);
-    CORRADE_COMPARE(csecond.stride(), 0);
+    CORRADE_COMPARE(csecondLvalue.size(), 0);
+    CORRADE_COMPARE(secondNonOverloaded.size(), 0);
+
+    CORRADE_COMPARE(second.stride(), 8);
+    CORRADE_COMPARE(secondLvalue.stride(), 8);
+    CORRADE_COMPARE(csecond.stride(), 8);
+    CORRADE_COMPARE(csecondLvalue.stride(), 8);
+    CORRADE_COMPARE(secondNonOverloaded.stride(), 8);
 }
 
 void StridedArrayViewTest::sliceMemberFunctionPointerArrayType() {
