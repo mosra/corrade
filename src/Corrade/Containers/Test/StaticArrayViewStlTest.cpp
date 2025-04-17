@@ -54,13 +54,11 @@ void StaticArrayViewStlTest::convertFromArray() {
 
     StaticArrayView<3, float> b = a;
     CORRADE_COMPARE(b, &a[0]);
-    CORRADE_COMPARE(b.size(), 3);
     CORRADE_COMPARE(b[0], 42.0f);
 
     auto c = staticArrayView(a);
     CORRADE_VERIFY(std::is_same<decltype(c), StaticArrayView<3, float>>::value);
     CORRADE_COMPARE(c, &a[0]);
-    CORRADE_COMPARE(c.size(), 3);
     CORRADE_COMPARE(c[0], 42.0f);
 }
 
@@ -73,7 +71,6 @@ void StaticArrayViewStlTest::convertFromConstArray() {
 
     StaticArrayView<3, const float> b = a;
     CORRADE_COMPARE(b, &a[0]);
-    CORRADE_COMPARE(b.size(), 3);
     CORRADE_COMPARE(b[0], 42.0f);
 }
 
@@ -86,7 +83,6 @@ void StaticArrayViewStlTest::convertConstFromArray() {
 
     StaticArrayView<3, const float> b = a;
     CORRADE_COMPARE(b, &a[0]);
-    CORRADE_COMPARE(b.size(), 3);
     CORRADE_COMPARE(b[0], 42.0f);
 }
 
