@@ -117,12 +117,8 @@ template<std::size_t size, class T> struct StaticArrayViewConverter<size, T, std
     }
 };
 #endif
-template<class T, StlSpanSizeType Extent> struct ErasedStaticArrayViewConverter<std::span<T, Extent>>: StaticArrayViewConverter<std::size_t(Extent), T, std::span<T, Extent>> {
-    static_assert(Extent >= 0, "can't convert dynamic std::span to StaticArrayView");
-};
-template<class T, StlSpanSizeType Extent> struct ErasedStaticArrayViewConverter<const std::span<T, Extent>>: StaticArrayViewConverter<std::size_t(Extent), T, std::span<T, Extent>> {
-    static_assert(Extent >= 0, "can't convert dynamic std::span to StaticArrayView");
-};
+template<class T, StlSpanSizeType Extent> struct ErasedStaticArrayViewConverter<std::span<T, Extent>, typename std::enable_if<Extent != std::dynamic_extent>::type>: StaticArrayViewConverter<std::size_t(Extent), T, std::span<T, Extent>> {};
+template<class T, StlSpanSizeType Extent> struct ErasedStaticArrayViewConverter<const std::span<T, Extent>, typename std::enable_if<Extent != std::dynamic_extent>::type>: StaticArrayViewConverter<std::size_t(Extent), T, std::span<T, Extent>> {};
 
 }}}
 #endif

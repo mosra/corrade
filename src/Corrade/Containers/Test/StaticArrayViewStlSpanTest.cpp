@@ -87,6 +87,15 @@ void StaticArrayViewStlSpanTest::convertFromSpan() {
     #if !__has_include(<span>)
     CORRADE_SKIP("The <span> header is not available on this platform.");
     #else
+
+    /* Uncomment this to see the ErasedStaticArrayViewConverter error
+       (which isn't testable with is_constructible below). Should be just a
+       single message about "no matching function", not a cascade of errors
+       with size too large and such. */
+    #if 0
+    staticArrayView(std::span<float>{});
+    #endif
+
     /* Not using is_convertible to catch also accidental explicit
        conversions. */
     CORRADE_VERIFY(std::is_constructible<StaticArrayView<3, float>, std::span<float, 3>>::value);

@@ -1109,10 +1109,6 @@ template<std::size_t size_, class T, class U> constexpr std::size_t arraySize(U(
     return size_;
 }
 
-namespace Implementation {
-    template<class> struct ErasedStaticArrayViewConverter;
-}
-
 /**
 @brief Compile-time-sized array view
 

@@ -138,6 +138,7 @@ namespace Implementation {
        (such as in ArrayViewStl, to allow derived types) */
     template<class, class, class = void> struct ArrayViewConverter;
     template<std::size_t, class, class, class = void> struct StaticArrayViewConverter;
+    template<class, class = void> struct ErasedStaticArrayViewConverter;
 }
 
 }}
