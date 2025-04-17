@@ -436,6 +436,11 @@ void StaticArrayViewTest::convertConstFromExternalView() {
     CORRADE_VERIFY(std::is_constructible<Containers::StaticArrayView<5, const int>, IntView5>::value);
     CORRADE_VERIFY(!std::is_constructible<Containers::StaticArrayView<6, const int>, IntView5>::value);
     CORRADE_VERIFY(!std::is_constructible<Containers::StaticArrayView<5, const float>, IntView5>::value);
+
+    /* Creating a non-const view from a const type should not be possible. Not
+       using is_convertible to catch also accidental explicit conversions. */
+    CORRADE_VERIFY(std::is_constructible<Containers::StaticArrayView<5, const int>, ConstIntView5>::value);
+    CORRADE_VERIFY(!std::is_constructible<Containers::StaticArrayView<5, int>, ConstIntView5>::value);
 }
 
 void StaticArrayViewTest::convertToConstExternalView() {

@@ -71,6 +71,7 @@ template<> struct ArrayViewConverter<const int, ConstIntView> {
 template<> struct ErasedArrayViewConverter<IntView>: ArrayViewConverter<int, IntView> {};
 template<> struct ErasedArrayViewConverter<const IntView>: ArrayViewConverter<int, IntView> {};
 
+template<> struct ErasedArrayViewConverter<ConstIntView>: ArrayViewConverter<const int, ConstIntView> {};
 template<> struct ErasedArrayViewConverter<const ConstIntView>: ArrayViewConverter<const int, ConstIntView> {};
 
 /* To keep the (Strided)ArrayView API in reasonable bounds, the const-adding
@@ -2192,6 +2193,11 @@ void StridedArrayViewTest::convertConstFromExternalView() {
        is_convertible to catch also accidental explicit conversions. */
     CORRADE_VERIFY(std::is_constructible<Containers::StridedArrayView1D<const int>, IntView>::value);
     CORRADE_VERIFY(!std::is_constructible<Containers::StridedArrayView1D<const float>, IntView>::value);
+
+    /* Creating a non-const view from a const type should not be possible. Not
+       using is_convertible to catch also accidental explicit conversions. */
+    CORRADE_VERIFY(std::is_constructible<Containers::StridedArrayView1D<const int>, ConstIntView>::value);
+    CORRADE_VERIFY(!std::is_constructible<Containers::StridedArrayView1D<int>, ConstIntView>::value);
 }
 
 void StridedArrayViewTest::convertVoidFromExternalView() {
@@ -2214,6 +2220,11 @@ void StridedArrayViewTest::convertConstVoidFromExternalView() {
     ConstVoidStridedArrayView1D b = a;
     CORRADE_COMPARE(b.data(), &data[0]);
     CORRADE_COMPARE(b.size(), 5);
+
+    /* Creating a non-const view from a const type should not be possible. Not
+       using is_convertible to catch also accidental explicit conversions. */
+    CORRADE_VERIFY(std::is_constructible<ConstVoidStridedArrayView1D, ConstIntView>::value);
+    CORRADE_VERIFY(!std::is_constructible<VoidStridedArrayView1D, ConstIntView>::value);
 }
 
 void StridedArrayViewTest::convertConstVoidFromConstExternalView() {

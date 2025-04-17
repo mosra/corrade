@@ -830,6 +830,11 @@ void ArrayViewTest::convertConstFromExternalView() {
        is_convertible to catch also accidental explicit conversions. */
     CORRADE_VERIFY(std::is_constructible<Containers::ArrayView<const int>, IntView>::value);
     CORRADE_VERIFY(!std::is_constructible<Containers::ArrayView<const float>, IntView>::value);
+
+    /* Creating a non-const view from a const type should not be possible. Not
+       using is_convertible to catch also accidental explicit conversions. */
+    CORRADE_VERIFY(std::is_constructible<Containers::ArrayView<const int>, ConstIntView>::value);
+    CORRADE_VERIFY(!std::is_constructible<Containers::ArrayView<int>, ConstIntView>::value);
 }
 
 void ArrayViewTest::convertToConstExternalView() {
@@ -868,6 +873,11 @@ void ArrayViewTest::convertConstVoidFromExternalView() {
     ConstVoidArrayView b = a;
     CORRADE_COMPARE(b.data(), data);
     CORRADE_COMPARE(b.size(), 5*4);
+
+    /* Creating a non-const view from a const type should not be possible. Not
+       using is_convertible to catch also accidental explicit conversions. */
+    CORRADE_VERIFY(std::is_constructible<ConstVoidArrayView, ConstIntView>::value);
+    CORRADE_VERIFY(!std::is_constructible<VoidArrayView, ConstIntView>::value);
 }
 
 void ArrayViewTest::convertConstVoidFromConstExternalView() {
