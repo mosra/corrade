@@ -56,7 +56,8 @@ typedef std::ptrdiff_t StlSpanSizeType;
 typedef std::size_t StlSpanSizeType;
 #endif
 
-/* dynamic std::span from/to ArrayView */
+/* Dynamic std::span to ArrayView. std::span from ArrayView is done via their
+   own "magic constructor", whatever that is. */
 template<class T> struct ArrayViewConverter<T, std::span<T>> {
     constexpr static ArrayView<T> from(std::span<T> other) {
         return {other.data(), std::size_t(other.size())};
@@ -71,7 +72,7 @@ template<class T> struct ArrayViewConverter<const T, std::span<T>> {
 template<class T> struct ErasedArrayViewConverter<std::span<T>>: ArrayViewConverter<T, std::span<T>> {};
 template<class T> struct ErasedArrayViewConverter<const std::span<T>>: ArrayViewConverter<T, std::span<T>> {};
 
-/* static std::span to ArrayView */
+/* Static std::span to ArrayView */
 template<class T, StlSpanSizeType Extent> struct ArrayViewConverter<T, std::span<T, Extent>> {
     constexpr static ArrayView<T> from(std::span<T, Extent> other) {
         return {other.data(), std::size_t(other.size())};
