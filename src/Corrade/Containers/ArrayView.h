@@ -771,7 +771,11 @@ template<> class ArrayView<void> {
            e.g. std::vector<T>&& because that would break uses like
            `consume(foo());`, where `consume()` expects a view but `foo()`
            returns a std::vector. */
-        template<class T, class = decltype(Implementation::ErasedArrayViewConverter<typename std::decay<T&&>::type>::from(std::declval<T&&>()))> constexpr /*implicit*/ ArrayView(T&& other) noexcept: ArrayView{Implementation::ErasedArrayViewConverter<typename std::decay<T&&>::type>::from(other)} {}
+        template<class T, class U = decltype(Implementation::ErasedArrayViewConverter<typename std::decay<T&&>::type>::from(std::declval<T&&>()))
+            #ifndef DOXYGEN_GENERATING_OUTPUT
+            , typename std::enable_if<!std::is_const<typename U::Type>::value, int>::type = 0
+            #endif
+        > constexpr /*implicit*/ ArrayView(T&& other) noexcept: ArrayView{Implementation::ErasedArrayViewConverter<typename std::decay<T&&>::type>::from(other)} {}
 
         #ifndef CORRADE_MSVC_COMPATIBILITY
         /** @brief Whether the view is non-empty */

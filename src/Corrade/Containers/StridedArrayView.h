@@ -1312,7 +1312,11 @@ template<unsigned dimensions> class StridedArrayView<dimensions, void> {
            StaticArrayViewConverter overload as we wouldn't be able to infer
            the size parameter. Since ArrayViewConverter is supposed to handle
            conversion from statically sized arrays as well, this is okay. */
-        template<class T, unsigned d = dimensions, class = typename std::enable_if<d == 1, decltype(Implementation::ErasedArrayViewConverter<typename std::decay<T&&>::type>::from(std::declval<T&&>()))>::type> constexpr /*implicit*/ StridedArrayView(T&& other) noexcept: StridedArrayView{Implementation::ErasedArrayViewConverter<typename std::decay<T&&>::type>::from(other)} {}
+        template<class T, class U = decltype(Implementation::ErasedArrayViewConverter<typename std::decay<T&&>::type>::from(std::declval<T&&>()))
+            #ifndef DOXYGEN_GENERATING_OUTPUT
+            , typename std::enable_if<dimensions == 1 && !std::is_const<typename U::Type>::value, int>::type = 0
+            #endif
+        > constexpr /*implicit*/ StridedArrayView(T&& other) noexcept: StridedArrayView{Implementation::ErasedArrayViewConverter<typename std::decay<T&&>::type>::from(other)} {}
 
         /** @brief Whether the array is non-empty */
         constexpr explicit operator bool() const { return _data; }
