@@ -78,12 +78,12 @@ template<class T, StlSpanSizeType Extent> struct ArrayViewConverter<T, std::span
     }
     /* Other way not possible as ArrayView has dynamic size */
 };
+template<class T, StlSpanSizeType Extent> struct ArrayViewConverter<T, const std::span<T, Extent>>: ArrayViewConverter<T, std::span<T, Extent>> {};
 template<class T, StlSpanSizeType Extent> struct ArrayViewConverter<const T, std::span<T, Extent>> {
     constexpr static ArrayView<T> from(std::span<T, Extent> other) {
         return {other.data(), std::size_t(other.size())};
     }
 };
-template<class T, StlSpanSizeType Extent> struct ArrayViewConverter<T, const std::span<T, Extent>>: ArrayViewConverter<T, std::span<T, Extent>> {};
 template<class T, StlSpanSizeType Extent> struct ErasedArrayViewConverter<std::span<T, Extent>>: ArrayViewConverter<T, std::span<T, Extent>> {};
 template<class T, StlSpanSizeType Extent> struct ErasedArrayViewConverter<const std::span<T, Extent>>: ArrayViewConverter<T, std::span<T, Extent>> {};
 
