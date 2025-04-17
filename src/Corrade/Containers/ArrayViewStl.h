@@ -47,48 +47,62 @@ for more information.
 #ifndef DOXYGEN_GENERATING_OUTPUT
 namespace Corrade { namespace Containers { namespace Implementation {
 
-/* std::array to ArrayView */
-template<std::size_t size, class T> struct ArrayViewConverter<T, std::array<T, size>> {
-    constexpr static ArrayView<T> from(std::array<T, size>& other) {
+/* std::array<U> to ArrayView<T>, with mutable T, so the array is taken as a
+   mutable reference, and U either the same as T or derived but of the same
+   size */
+template<std::size_t size, class T, class U> struct ArrayViewConverter<T, std::array<U, size>, typename std::enable_if<std::is_convertible<U*, T*>::value && sizeof(T) == sizeof(U) && !std::is_const<T>::value>::type> {
+    constexpr static ArrayView<T> from(std::array<U, size>& other) {
         return {other.data(), other.size()};
     }
-    constexpr static ArrayView<T> from(std::array<T, size>&& other) {
+    constexpr static ArrayView<T> from(std::array<U, size>&& other) {
         return {other.data(), other.size()};
     }
 };
-template<std::size_t size, class T> struct ArrayViewConverter<const T, std::array<T, size>> {
-    constexpr static ArrayView<const T> from(const std::array<T, size>& other) {
+/* std::array<U> to ArrayView<const T>, U either the same as T or derived */
+template<std::size_t size, class T, class U> struct ArrayViewConverter<const T, std::array<U, size>, typename std::enable_if<std::is_convertible<U*, T*>::value && sizeof(T) == sizeof(U)>::type> {
+    constexpr static ArrayView<const T> from(const std::array<U, size>& other) {
         return {other.data(), other.size()};
     }
 };
 template<std::size_t size, class T> struct ErasedArrayViewConverter<std::array<T, size>>: ArrayViewConverter<T, std::array<T, size>> {};
 template<std::size_t size, class T> struct ErasedArrayViewConverter<const std::array<T, size>>: ArrayViewConverter<const T, std::array<T, size>> {};
 
-/* std::vector to ArrayView */
-template<class T, class Allocator> struct ArrayViewConverter<T, std::vector<T, Allocator>> {
-    static ArrayView<T> from(std::vector<T, Allocator>& other) {
+/* std::vector<U> to ArrayView<T>, with mutable T, so the array is taken as a
+   mutable reference, and U either the same as T or derived but of the same
+   size */
+template<class T, class U, class Allocator> struct ArrayViewConverter<T, std::vector<U, Allocator>, typename std::enable_if<std::is_convertible<U*, T*>::value && sizeof(T) == sizeof(U) && !std::is_const<T>::value>::type> {
+    static ArrayView<T> from(std::vector<U, Allocator>& other) {
         return {other.data(), other.size()};
     }
-    static ArrayView<T> from(std::vector<T, Allocator>&& other) {
+    static ArrayView<T> from(std::vector<U, Allocator>&& other) {
         return {other.data(), other.size()};
     }
 };
-template<class T, class Allocator> struct ArrayViewConverter<const T, std::vector<T, Allocator>> {
-    static ArrayView<const T> from(const std::vector<T, Allocator>& other) {
+/* std::vector<U> to ArrayView<const T>, U either the same as T or derived but
+   of the same size */
+template<class T, class U, class Allocator> struct ArrayViewConverter<const T, std::vector<U, Allocator>, typename std::enable_if<std::is_convertible<U*, T*>::value && sizeof(T) == sizeof(U)>::type> {
+    static ArrayView<const T> from(const std::vector<U, Allocator>& other) {
         return {other.data(), other.size()};
     }
 };
 template<class T, class Allocator> struct ErasedArrayViewConverter<std::vector<T, Allocator>>: ArrayViewConverter<T, std::vector<T, Allocator>> {};
 template<class T, class Allocator> struct ErasedArrayViewConverter<const std::vector<T, Allocator>>: ArrayViewConverter<const T, std::vector<T, Allocator>> {};
 
-/* std::array to StaticArrayView */
-template<std::size_t size, class T> struct StaticArrayViewConverter<size, T, std::array<T, size>> {
-    constexpr static StaticArrayView<size, T> from(std::array<T, size>& other) {
+/* std::array<U> to StaticArrayView<T>, with mutable T, so the array is taken
+   as a mutable reference, and U either the same as T or derived but of the
+   same size */
+template<std::size_t size, class T, class U> struct StaticArrayViewConverter<size, T, std::array<U, size>, typename std::enable_if<std::is_convertible<U*, T*>::value && sizeof(T) == sizeof(U) && !std::is_const<T>::value>::type> {
+    constexpr static StaticArrayView<size, T> from(std::array<U, size>& other) {
+        return StaticArrayView<size, T>{other.data()};
+    }
+    constexpr static StaticArrayView<size, T> from(std::array<U, size>&& other) {
         return StaticArrayView<size, T>{other.data()};
     }
 };
-template<std::size_t size, class T> struct StaticArrayViewConverter<size, const T, std::array<T, size>> {
-    constexpr static StaticArrayView<size, const T> from(const std::array<T, size>& other) {
+/* std::array<U> to StaticArrayView<const T>, U either the same as T or
+   derived but of the same size */
+template<std::size_t size, class T, class U> struct StaticArrayViewConverter<size, const T, std::array<U, size>, typename std::enable_if<std::is_convertible<U*, T*>::value && sizeof(T) == sizeof(U)>::type> {
+    constexpr static StaticArrayView<size, const T> from(const std::array<U, size>& other) {
         return StaticArrayView<size, const T>(other.data());
     }
 };

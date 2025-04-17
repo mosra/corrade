@@ -56,39 +56,35 @@ typedef std::ptrdiff_t StlSpanSizeType;
 typedef std::size_t StlSpanSizeType;
 #endif
 
-/* Dynamic std::span to ArrayView. std::span from ArrayView is done via their
-   own "magic constructor", whatever that is. */
-template<class T> struct ArrayViewConverter<T, std::span<T>> {
-    constexpr static ArrayView<T> from(std::span<T> other) {
+/* Dynamic std::span<U> to ArrayView<T>, U either the same as T or derived but
+   of the same size, and handling also T being const U, and combinations
+   thereof. std::span from ArrayView is done via their own "magic constructor",
+   whatever that is. */
+template<class T, class U> struct ArrayViewConverter<T, std::span<U>, typename std::enable_if<std::is_convertible<U*, T*>::value && sizeof(T) == sizeof(U)>::type> {
+    constexpr static ArrayView<T> from(std::span<U> other) {
         return {other.data(), std::size_t(other.size())};
     }
 };
-template<class T> struct ArrayViewConverter<T, const std::span<T>>: ArrayViewConverter<T, std::span<T>> {};
-template<class T> struct ArrayViewConverter<const T, std::span<T>> {
-    constexpr static ArrayView<const T> from(std::span<T> other) {
-        return {other.data(), std::size_t(other.size())};
-    }
-};
+template<class T, class U> struct ArrayViewConverter<T, const std::span<U>, typename std::enable_if<std::is_convertible<U*, T*>::value && sizeof(T) == sizeof(U)>::type>: ArrayViewConverter<T, std::span<U>> {};
 template<class T> struct ErasedArrayViewConverter<std::span<T>>: ArrayViewConverter<T, std::span<T>> {};
 template<class T> struct ErasedArrayViewConverter<const std::span<T>>: ArrayViewConverter<T, std::span<T>> {};
 
-/* Static std::span to ArrayView */
-template<class T, StlSpanSizeType Extent> struct ArrayViewConverter<T, std::span<T, Extent>> {
-    constexpr static ArrayView<T> from(std::span<T, Extent> other) {
+/* Static std::span<U> to ArrayView<T>, U either the same as T or derived but
+   of the same size, and handling also T being const U, and combinations
+   thereof. The extent has to be forced non-dynamic to not be ambiguous with
+   the std::span<U> overloads above. */
+template<class T, class U, StlSpanSizeType Extent> struct ArrayViewConverter<T, std::span<U, Extent>, typename std::enable_if<std::is_convertible<U*, T*>::value && sizeof(T) == sizeof(U) && Extent != std::dynamic_extent>::type> {
+    constexpr static ArrayView<T> from(std::span<U, Extent> other) {
         return {other.data(), std::size_t(other.size())};
     }
     /* Other way not possible as ArrayView has dynamic size */
 };
-template<class T, StlSpanSizeType Extent> struct ArrayViewConverter<T, const std::span<T, Extent>>: ArrayViewConverter<T, std::span<T, Extent>> {};
-template<class T, StlSpanSizeType Extent> struct ArrayViewConverter<const T, std::span<T, Extent>> {
-    constexpr static ArrayView<T> from(std::span<T, Extent> other) {
-        return {other.data(), std::size_t(other.size())};
-    }
-};
+template<class T, class U, StlSpanSizeType Extent> struct ArrayViewConverter<T, const std::span<U, Extent>, typename std::enable_if<std::is_convertible<U*, T*>::value && sizeof(T) == sizeof(U) && Extent != std::dynamic_extent>::type>: ArrayViewConverter<T, std::span<U, Extent>> {};
 template<class T, StlSpanSizeType Extent> struct ErasedArrayViewConverter<std::span<T, Extent>>: ArrayViewConverter<T, std::span<T, Extent>> {};
 template<class T, StlSpanSizeType Extent> struct ErasedArrayViewConverter<const std::span<T, Extent>>: ArrayViewConverter<T, std::span<T, Extent>> {};
 
-/* static std::span from/to StaticArrayView */
+/* Static std::span from/to StaticArrayView. Handling derived types in separate
+   specialization below as that conversion works only in one direction. */
 template<std::size_t size, class T> struct StaticArrayViewConverter<size, T, std::span<T, StlSpanSizeType(size)>> {
     constexpr static StaticArrayView<size, T> from(std::span<T, StlSpanSizeType(size)> other) {
         return StaticArrayView<size, T>{other.data()};
@@ -102,12 +98,15 @@ template<std::size_t size, class T> struct StaticArrayViewConverter<size, T, std
     }
     #endif
 };
-template<std::size_t size, class T> struct StaticArrayViewConverter<size, T, const std::span<T, StlSpanSizeType(size)>>: StaticArrayViewConverter<size, T, std::span<T, StlSpanSizeType(size)>> {};
-template<std::size_t size, class T> struct StaticArrayViewConverter<size, const T, std::span<T, StlSpanSizeType(size)>> {
-    constexpr static StaticArrayView<size, const T> from(std::span<T, StlSpanSizeType(size)> other) {
-        return StaticArrayView<size, const T>{other.data()};
+/* Static std::span<U> to StaticArrayView<T>, U derived from T but of the same
+   size or T being const U and combinations thereof, but excluding U same as T,
+   which is handled above. */
+template<std::size_t size, class T, class U> struct StaticArrayViewConverter<size, T, std::span<U, StlSpanSizeType(size)>, typename std::enable_if<std::is_convertible<U*, T*>::value && sizeof(T) == sizeof(U) && !std::is_same<T, U>::value>::type> {
+    constexpr static StaticArrayView<size, T> from(std::span<U, StlSpanSizeType(size)> other) {
+        return StaticArrayView<size, T>{other.data()};
     }
 };
+template<std::size_t size, class T, class U> struct StaticArrayViewConverter<size, T, const std::span<U, StlSpanSizeType(size)>, typename std::enable_if<std::is_convertible<U*, T*>::value && sizeof(T) == sizeof(U)>::type>: StaticArrayViewConverter<size, T, std::span<U, StlSpanSizeType(size)>> {};
 #if !defined(CORRADE_TARGET_LIBCXX) || _LIBCPP_VERSION >= 9000
 /* std::span in libc++ < 9 has an implicit all-catching constructor, which
    means we can't implement our own to() routines with compile time checks

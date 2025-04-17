@@ -38,6 +38,9 @@ struct StaticArrayViewStlTest: TestSuite::Tester {
     void convertFromConstArrayEmpty();
     void convertConstFromArray();
     void convertConstFromArrayEmpty();
+
+    void convertFromArrayDerived();
+    void convertConstFromArrayDerived();
 };
 
 StaticArrayViewStlTest::StaticArrayViewStlTest() {
@@ -46,7 +49,10 @@ StaticArrayViewStlTest::StaticArrayViewStlTest() {
               &StaticArrayViewStlTest::convertFromConstArray,
               &StaticArrayViewStlTest::convertFromConstArrayEmpty,
               &StaticArrayViewStlTest::convertConstFromArray,
-              &StaticArrayViewStlTest::convertConstFromArrayEmpty});
+              &StaticArrayViewStlTest::convertConstFromArrayEmpty,
+
+              &StaticArrayViewStlTest::convertFromArrayDerived,
+              &StaticArrayViewStlTest::convertConstFromArrayDerived});
 }
 
 void StaticArrayViewStlTest::convertFromArray() {
@@ -84,10 +90,62 @@ void StaticArrayViewStlTest::convertConstFromArray() {
     StaticArrayView<3, const float> b = a;
     CORRADE_COMPARE(b, &a[0]);
     CORRADE_COMPARE(b[0], 42.0f);
+
+    /* Creating a non-const view from a const array should not be possible. Not
+       using is_convertible to catch also accidental explicit conversions. */
+    CORRADE_VERIFY(std::is_constructible<StaticArrayView<3, const float>, std::array<float, 3>>::value);
+    CORRADE_VERIFY(!std::is_constructible<StaticArrayView<3, float>, const std::array<float, 3>>::value);
 }
 
 void StaticArrayViewStlTest::convertConstFromArrayEmpty() {
     CORRADE_SKIP("Zero-sized StaticArrayView is not implemented yet.");
+}
+
+struct Base {
+    float a;
+};
+struct Derived: Base {
+    /* FFS why is this needed?! */
+    /*implicit*/ Derived(float a): Base{a} {}
+};
+struct DerivedDifferentSize: Base {
+    int b;
+};
+
+void StaticArrayViewStlTest::convertFromArrayDerived() {
+    std::array<Derived, 3> a{{{42.0f}, {13.3f}, {-25.0f}}};
+
+    StaticArrayView<3, Base> b = a;
+    CORRADE_COMPARE(b.data(), &a[0]);
+    CORRADE_COMPARE(b[0].a, 42.0f);
+
+    /* Conversion the other way not allowed. Not using is_convertible to catch
+       also accidental explicit conversions. */
+    CORRADE_VERIFY(std::is_constructible<StaticArrayView<3, Base>, std::array<Derived, 3>>::value);
+    CORRADE_VERIFY(!std::is_constructible<StaticArrayView<3, Derived>, std::array<Base, 3>>::value);
+    /* Conversion from a derived type that isn't the same size shouldn't be
+       allowed either */
+    CORRADE_VERIFY(!std::is_constructible<StaticArrayView<3, Base>, std::array<DerivedDifferentSize, 3>>::value);
+}
+
+void StaticArrayViewStlTest::convertConstFromArrayDerived() {
+    std::array<Derived, 3> a{{{42.0f}, {13.3f}, {-25.0f}}};
+
+    StaticArrayView<3, const Base> b = a;
+    CORRADE_COMPARE(b.data(), &a[0]);
+    CORRADE_COMPARE(b[0].a, 42.0f);
+
+    /* Conversion the other way not allowed. Not using is_convertible to catch
+       also accidental explicit conversions. */
+    CORRADE_VERIFY(std::is_constructible<StaticArrayView<3, const Base>, std::array<Derived, 3>>::value);
+    CORRADE_VERIFY(!std::is_constructible<StaticArrayView<3, const Derived>, std::array<Base, 3>>::value);
+    /* Creating a non-const view from a const array should not be possible
+       either */
+    CORRADE_VERIFY(!std::is_constructible<StaticArrayView<3, Base>, std::array<const Derived, 3>>::value);
+    CORRADE_VERIFY(!std::is_constructible<StaticArrayView<3, Base>, const std::array<Derived, 3>>::value);
+    /* Conversion from a derived type that isn't the same size shouldn't be
+       allowed either */
+    CORRADE_VERIFY(!std::is_constructible<StaticArrayView<3, const Base>, std::array<DerivedDifferentSize, 3>>::value);
 }
 
 }}}}

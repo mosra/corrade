@@ -1661,7 +1661,6 @@ template<class T> inline std::size_t BasicStringView<T>::count(const char charac
 #ifndef CORRADE_SINGLES_NO_ADVANCED_STRING_APIS
 namespace Implementation {
 
-template<class, class> struct ArrayViewConverter;
 template<class> struct ErasedArrayViewConverter;
 
 /* Strangely enough, if the from() functions don't accept T& but just T, it

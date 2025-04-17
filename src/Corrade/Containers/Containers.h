@@ -132,6 +132,14 @@ class StringIterableIterator;
 
 template<class, class, class> class Triple;
 
+namespace Implementation {
+    /* StringView needs these but without including ArrayView so they have to
+       be here due to the default argument that's optionally used for SFINAE
+       (such as in ArrayViewStl, to allow derived types) */
+    template<class, class, class = void> struct ArrayViewConverter;
+    template<std::size_t, class, class, class = void> struct StaticArrayViewConverter;
+}
+
 }}
 #endif
 

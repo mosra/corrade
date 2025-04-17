@@ -47,7 +47,6 @@
 namespace Corrade { namespace Containers {
 
 namespace Implementation {
-    template<class, class> struct ArrayViewConverter;
     template<class> struct ErasedArrayViewConverter;
     #ifndef CORRADE_SINGLES_NO_ARRAYTUPLE_COMPATIBILITY
     /* so ArrayTuple can update the data pointer */
@@ -217,6 +216,12 @@ Corrade type                    | ↭ | STL type
 Example:
 
 @snippet Containers-stl2a.cpp ArrayView
+
+In all cases above, it's also possible to create an @ref ArrayView "ArrayView<T>"
+instance from a @ref std::array, @ref std::vector or @ref std::span of a type
+derived from `T` if the types have the same size. This basically just expands
+the @ref ArrayView(ArrayView<U>) constructor functionality to external types as
+well.
 
 @anchor Containers-ArrayView-initializer-list
 
@@ -1105,7 +1110,6 @@ template<std::size_t size_, class T, class U> constexpr std::size_t arraySize(U(
 }
 
 namespace Implementation {
-    template<std::size_t, class, class> struct StaticArrayViewConverter;
     template<class> struct ErasedStaticArrayViewConverter;
 }
 
