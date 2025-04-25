@@ -28,7 +28,7 @@ build() {
 
 check() {
     cd "$_rootdir/build-clang-addresssanitizer"
-    ASAN_OPTIONS="color=always" LSAN_OPTIONS="color=always" CORRADE_TEST_COLOR=ON ctest --output-on-failure
+    ASAN_OPTIONS="color=always" LSAN_OPTIONS="color=always" CORRADE_TEST_COLOR=ON ctest --output-on-failure -j9
 }
 
 package() {
