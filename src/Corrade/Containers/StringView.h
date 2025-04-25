@@ -431,7 +431,16 @@ BasicStringView {
          */
         template<class U = T
             #ifndef DOXYGEN_GENERATING_OUTPUT
-            , typename std::enable_if<std::is_const<U>::value, int>::type = 0
+            /* typename std::enable_if<std::is_const<U>::value, int>::type = 0
+               cannot be used because GCC and Clang then have different
+               mangling for the deinlined specialization in StringView.cpp,
+               which means Corrade built with GCC cannot be used with Clang and
+               vice versa. With GCC-built Corrade, Clang wants to link to
+                _ZN7Corrade10Containers15BasicStringViewIKcEC1IS2_TnNSt9enable_ifIXsr3std8
+               which c++filt cannot even demangle, the other way GCC wants
+                Corrade::Containers::BasicStringView<char const>::BasicStringView<char const, 0>(Corrade::Containers::String const&)
+               which Clang doesn't export. */
+            , class = typename std::enable_if<std::is_const<U>::value>::type
             #endif
         > /*implicit*/ BasicStringView(const String& data) noexcept;
 

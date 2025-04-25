@@ -40,7 +40,8 @@
 namespace Corrade { namespace Containers {
 
 /* Yes, I'm also surprised this works. On Windows (MSVC, clang-cl and MinGw) it
-   needs an explicit export otherwise the symbol doesn't get exported. */
+   needs an explicit export otherwise the symbol doesn't get exported. See the
+   note about SFINAE mangling in the header, tho. */
 template<> template<> CORRADE_UTILITY_EXPORT void BasicBitArrayView<char>::setAll() const {
     /* If there are no bits to go through, bail. Otherwise the code touches at
        least one byte. */
@@ -81,7 +82,8 @@ template<> template<> CORRADE_UTILITY_EXPORT void BasicBitArrayView<char>::setAl
 }
 
 /* Yes, I'm also surprised this works. On Windows (MSVC, clang-cl and MinGw) it
-   needs an explicit export otherwise the symbol doesn't get exported. */
+   needs an explicit export otherwise the symbol doesn't get exported. See the
+   note about SFINAE mangling in the header, tho. */
 template<> template<> CORRADE_UTILITY_EXPORT void BasicBitArrayView<char>::resetAll() const {
     /* If there are no bits to go through, bail. Otherwise the code touches at
        least one byte. */

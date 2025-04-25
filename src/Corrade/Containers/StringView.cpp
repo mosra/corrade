@@ -77,7 +77,8 @@ template<class T> BasicStringView<T>::BasicStringView(T* const data, const Strin
 template<class T> BasicStringView<T>::BasicStringView(String& string) noexcept: BasicStringView{string.data(), string.size(), string.viewFlags()} {}
 
 /* Yes, I'm also surprised this works. On Windows (MSVC, clang-cl and MinGw) it
-   needs an explicit export otherwise the symbol doesn't get exported. */
+   needs an explicit export otherwise the symbol doesn't get exported. See the
+   note about SFINAE mangling in the header, tho. */
 template<> template<> CORRADE_UTILITY_EXPORT BasicStringView<const char>::BasicStringView(const String& string) noexcept: BasicStringView{string.data(), string.size(), string.viewFlags()} {}
 
 #ifndef CORRADE_SINGLES_NO_ADVANCED_STRING_APIS

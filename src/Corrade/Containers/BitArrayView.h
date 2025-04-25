@@ -262,7 +262,14 @@ template<class T> class BasicBitArrayView {
          *      @ref set(std::size_t) const
          */
         #ifndef DOXYGEN_GENERATING_OUTPUT
-        template<class U = T, typename std::enable_if<!std::is_const<U>::value, int>::type = 0>
+        /* typename std::enable_if<std::is_const<U>::value, int>::type = 0
+           cannot be used because GCC and Clang then have different mangling
+           for the deinlined specialization in BitArrayView.cpp, which means
+           Corrade built with GCC cannot be used with Clang and vice versa.
+           Applies to resetAll() as well but not set() / reset() as those are
+           inline in the header. Similar case is in StringView.h, along with
+           more details about how the names get mangled. */
+        template<class U = T, class = typename std::enable_if<!std::is_const<U>::value>::type>
         #endif
         void setAll() const;
 
@@ -286,7 +293,10 @@ template<class T> class BasicBitArrayView {
          * @see @ref setAll(), @ref reset(std::size_t) const
          */
         #ifndef DOXYGEN_GENERATING_OUTPUT
-        template<class U = T, typename std::enable_if<!std::is_const<U>::value, int>::type = 0>
+        /* typename std::enable_if<std::is_const<U>::value, int>::type = 0
+           cannot be used because GCC and Clang then have different mangling
+           for the deinlined specialization in BitArrayView.cpp, see above */
+        template<class U = T, class = typename std::enable_if<!std::is_const<U>::value>::type>
         #endif
         void resetAll() const;
 
