@@ -184,6 +184,13 @@ should be printed as a container of its contents or as a whole.
 */
 /* When using {}, MSVC 2015 complains that even the explicitly defaulted
    constructor doesn't exist */
+#ifdef CORRADE_TARGET_CLANG
+#pragma GCC diagnostic push
+/* Seems to be a new and very useless warning, didn't happen before (Clang 17?)
+   Happens on version 19 and 21 as well, not on 13 or 10. Maybe related:
+   https://github.com/llvm/llvm-project/issues/64356 */
+#pragma GCC diagnostic ignored "-Wconstant-logical-operand"
+#endif
 template<class T> using IsIterable = std::integral_constant<bool,
     #ifndef DOXYGEN_GENERATING_OUTPUT
     (Implementation::HasMemberBegin<T>::value || Implementation::HasBegin<T>::value) &&
@@ -192,6 +199,9 @@ template<class T> using IsIterable = std::integral_constant<bool,
     implementation-specific
     #endif
     >;
+#ifdef CORRADE_TARGET_CLANG
+#pragma GCC diagnostic pop
+#endif
 
 /**
 @brief Traits class for checking whether given type is string-like
@@ -209,6 +219,13 @@ Used together with @ref IsIterable by @ref Debug to decide whether given type
 should be printed as a container of its contents or as a whole.
 @todoc use the ellipsis macro once m.css has it
 */
+#ifdef CORRADE_TARGET_CLANG
+#pragma GCC diagnostic push
+/* Seems to be a new and very useless warning, didn't happen before (Clang 17?)
+   Happens on version 19 and 21 as well, not on 13 or 10. Maybe related:
+   https://github.com/llvm/llvm-project/issues/64356 */
+#pragma GCC diagnostic ignored "-Wconstant-logical-operand"
+#endif
 template<class T> using IsStringLike = std::integral_constant<bool,
     #ifndef DOXYGEN_GENERATING_OUTPUT
     Implementation::HasMemberCStr<T>::value || Implementation::HasMemberSubstr<T>::value || std::is_same<typename std::decay<T>::type, Containers::StringView>::value || std::is_same<typename std::decay<T>::type, Containers::MutableStringView>::value || std::is_same<typename std::decay<T>::type, Containers::String>::value
@@ -216,6 +233,9 @@ template<class T> using IsStringLike = std::integral_constant<bool,
     implementation-specific
     #endif
     >;
+#ifdef CORRADE_TARGET_CLANG
+#pragma GCC diagnostic pop
+#endif
 
 }}
 
