@@ -279,7 +279,7 @@ int Copyable::moved = 0;
 struct Throwable {
     /* Clang complains this function is unused. But removing it may have
        unintended consequences, so don't. */
-    explicit Throwable(int) CORRADE_UNUSED {}
+    CORRADE_UNUSED explicit Throwable(int) {}
     Throwable(const Throwable&) {}
     Throwable(Throwable&&) {}
     Throwable& operator=(const Throwable&) { return *this; }

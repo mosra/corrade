@@ -250,7 +250,7 @@ struct Movable {
     /* To test perfect forwarding in in-place construction. Clang complains
        this function is unused. But removing it may have unintended
        consequences, so don't. */
-    explicit Movable(int a, int&&) noexcept CORRADE_UNUSED: Movable{a} {}
+    CORRADE_UNUSED explicit Movable(int a, int&&) noexcept: Movable{a} {}
     Movable(const Movable&) = delete;
     Movable(Movable&& other) noexcept: a(other.a) {
         ++constructed;

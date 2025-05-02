@@ -159,7 +159,7 @@ int three(CORRADE_UNUSED int somenumber) { return 3; }
 struct Four {
     explicit Four(): a{4} {}
     /* If the annotation is removed, it should warn on Clang */
-    explicit Four(int somenumber) noexcept CORRADE_UNUSED: a{somenumber} {}
+    CORRADE_UNUSED explicit Four(int somenumber) noexcept: a{somenumber} {}
 
     int a;
 };
