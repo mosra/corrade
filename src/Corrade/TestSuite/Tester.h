@@ -1082,9 +1082,9 @@ class CORRADE_TESTSUITE_EXPORT Tester {
             /* "warning: parameter ‘benchmarkBegin’ set but not used", is that
                some GCC 13 regression? I thought such silly warnings where a
                static_cast made a variable look like being unused were bugs
-               from the GCC 4.8 and MSVC 2015 era. Happens on GCC 14 as
-               well. */
-            #if defined(CORRADE_TARGET_GCC) && !defined(CORRADE_TARGET_CLANG) && __GNUC__ == 14
+               from the GCC 4.8 and MSVC 2015 era. Happens on GCC 14 *and* 15
+               as well, but I still hope version 16 fixes it. */
+            #if defined(CORRADE_TARGET_GCC) && !defined(CORRADE_TARGET_CLANG) && __GNUC__ >= 13 && __GNUC__ < 16
             static_cast<void>(benchmarkBegin);
             static_cast<void>(benchmarkEnd);
             #endif
