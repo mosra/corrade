@@ -113,16 +113,40 @@
    https://github.com/gcc-mirror/gcc/commit/19665740d336d4ee7d0cf92b5b0643fa1d7da14a
    https://en.cppreference.com/w/cpp/header/ciso646 */
 /* <ciso646> is removed in C++20 and replaced by <version>. As of August 2023
-   only MSVC 2022 warns that it's removed (which is why <version> is used
-   here), neither libc++ nor libstdc++ are at such level of annoyance yet.
+   MSVC 2022 warns that it's removed when using C++20, libc++ version 19 so far
+   doesn't warn. Unfortunately libstdc++ as of version 15 warns already when
+   using C++17, which is extremely annoying, because I can no longer expect
+   that all C++17-enabled compilers have <ciso646> that works without warnings
+   and all C++20-enabled compilers have <version> -- and *assuming* that all
+   C++17-enabled compilers have <version> isn't going to work, because one can
+   for example use a newer Clang with an older libstdc++ that doesn't have
+   <version> yet.
 
-   Note that the check for CORRADE_CXX_STANDARD may theoretically not be enough
-   for certain combinations of Clang + libstdc++ where libstdc++ doesn't have
-   <version> yet but Clang supports C++20 already. Didn't come across any such
-   case in practice yet, but if it happens this may need an additional
-   __has_include guard. */
-#if CORRADE_CXX_STANDARD >= 202002
-#include <version>
+   I also cannot make an exception for, say, _GLIBCXX_RELEASE >= 15 because I
+   kinda need to include <ciso646> or <version> to get to the value of this
+   macro, turning this into a stupid chicken-or-egg problem. Why the fuck did
+   you have to *remove* the old header in the first place, just three years
+   after it was marked deprecated, and, secondly, why THE FUCK it has to warn
+   now, giving the codebase no headroom at all to paper over toolchain version
+   differences?? Not every project is always on the latest GCC, for fucks sake.
+
+   The only way to do this semi-sanely is thus first checking if __has_include
+   is implemented by the compiler (because, guess what, it's *also* new in
+   C++17, thus it may happen that <version> is there but __has_include not yet
+   or vice versa, or any other combination, and __has_include is made in a way
+   that its mere presence in a preprocessor expression is a syntax error if not
+   implemented by the compiler), and then if it is, and <version> is there, and
+   C++17 is used, include <version>, otherwise <ciso646>. Truly a design
+   marvel, congratulations everyone involved, needing three paragraphs of
+   explanatory comments for a basic STL version check that should have been
+   just a single #include line if the involved parties just paused and thought
+   for a moment. */
+#if CORRADE_CXX_STANDARD >= 201703 && defined(__has_include)
+    #if __has_include(<version>)
+    #include <version>
+    #else
+    #include <ciso646>
+    #endif
 #else
 #include <ciso646>
 #endif

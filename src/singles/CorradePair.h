@@ -76,8 +76,12 @@
 /* CORRADE_TARGET_LIBSTDCXX, CORRADE_TARGET_LIBCXX and
    CORRADE_TARGET_DINKUMWARE is needed for the StlForwardTupleSize.h header
    needed by StructuredBindings */
-#if CORRADE_CXX_STANDARD >= 202002
-#include <version>
+#if CORRADE_CXX_STANDARD >= 201703 && defined(__has_include)
+    #if __has_include(<version>)
+    #include <version>
+    #else
+    #include <ciso646>
+    #endif
 #else
 #include <ciso646>
 #endif

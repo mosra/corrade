@@ -110,8 +110,12 @@
    CorradeGrowableArray.h uses the STL detection macros to decide on
    CORRADE_NO_STD_IS_TRIVIALLY_TRAITS, so just doing the whole check
    unconditionally */
-#if CORRADE_CXX_STANDARD >= 202002
-#include <version>
+#if CORRADE_CXX_STANDARD >= 201703 && defined(__has_include)
+    #if __has_include(<version>)
+    #include <version>
+    #else
+    #include <ciso646>
+    #endif
 #else
 #include <ciso646>
 #endif
