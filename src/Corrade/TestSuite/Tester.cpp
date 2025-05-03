@@ -1146,6 +1146,10 @@ Tester::BenchmarkRunner::~BenchmarkRunner() {
     _instance._state->benchmarkResult = (_instance.*_end)();
 }
 
+const char* Tester::BenchmarkRunner::begin() const {
+     return nullptr;
+}
+
 const char* Tester::BenchmarkRunner::end() const {
      return reinterpret_cast<char*>(_instance._state->benchmarkBatchSize);
 }

@@ -1584,7 +1584,16 @@ class CORRADE_TESTSUITE_EXPORT Tester {
 
                 ~BenchmarkRunner();
 
-                const char* begin() const { return nullptr; }
+                /* The end() has to be deinlined because it accesses the
+                   privately defined Tester::_state; the begin(), which returns
+                   nullptr, has to be deinlined because GCC 15 in optimized
+                   builds compiles away the null pointer arithmetic, causing it
+                   to iterate forever. Very useful optimization, thank you.
+
+                   Those being non-inline shouldn't be a problem as the
+                   range-for loop in CORRADE_BENCHMARK() should cache them both
+                   internally. */
+                const char* begin() const;
                 const char* end() const;
 
             private:
