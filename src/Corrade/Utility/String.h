@@ -34,9 +34,12 @@
 #include <cstdint>
 
 #include "Corrade/Containers/StringView.h"
+
+#ifdef CORRADE_BUILD_DEPRECATED
+#include "Corrade/Utility/Macros.h"
 #include "Corrade/Utility/StlForwardString.h"
 #include "Corrade/Utility/StlForwardVector.h"
-#include "Corrade/Utility/visibility.h"
+#endif
 
 namespace Corrade { namespace Utility {
 
@@ -236,20 +239,25 @@ Example usage:
 */
 CORRADE_UTILITY_EXPORT Containers::Optional<Containers::Array<std::uint32_t>> parseNumberSequence(Containers::StringView string, std::uint32_t min, std::uint32_t max);
 
+#ifdef CORRADE_BUILD_DEPRECATED
 /**
 @brief Safely construct string from char array
 
 If @p string is @cpp nullptr @ce, returns empty string.
+@m_deprecated_since_latest Use @ref Containers::StringView instead, it treats
+    @cpp nullptr @ce as an empty string on its own
 */
-CORRADE_UTILITY_EXPORT std::string fromArray(const char* string);
+CORRADE_UTILITY_EXPORT CORRADE_DEPRECATED("use Containers::StringView instead") std::string fromArray(const char* string);
 
 /**
 @brief Safely construct string from char array with explicit length
 
 If @p string is @cpp nullptr @ce, returns empty string. Otherwise takes also
 @p length into account.
+@m_deprecated_since_latest Use @ref Containers::StringView instead, it treats
+    @cpp nullptr @ce as an empty string on its own
 */
-CORRADE_UTILITY_EXPORT std::string fromArray(const char* string, std::size_t length);
+CORRADE_UTILITY_EXPORT CORRADE_DEPRECATED("use Containers::StringView instead") std::string fromArray(const char* string, std::size_t length);
 
 /**
 @brief Trim leading characters from string
@@ -257,18 +265,20 @@ CORRADE_UTILITY_EXPORT std::string fromArray(const char* string, std::size_t len
 @param characters   Characters which will be trimmed
 
 Implemented using @ref ltrimInPlace().
-@see @ref rtrim(), @ref trim()
+@m_deprecated_since_latest Use @ref Containers::StringView::trimmedPrefix(StringView) const
+    instead.
 */
-CORRADE_UTILITY_EXPORT std::string ltrim(std::string string, const std::string& characters);
+CORRADE_UTILITY_EXPORT CORRADE_DEPRECATED("use Containers::StringView::trimmedPrefix() instead") std::string ltrim(std::string string, const std::string& characters);
 
 /**
 @brief Trim leading whitespace from string
 
 Equivalent to calling @ref ltrim(std::string, const std::string&) with
 @cpp " \t\f\v\r\n" @ce as second parameter. Implemented using @ref ltrimInPlace().
-@see @ref rtrim(), @ref trim()
+@m_deprecated_since_latest Use @ref Containers::StringView::trimmedPrefix()
+    instead.
 */
-CORRADE_UTILITY_EXPORT std::string ltrim(std::string string);
+CORRADE_UTILITY_EXPORT CORRADE_DEPRECATED("use Containers::StringView::trimmedPrefix() instead") std::string ltrim(std::string string);
 
 /**
 @brief Trim trailing characters from string
@@ -276,20 +286,20 @@ CORRADE_UTILITY_EXPORT std::string ltrim(std::string string);
 @param characters   Characters which will be trimmed
 
 Implemented using @ref rtrimInPlace().
-@see @ref ltrim(), @ref trim(),
-    @ref Containers::StringView::trimmedSuffix(StringView) const
+@m_deprecated_since_latest Use @ref Containers::StringView::trimmedSuffix(StringView) const
+    instead.
 */
-CORRADE_UTILITY_EXPORT std::string rtrim(std::string string, const std::string& characters);
+CORRADE_UTILITY_EXPORT CORRADE_DEPRECATED("use Containers::StringView::trimmedSuffix() instead") std::string rtrim(std::string string, const std::string& characters);
 
 /**
 @brief Trim trailing whitespace from string
 
 Equivalent to calling @ref rtrim(std::string, const std::string&) with
 @cpp " \t\f\v\r\n" @ce as second parameter. Implemented using @ref trimInPlace().
-@see @ref ltrim(), @ref trim(),
-    @ref Containers::StringView::trimmedSuffix() const
+@m_deprecated_since_latest Use @ref Containers::StringView::trimmedSuffix()
+    instead.
 */
-CORRADE_UTILITY_EXPORT std::string rtrim(std::string string);
+CORRADE_UTILITY_EXPORT CORRADE_DEPRECATED("use Containers::StringView::trimmedSuffix() instead") std::string rtrim(std::string string);
 
 /**
 @brief Trim leading and trailing characters from string
@@ -298,9 +308,10 @@ CORRADE_UTILITY_EXPORT std::string rtrim(std::string string);
 
 Equivalent to @cpp ltrim(rtrim(string, characters), characters) @ce.
 Implemented using @ref trimInPlace().
-@see @ref Containers::StringView::trimmed(StringView) const
+@m_deprecated_since_latest Use @ref Containers::StringView::trimmed(StringView) const
+    instead.
 */
-CORRADE_UTILITY_EXPORT std::string trim(std::string string, const std::string& characters);
+CORRADE_UTILITY_EXPORT CORRADE_DEPRECATED("use Containers::StringView::trimmed() instead") std::string trim(std::string string, const std::string& characters);
 
 /**
 @brief Trim leading and trailing whitespace from string
@@ -308,49 +319,49 @@ CORRADE_UTILITY_EXPORT std::string trim(std::string string, const std::string& c
 Equivalent to calling @ref trim(std::string, const std::string&) with
 @cpp " \t\f\v\r\n" @ce as second parameter. Implemented using
 @ref trimInPlace().
-@see @ref Containers::StringView::trimmed() const
+@m_deprecated_since_latest Use @ref Containers::StringView::trimmed() instead.
 */
-CORRADE_UTILITY_EXPORT std::string trim(std::string string);
+CORRADE_UTILITY_EXPORT  CORRADE_DEPRECATED("use Containers::StringView::trimmed() instead") std::string trim(std::string string);
 
 /**
 @brief Trim leading characters from a string, in place
 @param string       String to be trimmed in place
 @param characters   Characters which will be trimmed
 
-@see @ref ltrim(), @ref rtrimInPlace(), @ref trimInPlace(),
-    @ref Containers::StringView::trimmedPrefix(StringView) const
+@m_deprecated_since_latest Use @ref Containers::StringView::trimmedPrefix(StringView) const
+    instead.
 */
-CORRADE_UTILITY_EXPORT void ltrimInPlace(std::string& string, const std::string& characters);
+CORRADE_UTILITY_EXPORT CORRADE_DEPRECATED("use Containers::StringView::trimmedPrefix() instead") void ltrimInPlace(std::string& string, const std::string& characters);
 
 /**
 @brief Trim leading whitespace from a string, in place
 
 Equivalent to calling @ref ltrimInPlace(std::string&, const std::string&) with
 @cpp " \t\f\v\r\n" @ce as second parameter.
-@see @ref ltrim(), @ref rtrimInPlace(), @ref trimInPlace(),
-    @ref Containers::StringView::trimmedPrefix() const
+@m_deprecated_since_latest Use @ref Containers::StringView::trimmedPrefix()
+    instead.
 */
-CORRADE_UTILITY_EXPORT void ltrimInPlace(std::string& string);
+CORRADE_UTILITY_EXPORT CORRADE_DEPRECATED("use Containers::StringView::trimmedPrefix() instead") void ltrimInPlace(std::string& string);
 
 /**
 @brief Trim trailing characters from a string, in place
 @param string       String to be trimmed
 @param characters   Characters which will be trimmed
 
-@see @ref rtrim(), @ref ltrimInPlace(), @ref trimInPlace(),
-    @ref Containers::StringView::trimmedSuffix(StringView) const
+@m_deprecated_since_latest Use @ref Containers::StringView::trimmedSuffix(StringView) const
+    instead.
 */
-CORRADE_UTILITY_EXPORT void rtrimInPlace(std::string& string, const std::string& characters);
+CORRADE_UTILITY_EXPORT CORRADE_DEPRECATED("use Containers::StringView::trimmedSuffix() instead") void rtrimInPlace(std::string& string, const std::string& characters);
 
 /**
 @brief Trim trailing whitespace from a string, in place
 
 Equivalent to calling @ref rtrimInPlace(std::string&, const std::string&) with
 @cpp " \t\f\v\r\n" @ce as second parameter.
-@see @ref rtrim(), @ref ltrim(), @ref trim(),
-    @ref Containers::StringView::trimmedSuffix() const
+@m_deprecated_since_latest Use @ref Containers::StringView::trimmedSuffix()
+    instead.
 */
-CORRADE_UTILITY_EXPORT void rtrimInPlace(std::string& string);
+CORRADE_UTILITY_EXPORT CORRADE_DEPRECATED("use Containers::StringView::trimmedSuffix() instead") void rtrimInPlace(std::string& string);
 
 /**
 @brief Trim leading and trailing characters from a string, in place
@@ -358,65 +369,65 @@ CORRADE_UTILITY_EXPORT void rtrimInPlace(std::string& string);
 @param characters   Characters which will be trimmed
 
 Equivalent to calling both @ref ltrimInPlace() and @ref rtrimInPlace().
-@see @ref trim(), @ref Containers::StringView::trimmed(StringView) const
+@m_deprecated_since_latest Use @ref Containers::StringView::trimmed(StringView) const
+    instead.
 */
-CORRADE_UTILITY_EXPORT void trimInPlace(std::string& string, const std::string& characters);
+CORRADE_UTILITY_EXPORT CORRADE_DEPRECATED("use Containers::StringView::trimmed() instead") void trimInPlace(std::string& string, const std::string& characters);
 
 /**
 @brief Trim leading and trailing whitespace from a string, in place
 
 Equivalent to calling @ref trimInPlace(std::string&, const std::string&) with
 @cpp " \t\f\v\r\n" @ce as second parameter.
-@see @ref trim(), @ref Containers::StringView::trimmed() const
+@m_deprecated_since_latest Use @ref Containers::StringView::trimmed() instead.
 */
-CORRADE_UTILITY_EXPORT void trimInPlace(std::string& string);
+CORRADE_UTILITY_EXPORT CORRADE_DEPRECATED("use Containers::StringView::trimmed() instead") void trimInPlace(std::string& string);
 
 /**
 @brief Split a string on given character
 @param string       String to split
 @param delimiter    Delimiter
 
-@see @ref Containers::StringView::split(char) const
+@m_deprecated_since_latest Use @ref Containers::StringView::split(char) const
+    instead.
 */
-CORRADE_UTILITY_EXPORT std::vector<std::string> split(const std::string& string, char delimiter);
+CORRADE_UTILITY_EXPORT CORRADE_DEPRECATED("use Containers::StringView::split() instead") std::vector<std::string> split(const std::string& string, char delimiter);
 
-#ifdef CORRADE_BUILD_DEPRECATED
 /**
 @overload
 @m_deprecated_since_latest Use @ref Containers::StringView::split(char) const
     instead.
 */
 CORRADE_UTILITY_EXPORT CORRADE_DEPRECATED("use Containers::StringView::split() instead") Containers::Array<Containers::StringView> split(Containers::StringView string, char delimiter);
-#endif
 
 /**
 @brief Split a string on given character and remove empty parts
 @param string       String to split
 @param delimiter    Delimiter
 
-@see @ref Containers::StringView::splitWithoutEmptyParts(char) const
+@m_deprecated_since_latest Use
+    @ref Containers::StringView::splitWithoutEmptyParts(char) const instead.
 */
-CORRADE_UTILITY_EXPORT std::vector<std::string> splitWithoutEmptyParts(const std::string& string, char delimiter);
+CORRADE_UTILITY_EXPORT CORRADE_DEPRECATED("use Containers::StringView::splitWithoutEmptyParts() instead") std::vector<std::string> splitWithoutEmptyParts(const std::string& string, char delimiter);
 
-#ifdef CORRADE_BUILD_DEPRECATED
 /**
 @overload
 @m_deprecated_since_latest Use
     @ref Containers::StringView::splitWithoutEmptyParts(char) const instead.
 */
 CORRADE_UTILITY_EXPORT CORRADE_DEPRECATED("use Containers::StringView::splitWithoutEmptyParts() instead") Containers::Array<Containers::StringView> splitWithoutEmptyParts(Containers::StringView string, char delimiter);
-#endif
 
 /**
 @brief Split a string on any character from given set and remove empty parts
 @param string       String to split
 @param delimiters   Delimiter characters
 
-@see @ref Containers::StringView::splitOnAnyWithoutEmptyParts(StringView) const
+@m_deprecated_since_latest Use
+    @ref Containers::StringView::splitOnAnyWithoutEmptyParts(StringView) const
+    instead.
 */
-CORRADE_UTILITY_EXPORT std::vector<std::string> splitWithoutEmptyParts(const std::string& string, const std::string& delimiters);
+CORRADE_UTILITY_EXPORT CORRADE_DEPRECATED("use Containers::StringView::splitOnAnyWithoutEmptyParts() instead") std::vector<std::string> splitWithoutEmptyParts(const std::string& string, const std::string& delimiters);
 
-#ifdef CORRADE_BUILD_DEPRECATED
 /**
 @overload
 @m_deprecated_since_latest Use
@@ -424,19 +435,17 @@ CORRADE_UTILITY_EXPORT std::vector<std::string> splitWithoutEmptyParts(const std
     instead.
 */
 CORRADE_UTILITY_EXPORT CORRADE_DEPRECATED("use Containers::StringView::splitOnAnyWithoutEmptyParts() instead") Containers::Array<Containers::StringView> splitWithoutEmptyParts(Containers::StringView string, Containers::StringView delimiters);
-#endif
 
 /**
 @brief Split a string on whitespace and remove empty parts
 
 Equivalent to calling @ref splitWithoutEmptyParts(const std::string&, const std::string&)
 with @cpp " \t\f\v\r\n" @ce as second parameter.
-
-@see @ref Containers::StringView::splitOnAnyWithoutEmptyParts()
+@m_deprecated_since_latest Use
+    @ref Containers::StringView::splitOnAnyWithoutEmptyParts() instead.
 */
-CORRADE_UTILITY_EXPORT std::vector<std::string> splitWithoutEmptyParts(const std::string& string);
+CORRADE_UTILITY_EXPORT CORRADE_DEPRECATED("use Containers::StringView::splitOnAnyWithoutEmptyParts() instead") std::vector<std::string> splitWithoutEmptyParts(const std::string& string);
 
-#ifdef CORRADE_BUILD_DEPRECATED
 /**
 @overload
 @m_deprecated_since_latest Use
@@ -444,151 +453,173 @@ CORRADE_UTILITY_EXPORT std::vector<std::string> splitWithoutEmptyParts(const std
     instead.
 */
 CORRADE_UTILITY_EXPORT CORRADE_DEPRECATED("use Containers::StringView::splitOnWhitespaceWithoutEmptyParts() instead") Containers::Array<Containers::StringView> splitWithoutEmptyParts(const Containers::StringView string);
-#endif
 
 /**
 @brief Partition a string
-@m_since{2019,10}
 
 Equivalent to Python's @m_class{m-doc-external} [str.partition()](https://docs.python.org/3/library/stdtypes.html#str.partition).
 Splits @p string at the first occurrence of @p separator. First returned value
 is the part before the separator, second the separator, third a part after the
 separator. If the separator is not found, returns the input string followed by
 two empty strings.
-@see @ref rpartition(), @ref Path::splitExtension(),
-    @ref Containers::StringView::partition()
+@m_deprecated_since_latest Use @ref Containers::StringView::partition(char) const
+    instead.
 */
-CORRADE_UTILITY_EXPORT Containers::StaticArray<3, std::string> partition(const std::string& string, char separator);
+CORRADE_UTILITY_EXPORT CORRADE_DEPRECATED("use Containers::StringView::partition() instead") Containers::StaticArray<3, std::string> partition(const std::string& string, char separator);
 
 /**
 @overload
-@m_since{2019,10}
+@m_deprecated_since_latest Use @ref Containers::StringView::partition(StringView) const
+    instead.
 */
-CORRADE_UTILITY_EXPORT Containers::StaticArray<3, std::string> partition(const std::string& string, const std::string& separator);
+CORRADE_UTILITY_EXPORT CORRADE_DEPRECATED("use Containers::StringView::partition() instead") Containers::StaticArray<3, std::string> partition(const std::string& string, const std::string& separator);
 
 /**
 @brief Right-partition a string
-@m_since{2019,10}
 
 Equivalent to Python's @m_class{m-doc-external} [str.rpartition()](https://docs.python.org/3/library/stdtypes.html#str.rpartition).
 Splits @p string at the last occurrence of @p separator. First returned value is
 the part before the separator, second the separator, third a part after the
 separator. If the separator is not found, returns two empty strings followed by
 the input string.
-@see @ref partition(), @ref Path::splitExtension()
+@m_deprecated_since_latest Use @ref Containers::StringView::partitionLast(char) const
+    instead.
 */
-CORRADE_UTILITY_EXPORT Containers::StaticArray<3, std::string> rpartition(const std::string& string, char separator);
+CORRADE_UTILITY_EXPORT CORRADE_DEPRECATED("use Containers::StringView::partitionLast() instead") Containers::StaticArray<3, std::string> rpartition(const std::string& string, char separator);
 
 /**
 @overload
-@m_since{2019,10}
+@m_deprecated_since_latest Use @ref Containers::StringView::partitionLast(StringView) const
+    instead.
 */
-CORRADE_UTILITY_EXPORT Containers::StaticArray<3, std::string> rpartition(const std::string& string, const std::string& separator);
+CORRADE_UTILITY_EXPORT CORRADE_DEPRECATED("use Containers::StringView::partitionLast() instead") Containers::StaticArray<3, std::string> rpartition(const std::string& string, const std::string& separator);
 
 /**
 @brief Join strings with given character
 @param strings      Strings to join
 @param delimiter    Delimiter
 
-@see @ref Containers::StringView::join()
+@m_deprecated_since_latest Use @ref Containers::StringView::join() instead.
 */
-CORRADE_UTILITY_EXPORT std::string join(const std::vector<std::string>& strings, char delimiter);
+CORRADE_UTILITY_EXPORT CORRADE_DEPRECATED("use Containers::StringView::join() instead") std::string join(const std::vector<std::string>& strings, char delimiter);
 
 /**
 @overload
-@m_since{2019,10}
+@m_deprecated_since_latest Use @ref Containers::StringView::join() instead.
 */
-CORRADE_UTILITY_EXPORT std::string join(const std::vector<std::string>& strings, const std::string& delimiter);
+CORRADE_UTILITY_EXPORT CORRADE_DEPRECATED("use Containers::StringView::join() instead") std::string join(const std::vector<std::string>& strings, const std::string& delimiter);
 
 /**
 @brief Join strings with given character and remove empty parts
 @param strings      Strings to join
 @param delimiter    Delimiter
 
-@see @ref Containers::StringView::joinWithoutEmptyParts()
+@m_deprecated_since_latest Use
+    @ref Containers::StringView::joinWithoutEmptyParts() instead.
 */
-CORRADE_UTILITY_EXPORT std::string joinWithoutEmptyParts(const std::vector<std::string>& strings, char delimiter);
+CORRADE_UTILITY_EXPORT CORRADE_DEPRECATED("use Containers::StringView::joinWithoutEmptyParts() instead") std::string joinWithoutEmptyParts(const std::vector<std::string>& strings, char delimiter);
 
-/** @overload */
-CORRADE_UTILITY_EXPORT std::string joinWithoutEmptyParts(const std::vector<std::string>& strings, const std::string& delimiter);
+/**
+@overload
+@m_deprecated_since_latest Use
+    @ref Containers::StringView::joinWithoutEmptyParts() instead
+*/
+CORRADE_UTILITY_EXPORT CORRADE_DEPRECATED("use Containers::StringView::joinWithoutEmptyParts() instead") std::string joinWithoutEmptyParts(const std::vector<std::string>& strings, const std::string& delimiter);
 
 /**
 @brief Whether the string has given prefix
 
 In particular, returns @cpp true @ce for empty @p string only if @p prefix is
 empty as well.
-@see @ref stripPrefix(), @ref Containers::StringView::hasPrefix()
+@m_deprecated_since_latest Use @ref Containers::StringView::hasPrefix(StringView) const
+    instead.
 */
-CORRADE_UTILITY_EXPORT bool beginsWith(const std::string& string, const std::string& prefix);
+CORRADE_UTILITY_EXPORT CORRADE_DEPRECATED("use Containers::StringView::hasPrefix() instead") bool beginsWith(const std::string& string, const std::string& prefix);
 
-/** @overload */
-CORRADE_UTILITY_EXPORT bool beginsWith(const std::string& string, char prefix);
+/**
+@overload
+@m_deprecated_since_latest Use @ref Containers::StringView::hasPrefix(char) const
+    instead.
+*/
+CORRADE_UTILITY_EXPORT CORRADE_DEPRECATED("use Containers::StringView::hasPrefix() instead") bool beginsWith(const std::string& string, char prefix);
 
-#ifdef CORRADE_BUILD_DEPRECATED
 /**
 @brief Whether string view has given prefix
-@m_deprecated_since_latest Use @ref Containers::StringView::hasPrefix()
+@m_deprecated_since_latest Use @ref Containers::StringView::hasPrefix(StringView) const
     instead.
 */
 CORRADE_UTILITY_EXPORT CORRADE_DEPRECATED("use Containers::StringView::hasPrefix() instead") bool viewBeginsWith(Containers::ArrayView<const char> string, Containers::ArrayView<const char> prefix);
 
 /**
 @overload
-@m_deprecated_since_latest Use @ref Containers::StringView::hasPrefix()
+@m_deprecated_since_latest Use @ref Containers::StringView::hasPrefix(char) const
     instead.
 */
 CORRADE_UTILITY_EXPORT CORRADE_DEPRECATED("use Containers::StringView::hasPrefix() instead") bool viewBeginsWith(Containers::ArrayView<const char> string, char prefix);
-#endif
 
 /**
 @brief Whether the string has given suffix
 
 In particular, returns @cpp true @ce for empty @p string only if @p suffix is
 empty as well.
-@see @ref stripSuffix(), @ref Containers::StringView::hasSuffix()
+@m_deprecated_since_latest Use @ref Containers::StringView::hasSuffix(StringView) const
+    instead.
 */
-CORRADE_UTILITY_EXPORT bool endsWith(const std::string& string, const std::string& suffix);
+CORRADE_UTILITY_EXPORT CORRADE_DEPRECATED("use Containers::StringView::endsWith() instead") bool endsWith(const std::string& string, const std::string& suffix);
 
-/** @overload */
-CORRADE_UTILITY_EXPORT bool endsWith(const std::string& string, char suffix);
+/**
+@overload
+@m_deprecated_since_latest Use @ref Containers::StringView::hasSuffix(char) const
+    instead.
+*/
+CORRADE_UTILITY_EXPORT CORRADE_DEPRECATED("use Containers::StringView::endsWith() instead") bool endsWith(const std::string& string, char suffix);
 
-#ifdef CORRADE_BUILD_DEPRECATED
 /**
 @brief Whether string view has given suffix
-@m_deprecated_since_latest Use @ref Containers::StringView::hasSuffix()
+@m_deprecated_since_latest Use @ref Containers::StringView::hasSuffix(StringView) const
     instead.
 */
 CORRADE_UTILITY_EXPORT CORRADE_DEPRECATED("use Containers::StringView::hasSuffix() instead") bool viewEndsWith(Containers::ArrayView<const char> string, Containers::ArrayView<const char> suffix);
 
 /**
 @overload
-@m_deprecated_since_latest Use @ref Containers::StringView::hasSuffix()
+@m_deprecated_since_latest Use @ref Containers::StringView::hasSuffix(char) const
     instead.
 */
 CORRADE_UTILITY_EXPORT CORRADE_DEPRECATED("use Containers::StringView::hasSuffix() instead") bool viewEndsWith(Containers::ArrayView<const char> string, char suffix);
-#endif
 
 /**
 @brief Strip given prefix from a string
 
 Expects that the string actually begins with given prefix.
-@see @ref beginsWith(), @ref Containers::StringView::exceptPrefix()
+@m_deprecated_since_latest Use @ref Containers::StringView::exceptPrefix()
+    instead.
 */
-CORRADE_UTILITY_EXPORT std::string stripPrefix(std::string string, const std::string& prefix);
+CORRADE_UTILITY_EXPORT CORRADE_DEPRECATED("use Containers::StringView::exceptPrefix() instead") std::string stripPrefix(std::string string, const std::string& prefix);
 
-/** @overload */
-CORRADE_UTILITY_EXPORT std::string stripPrefix(std::string string, char prefix);
+/**
+@overload
+@m_deprecated_since_latest Use @ref Containers::StringView::exceptPrefix()
+    instead.
+*/
+CORRADE_UTILITY_EXPORT CORRADE_DEPRECATED("use Containers::StringView::exceptPrefix() instead") std::string stripPrefix(std::string string, char prefix);
 
 /**
 @brief Strip given suffix from a string
 
 Expects that the string actually ends with given suffix.
-@see @ref endsWith(), @ref Containers::StringView::exceptSuffix()
+@m_deprecated_since_latest Use @ref Containers::StringView::exceptSuffix()
+    instead.
 */
-CORRADE_UTILITY_EXPORT std::string stripSuffix(std::string string, const std::string& suffix);
+CORRADE_UTILITY_EXPORT CORRADE_DEPRECATED("use Containers::StringView::exceptSuffix() instead") std::string stripSuffix(std::string string, const std::string& suffix);
 
-/** @overload */
-CORRADE_UTILITY_EXPORT std::string stripSuffix(std::string string, char suffix);
+/**
+@overload
+@m_deprecated_since_latest Use @ref Containers::StringView::exceptSuffix()
+    instead.
+*/
+CORRADE_UTILITY_EXPORT CORRADE_DEPRECATED("use Containers::StringView::exceptSuffix() instead") std::string stripSuffix(std::string string, char suffix);
+#endif
 
 }}}
 

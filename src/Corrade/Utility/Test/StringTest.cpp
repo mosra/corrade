@@ -24,9 +24,6 @@
     DEALINGS IN THE SOFTWARE.
 */
 
-#include <string>
-#include <vector>
-
 #include "Corrade/Containers/Array.h"
 #include "Corrade/Containers/Optional.h"
 #include "Corrade/Containers/StaticArray.h"
@@ -36,12 +33,18 @@
 #include "Corrade/TestSuite/Compare/Container.h"
 #include "Corrade/TestSuite/Compare/Numeric.h"
 #include "Corrade/Utility/Algorithms.h"
-#include "Corrade/Utility/DebugStl.h" /** @todo remove when std::string is no more */
 #include "Corrade/Utility/Format.h"
 #include "Corrade/Utility/Memory.h"
 #include "Corrade/Utility/String.h"
 #include "Corrade/Utility/Test/cpuVariantHelpers.h"
 #include "Corrade/Utility/Test/StringTest.h"
+
+#ifdef CORRADE_BUILD_DEPRECATED
+#include <string>
+#include <vector>
+
+#include "Corrade/Utility/DebugStl.h"
+#endif
 
 namespace Corrade { namespace Utility { namespace Test { namespace {
 
@@ -89,29 +92,27 @@ struct StringTest: TestSuite::Tester {
     void parseNumberSequenceOverflow();
     void parseNumberSequenceError();
 
-    void fromArray();
-    void trim();
-    void trimInPlace();
-    void split();
-    void splitMultipleCharacters();
-    void partition();
-    void join();
-
-    void beginsWith();
-    void beginsWithEmpty();
     #ifdef CORRADE_BUILD_DEPRECATED
-    void viewBeginsWith();
-    #endif
-    void endsWith();
-    void endsWithEmpty();
-    #ifdef CORRADE_BUILD_DEPRECATED
-    void viewEndsWith();
-    #endif
+    void deprecatedFromArray();
+    void deprecatedTrim();
+    void deprecatedTrimInPlace();
+    void deprecatedSplit();
+    void deprecatedSplitMultipleCharacters();
+    void deprecatedPartition();
+    void deprecatedJoin();
 
-    void stripPrefix();
-    void stripPrefixInvalid();
-    void stripSuffix();
-    void stripSuffixInvalid();
+    void deprecatedBeginsWith();
+    void deprecatedBeginsWithEmpty();
+    void deprecatedViewBeginsWith();
+    void deprecatedEndsWith();
+    void deprecatedEndsWithEmpty();
+    void deprecatedViewEndsWith();
+
+    void deprecatedStripPrefix();
+    void deprecatedStripPrefixInvalid();
+    void deprecatedStripSuffix();
+    void deprecatedStripSuffixInvalid();
+    #endif
 
     private:
         #ifdef CORRADE_UTILITY_FORCE_CPU_POINTER_DISPATCH
@@ -316,31 +317,29 @@ StringTest::StringTest() {
     addInstancedTests({&StringTest::parseNumberSequenceOverflow},
         Containers::arraySize(ParseNumberSequenceOverflowData));
 
-    addTests({&StringTest::parseNumberSequenceError,
+    addTests({&StringTest::parseNumberSequenceError});
 
-              &StringTest::fromArray,
-              &StringTest::trim,
-              &StringTest::trimInPlace,
-              &StringTest::split,
-              &StringTest::splitMultipleCharacters,
-              &StringTest::partition,
-              &StringTest::join,
+    #ifdef CORRADE_BUILD_DEPRECATED
+    addTests({&StringTest::deprecatedFromArray,
+              &StringTest::deprecatedTrim,
+              &StringTest::deprecatedTrimInPlace,
+              &StringTest::deprecatedSplit,
+              &StringTest::deprecatedSplitMultipleCharacters,
+              &StringTest::deprecatedPartition,
+              &StringTest::deprecatedJoin,
 
-              &StringTest::beginsWith,
-              &StringTest::beginsWithEmpty,
-              #ifdef CORRADE_BUILD_DEPRECATED
-              &StringTest::viewBeginsWith,
-              #endif
-              &StringTest::endsWith,
-              &StringTest::endsWithEmpty,
-              #ifdef CORRADE_BUILD_DEPRECATED
-              &StringTest::viewEndsWith,
-              #endif
+              &StringTest::deprecatedBeginsWith,
+              &StringTest::deprecatedBeginsWithEmpty,
+              &StringTest::deprecatedViewBeginsWith,
+              &StringTest::deprecatedEndsWith,
+              &StringTest::deprecatedEndsWithEmpty,
+              &StringTest::deprecatedViewEndsWith,
 
-              &StringTest::stripPrefix,
-              &StringTest::stripPrefixInvalid,
-              &StringTest::stripSuffix,
-              &StringTest::stripSuffixInvalid});
+              &StringTest::deprecatedStripPrefix,
+              &StringTest::deprecatedStripPrefixInvalid,
+              &StringTest::deprecatedStripSuffix,
+              &StringTest::deprecatedStripSuffixInvalid});
+    #endif
 }
 
 using namespace Containers::Literals;
@@ -1674,7 +1673,9 @@ void StringTest::parseNumberSequenceError() {
     CORRADE_COMPARE(out, "Utility::parseNumberSequence(): unrecognized character y in 3,5y7,x,25\n");
 }
 
-void StringTest::fromArray() {
+#ifdef CORRADE_BUILD_DEPRECATED
+CORRADE_IGNORE_DEPRECATED_PUSH
+void StringTest::deprecatedFromArray() {
     CORRADE_COMPARE(String::fromArray(nullptr), "");
     CORRADE_COMPARE(String::fromArray(nullptr, 37), "");
 
@@ -1682,7 +1683,7 @@ void StringTest::fromArray() {
     CORRADE_COMPARE(String::fromArray("abc\0def", 7), std::string("abc\0def", 7));
 }
 
-void StringTest::trim() {
+void StringTest::deprecatedTrim() {
     /* Spaces at the end */
     CORRADE_COMPARE(String::ltrim("abc  "), "abc  ");
     CORRADE_COMPARE(String::rtrim("abc  "), "abc");
@@ -1711,7 +1712,7 @@ void StringTest::trim() {
     CORRADE_COMPARE(String::trim("oubya", std::string{"aeiyou"}), "b");
 }
 
-void StringTest::trimInPlace() {
+void StringTest::deprecatedTrimInPlace() {
     /* Spaces at the end */
     {
         std::string a = "abc  ";
@@ -1786,11 +1787,11 @@ void StringTest::trimInPlace() {
     }
 }
 
-void StringTest::split() {
+void StringTest::deprecatedSplit() {
     /* These delegate into the StringView implementation and the tests are
-       kept just for archival purposes, until the whole thing is deprecated.
-       The explicit cast to avoid an ambiguous overload is kinda nasty, but
-       since this is eventually getting deprecated, I don't care anymore. */
+       kept just for archival purposes. The explicit cast to avoid an ambiguous
+       overload is kinda nasty, but since this is deprecated, I don't care
+       anymore. */
 
     /* Empty */
     CORRADE_COMPARE_AS(String::split(std::string{}, '/'),
@@ -1823,7 +1824,7 @@ void StringTest::split() {
         (std::vector<std::string>{"ab", "c", "def"}), TestSuite::Compare::Container);
 }
 
-void StringTest::splitMultipleCharacters() {
+void StringTest::deprecatedSplitMultipleCharacters() {
     /* These delegate into the StringView implementation and the tests are
        kept just for archival purposes, until the whole thing is deprecated.
        The explicit cast to avoid an ambiguous overload is kinda nasty, but
@@ -1856,7 +1857,7 @@ void StringTest::splitMultipleCharacters() {
         (std::vector<std::string>{"ab", "c", "def"}), TestSuite::Compare::Container);
 }
 
-void StringTest::partition() {
+void StringTest::deprecatedPartition() {
     /* Happy case */
     CORRADE_COMPARE_AS(String::partition("ab=c", '='),
         (Containers::StaticArray<3, std::string>{"ab", "=", "c"}),
@@ -1898,7 +1899,7 @@ void StringTest::partition() {
         TestSuite::Compare::Container);
 }
 
-void StringTest::join() {
+void StringTest::deprecatedJoin() {
     /* Empty */
     CORRADE_COMPARE(String::join({}, '/'), "");
     CORRADE_COMPARE(String::joinWithoutEmptyParts({}, '/'), "");
@@ -1940,9 +1941,9 @@ void StringTest::join() {
         "ab/c/def");
 }
 
-void StringTest::beginsWith() {
+void StringTest::deprecatedBeginsWith() {
     /* These delegate into the StringView implementation and the tests are
-       kept just for archival purposes, until the whole thing is deprecated. */
+       kept just for archival purposes */
 
     CORRADE_VERIFY(String::beginsWith("overcomplicated", "over"));
     CORRADE_VERIFY(String::beginsWith("overcomplicated", std::string{"over"}));
@@ -1955,34 +1956,30 @@ void StringTest::beginsWith() {
     CORRADE_VERIFY(!String::beginsWith("", 'h'));
 }
 
-void StringTest::beginsWithEmpty() {
+void StringTest::deprecatedBeginsWithEmpty() {
     /* These delegate into the StringView implementation and the tests are
-       kept just for archival purposes, until the whole thing is deprecated. */
+       kept just for archival purposes */
 
     CORRADE_VERIFY(!String::beginsWith("", "overcomplicated"));
     CORRADE_VERIFY(String::beginsWith("overcomplicated", ""));
     CORRADE_VERIFY(String::beginsWith("", ""));
 }
 
-#ifdef CORRADE_BUILD_DEPRECATED
-void StringTest::viewBeginsWith() {
+void StringTest::deprecatedViewBeginsWith() {
     /* These delegate into the StringView implementation and the tests are
-       kept just for archival purposes, until the whole thing is deprecated. */
+       kept just for archival purposes */
 
-    CORRADE_IGNORE_DEPRECATED_PUSH
     CORRADE_VERIFY(String::viewBeginsWith("overcomplicated", "over"));
     CORRADE_VERIFY(!String::viewBeginsWith("overcomplicated", "oven"));
 
     CORRADE_VERIFY(String::viewBeginsWith("hello", 'h'));
     CORRADE_VERIFY(!String::viewBeginsWith("hello", 'o'));
     CORRADE_VERIFY(!String::viewBeginsWith("", 'h'));
-    CORRADE_IGNORE_DEPRECATED_POP
 }
-#endif
 
-void StringTest::endsWith() {
+void StringTest::deprecatedEndsWith() {
     /* These delegate into the StringView implementation and the tests are
-       kept just for archival purposes, until the whole thing is deprecated. */
+       kept just for archival purposes */
 
     CORRADE_VERIFY(String::endsWith("overcomplicated", "complicated"));
     CORRADE_VERIFY(String::endsWith("overcomplicated", std::string{"complicated"}));
@@ -1997,21 +1994,19 @@ void StringTest::endsWith() {
     CORRADE_VERIFY(!String::endsWith("", 'h'));
 }
 
-void StringTest::endsWithEmpty() {
+void StringTest::deprecatedEndsWithEmpty() {
     /* These delegate into the StringView implementation and the tests are
-       kept just for archival purposes, until the whole thing is deprecated. */
+       kept just for archival purposes */
 
     CORRADE_VERIFY(!String::endsWith("", "overcomplicated"));
     CORRADE_VERIFY(String::endsWith("overcomplicated", ""));
     CORRADE_VERIFY(String::endsWith("", ""));
 }
 
-#ifdef CORRADE_BUILD_DEPRECATED
-void StringTest::viewEndsWith() {
+void StringTest::deprecatedViewEndsWith() {
     /* These delegate into the StringView implementation and the tests are
-       kept just for archival purposes, until the whole thing is deprecated. */
+       kept just for archival purposes */
 
-    CORRADE_IGNORE_DEPRECATED_PUSH
     CORRADE_VERIFY(String::viewEndsWith({"overcomplicated", 15}, "complicated"));
     CORRADE_VERIFY(!String::viewEndsWith("overcomplicated", "complicated"));
 
@@ -2022,18 +2017,16 @@ void StringTest::viewEndsWith() {
     CORRADE_VERIFY(String::viewEndsWith({"hello", 5}, 'o'));
     CORRADE_VERIFY(!String::viewEndsWith("hello", 'o'));
     CORRADE_VERIFY(!String::viewEndsWith("", 'h'));
-    CORRADE_IGNORE_DEPRECATED_POP
 }
-#endif
 
-void StringTest::stripPrefix() {
+void StringTest::deprecatedStripPrefix() {
     CORRADE_COMPARE(String::stripPrefix("overcomplicated", "over"), "complicated");
     CORRADE_COMPARE(String::stripPrefix("overcomplicated", std::string{"over"}), "complicated");
     CORRADE_COMPARE(String::stripPrefix("overcomplicated", 'o'), "vercomplicated");
     CORRADE_COMPARE(String::stripPrefix("overcomplicated", ""), "overcomplicated");
 }
 
-void StringTest::stripPrefixInvalid() {
+void StringTest::deprecatedStripPrefixInvalid() {
     CORRADE_SKIP_IF_NO_ASSERT();
 
     Containers::String out;
@@ -2042,14 +2035,14 @@ void StringTest::stripPrefixInvalid() {
     CORRADE_COMPARE(out, "Utility::String::stripPrefix(): string doesn't begin with given prefix\n");
 }
 
-void StringTest::stripSuffix() {
+void StringTest::deprecatedStripSuffix() {
     CORRADE_COMPARE(String::stripSuffix("overcomplicated", "complicated"), "over");
     CORRADE_COMPARE(String::stripSuffix("overcomplicated", std::string{"complicated"}), "over");
     CORRADE_COMPARE(String::stripSuffix("overcomplicated", 'd'), "overcomplicate");
     CORRADE_COMPARE(String::stripSuffix("overcomplicated", ""), "overcomplicated");
 }
 
-void StringTest::stripSuffixInvalid() {
+void StringTest::deprecatedStripSuffixInvalid() {
     CORRADE_SKIP_IF_NO_ASSERT();
 
     Containers::String out;
@@ -2057,6 +2050,8 @@ void StringTest::stripSuffixInvalid() {
     String::stripSuffix("overcomplicated", "over");
     CORRADE_COMPARE(out, "Utility::String::stripSuffix(): string doesn't end with given suffix\n");
 }
+CORRADE_IGNORE_DEPRECATED_POP
+#endif
 
 }}}}
 

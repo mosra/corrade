@@ -26,14 +26,9 @@
 
 #include "String.h"
 
-#include <string>
-#include <vector>
-
 #include "Corrade/Containers/GrowableArray.h"
 #include "Corrade/Containers/Optional.h"
-#include "Corrade/Containers/StaticArray.h"
-#include "Corrade/Containers/StringIterable.h"
-#include "Corrade/Containers/StringStl.h"
+#include "Corrade/Containers/String.h"
 #include "Corrade/Utility/Implementation/cpu.h"
 #if defined(CORRADE_ENABLE_AVX2) || defined(CORRADE_ENABLE_BMI1)
 #include "Corrade/Utility/IntrinsicsAvx.h" /* TZCNT is in AVX headers :( */
@@ -44,6 +39,15 @@
 #endif
 #ifdef CORRADE_ENABLE_SIMD128
 #include <wasm_simd128.h>
+#endif
+
+#ifdef CORRADE_BUILD_DEPRECATED
+#include <string>
+#include <vector>
+
+#include "Corrade/Containers/StaticArray.h"
+#include "Corrade/Containers/StringIterable.h"
+#include "Corrade/Containers/StringStl.h"
 #endif
 
 namespace Corrade { namespace Utility { namespace String {
@@ -1360,6 +1364,7 @@ Containers::Optional<Containers::Array<std::uint32_t>> parseNumberSequence(const
     return Containers::optional(Utility::move(out));
 }
 
+#ifdef CORRADE_BUILD_DEPRECATED
 std::string fromArray(const char* string) {
     return string ? std::string{string} : std::string{};
 }
@@ -1377,22 +1382,30 @@ void rtrimInPlace(std::string& string, const std::string& characters) {
 }
 
 void trimInPlace(std::string& string, const std::string& characters) {
+    CORRADE_IGNORE_DEPRECATED_PUSH
     rtrimInPlace(string, characters);
     ltrimInPlace(string, characters);
+    CORRADE_IGNORE_DEPRECATED_POP
 }
 
 std::string ltrim(std::string string, const std::string& characters) {
+    CORRADE_IGNORE_DEPRECATED_PUSH
     ltrimInPlace(string, characters);
+    CORRADE_IGNORE_DEPRECATED_POP
     return string;
 }
 
 std::string rtrim(std::string string, const std::string& characters) {
+    CORRADE_IGNORE_DEPRECATED_PUSH
     rtrimInPlace(string, characters);
+    CORRADE_IGNORE_DEPRECATED_POP
     return string;
 }
 
 std::string trim(std::string string, const std::string& characters) {
+    CORRADE_IGNORE_DEPRECATED_PUSH
     trimInPlace(string, characters);
+    CORRADE_IGNORE_DEPRECATED_POP
     return string;
 }
 
@@ -1408,7 +1421,9 @@ std::string join(const std::vector<std::string>& strings, const std::string& del
 
 std::string join(const std::vector<std::string>& strings, char delimiter) {
     /* It's fine (although ugly), this will be a SSO */
+    CORRADE_IGNORE_DEPRECATED_PUSH
     return join(strings, {&delimiter, 1});
+    CORRADE_IGNORE_DEPRECATED_POP
 }
 
 std::string joinWithoutEmptyParts(const std::vector<std::string>& strings, const std::string& delimiter) {
@@ -1423,7 +1438,9 @@ std::string joinWithoutEmptyParts(const std::vector<std::string>& strings, const
 
 std::string joinWithoutEmptyParts(const std::vector<std::string>& strings, char delimiter) {
     /* It's fine (although ugly), this will be a SSO */
+    CORRADE_IGNORE_DEPRECATED_PUSH
     return joinWithoutEmptyParts(strings, {&delimiter, 1});
+    CORRADE_IGNORE_DEPRECATED_POP
 }
 
 bool beginsWith(const std::string& string, const std::string& prefix) {
@@ -1436,7 +1453,6 @@ bool beginsWith(const std::string& string, char prefix) {
     return !string.empty() && string[0] == prefix;
 }
 
-#ifdef CORRADE_BUILD_DEPRECATED
 bool viewBeginsWith(Containers::ArrayView<const char> string, Containers::ArrayView<const char> prefix) {
     /* Yup, it's weird like this, see the tests */
     return Containers::StringView{string.data(), string.size()}.hasPrefix({prefix.data(), prefix.size() - 1});
@@ -1445,7 +1461,6 @@ bool viewBeginsWith(Containers::ArrayView<const char> string, Containers::ArrayV
 bool viewBeginsWith(Containers::ArrayView<const char> string, char prefix) {
     return Containers::StringView{string.data(), string.size()}.hasPrefix(prefix);
 }
-#endif
 
 bool endsWith(const std::string& string, const std::string& suffix) {
     /* This is soon meant to be deprecated so all the ugly conversions don't
@@ -1457,7 +1472,6 @@ bool endsWith(const std::string& string, char suffix) {
     return !string.empty() && string[string.size() - 1] == suffix;
 }
 
-#ifdef CORRADE_BUILD_DEPRECATED
 bool viewEndsWith(Containers::ArrayView<const char> string, Containers::ArrayView<const char> suffix) {
     /* Yup, it's weird like this, see the tests */
     return Containers::StringView{string.data(), string.size()}.hasSuffix({suffix.data(), suffix.size() - 1});
@@ -1466,10 +1480,9 @@ bool viewEndsWith(Containers::ArrayView<const char> string, Containers::ArrayVie
 bool viewEndsWith(Containers::ArrayView<const char> string, char suffix) {
     return Containers::StringView{string.data(), string.size()}.hasSuffix(suffix);
 }
-#endif
 
 std::string stripPrefix(std::string string, const std::string& prefix) {
-    CORRADE_ASSERT(beginsWith(string, prefix),
+    CORRADE_ASSERT(Containers::StringView{string}.hasPrefix(prefix),
         "Utility::String::stripPrefix(): string doesn't begin with given prefix", {});
     string.erase(0, prefix.size());
     return string;
@@ -1477,11 +1490,13 @@ std::string stripPrefix(std::string string, const std::string& prefix) {
 
 std::string stripPrefix(std::string string, char prefix) {
     /* It's fine (although ugly), this will be a SSO */
+    CORRADE_IGNORE_DEPRECATED_PUSH
     return stripPrefix(std::move(string), {&prefix, 1});
+    CORRADE_IGNORE_DEPRECATED_POP
 }
 
 std::string stripSuffix(std::string string, const std::string& suffix) {
-    CORRADE_ASSERT(endsWith(string, suffix),
+    CORRADE_ASSERT(Containers::StringView{string}.hasSuffix(suffix),
         "Utility::String::stripSuffix(): string doesn't end with given suffix", {});
     string.erase(string.size() - suffix.size());
     return string;
@@ -1489,7 +1504,9 @@ std::string stripSuffix(std::string string, const std::string& suffix) {
 
 std::string stripSuffix(std::string string, char suffix) {
     /* It's fine (although ugly), this will be a SSO */
+    CORRADE_IGNORE_DEPRECATED_PUSH
     return stripSuffix(std::move(string), {&suffix, 1});
+    CORRADE_IGNORE_DEPRECATED_POP
 }
 
 namespace {
@@ -1497,19 +1514,42 @@ namespace {
     constexpr Containers::StringView Whitespace = " \t\f\v\r\n"_s;
 }
 
-std::string ltrim(std::string string) { return ltrim(std::move(string), Whitespace); }
+std::string ltrim(std::string string) {
+    CORRADE_IGNORE_DEPRECATED_PUSH
+    return ltrim(std::move(string), Whitespace);
+    CORRADE_IGNORE_DEPRECATED_POP
+}
 
-std::string rtrim(std::string string) { return rtrim(std::move(string), Whitespace); }
+std::string rtrim(std::string string) {
+    CORRADE_IGNORE_DEPRECATED_PUSH
+    return rtrim(std::move(string), Whitespace);
+    CORRADE_IGNORE_DEPRECATED_POP
+}
 
-std::string trim(std::string string) { return trim(std::move(string), Whitespace); }
+std::string trim(std::string string) {
+    CORRADE_IGNORE_DEPRECATED_PUSH
+    return trim(std::move(string), Whitespace);
+    CORRADE_IGNORE_DEPRECATED_POP
+}
 
-void ltrimInPlace(std::string& string) { ltrimInPlace(string, Whitespace); }
+void ltrimInPlace(std::string& string) {
+    CORRADE_IGNORE_DEPRECATED_PUSH
+    ltrimInPlace(string, Whitespace);
+    CORRADE_IGNORE_DEPRECATED_POP
+}
 
-void rtrimInPlace(std::string& string) { rtrimInPlace(string, Whitespace); }
+void rtrimInPlace(std::string& string) {
+    CORRADE_IGNORE_DEPRECATED_PUSH
+    rtrimInPlace(string, Whitespace);
+    CORRADE_IGNORE_DEPRECATED_POP
+}
 
-void trimInPlace(std::string& string) { trimInPlace(string, Whitespace); }
+void trimInPlace(std::string& string) {
+    CORRADE_IGNORE_DEPRECATED_PUSH
+    trimInPlace(string, Whitespace);
+    CORRADE_IGNORE_DEPRECATED_POP
+}
 
-#ifdef CORRADE_BUILD_DEPRECATED
 Containers::Array<Containers::StringView> split(const Containers::StringView string, const char delimiter) {
     return string.split(delimiter);
 }
@@ -1525,7 +1565,6 @@ Containers::Array<Containers::StringView> splitWithoutEmptyParts(const Container
 Containers::Array<Containers::StringView> splitWithoutEmptyParts(const Containers::StringView string) {
     return string.splitOnWhitespaceWithoutEmptyParts();
 }
-#endif
 
 std::vector<std::string> split(const std::string& string, const char delimiter) {
     /* IDGAF that this has one extra allocation due to the Array being copied
@@ -1566,7 +1605,9 @@ Containers::StaticArray<3, std::string> partition(const std::string& string, con
 
 Containers::StaticArray<3, std::string> partition(const std::string& string, char separator) {
     /* It's fine (although ugly), this will be a SSO */
+    CORRADE_IGNORE_DEPRECATED_PUSH
     return partition(string, {&separator, 1});
+    CORRADE_IGNORE_DEPRECATED_POP
 }
 
 Containers::StaticArray<3, std::string> rpartition(const std::string& string, const std::string& separator) {
@@ -1580,7 +1621,10 @@ Containers::StaticArray<3, std::string> rpartition(const std::string& string, co
 
 Containers::StaticArray<3, std::string> rpartition(const std::string& string, char separator) {
     /* It's fine (although ugly), this will be a SSO */
+    CORRADE_IGNORE_DEPRECATED_PUSH
     return rpartition(string, {&separator, 1});
+    CORRADE_IGNORE_DEPRECATED_POP
 }
+#endif
 
 }}}

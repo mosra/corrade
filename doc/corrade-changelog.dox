@@ -862,6 +862,9 @@ namespace Corrade {
     deprecated in favor of @ref Containers::BasicStringView::hasPrefix() and
     @ref Containers::BasicStringView::hasSuffix(); the overloads taking
     @ref std::string are still kept
+-   All remaining @ref Utility::String APIs taking a @ref std::string are
+    deprecated in favor of variants implemented directly on
+    @ref Containers::BasicStringView
 -   @cpp CORRADE_ALIGNAS() @ce and @cpp CORRADE_NORETURN @ce macros are
     deprecated as they were originally introduced for compatibility with GCC
     4.7 and older and aren't needed anymore. Use the standard C++11
