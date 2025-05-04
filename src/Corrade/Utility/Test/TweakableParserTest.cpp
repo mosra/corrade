@@ -392,9 +392,8 @@ template<class T> void TweakableParserTest::floatingPointError() {
 void TweakableParserTest::character() {
     auto&& data = CharacterData[testCaseInstanceId()];
     setTestCaseDescription(data.name);
-    std::string input = data.data; /* lazy way to get a length */
 
-    auto parsed = TweakableParser<char>::parse({input.data(), input.size()});
+    auto parsed = TweakableParser<char>::parse(data.data);
     {
         CORRADE_EXPECT_FAIL_IF(data.expectFail, "Not yet implemented.");
         CORRADE_COMPARE(parsed, Containers::pair(TweakableState::Success, data.result));
@@ -404,12 +403,11 @@ void TweakableParserTest::character() {
 void TweakableParserTest::characterError() {
     auto&& data = CharacterErrorData[testCaseInstanceId()];
     setTestCaseDescription(data.name);
-    std::string input = data.data; /* lazy way to get a length */
 
     Containers::String out;
     Warning redirectWarning{&out};
     Error redirectError{&out};
-    TweakableState state = TweakableParser<char>::parse({input.data(), input.size()}).first();
+    TweakableState state = TweakableParser<char>::parse(data.data).first();
     CORRADE_COMPARE(out, data.error);
     CORRADE_COMPARE(state, data.state);
 }
@@ -417,19 +415,17 @@ void TweakableParserTest::characterError() {
 void TweakableParserTest::boolean() {
     auto&& data = BooleanData[testCaseInstanceId()];
     setTestCaseDescription(data.name);
-    std::string input = data.data; /* lazy way to get a length */
-    CORRADE_COMPARE(TweakableParser<bool>::parse({input.data(), input.size()}), Containers::pair(TweakableState::Success, data.result));
+    CORRADE_COMPARE(TweakableParser<bool>::parse(data.data), Containers::pair(TweakableState::Success, data.result));
 }
 
 void TweakableParserTest::booleanError() {
     auto&& data = BooleanErrorData[testCaseInstanceId()];
     setTestCaseDescription(data.name);
-    std::string input = data.data; /* lazy way to get a length */
 
     Containers::String out;
     Warning redirectWarning{&out};
     Error redirectError{&out};
-    TweakableState state = TweakableParser<bool>::parse({input.data(), input.size()}).first();
+    TweakableState state = TweakableParser<bool>::parse(data.data).first();
     CORRADE_COMPARE(out, data.error);
     CORRADE_COMPARE(state, data.state);
 }
