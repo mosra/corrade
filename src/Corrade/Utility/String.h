@@ -32,12 +32,10 @@
 
 #include <cstddef>
 #include <cstdint>
-#include <string>
-#include <vector>
 
-#include "Corrade/configure.h"
-#include "Corrade/Containers/ArrayView.h"
 #include "Corrade/Containers/StringView.h"
+#include "Corrade/Utility/StlForwardString.h"
+#include "Corrade/Utility/StlForwardVector.h"
 #include "Corrade/Utility/visibility.h"
 
 namespace Corrade { namespace Utility {
@@ -60,33 +58,12 @@ See also @ref building-corrade and @ref corrade-cmake for more information.
 */
 namespace String {
 
-namespace Implementation {
-    CORRADE_UTILITY_EXPORT void ltrimInPlace(std::string& string, Containers::ArrayView<const char> characters);
-    CORRADE_UTILITY_EXPORT void rtrimInPlace(std::string& string, Containers::ArrayView<const char> characters);
-    CORRADE_UTILITY_EXPORT void trimInPlace(std::string& string, Containers::ArrayView<const char> characters);
-
-    CORRADE_UTILITY_EXPORT std::string ltrim(std::string string, Containers::ArrayView<const char> characters);
-    CORRADE_UTILITY_EXPORT std::string rtrim(std::string string, Containers::ArrayView<const char> characters);
-    CORRADE_UTILITY_EXPORT std::string trim(std::string string, Containers::ArrayView<const char> characters);
-
-    CORRADE_UTILITY_EXPORT std::string join(const std::vector<std::string>& strings, Containers::ArrayView<const char> delimiter);
-    CORRADE_UTILITY_EXPORT std::string joinWithoutEmptyParts(const std::vector<std::string>& strings, Containers::ArrayView<const char> delimiter);
-
-    CORRADE_UTILITY_EXPORT bool beginsWith(Containers::ArrayView<const char> string, Containers::ArrayView<const char> prefix);
-    CORRADE_UTILITY_EXPORT bool endsWith(Containers::ArrayView<const char> string, Containers::ArrayView<const char> suffix);
-
-    CORRADE_UTILITY_EXPORT std::string stripPrefix(std::string string, Containers::ArrayView<const char> suffix);
-    CORRADE_UTILITY_EXPORT std::string stripSuffix(std::string string, Containers::ArrayView<const char> suffix);
-}
-
 /**
 @brief Safely construct string from char array
 
 If @p string is @cpp nullptr @ce, returns empty string.
 */
-inline std::string fromArray(const char* string) {
-    return string ? std::string{string} : std::string{};
-}
+CORRADE_UTILITY_EXPORT std::string fromArray(const char* string);
 
 /**
 @brief Safely construct string from char array with explicit length
@@ -94,9 +71,7 @@ inline std::string fromArray(const char* string) {
 If @p string is @cpp nullptr @ce, returns empty string. Otherwise takes also
 @p length into account.
 */
-inline std::string fromArray(const char* string, std::size_t length) {
-    return string ? std::string{string, length} : std::string{};
-}
+CORRADE_UTILITY_EXPORT std::string fromArray(const char* string, std::size_t length);
 
 /**
 @brief Trim leading characters from string
@@ -106,19 +81,12 @@ inline std::string fromArray(const char* string, std::size_t length) {
 Implemented using @ref ltrimInPlace().
 @see @ref rtrim(), @ref trim()
 */
-inline std::string ltrim(std::string string, const std::string& characters) {
-    return Implementation::ltrim(std::move(string), {characters.data(), characters.size()});
-}
-
-/** @overload */
-template<std::size_t size> inline std::string ltrim(std::string string, const char(&characters)[size]) {
-    return Implementation::ltrim(std::move(string), {characters, size - 1});
-}
+CORRADE_UTILITY_EXPORT std::string ltrim(std::string string, const std::string& characters);
 
 /**
 @brief Trim leading whitespace from string
 
-Equivalent to calling @ref ltrim(std::string, const char(&)[size]) with
+Equivalent to calling @ref ltrim(std::string, const std::string&) with
 @cpp " \t\f\v\r\n" @ce as second parameter. Implemented using @ref ltrimInPlace().
 @see @ref rtrim(), @ref trim()
 */
@@ -133,19 +101,12 @@ Implemented using @ref rtrimInPlace().
 @see @ref ltrim(), @ref trim(),
     @ref Containers::StringView::trimmedSuffix(StringView) const
 */
-inline std::string rtrim(std::string string, const std::string& characters) {
-    return Implementation::rtrim(std::move(string), {characters.data(), characters.size()});
-}
-
-/** @overload */
-template<std::size_t size> inline std::string rtrim(std::string string, const char(&characters)[size]) {
-    return Implementation::rtrim(std::move(string), {characters, size - 1});
-}
+CORRADE_UTILITY_EXPORT std::string rtrim(std::string string, const std::string& characters);
 
 /**
 @brief Trim trailing whitespace from string
 
-Equivalent to calling @ref rtrim(std::string, const char(&)[size]) with
+Equivalent to calling @ref rtrim(std::string, const std::string&) with
 @cpp " \t\f\v\r\n" @ce as second parameter. Implemented using @ref trimInPlace().
 @see @ref ltrim(), @ref trim(),
     @ref Containers::StringView::trimmedSuffix() const
@@ -161,19 +122,12 @@ Equivalent to @cpp ltrim(rtrim(string, characters), characters) @ce.
 Implemented using @ref trimInPlace().
 @see @ref Containers::StringView::trimmed(StringView) const
 */
-inline std::string trim(std::string string, const std::string& characters) {
-    return Implementation::trim(std::move(string), {characters.data(), characters.size()});
-}
-
-/** @overload */
-template<std::size_t size> inline std::string trim(std::string string, const char(&characters)[size]) {
-    return Implementation::trim(std::move(string), {characters, size - 1});
-}
+CORRADE_UTILITY_EXPORT std::string trim(std::string string, const std::string& characters);
 
 /**
 @brief Trim leading and trailing whitespace from string
 
-Equivalent to calling @ref trim(std::string, const char(&)[size]) with
+Equivalent to calling @ref trim(std::string, const std::string&) with
 @cpp " \t\f\v\r\n" @ce as second parameter. Implemented using
 @ref trimInPlace().
 @see @ref Containers::StringView::trimmed() const
@@ -188,19 +142,12 @@ CORRADE_UTILITY_EXPORT std::string trim(std::string string);
 @see @ref ltrim(), @ref rtrimInPlace(), @ref trimInPlace(),
     @ref Containers::StringView::trimmedPrefix(StringView) const
 */
-inline void ltrimInPlace(std::string& string, const std::string& characters) {
-    Implementation::ltrimInPlace(string, {characters.data(), characters.size()});
-}
-
-/** @overload */
-template<std::size_t size> inline void ltrimInPlace(std::string& string, const char(&characters)[size]) {
-    Implementation::ltrimInPlace(string, {characters, size - 1});
-}
+CORRADE_UTILITY_EXPORT void ltrimInPlace(std::string& string, const std::string& characters);
 
 /**
 @brief Trim leading whitespace from a string, in place
 
-Equivalent to calling @ref ltrimInPlace(std::string&, const char(&)[size]) with
+Equivalent to calling @ref ltrimInPlace(std::string&, const std::string&) with
 @cpp " \t\f\v\r\n" @ce as second parameter.
 @see @ref ltrim(), @ref rtrimInPlace(), @ref trimInPlace(),
     @ref Containers::StringView::trimmedPrefix() const
@@ -215,19 +162,12 @@ CORRADE_UTILITY_EXPORT void ltrimInPlace(std::string& string);
 @see @ref rtrim(), @ref ltrimInPlace(), @ref trimInPlace(),
     @ref Containers::StringView::trimmedSuffix(StringView) const
 */
-inline void rtrimInPlace(std::string& string, const std::string& characters) {
-    Implementation::rtrimInPlace(string, {characters.data(), characters.size()});
-}
-
-/** @overload */
-template<std::size_t size> inline void rtrimInPlace(std::string& string, const char(&characters)[size]) {
-    Implementation::rtrimInPlace(string, {characters, size - 1});
-}
+CORRADE_UTILITY_EXPORT void rtrimInPlace(std::string& string, const std::string& characters);
 
 /**
 @brief Trim trailing whitespace from a string, in place
 
-Equivalent to calling @ref rtrimInPlace(std::string&, const char(&)[size]) with
+Equivalent to calling @ref rtrimInPlace(std::string&, const std::string&) with
 @cpp " \t\f\v\r\n" @ce as second parameter.
 @see @ref rtrim(), @ref ltrim(), @ref trim(),
     @ref Containers::StringView::trimmedSuffix() const
@@ -242,19 +182,12 @@ CORRADE_UTILITY_EXPORT void rtrimInPlace(std::string& string);
 Equivalent to calling both @ref ltrimInPlace() and @ref rtrimInPlace().
 @see @ref trim(), @ref Containers::StringView::trimmed(StringView) const
 */
-inline void trimInPlace(std::string& string, const std::string& characters) {
-    return Implementation::trimInPlace(string, {characters.data(), characters.size()});
-}
-
-/** @overload */
-template<std::size_t size> inline void trimInPlace(std::string& string, const char(&characters)[size]) {
-    return Implementation::trimInPlace(string, {characters, size - 1});
-}
+CORRADE_UTILITY_EXPORT void trimInPlace(std::string& string, const std::string& characters);
 
 /**
 @brief Trim leading and trailing whitespace from a string, in place
 
-Equivalent to calling @ref trimInPlace(std::string&, const char(&)[size]) with
+Equivalent to calling @ref trimInPlace(std::string&, const std::string&) with
 @cpp " \t\f\v\r\n" @ce as second parameter.
 @see @ref trim(), @ref Containers::StringView::trimmed() const
 */
@@ -381,25 +314,13 @@ CORRADE_UTILITY_EXPORT Containers::StaticArray<3, std::string> rpartition(const 
 
 @see @ref Containers::StringView::join()
 */
-inline std::string join(const std::vector<std::string>& strings, char delimiter) {
-    return Implementation::join(strings, {&delimiter, 1});
-}
+CORRADE_UTILITY_EXPORT std::string join(const std::vector<std::string>& strings, char delimiter);
 
 /**
 @overload
 @m_since{2019,10}
 */
-template<std::size_t size> inline std::string join(const std::vector<std::string>& strings, const char(&delimiter)[size]) {
-    return Implementation::join(strings, {delimiter, size - 1});
-}
-
-/**
-@overload
-@m_since{2019,10}
-*/
-inline std::string join(const std::vector<std::string>& strings, const std::string& delimiter) {
-    return Implementation::join(strings, {delimiter.data(), delimiter.size()});
-}
+CORRADE_UTILITY_EXPORT std::string join(const std::vector<std::string>& strings, const std::string& delimiter);
 
 /**
 @brief Join strings with given character and remove empty parts
@@ -408,19 +329,10 @@ inline std::string join(const std::vector<std::string>& strings, const std::stri
 
 @see @ref Containers::StringView::joinWithoutEmptyParts()
 */
-inline std::string joinWithoutEmptyParts(const std::vector<std::string>& strings, char delimiter) {
-    return Implementation::joinWithoutEmptyParts(strings, {&delimiter, 1});
-}
+CORRADE_UTILITY_EXPORT std::string joinWithoutEmptyParts(const std::vector<std::string>& strings, char delimiter);
 
 /** @overload */
-template<std::size_t size> inline std::string joinWithoutEmptyParts(const std::vector<std::string>& strings, const char(&delimiter)[size]) {
-    return Implementation::joinWithoutEmptyParts(strings, {delimiter, size - 1});
-}
-
-/** @overload */
-inline std::string joinWithoutEmptyParts(const std::vector<std::string>& strings, const std::string& delimiter) {
-    return Implementation::joinWithoutEmptyParts(strings, {delimiter.data(), delimiter.size()});
-}
+CORRADE_UTILITY_EXPORT std::string joinWithoutEmptyParts(const std::vector<std::string>& strings, const std::string& delimiter);
 
 namespace Implementation {
     CORRADE_UTILITY_EXPORT extern const char* CORRADE_UTILITY_CPU_DISPATCHED_DECLARATION(commonPrefix)(const char* a, const char* b, std::size_t sizeA, std::size_t sizeB);
@@ -526,19 +438,10 @@ In particular, returns @cpp true @ce for empty @p string only if @p prefix is
 empty as well.
 @see @ref stripPrefix(), @ref Containers::StringView::hasPrefix()
 */
-inline bool beginsWith(const std::string& string, const std::string& prefix) {
-    return Implementation::beginsWith({string.data(), string.size()}, {prefix.data(), prefix.size()});
-}
+CORRADE_UTILITY_EXPORT bool beginsWith(const std::string& string, const std::string& prefix);
 
 /** @overload */
-template<std::size_t size> inline bool beginsWith(const std::string& string, const char(&prefix)[size]) {
-    return Implementation::beginsWith({string.data(), string.size()}, {prefix, size - 1});
-}
-
-/** @overload */
-inline bool beginsWith(const std::string& string, char prefix) {
-    return !string.empty() && string[0] == prefix;
-}
+CORRADE_UTILITY_EXPORT bool beginsWith(const std::string& string, char prefix);
 
 #ifdef CORRADE_BUILD_DEPRECATED
 /**
@@ -546,18 +449,14 @@ inline bool beginsWith(const std::string& string, char prefix) {
 @m_deprecated_since_latest Use @ref Containers::StringView::hasPrefix()
     instead.
 */
-template<std::size_t size> inline CORRADE_DEPRECATED("use Containers::StringView::beginsWith() instead") bool viewBeginsWith(Containers::ArrayView<const char> string, const char(&prefix)[size]) {
-    return Implementation::beginsWith(string, {prefix, size - 1});
-}
+CORRADE_UTILITY_EXPORT CORRADE_DEPRECATED("use Containers::StringView::hasPrefix() instead") bool viewBeginsWith(Containers::ArrayView<const char> string, Containers::ArrayView<const char> prefix);
 
 /**
 @overload
 @m_deprecated_since_latest Use @ref Containers::StringView::hasPrefix()
     instead.
 */
-inline CORRADE_DEPRECATED("use Containers::StringView::beginsWith() instead") bool viewBeginsWith(Containers::ArrayView<const char> string, char prefix) {
-    return !string.isEmpty() && string[0] == prefix;
-}
+CORRADE_UTILITY_EXPORT CORRADE_DEPRECATED("use Containers::StringView::hasPrefix() instead") bool viewBeginsWith(Containers::ArrayView<const char> string, char prefix);
 #endif
 
 /**
@@ -567,19 +466,10 @@ In particular, returns @cpp true @ce for empty @p string only if @p suffix is
 empty as well.
 @see @ref stripSuffix(), @ref Containers::StringView::hasSuffix()
 */
-inline bool endsWith(const std::string& string, const std::string& suffix) {
-    return Implementation::endsWith({string.data(), string.size()}, {suffix.data(), suffix.size()});
-}
+CORRADE_UTILITY_EXPORT bool endsWith(const std::string& string, const std::string& suffix);
 
 /** @overload */
-template<std::size_t size> inline bool endsWith(const std::string& string, const char(&suffix)[size]) {
-    return Implementation::endsWith({string.data(), string.size()}, {suffix, size - 1});
-}
-
-/** @overload */
-inline bool endsWith(const std::string& string, char suffix) {
-    return !string.empty() && string[string.size() - 1] == suffix;
-}
+CORRADE_UTILITY_EXPORT bool endsWith(const std::string& string, char suffix);
 
 #ifdef CORRADE_BUILD_DEPRECATED
 /**
@@ -587,18 +477,14 @@ inline bool endsWith(const std::string& string, char suffix) {
 @m_deprecated_since_latest Use @ref Containers::StringView::hasSuffix()
     instead.
 */
-template<std::size_t size> inline CORRADE_DEPRECATED("use Containers::StringView::endsWith() instead") bool viewEndsWith(Containers::ArrayView<const char> string, const char(&suffix)[size]) {
-    return Implementation::endsWith(string, {suffix, size - 1});
-}
+CORRADE_UTILITY_EXPORT CORRADE_DEPRECATED("use Containers::StringView::hasSuffix() instead") bool viewEndsWith(Containers::ArrayView<const char> string, Containers::ArrayView<const char> suffix);
 
 /**
 @overload
 @m_deprecated_since_latest Use @ref Containers::StringView::hasSuffix()
     instead.
 */
-inline CORRADE_DEPRECATED("use Containers::StringView::endsWith() instead") bool viewEndsWith(Containers::ArrayView<const char> string, char suffix) {
-    return !string.isEmpty() && string[string.size() - 1] == suffix;
-}
+CORRADE_UTILITY_EXPORT CORRADE_DEPRECATED("use Containers::StringView::hasSuffix() instead") bool viewEndsWith(Containers::ArrayView<const char> string, char suffix);
 #endif
 
 /**
@@ -607,19 +493,10 @@ inline CORRADE_DEPRECATED("use Containers::StringView::endsWith() instead") bool
 Expects that the string actually begins with given prefix.
 @see @ref beginsWith(), @ref Containers::StringView::exceptPrefix()
 */
-inline std::string stripPrefix(std::string string, const std::string& prefix) {
-    return Implementation::stripPrefix(std::move(string), {prefix.data(), prefix.size()});
-}
+CORRADE_UTILITY_EXPORT std::string stripPrefix(std::string string, const std::string& prefix);
 
 /** @overload */
-template<std::size_t size> inline std::string stripPrefix(std::string string, const char(&prefix)[size]) {
-    return Implementation::stripPrefix(std::move(string), {prefix, size - 1});
-}
-
-/** @overload */
-inline std::string stripPrefix(std::string string, char prefix) {
-    return Implementation::stripPrefix(std::move(string), {&prefix, 1});
-}
+CORRADE_UTILITY_EXPORT std::string stripPrefix(std::string string, char prefix);
 
 /**
 @brief Strip given suffix from a string
@@ -627,19 +504,10 @@ inline std::string stripPrefix(std::string string, char prefix) {
 Expects that the string actually ends with given suffix.
 @see @ref endsWith(), @ref Containers::StringView::exceptSuffix()
 */
-inline std::string stripSuffix(std::string string, const std::string& suffix) {
-    return Implementation::stripSuffix(std::move(string), {suffix.data(), suffix.size()});
-}
+CORRADE_UTILITY_EXPORT std::string stripSuffix(std::string string, const std::string& suffix);
 
 /** @overload */
-template<std::size_t size> inline std::string stripSuffix(std::string string, const char(&suffix)[size]) {
-    return Implementation::stripSuffix(std::move(string), {suffix, size - 1});
-}
-
-/** @overload */
-inline std::string stripSuffix(std::string string, char suffix) {
-    return Implementation::stripSuffix(std::move(string), {&suffix, 1});
-}
+CORRADE_UTILITY_EXPORT std::string stripSuffix(std::string string, char suffix);
 
 /**
 @brief Replace first occurrence in a string

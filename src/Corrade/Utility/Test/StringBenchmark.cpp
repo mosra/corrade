@@ -28,6 +28,7 @@
 #include <cstring> /* std::memchr */
 #include <locale> /* std::locale::classic() */
 
+#include "Corrade/Containers/ArrayView.h" /* arraySize() */
 #include "Corrade/Containers/Optional.h"
 #include "Corrade/Containers/StringView.h"
 #include "Corrade/TestSuite/Tester.h"
