@@ -546,8 +546,8 @@ inline bool beginsWith(const std::string& string, char prefix) {
 @m_deprecated_since_latest Use @ref Containers::StringView::hasPrefix()
     instead.
 */
-template<std::size_t size> inline CORRADE_DEPRECATED("use Containers::StringView::beginsWith() instead") bool viewBeginsWith(Containers::ArrayView<const char> string, const char(&prefix)[size]) {
-    return Implementation::beginsWith(string, {prefix, size - 1});
+template<std::size_t size> inline CORRADE_DEPRECATED("use Containers::StringView::hasPrefix() instead") bool viewBeginsWith(Containers::StringView string, const char(&prefix)[size]) {
+    return string.hasPrefix({prefix, size - 1});
 }
 
 /**
@@ -555,8 +555,8 @@ template<std::size_t size> inline CORRADE_DEPRECATED("use Containers::StringView
 @m_deprecated_since_latest Use @ref Containers::StringView::hasPrefix()
     instead.
 */
-inline CORRADE_DEPRECATED("use Containers::StringView::beginsWith() instead") bool viewBeginsWith(Containers::ArrayView<const char> string, char prefix) {
-    return !string.isEmpty() && string[0] == prefix;
+inline CORRADE_DEPRECATED("use Containers::StringView::hasPrefix() instead") bool viewBeginsWith(Containers::StringView string, char prefix) {
+    return string.hasPrefix(prefix);
 }
 #endif
 
@@ -587,8 +587,8 @@ inline bool endsWith(const std::string& string, char suffix) {
 @m_deprecated_since_latest Use @ref Containers::StringView::hasSuffix()
     instead.
 */
-template<std::size_t size> inline CORRADE_DEPRECATED("use Containers::StringView::endsWith() instead") bool viewEndsWith(Containers::ArrayView<const char> string, const char(&suffix)[size]) {
-    return Implementation::endsWith(string, {suffix, size - 1});
+template<std::size_t size> inline CORRADE_DEPRECATED("use Containers::StringView::hasSuffix() instead") bool viewEndsWith(Containers::StringView string, const char(&suffix)[size]) {
+    return string.hasSuffix({suffix, size - 1});
 }
 
 /**
@@ -596,8 +596,8 @@ template<std::size_t size> inline CORRADE_DEPRECATED("use Containers::StringView
 @m_deprecated_since_latest Use @ref Containers::StringView::hasSuffix()
     instead.
 */
-inline CORRADE_DEPRECATED("use Containers::StringView::endsWith() instead") bool viewEndsWith(Containers::ArrayView<const char> string, char suffix) {
-    return !string.isEmpty() && string[string.size() - 1] == suffix;
+inline CORRADE_DEPRECATED("use Containers::StringView::hasSuffix() instead") bool viewEndsWith(Containers::StringView string, char suffix) {
+    return string.hasSuffix(suffix);
 }
 #endif
 
