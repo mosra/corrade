@@ -897,9 +897,7 @@ Containers::Optional<Containers::Array<Containers::String>> list(const Container
     /* Windows (not Store/Phone) */
     #elif defined(CORRADE_TARGET_WINDOWS) && !defined(CORRADE_TARGET_WINDOWS_RT)
     WIN32_FIND_DATAW data;
-    /** @todo drop the StringView cast once widen(const std::string&) is
-        removed */
-    HANDLE hFile = FindFirstFileW(Unicode::widen(Containers::StringView{join(path, "*"_s)}), &data);
+    HANDLE hFile = FindFirstFileW(Unicode::widen(join(path, "*"_s)), &data);
     if(hFile == INVALID_HANDLE_VALUE) {
         Error err;
         err << "Utility::Path::list(): can't list" << path << Debug::nospace << ":";
