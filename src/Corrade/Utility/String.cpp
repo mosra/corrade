@@ -1142,7 +1142,7 @@ Containers::String replaceAll(Containers::StringView string, const Containers::S
     while(const Containers::StringView found = string.find(search)) {
         arrayAppend(output, string.prefix(found.begin()));
         arrayAppend(output, replace);
-        string = string.slice(found.end(), string.end());
+        string = string.suffix(found.end());
     }
     arrayAppend(output, string);
     arrayAppend(output, '\0');
