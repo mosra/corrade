@@ -26,7 +26,6 @@
 
 #include "String.h"
 
-#include <cctype>
 #include <string>
 #include <vector>
 
