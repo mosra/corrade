@@ -73,7 +73,6 @@ struct StringTest: TestSuite::Tester {
     void lowercaseUppercaseString();
     void lowercaseUppercaseStringSmall();
     void lowercaseUppercaseStringNotOwned();
-    void lowercaseUppercaseStl();
 
     void beginsWith();
     void beginsWithEmpty();
@@ -296,7 +295,6 @@ StringTest::StringTest() {
     addTests({&StringTest::lowercaseUppercaseString,
               &StringTest::lowercaseUppercaseStringSmall,
               &StringTest::lowercaseUppercaseStringNotOwned,
-              &StringTest::lowercaseUppercaseStl,
 
               &StringTest::beginsWith,
               &StringTest::beginsWithEmpty,
@@ -1605,13 +1603,6 @@ void StringTest::lowercaseUppercaseStringNotOwned() {
         CORRADE_COMPARE(out, "HELLO!");
         CORRADE_VERIFY(out.data() != data);
     }
-}
-
-void StringTest::lowercaseUppercaseStl() {
-    /* These just call into the in-place implementations tested above, so
-       verify just basic functionality */
-    CORRADE_COMPARE(String::lowercase(std::string{"YEAh!"}), "yeah!");
-    CORRADE_COMPARE(String::uppercase(std::string{"Hello!"}), "HELLO!");
 }
 
 void StringTest::beginsWith() {

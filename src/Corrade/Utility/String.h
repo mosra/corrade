@@ -391,9 +391,6 @@ the returned instance. Makes a owned copy first if not.
 */
 CORRADE_UTILITY_EXPORT Containers::String lowercase(Containers::String string);
 
-/** @overload */
-CORRADE_UTILITY_EXPORT std::string lowercase(std::string string);
-
 /**
 @brief Convert ASCII characters in a string to uppercase, in place
 @m_since_latest
@@ -427,9 +424,6 @@ operation in-place if @p string is owned, transferring the data ownership to
 the returned instance. Makes a owned copy first if not.
 */
 CORRADE_UTILITY_EXPORT Containers::String uppercase(Containers::String string);
-
-/** @overload */
-CORRADE_UTILITY_EXPORT std::string uppercase(std::string string);
 
 /**
 @brief Whether the string has given prefix
