@@ -1090,11 +1090,6 @@ Containers::String lowercase(Containers::String string) {
     return string;
 }
 
-std::string lowercase(std::string string) {
-    lowercaseInPlace(string);
-    return string;
-}
-
 Containers::String uppercase(const Containers::StringView string) {
     /* Theoretically doing the copy in the same loop as case change could be
        faster for *really long* strings due to cache reuse, but until that
@@ -1114,11 +1109,6 @@ Containers::String uppercase(Containers::String string) {
        owned. */
     if(!string.isSmall() && string.deleter()) string = Containers::String{string};
 
-    uppercaseInPlace(string);
-    return string;
-}
-
-std::string uppercase(std::string string) {
     uppercaseInPlace(string);
     return string;
 }

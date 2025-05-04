@@ -971,11 +971,10 @@ namespace Corrade {
     removed as they caused various ambiguities, so using these functions with
     @ref std::string may now need extra casts.
 -   @ref Utility::String::lowercase() and @ref Utility::String::uppercase()
-    now has overloads for both @ref Containers::StringView and
-    @ref std::string, which may cause ambiguous overload errors for existing
-    code that passes @cpp const char* @ce to it. Given that either type is
-    valid now, the code has to be updated to explicitly pass that type to the
-    function.
+    is now operating on a @ref Containers::StringView or
+    @ref Containers::String. The original @ref std::string overloads were
+    removed to prevent ambiguities, so using these functions with
+    @ref std::string may now need extra casts.
 -   @ref Utility::format() now returns a @ref Containers::String instead of
     @ref Containers::Array and @ref Utility::formatInto() now takes a
     @ref Containers::MutableStringView instead of @ref Containers::ArrayView.
