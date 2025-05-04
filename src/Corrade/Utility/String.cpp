@@ -49,239 +49,6 @@
 
 namespace Corrade { namespace Utility { namespace String {
 
-std::string fromArray(const char* string) {
-    return string ? std::string{string} : std::string{};
-}
-
-std::string fromArray(const char* string, std::size_t length) {
-    return string ? std::string{string, length} : std::string{};
-}
-
-void ltrimInPlace(std::string& string, const std::string& characters) {
-    string.erase(0, string.find_first_not_of(characters));
-}
-
-void rtrimInPlace(std::string& string, const std::string& characters) {
-    string.erase(string.find_last_not_of(characters)+1);
-}
-
-void trimInPlace(std::string& string, const std::string& characters) {
-    rtrimInPlace(string, characters);
-    ltrimInPlace(string, characters);
-}
-
-std::string ltrim(std::string string, const std::string& characters) {
-    ltrimInPlace(string, characters);
-    return string;
-}
-
-std::string rtrim(std::string string, const std::string& characters) {
-    rtrimInPlace(string, characters);
-    return string;
-}
-
-std::string trim(std::string string, const std::string& characters) {
-    trimInPlace(string, characters);
-    return string;
-}
-
-std::string join(const std::vector<std::string>& strings, const std::string& delimiter) {
-    /* IDGAF that this has two extra allocations due to the Array being created
-       and then the String converted to a std::string vector, the input
-       std::string instances are MUCH worse */
-    Containers::Array<Containers::StringView> stringViews{strings.size()};
-    for(std::size_t i = 0; i != strings.size(); ++i)
-        stringViews[i] = strings[i];
-    return Containers::StringView{delimiter}.join(stringViews);
-}
-
-std::string join(const std::vector<std::string>& strings, char delimiter) {
-    /* It's fine (although ugly), this will be a SSO */
-    return join(strings, {&delimiter, 1});
-}
-
-std::string joinWithoutEmptyParts(const std::vector<std::string>& strings, const std::string& delimiter) {
-    /* IDGAF that this has two extra allocations due to the Array being created
-       and then the String converted to a std::string vector, the input
-       std::string instances are MUCH worse */
-    Containers::Array<Containers::StringView> stringViews{strings.size()};
-    for(std::size_t i = 0; i != strings.size(); ++i)
-        stringViews[i] = strings[i];
-    return Containers::StringView{delimiter}.joinWithoutEmptyParts(stringViews);
-}
-
-std::string joinWithoutEmptyParts(const std::vector<std::string>& strings, char delimiter) {
-    /* It's fine (although ugly), this will be a SSO */
-    return joinWithoutEmptyParts(strings, {&delimiter, 1});
-}
-
-bool beginsWith(const std::string& string, const std::string& prefix) {
-    /* This is soon meant to be deprecated so all the ugly conversions don't
-       bother me too much */
-    return Containers::StringView{string}.hasPrefix(prefix);
-}
-
-bool beginsWith(const std::string& string, char prefix) {
-    return !string.empty() && string[0] == prefix;
-}
-
-#ifdef CORRADE_BUILD_DEPRECATED
-bool viewBeginsWith(Containers::ArrayView<const char> string, Containers::ArrayView<const char> prefix) {
-    /* Yup, it's weird like this, see the tests */
-    return Containers::StringView{string.data(), string.size()}.hasPrefix({prefix.data(), prefix.size() - 1});
-}
-
-bool viewBeginsWith(Containers::ArrayView<const char> string, char prefix) {
-    return Containers::StringView{string.data(), string.size()}.hasPrefix(prefix);
-}
-#endif
-
-bool endsWith(const std::string& string, const std::string& suffix) {
-    /* This is soon meant to be deprecated so all the ugly conversions don't
-       bother me too much */
-    return Containers::StringView{string}.hasSuffix(suffix);
-}
-
-bool endsWith(const std::string& string, char suffix) {
-    return !string.empty() && string[string.size() - 1] == suffix;
-}
-
-#ifdef CORRADE_BUILD_DEPRECATED
-bool viewEndsWith(Containers::ArrayView<const char> string, Containers::ArrayView<const char> suffix) {
-    /* Yup, it's weird like this, see the tests */
-    return Containers::StringView{string.data(), string.size()}.hasSuffix({suffix.data(), suffix.size() - 1});
-}
-
-bool viewEndsWith(Containers::ArrayView<const char> string, char suffix) {
-    return Containers::StringView{string.data(), string.size()}.hasSuffix(suffix);
-}
-#endif
-
-std::string stripPrefix(std::string string, const std::string& prefix) {
-    CORRADE_ASSERT(beginsWith(string, prefix),
-        "Utility::String::stripPrefix(): string doesn't begin with given prefix", {});
-    string.erase(0, prefix.size());
-    return string;
-}
-
-std::string stripPrefix(std::string string, char prefix) {
-    /* It's fine (although ugly), this will be a SSO */
-    return stripPrefix(std::move(string), {&prefix, 1});
-}
-
-std::string stripSuffix(std::string string, const std::string& suffix) {
-    CORRADE_ASSERT(endsWith(string, suffix),
-        "Utility::String::stripSuffix(): string doesn't end with given suffix", {});
-    string.erase(string.size() - suffix.size());
-    return string;
-}
-
-std::string stripSuffix(std::string string, char suffix) {
-    /* It's fine (although ugly), this will be a SSO */
-    return stripSuffix(std::move(string), {&suffix, 1});
-}
-
-namespace {
-    using namespace Containers::Literals;
-    constexpr Containers::StringView Whitespace = " \t\f\v\r\n"_s;
-}
-
-std::string ltrim(std::string string) { return ltrim(std::move(string), Whitespace); }
-
-std::string rtrim(std::string string) { return rtrim(std::move(string), Whitespace); }
-
-std::string trim(std::string string) { return trim(std::move(string), Whitespace); }
-
-void ltrimInPlace(std::string& string) { ltrimInPlace(string, Whitespace); }
-
-void rtrimInPlace(std::string& string) { rtrimInPlace(string, Whitespace); }
-
-void trimInPlace(std::string& string) { trimInPlace(string, Whitespace); }
-
-#ifdef CORRADE_BUILD_DEPRECATED
-Containers::Array<Containers::StringView> split(const Containers::StringView string, const char delimiter) {
-    return string.split(delimiter);
-}
-
-Containers::Array<Containers::StringView> splitWithoutEmptyParts(const Containers::StringView string, const char delimiter) {
-    return string.splitWithoutEmptyParts(delimiter);
-}
-
-Containers::Array<Containers::StringView> splitWithoutEmptyParts(const Containers::StringView string, const Containers::StringView delimiters) {
-    return string.splitOnAnyWithoutEmptyParts(delimiters);
-}
-
-Containers::Array<Containers::StringView> splitWithoutEmptyParts(const Containers::StringView string) {
-    return string.splitOnWhitespaceWithoutEmptyParts();
-}
-#endif
-
-std::vector<std::string> split(const std::string& string, const char delimiter) {
-    /* IDGAF that this has one extra allocation due to the Array being copied
-       to a std::vector, the owning std::string instances are much worse */
-    Containers::Array<Containers::StringView> parts = Containers::StringView{string}.split(delimiter);
-    return std::vector<std::string>{parts.begin(), parts.end()};
-}
-
-std::vector<std::string> splitWithoutEmptyParts(const std::string& string, const char delimiter) {
-    /* IDGAF that this has one extra allocation due to the Array being copied
-       to a std::vector, the owning std::string instances are much worse */
-    Containers::Array<Containers::StringView> parts = Containers::StringView{string}.splitWithoutEmptyParts(delimiter);
-    return std::vector<std::string>{parts.begin(), parts.end()};
-}
-
-std::vector<std::string> splitWithoutEmptyParts(const std::string& string, const std::string& delimiters) {
-    /* IDGAF that this has one extra allocation due to the Array being copied
-       to a std::vector, the owning std::string instances are much worse */
-    Containers::Array<Containers::StringView> parts = Containers::StringView{string}.splitOnAnyWithoutEmptyParts(delimiters);
-    return std::vector<std::string>{parts.begin(), parts.end()};
-}
-
-std::vector<std::string> splitWithoutEmptyParts(const std::string& string) {
-    /* IDGAF that this has one extra allocation due to the Array being copied
-       to a std::vector, the owning std::string instances are much worse */
-    Containers::Array<Containers::StringView> parts = Containers::StringView{string}.splitOnWhitespaceWithoutEmptyParts();
-    return std::vector<std::string>{parts.begin(), parts.end()};
-}
-
-namespace {
-
-Containers::StaticArray<3, std::string> partitionInternal(const std::string& string, Containers::ArrayView<const char> separator) {
-    const std::size_t pos = string.find(separator, 0, separator.size());
-    return {
-        string.substr(0, pos),
-        pos == std::string::npos ? std::string{} : string.substr(pos, separator.size()),
-        pos == std::string::npos ? std::string{} : string.substr(pos + separator.size())
-    };
-}
-
-Containers::StaticArray<3, std::string> rpartitionInternal(const std::string& string, Containers::ArrayView<const char> separator) {
-    const std::size_t pos = string.rfind(separator, std::string::npos, separator.size());
-    return {
-        pos == std::string::npos ? std::string{} : string.substr(0, pos),
-        pos == std::string::npos ? std::string{} : string.substr(pos, separator.size()),
-        pos == std::string::npos ? string.substr(0) : string.substr(pos + separator.size())
-    };
-}
-
-}
-
-Containers::StaticArray<3, std::string> partition(const std::string& string, char separator) {
-    return partitionInternal(string, {&separator, 1});
-}
-
-Containers::StaticArray<3, std::string> partition(const std::string& string, const std::string& separator) {
-    return partitionInternal(string, {separator.data(), separator.size()});
-}
-
-Containers::StaticArray<3, std::string> rpartition(const std::string& string, char separator) {
-    return rpartitionInternal(string, {&separator, 1});
-}
-
-Containers::StaticArray<3, std::string> rpartition(const std::string& string, const std::string& separator) {
-    return rpartitionInternal(string, {separator.data(), separator.size()});
-}
-
 namespace Implementation {
 
 namespace {
@@ -1592,6 +1359,239 @@ Containers::Optional<Containers::Array<std::uint32_t>> parseNumberSequence(const
 
     /* GCC 4.8 decases when seeing just `return out` here */
     return Containers::optional(Utility::move(out));
+}
+
+std::string fromArray(const char* string) {
+    return string ? std::string{string} : std::string{};
+}
+
+std::string fromArray(const char* string, std::size_t length) {
+    return string ? std::string{string, length} : std::string{};
+}
+
+void ltrimInPlace(std::string& string, const std::string& characters) {
+    string.erase(0, string.find_first_not_of(characters));
+}
+
+void rtrimInPlace(std::string& string, const std::string& characters) {
+    string.erase(string.find_last_not_of(characters)+1);
+}
+
+void trimInPlace(std::string& string, const std::string& characters) {
+    rtrimInPlace(string, characters);
+    ltrimInPlace(string, characters);
+}
+
+std::string ltrim(std::string string, const std::string& characters) {
+    ltrimInPlace(string, characters);
+    return string;
+}
+
+std::string rtrim(std::string string, const std::string& characters) {
+    rtrimInPlace(string, characters);
+    return string;
+}
+
+std::string trim(std::string string, const std::string& characters) {
+    trimInPlace(string, characters);
+    return string;
+}
+
+std::string join(const std::vector<std::string>& strings, const std::string& delimiter) {
+    /* IDGAF that this has two extra allocations due to the Array being created
+       and then the String converted to a std::string vector, the input
+       std::string instances are MUCH worse */
+    Containers::Array<Containers::StringView> stringViews{strings.size()};
+    for(std::size_t i = 0; i != strings.size(); ++i)
+        stringViews[i] = strings[i];
+    return Containers::StringView{delimiter}.join(stringViews);
+}
+
+std::string join(const std::vector<std::string>& strings, char delimiter) {
+    /* It's fine (although ugly), this will be a SSO */
+    return join(strings, {&delimiter, 1});
+}
+
+std::string joinWithoutEmptyParts(const std::vector<std::string>& strings, const std::string& delimiter) {
+    /* IDGAF that this has two extra allocations due to the Array being created
+       and then the String converted to a std::string vector, the input
+       std::string instances are MUCH worse */
+    Containers::Array<Containers::StringView> stringViews{strings.size()};
+    for(std::size_t i = 0; i != strings.size(); ++i)
+        stringViews[i] = strings[i];
+    return Containers::StringView{delimiter}.joinWithoutEmptyParts(stringViews);
+}
+
+std::string joinWithoutEmptyParts(const std::vector<std::string>& strings, char delimiter) {
+    /* It's fine (although ugly), this will be a SSO */
+    return joinWithoutEmptyParts(strings, {&delimiter, 1});
+}
+
+bool beginsWith(const std::string& string, const std::string& prefix) {
+    /* This is soon meant to be deprecated so all the ugly conversions don't
+       bother me too much */
+    return Containers::StringView{string}.hasPrefix(prefix);
+}
+
+bool beginsWith(const std::string& string, char prefix) {
+    return !string.empty() && string[0] == prefix;
+}
+
+#ifdef CORRADE_BUILD_DEPRECATED
+bool viewBeginsWith(Containers::ArrayView<const char> string, Containers::ArrayView<const char> prefix) {
+    /* Yup, it's weird like this, see the tests */
+    return Containers::StringView{string.data(), string.size()}.hasPrefix({prefix.data(), prefix.size() - 1});
+}
+
+bool viewBeginsWith(Containers::ArrayView<const char> string, char prefix) {
+    return Containers::StringView{string.data(), string.size()}.hasPrefix(prefix);
+}
+#endif
+
+bool endsWith(const std::string& string, const std::string& suffix) {
+    /* This is soon meant to be deprecated so all the ugly conversions don't
+       bother me too much */
+    return Containers::StringView{string}.hasSuffix(suffix);
+}
+
+bool endsWith(const std::string& string, char suffix) {
+    return !string.empty() && string[string.size() - 1] == suffix;
+}
+
+#ifdef CORRADE_BUILD_DEPRECATED
+bool viewEndsWith(Containers::ArrayView<const char> string, Containers::ArrayView<const char> suffix) {
+    /* Yup, it's weird like this, see the tests */
+    return Containers::StringView{string.data(), string.size()}.hasSuffix({suffix.data(), suffix.size() - 1});
+}
+
+bool viewEndsWith(Containers::ArrayView<const char> string, char suffix) {
+    return Containers::StringView{string.data(), string.size()}.hasSuffix(suffix);
+}
+#endif
+
+std::string stripPrefix(std::string string, const std::string& prefix) {
+    CORRADE_ASSERT(beginsWith(string, prefix),
+        "Utility::String::stripPrefix(): string doesn't begin with given prefix", {});
+    string.erase(0, prefix.size());
+    return string;
+}
+
+std::string stripPrefix(std::string string, char prefix) {
+    /* It's fine (although ugly), this will be a SSO */
+    return stripPrefix(std::move(string), {&prefix, 1});
+}
+
+std::string stripSuffix(std::string string, const std::string& suffix) {
+    CORRADE_ASSERT(endsWith(string, suffix),
+        "Utility::String::stripSuffix(): string doesn't end with given suffix", {});
+    string.erase(string.size() - suffix.size());
+    return string;
+}
+
+std::string stripSuffix(std::string string, char suffix) {
+    /* It's fine (although ugly), this will be a SSO */
+    return stripSuffix(std::move(string), {&suffix, 1});
+}
+
+namespace {
+    using namespace Containers::Literals;
+    constexpr Containers::StringView Whitespace = " \t\f\v\r\n"_s;
+}
+
+std::string ltrim(std::string string) { return ltrim(std::move(string), Whitespace); }
+
+std::string rtrim(std::string string) { return rtrim(std::move(string), Whitespace); }
+
+std::string trim(std::string string) { return trim(std::move(string), Whitespace); }
+
+void ltrimInPlace(std::string& string) { ltrimInPlace(string, Whitespace); }
+
+void rtrimInPlace(std::string& string) { rtrimInPlace(string, Whitespace); }
+
+void trimInPlace(std::string& string) { trimInPlace(string, Whitespace); }
+
+#ifdef CORRADE_BUILD_DEPRECATED
+Containers::Array<Containers::StringView> split(const Containers::StringView string, const char delimiter) {
+    return string.split(delimiter);
+}
+
+Containers::Array<Containers::StringView> splitWithoutEmptyParts(const Containers::StringView string, const char delimiter) {
+    return string.splitWithoutEmptyParts(delimiter);
+}
+
+Containers::Array<Containers::StringView> splitWithoutEmptyParts(const Containers::StringView string, const Containers::StringView delimiters) {
+    return string.splitOnAnyWithoutEmptyParts(delimiters);
+}
+
+Containers::Array<Containers::StringView> splitWithoutEmptyParts(const Containers::StringView string) {
+    return string.splitOnWhitespaceWithoutEmptyParts();
+}
+#endif
+
+std::vector<std::string> split(const std::string& string, const char delimiter) {
+    /* IDGAF that this has one extra allocation due to the Array being copied
+       to a std::vector, the owning std::string instances are much worse */
+    Containers::Array<Containers::StringView> parts = Containers::StringView{string}.split(delimiter);
+    return std::vector<std::string>{parts.begin(), parts.end()};
+}
+
+std::vector<std::string> splitWithoutEmptyParts(const std::string& string, const char delimiter) {
+    /* IDGAF that this has one extra allocation due to the Array being copied
+       to a std::vector, the owning std::string instances are much worse */
+    Containers::Array<Containers::StringView> parts = Containers::StringView{string}.splitWithoutEmptyParts(delimiter);
+    return std::vector<std::string>{parts.begin(), parts.end()};
+}
+
+std::vector<std::string> splitWithoutEmptyParts(const std::string& string, const std::string& delimiters) {
+    /* IDGAF that this has one extra allocation due to the Array being copied
+       to a std::vector, the owning std::string instances are much worse */
+    Containers::Array<Containers::StringView> parts = Containers::StringView{string}.splitOnAnyWithoutEmptyParts(delimiters);
+    return std::vector<std::string>{parts.begin(), parts.end()};
+}
+
+std::vector<std::string> splitWithoutEmptyParts(const std::string& string) {
+    /* IDGAF that this has one extra allocation due to the Array being copied
+       to a std::vector, the owning std::string instances are much worse */
+    Containers::Array<Containers::StringView> parts = Containers::StringView{string}.splitOnWhitespaceWithoutEmptyParts();
+    return std::vector<std::string>{parts.begin(), parts.end()};
+}
+
+namespace {
+
+Containers::StaticArray<3, std::string> partitionInternal(const std::string& string, Containers::ArrayView<const char> separator) {
+    const std::size_t pos = string.find(separator, 0, separator.size());
+    return {
+        string.substr(0, pos),
+        pos == std::string::npos ? std::string{} : string.substr(pos, separator.size()),
+        pos == std::string::npos ? std::string{} : string.substr(pos + separator.size())
+    };
+}
+
+Containers::StaticArray<3, std::string> rpartitionInternal(const std::string& string, Containers::ArrayView<const char> separator) {
+    const std::size_t pos = string.rfind(separator, std::string::npos, separator.size());
+    return {
+        pos == std::string::npos ? std::string{} : string.substr(0, pos),
+        pos == std::string::npos ? std::string{} : string.substr(pos, separator.size()),
+        pos == std::string::npos ? string.substr(0) : string.substr(pos + separator.size())
+    };
+}
+
+}
+
+Containers::StaticArray<3, std::string> partition(const std::string& string, char separator) {
+    return partitionInternal(string, {&separator, 1});
+}
+
+Containers::StaticArray<3, std::string> partition(const std::string& string, const std::string& separator) {
+    return partitionInternal(string, {separator.data(), separator.size()});
+}
+
+Containers::StaticArray<3, std::string> rpartition(const std::string& string, char separator) {
+    return rpartitionInternal(string, {&separator, 1});
+}
+
+Containers::StaticArray<3, std::string> rpartition(const std::string& string, const std::string& separator) {
+    return rpartitionInternal(string, {separator.data(), separator.size()});
 }
 
 }}}

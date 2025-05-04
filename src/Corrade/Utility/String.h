@@ -58,6 +58,184 @@ See also @ref building-corrade and @ref corrade-cmake for more information.
 */
 namespace String {
 
+namespace Implementation {
+    CORRADE_UTILITY_EXPORT extern const char* CORRADE_UTILITY_CPU_DISPATCHED_DECLARATION(commonPrefix)(const char* a, const char* b, std::size_t sizeA, std::size_t sizeB);
+    CORRADE_UTILITY_CPU_DISPATCHER_DECLARATION(commonPrefix)
+}
+
+/**
+@brief Longest common prefix of two strings
+@m_since_latest
+
+The returned view is a prefix of @p a.
+@see @ref Containers::StringView::prefix()
+*/
+inline Containers::StringView commonPrefix(Containers::StringView a, Containers::StringView b) {
+    return a.prefix(Implementation::commonPrefix(a.data(), b.data(), a.size(), b.size()));
+}
+
+namespace Implementation {
+    CORRADE_UTILITY_EXPORT extern void CORRADE_UTILITY_CPU_DISPATCHED_DECLARATION(lowercaseInPlace)(char* data, std::size_t size);
+    CORRADE_UTILITY_EXPORT extern void CORRADE_UTILITY_CPU_DISPATCHED_DECLARATION(uppercaseInPlace)(char* data, std::size_t size);
+    CORRADE_UTILITY_CPU_DISPATCHER_DECLARATION(lowercaseInPlace)
+    CORRADE_UTILITY_CPU_DISPATCHER_DECLARATION(uppercaseInPlace)
+}
+
+/**
+@brief Convert ASCII characters in a string to lowercase, in place
+@m_since_latest
+
+Replaces any character from `ABCDEFGHIJKLMNOPQRSTUVWXYZ` with a corresponding
+character from `abcdefghijklmnopqrstuvwxyz`. Deliberately supports only ASCII
+as Unicode-aware case conversion is a much more complex topic.
+@see @ref lowercase()
+*/
+inline void lowercaseInPlace(Containers::MutableStringView string) {
+    Implementation::lowercaseInPlace(string.data(), string.size());
+}
+
+/**
+@brief Convert ASCII characters in a string to lowercase
+@m_since_latest
+
+Allocates a copy and replaces any character from `ABCDEFGHIJKLMNOPQRSTUVWXYZ`
+with a corresponding character from `abcdefghijklmnopqrstuvwxyz`. Deliberately
+supports only ASCII as Unicode-aware case conversion is a much more complex
+topic.
+@see @ref lowercaseInPlace()
+*/
+CORRADE_UTILITY_EXPORT Containers::String lowercase(Containers::StringView string);
+
+/** @overload
+@m_since_latest
+
+Compared to @ref lowercase(Containers::StringView) is able to perform the
+operation in-place if @p string is owned, transferring the data ownership to
+the returned instance. Makes a owned copy first if not.
+*/
+CORRADE_UTILITY_EXPORT Containers::String lowercase(Containers::String string);
+
+/**
+@brief Convert ASCII characters in a string to uppercase, in place
+@m_since_latest
+
+Replaces any character from `abcdefghijklmnopqrstuvwxyz` with a corresponding
+character from `ABCDEFGHIJKLMNOPQRSTUVWXYZ`. Deliberately supports only ASCII
+as Unicode-aware case conversion is a much more complex topic.
+@see @ref uppercase()
+*/
+inline void uppercaseInPlace(Containers::MutableStringView string) {
+    Implementation::uppercaseInPlace(string.data(), string.size());
+}
+
+/**
+@brief Convert ASCII characters in a string to uppercase, in place
+@m_since_latest
+
+Allocates a copy and replaces any character from `abcdefghijklmnopqrstuvwxyz`
+with a corresponding character from `ABCDEFGHIJKLMNOPQRSTUVWXYZ`. Deliberately
+supports only ASCII as Unicode-aware case conversion is a much more complex
+topic.
+@see @ref uppercaseInPlace()
+*/
+CORRADE_UTILITY_EXPORT Containers::String uppercase(Containers::StringView string);
+
+/** @overload
+@m_since_latest
+
+Compared to @ref uppercase(Containers::StringView) is able to perform the
+operation in-place if @p string is owned, transferring the data ownership to
+the returned instance. Makes a owned copy first if not.
+*/
+CORRADE_UTILITY_EXPORT Containers::String uppercase(Containers::String string);
+
+/**
+@brief Replace first occurrence in a string
+@m_since_latest
+
+Returns @p string unmodified if it doesn't contain @p search. Having empty
+@p search causes @p replace to be prepended to @p string.
+@see @ref replaceAll()
+*/
+CORRADE_UTILITY_EXPORT Containers::String replaceFirst(Containers::StringView string, Containers::StringView search, Containers::StringView replace);
+
+/**
+@brief Replace all occurrences in a string
+@m_since_latest
+
+Returns @p string unmodified if it doesn't contain @p search. Expects that
+@p search is not empty, as that would cause an infinite loop. For substituting
+a single character with another the @ref replaceAll(Containers::String, char, char)
+variant is more optimal.
+@see @ref replaceFirst()
+*/
+CORRADE_UTILITY_EXPORT Containers::String replaceAll(Containers::StringView string, Containers::StringView search, Containers::StringView replace);
+
+/**
+@brief Replace all occurrences of a character in a string with another character
+@m_since_latest
+
+The @p string is passed through unmodified if it doesn't contain @p search.
+Otherwise the operation is performed in-place if @p string is owned,
+transferring the data ownership to the returned instance. An owned copy is made
+if not. See also @ref replaceAllInPlace() for a variant that operates on string
+views.
+@see @ref replaceAll(Containers::StringView, Containers::StringView, Containers::StringView),
+    @ref replaceFirst()
+*/
+CORRADE_UTILITY_EXPORT Containers::String replaceAll(Containers::String string, char search, char replace);
+
+namespace Implementation {
+    CORRADE_UTILITY_EXPORT extern void CORRADE_UTILITY_CPU_DISPATCHED_DECLARATION(replaceAllInPlaceCharacter)(char* data, std::size_t size, char search, char replace);
+    CORRADE_UTILITY_CPU_DISPATCHER_DECLARATION(replaceAllInPlaceCharacter)
+}
+
+/**
+@brief Replace all occurrences of a character in a string with another character in-place
+@m_since_latest
+
+@see @ref replaceAll(Containers::String, char, char),
+    @ref replaceAll(Containers::StringView, Containers::StringView, Containers::StringView),
+    @ref replaceFirst()
+*/
+inline void replaceAllInPlace(const Containers::MutableStringView string, const char search, const char replace) {
+    Implementation::replaceAllInPlaceCharacter(string.data(), string.size(), search, replace);
+}
+
+/**
+@brief Parse a number sequence
+@m_since_latest
+
+Parses a string containing a sequence of numbers, returning them converted to
+integers. The numbers can be delimited by commas (`,`), semicolons (`;`) or
+an arbitrary whitespace character. Order in which the numbers were specified is
+kept in the output including possible duplicates. Empty string results in an
+empty array returned.
+
+Additionally it's possible to specify a range using the `-` character, in which case the range will be expanded in the output. The range is inclusive, meaning
+`3-6` will result in @cpp {3, 4, 5, 6} @ce in the output. Ranges where the end
+is smaller than the start (such as `6-3`) will be treated as empty. If the
+number before the `-` is omitted, a @p min is used instead; if the number after
+the `-` is omitted, @cpp max - 1 @ce is used instead.
+
+If an unrecognized character is encountered, the function prints an error and
+returns a @relativeref{Corrade,Containers::NullOpt}. If any parsed number is
+less than @p min, greater than or equal to @p max or doesn't fit into 32 bits,
+it's omitted in the output.
+
+Example usage:
+
+-   `4,3 5;5;17` results in @cpp {4, 3, 5, 5, 17} @ce
+-   `12-,3-5,1` with @p max set to @cpp 15 @ce results in
+    @cpp {12, 13, 14, 3, 4, 5, 1} @ce
+-   `-3, 13-` with @p min set to @cpp 0 @ce and @p max to @cpp 15 @ce results
+    in @cpp {0, 1, 2, 3, 13, 14} @ce
+-   any input with @p min set to @cpp 0 @ce and @p max set to @cpp 0 @ce
+    results in an empty output
+-   `-` results in a range from @p min to @cpp max - 1 @ce
+*/
+CORRADE_UTILITY_EXPORT Containers::Optional<Containers::Array<std::uint32_t>> parseNumberSequence(Containers::StringView string, std::uint32_t min, std::uint32_t max);
+
 /**
 @brief Safely construct string from char array
 
@@ -334,97 +512,6 @@ CORRADE_UTILITY_EXPORT std::string joinWithoutEmptyParts(const std::vector<std::
 /** @overload */
 CORRADE_UTILITY_EXPORT std::string joinWithoutEmptyParts(const std::vector<std::string>& strings, const std::string& delimiter);
 
-namespace Implementation {
-    CORRADE_UTILITY_EXPORT extern const char* CORRADE_UTILITY_CPU_DISPATCHED_DECLARATION(commonPrefix)(const char* a, const char* b, std::size_t sizeA, std::size_t sizeB);
-    CORRADE_UTILITY_CPU_DISPATCHER_DECLARATION(commonPrefix)
-}
-
-/**
-@brief Longest common prefix of two strings
-@m_since_latest
-
-The returned view is a prefix of @p a.
-@see @ref Containers::StringView::prefix()
-*/
-inline Containers::StringView commonPrefix(Containers::StringView a, Containers::StringView b) {
-    return a.prefix(Implementation::commonPrefix(a.data(), b.data(), a.size(), b.size()));
-}
-
-namespace Implementation {
-    CORRADE_UTILITY_EXPORT extern void CORRADE_UTILITY_CPU_DISPATCHED_DECLARATION(lowercaseInPlace)(char* data, std::size_t size);
-    CORRADE_UTILITY_EXPORT extern void CORRADE_UTILITY_CPU_DISPATCHED_DECLARATION(uppercaseInPlace)(char* data, std::size_t size);
-    CORRADE_UTILITY_CPU_DISPATCHER_DECLARATION(lowercaseInPlace)
-    CORRADE_UTILITY_CPU_DISPATCHER_DECLARATION(uppercaseInPlace)
-}
-
-/**
-@brief Convert ASCII characters in a string to lowercase, in place
-@m_since_latest
-
-Replaces any character from `ABCDEFGHIJKLMNOPQRSTUVWXYZ` with a corresponding
-character from `abcdefghijklmnopqrstuvwxyz`. Deliberately supports only ASCII
-as Unicode-aware case conversion is a much more complex topic.
-@see @ref lowercase()
-*/
-inline void lowercaseInPlace(Containers::MutableStringView string) {
-    Implementation::lowercaseInPlace(string.data(), string.size());
-}
-
-/**
-@brief Convert ASCII characters in a string to lowercase
-@m_since_latest
-
-Allocates a copy and replaces any character from `ABCDEFGHIJKLMNOPQRSTUVWXYZ`
-with a corresponding character from `abcdefghijklmnopqrstuvwxyz`. Deliberately
-supports only ASCII as Unicode-aware case conversion is a much more complex
-topic.
-@see @ref lowercaseInPlace()
-*/
-CORRADE_UTILITY_EXPORT Containers::String lowercase(Containers::StringView string);
-
-/** @overload
-@m_since_latest
-
-Compared to @ref lowercase(Containers::StringView) is able to perform the
-operation in-place if @p string is owned, transferring the data ownership to
-the returned instance. Makes a owned copy first if not.
-*/
-CORRADE_UTILITY_EXPORT Containers::String lowercase(Containers::String string);
-
-/**
-@brief Convert ASCII characters in a string to uppercase, in place
-@m_since_latest
-
-Replaces any character from `abcdefghijklmnopqrstuvwxyz` with a corresponding
-character from `ABCDEFGHIJKLMNOPQRSTUVWXYZ`. Deliberately supports only ASCII
-as Unicode-aware case conversion is a much more complex topic.
-@see @ref uppercase()
-*/
-inline void uppercaseInPlace(Containers::MutableStringView string) {
-    Implementation::uppercaseInPlace(string.data(), string.size());
-}
-
-/**
-@brief Convert ASCII characters in a string to uppercase, in place
-@m_since_latest
-
-Allocates a copy and replaces any character from `abcdefghijklmnopqrstuvwxyz`
-with a corresponding character from `ABCDEFGHIJKLMNOPQRSTUVWXYZ`. Deliberately
-supports only ASCII as Unicode-aware case conversion is a much more complex
-topic.
-@see @ref uppercaseInPlace()
-*/
-CORRADE_UTILITY_EXPORT Containers::String uppercase(Containers::StringView string);
-
-/** @overload
-@m_since_latest
-
-Compared to @ref uppercase(Containers::StringView) is able to perform the
-operation in-place if @p string is owned, transferring the data ownership to
-the returned instance. Makes a owned copy first if not.
-*/
-CORRADE_UTILITY_EXPORT Containers::String uppercase(Containers::String string);
-
 /**
 @brief Whether the string has given prefix
 
@@ -502,93 +589,6 @@ CORRADE_UTILITY_EXPORT std::string stripSuffix(std::string string, const std::st
 
 /** @overload */
 CORRADE_UTILITY_EXPORT std::string stripSuffix(std::string string, char suffix);
-
-/**
-@brief Replace first occurrence in a string
-@m_since_latest
-
-Returns @p string unmodified if it doesn't contain @p search. Having empty
-@p search causes @p replace to be prepended to @p string.
-@see @ref replaceAll()
-*/
-CORRADE_UTILITY_EXPORT Containers::String replaceFirst(Containers::StringView string, Containers::StringView search, Containers::StringView replace);
-
-/**
-@brief Replace all occurrences in a string
-@m_since_latest
-
-Returns @p string unmodified if it doesn't contain @p search. Expects that
-@p search is not empty, as that would cause an infinite loop. For substituting
-a single character with another the @ref replaceAll(Containers::String, char, char)
-variant is more optimal.
-@see @ref replaceFirst()
-*/
-CORRADE_UTILITY_EXPORT Containers::String replaceAll(Containers::StringView string, Containers::StringView search, Containers::StringView replace);
-
-/**
-@brief Replace all occurrences of a character in a string with another character
-@m_since_latest
-
-The @p string is passed through unmodified if it doesn't contain @p search.
-Otherwise the operation is performed in-place if @p string is owned,
-transferring the data ownership to the returned instance. An owned copy is made
-if not. See also @ref replaceAllInPlace() for a variant that operates on string
-views.
-@see @ref replaceAll(Containers::StringView, Containers::StringView, Containers::StringView),
-    @ref replaceFirst()
-*/
-CORRADE_UTILITY_EXPORT Containers::String replaceAll(Containers::String string, char search, char replace);
-
-namespace Implementation {
-    CORRADE_UTILITY_EXPORT extern void CORRADE_UTILITY_CPU_DISPATCHED_DECLARATION(replaceAllInPlaceCharacter)(char* data, std::size_t size, char search, char replace);
-    CORRADE_UTILITY_CPU_DISPATCHER_DECLARATION(replaceAllInPlaceCharacter)
-}
-
-/**
-@brief Replace all occurrences of a character in a string with another character in-place
-@m_since_latest
-
-@see @ref replaceAll(Containers::String, char, char),
-    @ref replaceAll(Containers::StringView, Containers::StringView, Containers::StringView),
-    @ref replaceFirst()
-*/
-inline void replaceAllInPlace(const Containers::MutableStringView string, const char search, const char replace) {
-    Implementation::replaceAllInPlaceCharacter(string.data(), string.size(), search, replace);
-}
-
-/**
-@brief Parse a number sequence
-@m_since_latest
-
-Parses a string containing a sequence of numbers, returning them converted to
-integers. The numbers can be delimited by commas (`,`), semicolons (`;`) or
-an arbitrary whitespace character. Order in which the numbers were specified is
-kept in the output including possible duplicates. Empty string results in an
-empty array returned.
-
-Additionally it's possible to specify a range using the `-` character, in which case the range will be expanded in the output. The range is inclusive, meaning
-`3-6` will result in @cpp {3, 4, 5, 6} @ce in the output. Ranges where the end
-is smaller than the start (such as `6-3`) will be treated as empty. If the
-number before the `-` is omitted, a @p min is used instead; if the number after
-the `-` is omitted, @cpp max - 1 @ce is used instead.
-
-If an unrecognized character is encountered, the function prints an error and
-returns a @relativeref{Corrade,Containers::NullOpt}. If any parsed number is
-less than @p min, greater than or equal to @p max or doesn't fit into 32 bits,
-it's omitted in the output.
-
-Example usage:
-
--   `4,3 5;5;17` results in @cpp {4, 3, 5, 5, 17} @ce
--   `12-,3-5,1` with @p max set to @cpp 15 @ce results in
-    @cpp {12, 13, 14, 3, 4, 5, 1} @ce
--   `-3, 13-` with @p min set to @cpp 0 @ce and @p max to @cpp 15 @ce results
-    in @cpp {0, 1, 2, 3, 13, 14} @ce
--   any input with @p min set to @cpp 0 @ce and @p max set to @cpp 0 @ce
-    results in an empty output
--   `-` results in a range from @p min to @cpp max - 1 @ce
-*/
-CORRADE_UTILITY_EXPORT Containers::Optional<Containers::Array<std::uint32_t>> parseNumberSequence(Containers::StringView string, std::uint32_t min, std::uint32_t max);
 
 }}}
 
