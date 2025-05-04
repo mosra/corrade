@@ -27,7 +27,8 @@
 #include "String.h"
 
 #include <cctype>
-#include <cstring>
+#include <string>
+#include <vector>
 
 #include "Corrade/Containers/GrowableArray.h"
 #include "Corrade/Containers/Optional.h"
@@ -48,37 +49,43 @@
 
 namespace Corrade { namespace Utility { namespace String {
 
-namespace Implementation {
-
-void ltrimInPlace(std::string& string, const Containers::ArrayView<const char> characters) {
-    string.erase(0, string.find_first_not_of(characters, 0, characters.size()));
+std::string fromArray(const char* string) {
+    return string ? std::string{string} : std::string{};
 }
 
-void rtrimInPlace(std::string& string, const Containers::ArrayView<const char> characters) {
-    string.erase(string.find_last_not_of(characters, std::string::npos, characters.size())+1);
+std::string fromArray(const char* string, std::size_t length) {
+    return string ? std::string{string, length} : std::string{};
 }
 
-void trimInPlace(std::string& string, const Containers::ArrayView<const char> characters) {
+void ltrimInPlace(std::string& string, const std::string& characters) {
+    string.erase(0, string.find_first_not_of(characters));
+}
+
+void rtrimInPlace(std::string& string, const std::string& characters) {
+    string.erase(string.find_last_not_of(characters)+1);
+}
+
+void trimInPlace(std::string& string, const std::string& characters) {
     rtrimInPlace(string, characters);
     ltrimInPlace(string, characters);
 }
 
-std::string ltrim(std::string string, const Containers::ArrayView<const char> characters) {
+std::string ltrim(std::string string, const std::string& characters) {
     ltrimInPlace(string, characters);
     return string;
 }
 
-std::string rtrim(std::string string, const Containers::ArrayView<const char> characters) {
+std::string rtrim(std::string string, const std::string& characters) {
     rtrimInPlace(string, characters);
     return string;
 }
 
-std::string trim(std::string string, const Containers::ArrayView<const char> characters) {
+std::string trim(std::string string, const std::string& characters) {
     trimInPlace(string, characters);
     return string;
 }
 
-std::string join(const std::vector<std::string>& strings, const Containers::ArrayView<const char> delimiter) {
+std::string join(const std::vector<std::string>& strings, const std::string& delimiter) {
     /* IDGAF that this has two extra allocations due to the Array being created
        and then the String converted to a std::string vector, the input
        std::string instances are MUCH worse */
@@ -88,7 +95,12 @@ std::string join(const std::vector<std::string>& strings, const Containers::Arra
     return Containers::StringView{delimiter}.join(stringViews);
 }
 
-std::string joinWithoutEmptyParts(const std::vector<std::string>& strings, const Containers::ArrayView<const char> delimiter) {
+std::string join(const std::vector<std::string>& strings, char delimiter) {
+    /* It's fine (although ugly), this will be a SSO */
+    return join(strings, {&delimiter, 1});
+}
+
+std::string joinWithoutEmptyParts(const std::vector<std::string>& strings, const std::string& delimiter) {
     /* IDGAF that this has two extra allocations due to the Array being created
        and then the String converted to a std::string vector, the input
        std::string instances are MUCH worse */
@@ -98,32 +110,75 @@ std::string joinWithoutEmptyParts(const std::vector<std::string>& strings, const
     return Containers::StringView{delimiter}.joinWithoutEmptyParts(stringViews);
 }
 
-bool beginsWith(Containers::ArrayView<const char> string, const Containers::ArrayView<const char> prefix) {
-    /* This is soon meant to be deprecated so all the ugly conversions don't
-       bother me too much */
-    return Containers::StringView{string}.hasPrefix(Containers::StringView{prefix});
+std::string joinWithoutEmptyParts(const std::vector<std::string>& strings, char delimiter) {
+    /* It's fine (although ugly), this will be a SSO */
+    return joinWithoutEmptyParts(strings, {&delimiter, 1});
 }
 
-bool endsWith(Containers::ArrayView<const char> string, const Containers::ArrayView<const char> suffix) {
+bool beginsWith(const std::string& string, const std::string& prefix) {
     /* This is soon meant to be deprecated so all the ugly conversions don't
        bother me too much */
-    return Containers::StringView{string}.hasSuffix(Containers::StringView{suffix});
+    return Containers::StringView{string}.hasPrefix(prefix);
 }
 
-std::string stripPrefix(std::string string, const Containers::ArrayView<const char> prefix) {
-    CORRADE_ASSERT(beginsWith({string.data(), string.size()}, prefix),
+bool beginsWith(const std::string& string, char prefix) {
+    return !string.empty() && string[0] == prefix;
+}
+
+#ifdef CORRADE_BUILD_DEPRECATED
+bool viewBeginsWith(Containers::ArrayView<const char> string, Containers::ArrayView<const char> prefix) {
+    /* Yup, it's weird like this, see the tests */
+    return Containers::StringView{string.data(), string.size()}.hasPrefix({prefix.data(), prefix.size() - 1});
+}
+
+bool viewBeginsWith(Containers::ArrayView<const char> string, char prefix) {
+    return Containers::StringView{string.data(), string.size()}.hasPrefix(prefix);
+}
+#endif
+
+bool endsWith(const std::string& string, const std::string& suffix) {
+    /* This is soon meant to be deprecated so all the ugly conversions don't
+       bother me too much */
+    return Containers::StringView{string}.hasSuffix(suffix);
+}
+
+bool endsWith(const std::string& string, char suffix) {
+    return !string.empty() && string[string.size() - 1] == suffix;
+}
+
+#ifdef CORRADE_BUILD_DEPRECATED
+bool viewEndsWith(Containers::ArrayView<const char> string, Containers::ArrayView<const char> suffix) {
+    /* Yup, it's weird like this, see the tests */
+    return Containers::StringView{string.data(), string.size()}.hasSuffix({suffix.data(), suffix.size() - 1});
+}
+
+bool viewEndsWith(Containers::ArrayView<const char> string, char suffix) {
+    return Containers::StringView{string.data(), string.size()}.hasSuffix(suffix);
+}
+#endif
+
+std::string stripPrefix(std::string string, const std::string& prefix) {
+    CORRADE_ASSERT(beginsWith(string, prefix),
         "Utility::String::stripPrefix(): string doesn't begin with given prefix", {});
     string.erase(0, prefix.size());
     return string;
 }
 
-std::string stripSuffix(std::string string, const Containers::ArrayView<const char> suffix) {
-    CORRADE_ASSERT(endsWith({string.data(), string.size()}, suffix),
+std::string stripPrefix(std::string string, char prefix) {
+    /* It's fine (although ugly), this will be a SSO */
+    return stripPrefix(std::move(string), {&prefix, 1});
+}
+
+std::string stripSuffix(std::string string, const std::string& suffix) {
+    CORRADE_ASSERT(endsWith(string, suffix),
         "Utility::String::stripSuffix(): string doesn't end with given suffix", {});
     string.erase(string.size() - suffix.size());
     return string;
 }
 
+std::string stripSuffix(std::string string, char suffix) {
+    /* It's fine (although ugly), this will be a SSO */
+    return stripSuffix(std::move(string), {&suffix, 1});
 }
 
 namespace {

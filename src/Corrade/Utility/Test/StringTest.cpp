@@ -24,6 +24,9 @@
     DEALINGS IN THE SOFTWARE.
 */
 
+#include <string>
+#include <vector>
+
 #include "Corrade/Containers/Array.h"
 #include "Corrade/Containers/Optional.h"
 #include "Corrade/Containers/StaticArray.h"

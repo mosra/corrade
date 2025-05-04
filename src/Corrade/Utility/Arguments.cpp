@@ -32,6 +32,7 @@
 #include <cstring>
 #include <iomanip>
 #include <sstream>
+#include <vector>
 
 #include "Corrade/Containers/GrowableArray.h"
 #include "Corrade/Utility/Assert.h"
