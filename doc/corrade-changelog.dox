@@ -431,9 +431,6 @@ namespace Corrade {
     the @cpp "{:c}" @ce modifier
 -   @ref Utility::format() now accepts also a C++17 @ref std::string_view if
     you include @ref Corrade/Utility/FormatStlStringView.h
--   @ref Utility::String::split() and
-    @ref Utility::String::splitWithoutEmptyParts() now have
-    @ref Containers::StringView overloads that allocate much less
 -   Added a @ref Utility::String::replaceAll(Containers::String, char, char)
     overload for more optimal single-character replacement and a
     @ref Utility::String::replaceAllInPlace(Containers::MutableStringView, char, char)
