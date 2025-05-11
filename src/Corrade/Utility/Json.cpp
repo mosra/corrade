@@ -453,7 +453,8 @@ Containers::Optional<Json> Json::tokenize(const Containers::StringView filename,
                 for(; i != size; ++i) {
                     const char sc = data[i];
 
-                    if(sc == '\"') break;
+                    if(sc == '\"')
+                        break;
 
                     if(sc == '\\') switch(data[++i]) {
                         case '"':
@@ -569,7 +570,8 @@ Containers::Optional<Json> Json::tokenize(const Containers::StringView filename,
                     /* Optimizing for the simplest check, deliberately not
                        doing any validation here */
                     if(lc == '\t' || lc == '\r' || lc == '\n' || lc == ' ' ||
-                       lc == ',' || lc == ']' || lc == '}') break;
+                       lc == ',' || lc == ']' || lc == '}')
+                        break;
                 }
 
                 /* Decrement i as it's incremented again by the outer loop */
@@ -694,7 +696,8 @@ Containers::Optional<Json> Json::tokenize(const Containers::StringView filename,
 
 Containers::Optional<Json> Json::tokenize(const Containers::StringView filename, const std::size_t lineOffset, const std::size_t columnOffset, const Containers::StringView string, const Options options) {
     Containers::Optional<Json> out = tokenize(filename, lineOffset, columnOffset, string);
-    if(!out) return {};
+    if(!out)
+        return {};
 
     if((options & Option::ParseLiterals) && !out->parseLiterals(out->root()))
         return {};
@@ -702,16 +705,20 @@ Containers::Optional<Json> Json::tokenize(const Containers::StringView filename,
     /* If both ParseDoubles and ParseFloats is specified, doubles get a
        priority */
     if(options & Option::ParseDoubles) {
-        if(!out->parseDoubles(out->root())) return {};
+        if(!out->parseDoubles(out->root()))
+            return {};
     } else if(options & Option::ParseFloats) {
-        if(!out->parseFloats(out->root())) return {};
+        if(!out->parseFloats(out->root()))
+            return {};
     }
 
     /* ParseStrings is a superset of ParseStringKeys, so don't call both */
     if(options >= Option::ParseStrings) {
-        if(!out->parseStrings(out->root())) return {};
+        if(!out->parseStrings(out->root()))
+            return {};
     } else if(options >= Option::ParseStringKeys) {
-        if(!out->parseStringKeys(out->root())) return {};
+        if(!out->parseStringKeys(out->root()))
+            return {};
     }
 
     return out;
@@ -1378,7 +1385,8 @@ bool Json::parseLiterals(const JsonToken& token) {
     for(std::size_t i = tokenIndex, max = tokenIndex + 1 + token.childCount(); i != max; ++i) {
         /* Skip tokens that are already parsed */
         JsonToken& nestedToken = _state->tokens[i];
-        if(nestedToken.isParsed()) continue;
+        if(nestedToken.isParsed())
+            continue;
 
         if(nestedToken.type() == JsonToken::Type::Object ||
            nestedToken.type() == JsonToken::Type::Array) {
@@ -1630,7 +1638,8 @@ Containers::Optional<JsonObjectView> Json::parseObject(const JsonToken& token) {
 
     const std::size_t childCount = token.childCount();
     for(JsonToken *i = const_cast<JsonToken*>(&token) + 1, *iMax = i + childCount; i != iMax; i = const_cast<JsonToken*>(i->next())) {
-        if(!parseStringInternal("Utility::Json::parseObject():", *i)) return {};
+        if(!parseStringInternal("Utility::Json::parseObject():", *i))
+            return {};
     }
 
     return JsonObjectView{&token + 1, childCount};
@@ -2177,7 +2186,8 @@ Containers::Optional<Containers::StridedArrayView1D<const std::size_t>> Json::pa
     #else
     const Containers::Optional<Containers::StridedArrayView1D<const std::uint32_t>> out = parseUnsignedIntArray(token, expectedSize);
     #endif
-    if(!out) return {};
+    if(!out)
+        return {};
 
     return Containers::arrayCast<const std::size_t>(*out);
 }
@@ -2264,11 +2274,13 @@ Containers::Optional<JsonToken::Type> JsonToken::commonArrayType() const {
         (_childCountFlagsTypeNan & ChildCountMask)
         #endif
         ;
-    if(!childCount) return {};
+    if(!childCount)
+        return {};
 
     const Type type = this[1].type();
     for(const JsonToken *i = this[1].next(), *end = this + 1 + childCount; i != end; i = i->next())
-        if(i->type() != type) return {};
+        if(i->type() != type)
+            return {};
 
     return type;
 }
@@ -2284,7 +2296,8 @@ Containers::Optional<JsonToken::ParsedType> JsonToken::commonParsedArrayType() c
         (_childCountFlagsTypeNan & ChildCountMask)
         #endif
         ;
-    if(!childCount) return {};
+    if(!childCount)
+        return {};
 
     /* If the first token isn't parsed, bail. It doesn't make sense to return
        ParsedType::None as the common parsed type, since that says nothing
@@ -2295,7 +2308,8 @@ Containers::Optional<JsonToken::ParsedType> JsonToken::commonParsedArrayType() c
         return {};
 
     for(const JsonToken *i = this[1].next(), *end = this + 1 + childCount; i != end; i = i->next())
-        if(i->parsedType() != type) return {};
+        if(i->parsedType() != type)
+            return {};
 
     return type;
 }
@@ -2393,7 +2407,8 @@ const JsonToken* JsonToken::find(const Containers::StringView key) const {
         /* Returning a non-null pointer from the assert to not hit a second
            assert from operator[] below when testing */
         CORRADE_ASSERT(i->isParsed(), "Utility::JsonToken::find(): key string isn't parsed", this);
-        if(i->asStringInternal() == key) return i->firstChild();
+        if(i->asStringInternal() == key)
+            return i->firstChild();
     }
 
     return nullptr;
@@ -2422,7 +2437,8 @@ const JsonToken* JsonToken::find(const std::size_t index) const {
         (_childCountFlagsTypeNan & ChildCountMask)
         #endif
     ; i != end; i = i->next())
-        if(counter++ == index) return i;
+        if(counter++ == index)
+            return i;
 
     return nullptr;
 }
