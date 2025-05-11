@@ -220,18 +220,6 @@ class CORRADE_UTILITY_EXPORT StringIterable {
         bool isEmpty() const { return !_size; }
 
         /**
-         * @brief Element access
-         *
-         * Expects that @p i is less than @ref size(). The returned view
-         * has @ref StringViewFlag::Global or
-         * @ref StringViewFlag::NullTerminated set depending on what the
-         * original string instance was --- for example, if was a @ref String
-         * or a @cpp const char* @ce, all items will have
-         * @ref StringViewFlag::NullTerminated set.
-         */
-        StringView operator[](std::size_t i) const;
-
-        /**
          * @brief Iterator to first element
          *
          * @see @ref front()
@@ -268,6 +256,18 @@ class CORRADE_UTILITY_EXPORT StringIterable {
          * @see @ref isEmpty(), @ref end(), @ref operator[]()
          */
         StringView back() const;
+
+        /**
+         * @brief Element access
+         *
+         * Expects that @p i is less than @ref size(). The returned view
+         * has @ref StringViewFlag::Global or
+         * @ref StringViewFlag::NullTerminated set depending on what the
+         * original string instance was --- for example, if was a @ref String
+         * or a @cpp const char* @ce, all items will have
+         * @ref StringViewFlag::NullTerminated set.
+         */
+        StringView operator[](std::size_t i) const;
 
     private:
         /* See the comment inside Iterable for an explanation of why

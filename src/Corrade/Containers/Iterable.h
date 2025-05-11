@@ -236,13 +236,6 @@ template<class T> class Iterable {
         bool isEmpty() const { return !_size; }
 
         /**
-         * @brief Element access
-         *
-         * Expects that @p i is less than @ref size().
-         */
-        T& operator[](std::size_t i) const;
-
-        /**
          * @brief Iterator to first element
          *
          * @see @ref front()
@@ -283,6 +276,13 @@ template<class T> class Iterable {
          * @see @ref isEmpty(), @ref end(), @ref operator[]()
          */
         T& back() const;
+
+        /**
+         * @brief Element access
+         *
+         * Expects that @p i is less than @ref size().
+         */
+        T& operator[](std::size_t i) const;
 
     private:
         /* The ArrayView variants take IterableOverloadPriority<1>, while
@@ -468,12 +468,6 @@ template<class T> inline Iterable<T>::Iterable(const std::initializer_list<AnyRe
     return **static_cast<const AnyReference<T>*>(data);
 }} {}
 
-template<class T> T& Iterable<T>::operator[](const std::size_t i) const {
-    CORRADE_DEBUG_ASSERT(i < _size, "Containers::Iterable::operator[](): index" << i << "out of range for" << _size << "elements", _accessor(_data));
-
-    return _accessor(static_cast<const char*>(_data) + i*_stride);
-}
-
 template<class T> T& Iterable<T>::front() const {
     CORRADE_DEBUG_ASSERT(_size, "Containers::Iterable::front(): view is empty", _accessor(_data));
 
@@ -484,6 +478,12 @@ template<class T> T& Iterable<T>::back() const {
     CORRADE_DEBUG_ASSERT(_size, "Containers::Iterable::back(): view is empty", _accessor(_data));
 
     return _accessor(static_cast<const char*>(_data) + (_size - 1)*_stride);
+}
+
+template<class T> T& Iterable<T>::operator[](const std::size_t i) const {
+    CORRADE_DEBUG_ASSERT(i < _size, "Containers::Iterable::operator[](): index" << i << "out of range for" << _size << "elements", _accessor(_data));
+
+    return _accessor(static_cast<const char*>(_data) + i*_stride);
 }
 
 }}
