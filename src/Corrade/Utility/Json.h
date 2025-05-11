@@ -2352,7 +2352,7 @@ template<class T> class JsonView {
         friend Json;
         friend JsonToken;
 
-        explicit JsonView(const JsonToken* begin, const JsonToken* end) noexcept: _begin{begin}, _end{end} {}
+        explicit JsonView(const JsonToken* begin, std::size_t size) noexcept: _begin{begin}, _end{begin + size} {}
 
         const JsonToken* _begin;
         const JsonToken* _end;

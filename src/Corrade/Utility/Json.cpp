@@ -1633,7 +1633,7 @@ Containers::Optional<JsonObjectView> Json::parseObject(const JsonToken& token) {
         if(!parseStringInternal("Utility::Json::parseObject():", *i)) return {};
     }
 
-    return JsonObjectView{&token + 1, &token + 1 + childCount};
+    return JsonObjectView{&token + 1, childCount};
 }
 
 Containers::Optional<JsonArrayView> Json::parseArray(const JsonToken& token) {
@@ -1648,7 +1648,7 @@ Containers::Optional<JsonArrayView> Json::parseArray(const JsonToken& token) {
     }
 
     parseObjectArrayInternal(const_cast<JsonToken&>(token));
-    return JsonArrayView{&token + 1, &token + 1 + token.childCount()};
+    return JsonArrayView{&token + 1, token.childCount()};
 }
 
 Containers::Optional<std::nullptr_t> Json::parseNull(const JsonToken& token) {
@@ -2352,9 +2352,9 @@ const JsonToken* JsonToken::parent() const {
 JsonObjectView JsonToken::asObject() const {
     CORRADE_ASSERT(type() == Type::Object && isParsed(),
         "Utility::JsonToken::asObject(): token is" << (isParsed() ? "a parsed" : "an unparsed") << type(),
-        (JsonObjectView{this + 1, this + 1}));
+        (JsonObjectView{this + 1, 0}));
 
-    return JsonObjectView{this + 1, this + 1 +
+    return JsonObjectView{this + 1,
         #ifndef CORRADE_TARGET_32BIT
         _childCount
         #else
@@ -2366,9 +2366,9 @@ JsonObjectView JsonToken::asObject() const {
 JsonArrayView JsonToken::asArray() const {
     CORRADE_ASSERT(type() == Type::Array && isParsed(),
         "Utility::JsonToken::asArray(): token is" << (isParsed() ? "a parsed" : "an unparsed") << type(),
-        (JsonArrayView{this + 1, this + 1}));
+        (JsonArrayView{this + 1, 0}));
 
-    return JsonArrayView{this + 1, this + 1 +
+    return JsonArrayView{this + 1,
         #ifndef CORRADE_TARGET_32BIT
         _childCount
         #else
