@@ -1592,9 +1592,7 @@ bool Json::parseStrings(const JsonToken& token) {
     return true;
 }
 
-/* Has to be defined before it gets used by any other function, otherwise the
-   export macro gets ignored */
-template<class T> const JsonToken* JsonView<T>::find(const typename T::KeyType key) const {
+const JsonToken* JsonObjectView::find(const Containers::StringView key) const {
     /* If the enclosing array/object is not empty, _begin is the first child of
        it and so parent() is an O(1) operation and its never null. If the
        enclosing array/object is empty, _begin points to a token after it,
@@ -1607,21 +1605,23 @@ template<class T> const JsonToken* JsonView<T>::find(const typename T::KeyType k
     return _begin->parent()->find(key);
 }
 
-template<class T> const JsonToken& JsonView<T>::operator[](const typename T::KeyType key) const {
-    /* If the enclosing array/object is not empty, _begin is the first child of
-       it and so parent() is an O(1) operation and its never null. If the
-       enclosing array/object is empty, _begin points to a token after it,
-       which makes parent() either an O(n) operation (which wouldn't return a
-       correct value) or null (in case it's the root token). As finding
-       something in an empty view won't succeed anyway, catch that early and
-       access the parent only if the view is non-empty. */
-    CORRADE_ASSERT(_begin != _end,
-        "Utility::JsonView::operator[](): view is empty", *_begin);
+const JsonToken* JsonArrayView::find(const std::size_t index) const {
+    if(_begin == _end) /* See the comment above */
+        return nullptr;
+    return _begin->parent()->find(index);
+}
+
+const JsonToken& JsonObjectView::operator[](const Containers::StringView key) const {
+    CORRADE_ASSERT(_begin != _end, /* See the comment above */
+        "Utility::JsonObjectView::operator[](): view is empty", *_begin);
     return (*_begin->parent())[key];
 }
 
-template class CORRADE_UTILITY_EXPORT JsonView<JsonObjectItem>;
-template class CORRADE_UTILITY_EXPORT JsonView<JsonArrayItem>;
+const JsonToken& JsonArrayView::operator[](const std::size_t index) const {
+    CORRADE_ASSERT(_begin != _end, /* See the comment above */
+        "Utility::JsonArrayView::operator[](): view is empty", *_begin);
+    return (*_begin->parent())[index];
+}
 
 Containers::Optional<JsonObjectView> Json::parseObject(const JsonToken& token) {
     CORRADE_ASSERT(std::size_t(&token - _state->tokens) < _state->tokens.size(),

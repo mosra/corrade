@@ -61,10 +61,10 @@ class Json;
 class JsonToken;
 class JsonObjectItem;
 class JsonArrayItem;
-template<class> class JsonView;
-typedef JsonView<JsonObjectItem> JsonObjectView;
-typedef JsonView<JsonArrayItem> JsonArrayView;
-template<class> class JsonIterator;
+class JsonObjectView;
+class JsonArrayView;
+class JsonObjectIterator;
+class JsonArrayIterator;
 class JsonWriter;
 
 /* Endianness used only statically */

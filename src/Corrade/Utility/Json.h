@@ -27,7 +27,7 @@
 */
 
 /** @file
- * @brief Class @ref Corrade::Utility::Json, @ref Corrade::Utility::JsonToken
+ * @brief Class @ref Corrade::Utility::Json, @ref Corrade::Utility::JsonToken, @ref Corrade::Utility::JsonObjectItem, @ref Corrade::Utility::JsonArrayItem, @ref Corrade::Utility::JsonObjectIterator, @ref Corrade::Utility::JsonArrayIterator, @ref Corrade::Utility::JsonObjectView, @ref Corrade::Utility::JsonArrayView
  * @m_since_latest
  */
 
@@ -250,7 +250,8 @@ separately, either upfront if @ref Option::ParseStrings is set (or if
 on-demand if @ref parseStrings() / @ref parseStringKeys() / @ref parseString()
 is used.
 
-@see @ref JsonView, @ref JsonArrayItem, @ref JsonObjectItem
+@see @ref JsonArrayItem, @ref JsonObjectItem, @ref JsonArrayIterator,
+    @ref JsonObjectIterator, @ref JsonObjectView, @ref JsonArrayView
 */
 class CORRADE_UTILITY_EXPORT Json {
     public:
@@ -2172,13 +2173,6 @@ Returned when iterating @ref JsonToken::asObject(). See
 class CORRADE_UTILITY_EXPORT JsonObjectItem {
     public:
         /**
-         * @brief Key type
-         *
-         * Used by @ref JsonView::find() and @ref JsonView::operator[]().
-         */
-        typedef Containers::StringView KeyType;
-
-        /**
          * @brief Key
          *
          * Equivalent to calling @ref JsonToken::asString() on the token.
@@ -2205,10 +2199,9 @@ class CORRADE_UTILITY_EXPORT JsonObjectItem {
         }
 
     private:
-        friend JsonIterator<JsonObjectItem>;
+        friend JsonObjectIterator;
 
-        /* The index is used only in JsonArrayItem, not here */
-        explicit JsonObjectItem(std::size_t, const JsonToken& token) noexcept: _token{&token} {}
+        explicit JsonObjectItem(const JsonToken& token) noexcept: _token{&token} {}
 
         const JsonToken* _token;
 };
@@ -2224,13 +2217,6 @@ Returned when iterating @ref JsonToken::asObject(). See
 */
 class JsonArrayItem {
     public:
-        /**
-         * @brief Key type
-         *
-         * Used by @ref JsonView::find() and @ref JsonView::operator[]().
-         */
-        typedef std::size_t KeyType;
-
         /** @brief Array index */
         std::size_t index() const { return _index; }
 
@@ -2243,7 +2229,7 @@ class JsonArrayItem {
         }
 
     private:
-        friend JsonIterator<JsonArrayItem>;
+        friend JsonArrayIterator;
 
         explicit JsonArrayItem(std::size_t index, const JsonToken& token) noexcept: _index{index}, _token{&token} {}
 
@@ -2252,25 +2238,70 @@ class JsonArrayItem {
 };
 
 /**
-@brief JSON iterator
+@brief JSON object iterator
 @m_since_latest
 
-Iterator for @ref JsonView, which is returned from @ref JsonToken::asObject()
+Iterator for @ref JsonObjectView, which is returned from
+@ref Json::parseObject() and @ref JsonToken::asObject(). See
+@ref Utility-Json-usage-iteration for more information.
+
+@experimental
+*/
+class JsonObjectIterator {
+    public:
+        /** @brief Equality comparison */
+        bool operator==(const JsonObjectIterator& other) const {
+            return _token == other._token;
+        }
+
+        /** @brief Non-equality comparison */
+        bool operator!=(const JsonObjectIterator& other) const {
+            return _token != other._token;
+        }
+
+        /**
+         * @brief Advance to next position
+         *
+         * Implemented using @ref JsonToken::next().
+         */
+        JsonObjectIterator& operator++() {
+            _token = _token->next();
+            return *this;
+        }
+
+        /** @brief Dereference */
+        JsonObjectItem operator*() const {
+            return JsonObjectItem{*_token};
+        }
+
+    private:
+        friend JsonObjectView;
+
+        explicit JsonObjectIterator(const JsonToken* token) noexcept: _token{token} {}
+
+        const JsonToken* _token;
+};
+
+/**
+@brief JSON array iterator
+@m_since_latest
+
+Iterator for @ref JsonArrayView, which is returned from @ref Json::parseArray()
 and @ref JsonToken::asArray(). See @ref Utility-Json-usage-iteration for more
 information.
 
 @experimental
 */
-template<class T> class JsonIterator {
+class JsonArrayIterator {
     public:
         /** @brief Equality comparison */
-        bool operator==(const JsonIterator<T>& other) const {
+        bool operator==(const JsonArrayIterator& other) const {
             /* _index is implicit, no need to compare */
             return _token == other._token;
         }
 
         /** @brief Non-equality comparison */
-        bool operator!=(const JsonIterator<T>& other) const {
+        bool operator!=(const JsonArrayIterator& other) const {
             /* _index is implicit, no need to compare */
             return _token != other._token;
         }
@@ -2280,82 +2311,24 @@ template<class T> class JsonIterator {
          *
          * Implemented using @ref JsonToken::next().
          */
-        JsonIterator<T>& operator++() {
+        JsonArrayIterator& operator++() {
             ++_index;
             _token = _token->next();
             return *this;
         }
 
         /** @brief Dereference */
-        T operator*() const {
-            return T{_index, *_token};
+        JsonArrayItem operator*() const {
+            return JsonArrayItem{_index, *_token};
         }
 
     private:
-        friend JsonView<T>;
+        friend JsonArrayView;
 
-        explicit JsonIterator(std::size_t index, const JsonToken* token) noexcept: _index{index}, _token{token} {}
+        explicit JsonArrayIterator(std::size_t index, const JsonToken* token) noexcept: _index{index}, _token{token} {}
 
         std::size_t _index;
         const JsonToken* _token;
-};
-
-/**
-@brief JSON object and array view
-@m_since_latest
-
-Returned from @ref Json::parseObject(), @ref Json::parseArray(),
-@ref JsonToken::asObject() and @ref JsonToken::asArray(). See
-@ref Utility-Json-usage-iteration for more information.
-
-@experimental
-
-@see @ref JsonObjectView, @ref JsonArrayView
-*/
-template<class T> class JsonView {
-    public:
-        /** @brief Iterator to the first element */
-        JsonIterator<T> begin() const { return JsonIterator<T>{0, _begin}; }
-        /** @overload */
-        JsonIterator<T> cbegin() const { return JsonIterator<T>{0, _begin}; }
-
-        /** @brief Iterator to (one item after) the last element */
-        /* JsonIterator cannot be decremented and thus JsonArrayItem::index()
-           cannot be called, thus the index is never used for anything and can
-           be 0 for end() as well */
-        JsonIterator<T> end() const { return JsonIterator<T>{0, _end}; }
-        /** @overload */
-        JsonIterator<T> cend() const { return JsonIterator<T>{0, _end}; }
-
-        /**
-         * @brief Find an object value by key or an array value by index
-         *
-         * Calls @ref JsonToken::find(Containers::StringView) const or
-         * @ref JsonToken::find(std::size_t) const on the enclosing object or
-         * array token. Useful for performing a lookup directly on the value
-         * returned from @ref Json::parseObject() or @ref Json::parseArray().
-         */
-        const JsonToken* find(typename T::KeyType key) const;
-
-        /**
-         * @brief Access an object value by key or an array value by index
-         *
-         * Calls @ref JsonToken::operator[](Containers::StringView) const or
-         * @ref JsonToken::operator[](std::size_t) const on the enclosing
-         * object or array token. Useful for performing a lookup directly on
-         * the value returned from @ref Json::parseObject() or
-         * @ref Json::parseArray().
-         */
-        const JsonToken& operator[](typename T::KeyType key) const;
-
-    private:
-        friend Json;
-        friend JsonToken;
-
-        explicit JsonView(const JsonToken* begin, std::size_t size) noexcept: _begin{begin}, _end{begin + size} {}
-
-        const JsonToken* _begin;
-        const JsonToken* _end;
 };
 
 /**
@@ -2367,7 +2340,45 @@ Returned from @ref Json::parseObject() and @ref JsonToken::asObject(). See
 
 @experimental
 */
-typedef JsonView<JsonObjectItem> JsonObjectView;
+class CORRADE_UTILITY_EXPORT JsonObjectView {
+    public:
+        /** @brief Iterator to the first element */
+        JsonObjectIterator begin() const { return JsonObjectIterator{_begin}; }
+        /** @overload */
+        JsonObjectIterator cbegin() const { return JsonObjectIterator{_begin}; }
+
+        /** @brief Iterator to (one item after) the last element */
+        JsonObjectIterator end() const { return JsonObjectIterator{_end}; }
+        /** @overload */
+        JsonObjectIterator cend() const { return JsonObjectIterator{_end}; }
+
+        /**
+         * @brief Find an object value by key
+         *
+         * Calls @ref JsonToken::find(Containers::StringView) const on the
+         * enclosing object token. Useful for performing a lookup directly on
+         * the value returned from @ref Json::parseObject().
+         */
+        const JsonToken* find(Containers::StringView key) const;
+
+        /**
+         * @brief Access an object value by key
+         *
+         * Calls @ref JsonToken::operator[](Containers::StringView) const on
+         * the enclosing object token. Useful for performing a lookup directly
+         * on the value returned from @ref Json::parseObject().
+         */
+        const JsonToken& operator[](Containers::StringView key) const;
+
+    private:
+        friend Json;
+        friend JsonToken;
+
+        explicit JsonObjectView(const JsonToken* begin, std::size_t size) noexcept: _begin{begin}, _end{begin + size} {}
+
+        const JsonToken* _begin;
+        const JsonToken* _end;
+};
 
 /**
 @brief JSON array view
@@ -2378,7 +2389,48 @@ Returned from @ref Json::parseArray() and @ref JsonToken::asArray(). See
 
 @experimental
 */
-typedef JsonView<JsonArrayItem> JsonArrayView;
+class CORRADE_UTILITY_EXPORT JsonArrayView {
+    public:
+        /** @brief Iterator to the first element */
+        JsonArrayIterator begin() const { return JsonArrayIterator{0, _begin}; }
+        /** @overload */
+        JsonArrayIterator cbegin() const { return JsonArrayIterator{0, _begin}; }
+
+        /** @brief Iterator to (one item after) the last element */
+        /* JsonArrayIterator cannot be decremented and thus
+           JsonArrayItem::index() cannot be called, thus the index is never
+           used for anything and can be 0 for end() as well */
+        JsonArrayIterator end() const { return JsonArrayIterator{0, _end}; }
+        /** @overload */
+        JsonArrayIterator cend() const { return JsonArrayIterator{0, _end}; }
+
+        /**
+         * @brief Find an array value by index
+         *
+         * Calls @ref JsonToken::find(std::size_t) const on the enclosing array
+         * token. Useful for performing a lookup directly on the value returned
+         * from @ref Json::parseArray().
+         */
+        const JsonToken* find(std::size_t index) const;
+
+        /**
+         * @brief Access an array value by index
+         *
+         * Calls @ref JsonToken::operator[](std::size_t) const on the enclosing
+         * array token. Useful for performing a lookup directly on the value
+         * returned from @ref Json::parseArray().
+         */
+        const JsonToken& operator[](std::size_t index) const;
+
+    private:
+        friend Json;
+        friend JsonToken;
+
+        explicit JsonArrayView(const JsonToken* begin, std::size_t size) noexcept: _begin{begin}, _end{begin + size} {}
+
+        const JsonToken* _begin;
+        const JsonToken* _end;
+};
 
 inline JsonToken::Type JsonToken::type() const {
     #ifndef CORRADE_TARGET_32BIT

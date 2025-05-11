@@ -111,7 +111,9 @@ struct JsonTest: TestSuite::Tester {
         void parseArrayError();
         void parseTokenNotOwned();
 
-        void iterator();
+        void iteratorObject();
+        void iteratorArray();
+
         void iterateObject();
         void iterateObjectTokens();
         void iterateObjectNotObject();
@@ -1361,7 +1363,8 @@ JsonTest::JsonTest() {
 
     addTests({&JsonTest::parseTokenNotOwned,
 
-              &JsonTest::iterator,
+              &JsonTest::iteratorObject,
+              &JsonTest::iteratorArray,
 
               &JsonTest::iterateObject,
               &JsonTest::iterateObjectTokens,
@@ -1959,7 +1962,7 @@ void JsonTest::parseObjects() {
             CORRADE_VERIFY(!json->tokens()[7].isParsed());
             CORRADE_VERIFY(!json->tokens()[9].isParsed());
         } else {
-            Containers::Optional<JsonView<JsonObjectItem>> out = json->parseObject(json->root());
+            Containers::Optional<JsonObjectView> out = json->parseObject(json->root());
             CORRADE_VERIFY(out);
 
             /* Direct keys should be parsed, nested keys not */
@@ -2003,7 +2006,7 @@ void JsonTest::parseArrays() {
         if(!data.singleValue) {
             CORRADE_VERIFY(json->parseLiterals(json->root()));
         } else {
-            Containers::Optional<JsonView<JsonArrayItem>> out = json->parseArray(json->root());
+            Containers::Optional<JsonArrayView> out = json->parseArray(json->root());
             CORRADE_VERIFY(out);
 
             /* The view should span the whole array */
@@ -3115,7 +3118,7 @@ void JsonTest::parsedObjectAccessEmpty() {
     Containers::String out;
     Error redirectError{&out};
     (*object)["something"];
-    CORRADE_COMPARE(out, "Utility::JsonView::operator[](): view is empty\n");
+    CORRADE_COMPARE(out, "Utility::JsonObjectView::operator[](): view is empty\n");
 }
 
 void JsonTest::parsedArrayFind() {
@@ -3170,7 +3173,7 @@ void JsonTest::parsedArrayAccessEmpty() {
     Containers::String out;
     Error redirectError{&out};
     (*array)[0];
-    CORRADE_COMPARE(out, "Utility::JsonView::operator[](): view is empty\n");
+    CORRADE_COMPARE(out, "Utility::JsonArrayView::operator[](): view is empty\n");
 }
 
 void JsonTest::parseError() {
@@ -3333,13 +3336,28 @@ void JsonTest::parseTokenNotOwned() {
     CORRADE_COMPARE(out, expected);
 }
 
-void JsonTest::iterator() {
+void JsonTest::iteratorObject() {
+    Containers::Optional<Json> json = Json::fromString("{\"a\": 0, \"b\": 1}", Json::Option::ParseLiterals);
+    CORRADE_VERIFY(json);
+    CORRADE_VERIFY(json->root().isParsed());
+
+    JsonObjectIterator a = json->root().asObject().begin();
+    JsonObjectIterator b = ++json->root().asObject().begin();
+
+    CORRADE_VERIFY(a == a);
+    CORRADE_VERIFY(a != b);
+    CORRADE_VERIFY(b != a);
+    CORRADE_VERIFY(++a == b);
+    CORRADE_COMPARE((*b).value().data(), "1");
+}
+
+void JsonTest::iteratorArray() {
     Containers::Optional<Json> json = Json::fromString("[0, 1, 2]", Json::Option::ParseLiterals);
     CORRADE_VERIFY(json);
     CORRADE_VERIFY(json->root().isParsed());
 
-    JsonIterator<JsonArrayItem> a = json->root().asArray().begin();
-    JsonIterator<JsonArrayItem> b = ++json->root().asArray().begin();
+    JsonArrayIterator a = json->root().asArray().begin();
+    JsonArrayIterator b = ++json->root().asArray().begin();
 
     CORRADE_VERIFY(a == a);
     CORRADE_VERIFY(a != b);
@@ -3356,8 +3374,14 @@ void JsonTest::iterateObject() {
     })", Json::Option::ParseLiterals|Json::Option::ParseStringKeys);
     CORRADE_VERIFY(json);
 
+    JsonObjectView object = json->root().asObject();
+    CORRADE_VERIFY(object.cbegin() == object.begin());
+    CORRADE_VERIFY(object.cend() == object.end());
+    CORRADE_VERIFY(object.begin() != object.end());
+    /* find() and operator[]() tested in parsedObjectFind() */
+
     Containers::Array<Containers::Pair<Containers::StringView, Containers::StringView>> data;
-    for(JsonObjectItem a: json->root().asObject())
+    for(JsonObjectItem a: object)
         arrayAppend(data, InPlaceInit, a.key(), a.value().data());
 
     CORRADE_COMPARE_AS(data, (Containers::arrayView<Containers::Pair<Containers::StringView, Containers::StringView>>({
@@ -3430,8 +3454,14 @@ void JsonTest::iterateArray() {
     ])", Json::Option::ParseLiterals);
     CORRADE_VERIFY(json);
 
+    JsonArrayView array = json->root().asArray();
+    CORRADE_VERIFY(array.cbegin() == array.begin());
+    CORRADE_VERIFY(array.cend() == array.end());
+    CORRADE_VERIFY(array.begin() != array.end());
+    /* find() and operator[]() tested in parsedArrayFind() */
+
     Containers::Array<Containers::Pair<std::size_t, Containers::StringView>> data;
-    for(JsonArrayItem a: json->root().asArray())
+    for(JsonArrayItem a: array)
         arrayAppend(data, InPlaceInit, a.index(), a.value().data());
 
     CORRADE_COMPARE_AS(data, (Containers::arrayView<Containers::Pair<std::size_t, Containers::StringView>>({
