@@ -607,7 +607,7 @@ BasicStringView {
          * @brief First byte
          *
          * Expects there is at least one byte.
-         * @see @ref begin(), @ref operator[]()
+         * @see @ref isEmpty(), @ref begin(), @ref operator[]()
          */
         constexpr T& front() const;
 
@@ -615,7 +615,7 @@ BasicStringView {
          * @brief Last byte
          *
          * Expects there is at least one byte.
-         * @see @ref end(), @ref operator[]()
+         * @see @ref isEmpty(), @ref end(), @ref operator[]()
          */
         constexpr T& back() const;
 

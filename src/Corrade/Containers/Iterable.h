@@ -272,7 +272,7 @@ template<class T> class Iterable {
          * @brief First element
          *
          * Expects there is at least one element.
-         * @see @ref begin()
+         * @see @ref isEmpty(), @ref begin(), @ref operator[]()
          */
         T& front() const;
 
@@ -280,7 +280,7 @@ template<class T> class Iterable {
          * @brief Last element
          *
          * Expects there is at least one element.
-         * @see @ref end()
+         * @see @ref isEmpty(), @ref end(), @ref operator[]()
          */
         T& back() const;
 

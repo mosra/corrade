@@ -621,7 +621,7 @@ template<unsigned dimensions, class T> class StridedArrayView {
          * @brief First element
          *
          * Expects there is at least one element.
-         * @see @ref begin(), @ref operator[](std::size_t) const
+         * @see @ref isEmpty(), @ref begin(), @ref operator[](std::size_t) const
          */
         ElementType front() const;
 
@@ -629,7 +629,7 @@ template<unsigned dimensions, class T> class StridedArrayView {
          * @brief Last element
          *
          * Expects there is at least one element.
-         * @see @ref end(), @ref operator[](std::size_t) const
+         * @see @ref isEmpty(), @ref end(), @ref operator[](std::size_t) const
          */
         ElementType back() const;
 

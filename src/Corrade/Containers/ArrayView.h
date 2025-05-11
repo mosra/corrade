@@ -434,7 +434,7 @@ template<class T> class ArrayView {
          * @brief First element
          *
          * Expects there is at least one element.
-         * @see @ref begin(), @ref operator[]()
+         * @see @ref isEmpty(), @ref begin(), @ref operator[]()
          */
         constexpr T& front() const;
 
@@ -442,7 +442,7 @@ template<class T> class ArrayView {
          * @brief Last element
          *
          * Expects there is at least one element.
-         * @see @ref end(), @ref operator[]()
+         * @see @ref isEmpty(), @ref end(), @ref operator[]()
          */
         constexpr T& back() const;
 
@@ -1312,7 +1312,7 @@ template<std::size_t size_, class T> class StaticArrayView {
          * @brief First element
          *
          * Expects there is at least one element.
-         * @see @ref begin(), @ref operator[]()
+         * @see @ref isEmpty(), @ref begin(), @ref operator[]()
          */
         constexpr T& front() const;
 
@@ -1320,7 +1320,7 @@ template<std::size_t size_, class T> class StaticArrayView {
          * @brief Last element
          *
          * Expects there is at least one element.
-         * @see @ref end(), @ref operator[]()
+         * @see @ref isEmpty(), @ref end(), @ref operator[]()
          */
         constexpr T& back() const;
 

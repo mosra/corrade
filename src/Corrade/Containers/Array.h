@@ -623,7 +623,7 @@ class Array {
          * @brief First element
          *
          * Expects there is at least one element.
-         * @see @ref begin(), @ref operator[]()
+         * @see @ref isEmpty(), @ref begin(), @ref operator[]()
          */
         T& front();
         const T& front() const; /**< @overload */
@@ -632,7 +632,7 @@ class Array {
          * @brief Last element
          *
          * Expects there is at least one element.
-         * @see @ref end(), @ref operator[]()
+         * @see @ref isEmpty(), @ref end(), @ref operator[]()
          */
         T& back();
         const T& back() const; /**< @overload */

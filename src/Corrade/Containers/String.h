@@ -791,7 +791,7 @@ class CORRADE_UTILITY_EXPORT String {
          * @brief First byte
          *
          * Expects there is at least one byte.
-         * @see @ref begin(), @ref operator[]()
+         * @see @ref isEmpty(), @ref begin(), @ref operator[]()
          */
         char& front();
         char front() const; /**< @overload */
@@ -800,7 +800,7 @@ class CORRADE_UTILITY_EXPORT String {
          * @brief Last byte
          *
          * Expects there is at least one byte.
-         * @see @ref end(), @ref operator[]()
+         * @see @ref isEmpty(), @ref end(), @ref operator[]()
          */
         char& back();
         char back() const; /**< @overload */

@@ -256,7 +256,7 @@ class CORRADE_UTILITY_EXPORT StringIterable {
          *
          * Expects there is at least one element. See @ref operator[]() for
          * information about returned @ref StringViewFlags.
-         * @see @ref begin()
+         * @see @ref isEmpty(), @ref begin(), @ref operator[]()
          */
         StringView front() const;
 
@@ -265,7 +265,7 @@ class CORRADE_UTILITY_EXPORT StringIterable {
          *
          * Expects there is at least one element. See @ref operator[]() for
          * information about returned @ref StringViewFlags.
-         * @see @ref end()
+         * @see @ref isEmpty(), @ref end(), @ref operator[]()
          */
         StringView back() const;
 

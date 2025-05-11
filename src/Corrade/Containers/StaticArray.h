@@ -597,7 +597,7 @@ template<std::size_t size_, class T> class StaticArray: Implementation::StaticAr
         /**
          * @brief First element
          *
-         * @see @ref begin(), @ref operator[]()
+         * @see @ref isEmpty(), @ref begin(), @ref operator[]()
          */
         T& front() { return this->_data[0]; }
         /** @overload */
@@ -606,7 +606,7 @@ template<std::size_t size_, class T> class StaticArray: Implementation::StaticAr
         /**
          * @brief Last element
          *
-         * @see @ref end(), @ref operator[]()
+         * @see @ref isEmpty(), @ref end(), @ref operator[]()
          */
         T& back() { return this->_data[size_ - 1]; }
         /** @overload */
