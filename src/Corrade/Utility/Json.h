@@ -476,7 +476,7 @@ class CORRADE_UTILITY_EXPORT Json {
         /**
          * @brief Root JSON token
          *
-         * Always present. Tts @ref JsonToken::children() (if any) contain the
+         * Always present. Its @ref JsonToken::children() (if any) contain the
          * whole document ordered in a depth-first manner as described in
          * @ref Utility-Json-tokenization.
          */
@@ -1529,7 +1529,7 @@ class CORRADE_UTILITY_EXPORT JsonToken {
          * value as a child token tree. @ref Type::Null, @ref Type::Bool and
          * @ref Type::Number tokens return @cpp nullptr @ce always. Accessing
          * the first child has a @f$ \mathcal{O}(1) @f$ complexity. Returned
-         * value doints to data owned by the originating @ref Json instance.
+         * value points to data owned by the originating @ref Json instance.
          *
          * @m_class{m-note m-warning}
          *
@@ -1544,7 +1544,7 @@ class CORRADE_UTILITY_EXPORT JsonToken {
         inline const JsonToken* firstChild() const;
 
         /**
-         * @brief Next token or next
+         * @brief Next token
          *
          * Return next token at the same or higher level, or a pointer to (one
          * value after) the end. Accessing the next token has a
@@ -2320,6 +2320,9 @@ template<class T> class JsonView {
         JsonIterator<T> cbegin() const { return JsonIterator<T>{0, _begin}; }
 
         /** @brief Iterator to (one item after) the last element */
+        /* JsonIterator cannot be decremented and thus JsonArrayItem::index()
+           cannot be called, thus the index is never used for anything and can
+           be 0 for end() as well */
         JsonIterator<T> end() const { return JsonIterator<T>{0, _end}; }
         /** @overload */
         JsonIterator<T> cend() const { return JsonIterator<T>{0, _end}; }

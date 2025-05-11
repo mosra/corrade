@@ -49,10 +49,10 @@ namespace Corrade { namespace Utility {
 
 ### JSON token data layout
 
-At the very least, the JSON token has to contain a pointer to the input string
+At the very least, the JSON token has to contain an offset to the input string
 for token begin, a token byte size and, in case of objects or arrays the number
 of child tokens to make traversals possible. Token type can be determined
-implicitly, as mentioned in the public docs.
+implicitly, as mentioned in the public docs of JsonToken::data().
 
 On 32bit architectures all three (pointer, size and child count) are 32bit,
 thus looking like on the left. On 64bit, the pointer has to be 64bit, and the
@@ -88,8 +88,8 @@ A tokenizer alone wouldn't be enough however, as a goal here is to abuse the
 As value tokens have no children, a double (or a string pointer, or a boolean
 value) can be stored in place of the child count. Which is coincidentally why
 the diagrams above are both 8-byte aligned. Technically, string tokens that
-represent object keys have a children -- the object value -- but such
-information can be again determined implicitly.
+represent object keys have children -- the object value, and its potential
+children -- but such information can be again determined implicitly.
 
 Another goal is to have numbers parsable on-demand. Thus there needs to be a
 way to know whether a token has its value already parsed or not (and for
@@ -458,7 +458,11 @@ Containers::Optional<Json> Json::tokenize(const Containers::StringView filename,
                     if(sc == '\\') switch(data[++i]) {
                         case '"':
                         case '\\':
-                        case '/': /* JSON, why, you're weird */
+                        /* While not clearly said in the spec, this seems to be
+                           allowed to be escaped to be able to put strings
+                           containing "</script>" into <script> tags without
+                           requiring a JavaScript-aware X/HTML parser. Hah. */
+                        case '/':
                         case 'b':
                         case 'f':
                         case 'n':
@@ -780,6 +784,9 @@ void Json::parseObjectArrayInternal(JsonToken& token) {
         #endif
     ) return;
 
+    /* Just mark it as parsed and return. This is not done implicitly in order
+       to force users to always explicitly call parse{Object,Array}*() before
+       using the values. */
     #ifndef CORRADE_TARGET_32BIT
     token._sizeFlagsParsedTypeType =
         (token._sizeFlagsParsedTypeType & ~JsonToken::ParsedTypeMask)|
@@ -1252,7 +1259,9 @@ bool Json::parseStringInternal(const char* const errorPrefix, JsonToken& token) 
         exists */
     /* This assert would fire if we miscalculated during an initial parse
        (unlikely), or if the referenced token is not owned by the Json
-       instance. That should have been checked by the caller. */
+       instance. That should have been checked by the caller. With this check
+       failing the array would get reallocated, causing existing parsed string
+       pointers to become dangling. */
     CORRADE_INTERNAL_ASSERT(_state->strings.size() < arrayCapacity(_state->strings));
     Containers::String& destination = arrayAppend(_state->strings, InPlaceInit, NoInit, string.size());
 
@@ -2280,7 +2289,7 @@ Containers::Optional<JsonToken::ParsedType> JsonToken::commonParsedArrayType() c
     /* If the first token isn't parsed, bail. It doesn't make sense to return
        ParsedType::None as the common parsed type, since that says nothing
        about the contents -- it could be a heterogeneous mixture of whatever
-       and still have a None as a common oarsed type. */
+       and still have a None as a common parsed type. */
     const ParsedType type = this[1].parsedType();
     if(type == ParsedType::None)
         return {};
@@ -2369,6 +2378,8 @@ JsonArrayView JsonToken::asArray() const {
 }
 
 const JsonToken* JsonToken::find(const Containers::StringView key) const {
+    /* Returning a non-null pointer from the assert to not hit a second assert
+       from operator[] below when testing */
     CORRADE_ASSERT(type() == Type::Object && isParsed(),
         "Utility::JsonToken::find(): token is" << (isParsed() ? "a parsed" : "an unparsed") << type() << Debug::nospace << ", expected a parsed object", this);
 
@@ -2379,6 +2390,8 @@ const JsonToken* JsonToken::find(const Containers::StringView key) const {
         (_childCountFlagsTypeNan & ChildCountMask)
         #endif
     ; i != end; i = i->next()) {
+        /* Returning a non-null pointer from the assert to not hit a second
+           assert from operator[] below when testing */
         CORRADE_ASSERT(i->isParsed(), "Utility::JsonToken::find(): key string isn't parsed", this);
         if(i->asStringInternal() == key) return i->firstChild();
     }
@@ -2396,6 +2409,8 @@ const JsonToken& JsonToken::operator[](const Containers::StringView key) const {
 }
 
 const JsonToken* JsonToken::find(const std::size_t index) const {
+    /* Returning a non-null pointer from the assert to not hit a second assert
+       from operator[] below when testing */
     CORRADE_ASSERT(type() == Type::Array && isParsed(),
         "Utility::JsonToken::find(): token is" << (isParsed() ? "a parsed" : "an unparsed") << type() << Debug::nospace << ", expected a parsed array", this);
 
