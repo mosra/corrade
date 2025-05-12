@@ -768,8 +768,8 @@ Json::~Json() = default;
 
 Json& Json::operator=(Json&&) noexcept = default;
 
-Containers::ArrayView<const JsonToken> Json::tokens() const {
-    return _state->tokens.exceptPrefix(1);
+JsonView Json::tokens() const {
+    return JsonView{_state->tokens.data() + 1, _state->tokens.size() - 1};
 }
 
 const JsonToken& Json::root() const {
@@ -1592,7 +1592,7 @@ bool Json::parseStrings(const JsonToken& token) {
     return true;
 }
 
-const JsonToken* JsonObjectView::find(const Containers::StringView key) const {
+JsonIterator JsonObjectView::find(const Containers::StringView key) const {
     /* If the enclosing array/object is not empty, _begin is the first child of
        it and so parent() is an O(1) operation and its never null. If the
        enclosing array/object is empty, _begin points to a token after it,
@@ -1601,13 +1601,13 @@ const JsonToken* JsonObjectView::find(const Containers::StringView key) const {
        something in an empty view won't succeed anyway, catch that early and
        access the parent only if the view is non-empty. */
     if(_begin == _end)
-        return nullptr;
+        return {};
     return _begin->parent()->find(key);
 }
 
-const JsonToken* JsonArrayView::find(const std::size_t index) const {
+JsonIterator JsonArrayView::find(const std::size_t index) const {
     if(_begin == _end) /* See the comment above */
-        return nullptr;
+        return {};
     return _begin->parent()->find(index);
 }
 
@@ -1637,7 +1637,7 @@ Containers::Optional<JsonObjectView> Json::parseObject(const JsonToken& token) {
     parseObjectArrayInternal(const_cast<JsonToken&>(token));
 
     const std::size_t childCount = token.childCount();
-    for(JsonToken *i = const_cast<JsonToken*>(&token) + 1, *iMax = i + childCount; i != iMax; i = const_cast<JsonToken*>(i->next())) {
+    for(JsonToken *i = const_cast<JsonToken*>(&token) + 1, *iMax = i + childCount; i != iMax; i = const_cast<JsonToken*>(&*i->next())) {
         if(!parseStringInternal("Utility::Json::parseObject():", *i))
             return {};
     }
@@ -2278,7 +2278,7 @@ Containers::Optional<JsonToken::Type> JsonToken::commonArrayType() const {
         return {};
 
     const Type type = this[1].type();
-    for(const JsonToken *i = this[1].next(), *end = this + 1 + childCount; i != end; i = i->next())
+    for(const JsonToken *i = &*this[1].next(), *end = this + 1 + childCount; i != end; i = &*i->next())
         if(i->type() != type)
             return {};
 
@@ -2307,7 +2307,7 @@ Containers::Optional<JsonToken::ParsedType> JsonToken::commonParsedArrayType() c
     if(type == ParsedType::None)
         return {};
 
-    for(const JsonToken *i = this[1].next(), *end = this + 1 + childCount; i != end; i = i->next())
+    for(const JsonToken *i = &*this[1].next(), *end = this + 1 + childCount; i != end; i = &*i->next())
         if(i->parsedType() != type)
             return {};
 
@@ -2350,17 +2350,17 @@ std::size_t JsonToken::childCount() const {
     #endif
 }
 
-Containers::ArrayView<const JsonToken> JsonToken::children() const {
-    return {this + 1, childCount()};
+JsonView JsonToken::children() const {
+    return JsonView{this + 1, childCount()};
 }
 
-const JsonToken* JsonToken::parent() const {
+JsonIterator JsonToken::parent() const {
     /* Traverse backwards until a token that spans over this one is found, or
        until we reach the sentinel */
     const JsonToken* prev = this - 1;
     while(prev->_data && prev + prev->childCount() < this)
         --prev;
-    return prev->_data ? prev : nullptr;
+    return JsonIterator{prev->_data ? prev : nullptr};
 }
 
 JsonObjectView JsonToken::asObject() const {
@@ -2391,11 +2391,11 @@ JsonArrayView JsonToken::asArray() const {
         };
 }
 
-const JsonToken* JsonToken::find(const Containers::StringView key) const {
-    /* Returning a non-null pointer from the assert to not hit a second assert
+JsonIterator JsonToken::find(const Containers::StringView key) const {
+    /* Returning a valid iterator from the assert to not hit a second assert
        from operator[] below when testing */
     CORRADE_ASSERT(type() == Type::Object && isParsed(),
-        "Utility::JsonToken::find(): token is" << (isParsed() ? "a parsed" : "an unparsed") << type() << Debug::nospace << ", expected a parsed object", this);
+        "Utility::JsonToken::find(): token is" << (isParsed() ? "a parsed" : "an unparsed") << type() << Debug::nospace << ", expected a parsed object", *this);
 
     for(const JsonToken *i = this + 1, *end = this + 1 +
         #ifndef CORRADE_TARGET_32BIT
@@ -2403,19 +2403,19 @@ const JsonToken* JsonToken::find(const Containers::StringView key) const {
         #else
         (_childCountFlagsTypeNan & ChildCountMask)
         #endif
-    ; i != end; i = i->next()) {
-        /* Returning a non-null pointer from the assert to not hit a second
+    ; i != end; i = &*i->next()) {
+        /* Returning a non-null iterator from the assert to not hit a second
            assert from operator[] below when testing */
-        CORRADE_ASSERT(i->isParsed(), "Utility::JsonToken::find(): key string isn't parsed", this);
+        CORRADE_ASSERT(i->isParsed(), "Utility::JsonToken::find(): key string isn't parsed", JsonIterator{this});
         if(i->asStringInternal() == key)
             return i->firstChild();
     }
 
-    return nullptr;
+    return {};
 }
 
 const JsonToken& JsonToken::operator[](const Containers::StringView key) const {
-    const JsonToken* found = find(key);
+    const JsonIterator found = find(key);
     /** @todo any chance to report file/line here? would need to go upwards
         until the root token to find the start of the token stream, but then it
         still wouldn't be possible to get the filename */
@@ -2423,11 +2423,11 @@ const JsonToken& JsonToken::operator[](const Containers::StringView key) const {
     return *found;
 }
 
-const JsonToken* JsonToken::find(const std::size_t index) const {
-    /* Returning a non-null pointer from the assert to not hit a second assert
+JsonIterator JsonToken::find(const std::size_t index) const {
+    /* Returning a valid iterator from the assert to not hit a second assert
        from operator[] below when testing */
     CORRADE_ASSERT(type() == Type::Array && isParsed(),
-        "Utility::JsonToken::find(): token is" << (isParsed() ? "a parsed" : "an unparsed") << type() << Debug::nospace << ", expected a parsed array", this);
+        "Utility::JsonToken::find(): token is" << (isParsed() ? "a parsed" : "an unparsed") << type() << Debug::nospace << ", expected a parsed array", *this);
 
     std::size_t counter = 0;
     for(const JsonToken *i = this + 1, *end = this + 1 +
@@ -2436,15 +2436,15 @@ const JsonToken* JsonToken::find(const std::size_t index) const {
         #else
         (_childCountFlagsTypeNan & ChildCountMask)
         #endif
-    ; i != end; i = i->next())
+    ; i != end; i = &*i->next())
         if(counter++ == index)
-            return i;
+            return JsonIterator{i};
 
-    return nullptr;
+    return {};
 }
 
 const JsonToken& JsonToken::operator[](const std::size_t index) const {
-    const JsonToken* found = find(index);
+    const JsonIterator found = find(index);
     /** @todo something better like "index N out of range for M elements",
         would need an internal helper or some such to get the counter value */
     /** @todo any chance to report file/line here? would need to go upwards

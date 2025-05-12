@@ -111,9 +111,13 @@ struct JsonTest: TestSuite::Tester {
         void parseArrayError();
         void parseTokenNotOwned();
 
+        void iterator();
+        void iteratorInvalid();
         void iteratorObject();
         void iteratorArray();
 
+        void iterate();
+        void iterateOutOfRange();
         void iterateObject();
         void iterateObjectTokens();
         void iterateObjectNotObject();
@@ -1363,9 +1367,13 @@ JsonTest::JsonTest() {
 
     addTests({&JsonTest::parseTokenNotOwned,
 
+              &JsonTest::iterator,
+              &JsonTest::iteratorInvalid,
               &JsonTest::iteratorObject,
               &JsonTest::iteratorArray,
 
+              &JsonTest::iterate,
+              &JsonTest::iterateOutOfRange,
               &JsonTest::iterateObject,
               &JsonTest::iterateObjectTokens,
               &JsonTest::iterateObjectNotObject,
@@ -1480,7 +1488,7 @@ void JsonTest::singleObject() {
     CORRADE_COMPARE(object.childCount(), 0);
     CORRADE_COMPARE(object.children().size(), 0);
     CORRADE_VERIFY(!object.firstChild());
-    CORRADE_COMPARE(object.next(), json->tokens().end());
+    CORRADE_VERIFY(object.next() == json->tokens().end());
     CORRADE_VERIFY(!object.parent());
 }
 
@@ -1497,7 +1505,7 @@ void JsonTest::singleArray() {
     CORRADE_COMPARE(array.childCount(), 0);
     CORRADE_COMPARE(array.children().size(), 0);
     CORRADE_VERIFY(!array.firstChild());
-    CORRADE_COMPARE(array.next(), json->tokens().end());
+    CORRADE_VERIFY(array.next() == json->tokens().end());
     CORRADE_VERIFY(!array.parent());
 }
 
@@ -1515,7 +1523,7 @@ void JsonTest::singleNull() {
     CORRADE_COMPARE(null.childCount(), 0);
     CORRADE_COMPARE(null.children().size(), 0);
     CORRADE_VERIFY(!null.firstChild());
-    CORRADE_COMPARE(null.next(), json->tokens().end());
+    CORRADE_VERIFY(null.next() == json->tokens().end());
     CORRADE_VERIFY(!null.parent());
 }
 
@@ -1533,7 +1541,7 @@ void JsonTest::singleBoolean() {
     CORRADE_COMPARE(boolean.childCount(), 0);
     CORRADE_COMPARE(boolean.children().size(), 0);
     CORRADE_VERIFY(!boolean.firstChild());
-    CORRADE_COMPARE(boolean.next(), json->tokens().end());
+    CORRADE_VERIFY(boolean.next() == json->tokens().end());
     CORRADE_VERIFY(!boolean.parent());
 }
 
@@ -1551,7 +1559,7 @@ void JsonTest::singleNumber() {
     CORRADE_COMPARE(number.childCount(), 0);
     CORRADE_COMPARE(number.children().size(), 0);
     CORRADE_VERIFY(!number.firstChild());
-    CORRADE_COMPARE(number.next(), json->tokens().end());
+    CORRADE_VERIFY(number.next() == json->tokens().end());
     CORRADE_VERIFY(!number.parent());
 }
 
@@ -1569,7 +1577,7 @@ void JsonTest::singleString() {
     CORRADE_COMPARE(string.childCount(), 0);
     CORRADE_COMPARE(string.children().size(), 0);
     CORRADE_VERIFY(!string.firstChild());
-    CORRADE_COMPARE(string.next(), json->tokens().end());
+    CORRADE_VERIFY(string.next() == json->tokens().end());
     CORRADE_VERIFY(!string.parent());
 }
 
@@ -1653,39 +1661,39 @@ void JsonTest::simpleObject() {
     /* Verify traversal */
     CORRADE_COMPARE(object.childCount(), 16);
     CORRADE_VERIFY(object.firstChild());
-    CORRADE_COMPARE(object.firstChild()->firstChild(), &string1);
+    CORRADE_VERIFY(object.firstChild()->firstChild() == string1);
     CORRADE_COMPARE(object.children().size(), 16);
     CORRADE_COMPARE(&object.children().front().children().front(), &string1);
     CORRADE_COMPARE(&object.children().back(), &bool2);
-    CORRADE_COMPARE(object.next(), json->tokens().end());
+    CORRADE_VERIFY(object.next() == json->tokens().end());
     CORRADE_VERIFY(!object.parent());
 
     /* The object values should ... */
-    const JsonToken* prevKey = nullptr;
-    const JsonToken* prevValue = nullptr;
-    for(const JsonToken* key = object.firstChild(); key != json->tokens().end(); key = key->next()) {
+    JsonIterator prevKey;
+    JsonIterator prevValue;
+    for(JsonIterator key = object.firstChild(); key != json->tokens().end(); key = key->next()) {
         CORRADE_ITERATION(key->data());
         /* Have exactly one child */
         CORRADE_COMPARE(key->childCount(), 1);
         CORRADE_COMPARE(key->children().size(), 1);
         /* All the same parent */
-        CORRADE_COMPARE(key->parent(), &object);
+        CORRADE_VERIFY(key->parent() == object);
         /* Next should always point to the key */
-        if(prevKey) CORRADE_COMPARE(prevKey->next(), key);
+        if(prevKey) CORRADE_VERIFY(prevKey->next() == key);
         prevKey = key;
 
         /* The value having no nested children */
-        const JsonToken* value = key->firstChild();
+        JsonIterator value = key->firstChild();
         CORRADE_VERIFY(value);
         CORRADE_COMPARE(value->childCount(), 0);
         CORRADE_COMPARE(value->children().size(), 0);
         /* Key being the parent */
-        CORRADE_COMPARE(value->parent(), key);
+        CORRADE_VERIFY(value->parent() == key);
         /* Next should always point to the next key */
-        if(prevValue) CORRADE_COMPARE(prevValue->next(), key);
+        if(prevValue) CORRADE_VERIFY(prevValue->next() == key);
         prevValue = value;
     }
-    CORRADE_COMPARE(prevValue, &json->tokens().back());
+    CORRADE_VERIFY(prevValue == json->tokens().back());
 }
 
 void JsonTest::simpleArray() {
@@ -1742,11 +1750,11 @@ void JsonTest::simpleArray() {
 
     /* Verify traversal */
     CORRADE_COMPARE(array.childCount(), 8);
-    CORRADE_COMPARE(array.firstChild(), &string1);
+    CORRADE_VERIFY(array.firstChild() == string1);
     CORRADE_COMPARE(array.children().size(), 8);
     CORRADE_COMPARE(&array.children().front(), &string1);
     CORRADE_COMPARE(&array.children().back(), &bool2);
-    CORRADE_COMPARE(array.next(), json->tokens().end());
+    CORRADE_VERIFY(array.next() == json->tokens().end());
     CORRADE_VERIFY(!array.parent());
 
     /* The array children should ... */
@@ -1758,9 +1766,9 @@ void JsonTest::simpleArray() {
         CORRADE_COMPARE(i.children().size(), 0);
         CORRADE_VERIFY(!i.firstChild());
         /* All the same parent */
-        CORRADE_COMPARE(i.parent(), &array);
+        CORRADE_VERIFY(i.parent() == array);
         /* Next should always point to ... the next */
-        if(prev) CORRADE_COMPARE(prev->next(), &i);
+        if(prev) CORRADE_VERIFY(prev->next() == i);
         prev = &i;
     }
     CORRADE_COMPARE(prev, &json->tokens().back());
@@ -1908,34 +1916,34 @@ void JsonTest::nested() {
     }
 
     /* Verify first childs */
-    CORRADE_COMPARE(array.firstChild(), &object);
-    CORRADE_COMPARE(object.firstChild(), &hello);
-    CORRADE_COMPARE(hello.firstChild(), &five);
-    CORRADE_COMPARE(yes.firstChild(), &true_);
-    CORRADE_COMPARE(matrix.firstChild(), &matrixArray1);
-    CORRADE_COMPARE(matrixArray1.firstChild(), &matrixArray2);
-    CORRADE_COMPARE(matrixArray2.firstChild(), &zero);
-    CORRADE_COMPARE(matrixArray3.firstChild(), &two);
-    CORRADE_COMPARE(braces.firstChild(), &bracesObject);
-    CORRADE_COMPARE(bracesObject.firstChild(), &again);
-    CORRADE_COMPARE(again.firstChild(), &emptyObject);
+    CORRADE_VERIFY(array.firstChild() == object);
+    CORRADE_VERIFY(object.firstChild() == hello);
+    CORRADE_VERIFY(hello.firstChild() == five);
+    CORRADE_VERIFY(yes.firstChild() == true_);
+    CORRADE_VERIFY(matrix.firstChild() == matrixArray1);
+    CORRADE_VERIFY(matrixArray1.firstChild() == matrixArray2);
+    CORRADE_VERIFY(matrixArray2.firstChild() == zero);
+    CORRADE_VERIFY(matrixArray3.firstChild() == two);
+    CORRADE_VERIFY(braces.firstChild() == bracesObject);
+    CORRADE_VERIFY(bracesObject.firstChild() == again);
+    CORRADE_VERIFY(again.firstChild() == emptyObject);
 
     /* Verify next tokens */
-    CORRADE_COMPARE(array.next(), json->tokens().end());
-    CORRADE_COMPARE(object.next(), &number);
-    CORRADE_COMPARE(hello.next(), &yes);
-    CORRADE_COMPARE(yes.next(), &matrix);
-    CORRADE_COMPARE(matrix.next(), &braces);
-    CORRADE_COMPARE(matrixArray1.next(), &braces);
-    CORRADE_COMPARE(matrixArray2.next(), &matrixArray3);
-    CORRADE_COMPARE(matrixArray3.next(), &braces);
-    CORRADE_COMPARE(braces.next(), &number);
-    CORRADE_COMPARE(bracesObject.next(), &number);
-    CORRADE_COMPARE(again.next(), &number);
-    CORRADE_COMPARE(emptyObject.next(), &number);
-    CORRADE_COMPARE(number.next(), &bye);
-    CORRADE_COMPARE(bye.next(), &emptyArray);
-    CORRADE_COMPARE(emptyArray.next(), json->tokens().end());
+    CORRADE_VERIFY(array.next() == json->tokens().end());
+    CORRADE_VERIFY(object.next() == number);
+    CORRADE_VERIFY(hello.next() == yes);
+    CORRADE_VERIFY(yes.next() == matrix);
+    CORRADE_VERIFY(matrix.next() == braces);
+    CORRADE_VERIFY(matrixArray1.next() == braces);
+    CORRADE_VERIFY(matrixArray2.next() == matrixArray3);
+    CORRADE_VERIFY(matrixArray3.next() == braces);
+    CORRADE_VERIFY(braces.next() == number);
+    CORRADE_VERIFY(bracesObject.next() == number);
+    CORRADE_VERIFY(again.next() == number);
+    CORRADE_VERIFY(emptyObject.next() == number);
+    CORRADE_VERIFY(number.next() == bye);
+    CORRADE_VERIFY(bye.next() == emptyArray);
+    CORRADE_VERIFY(emptyArray.next() == json->tokens().end());
 }
 
 void JsonTest::parseObjects() {
@@ -3077,7 +3085,7 @@ void JsonTest::parsedObjectFind() {
     Containers::Optional<JsonObjectView> object = json->parseObject(json->root());
     CORRADE_VERIFY(object);
 
-    const JsonToken* another = object->find("another");
+    JsonIterator another = object->find("another");
     CORRADE_VERIFY(another);
     CORRADE_COMPARE(another->data(), "3");
     CORRADE_COMPARE((*object)["another"].data(), "3");
@@ -3132,7 +3140,7 @@ void JsonTest::parsedArrayFind() {
     Containers::Optional<JsonArrayView> array = json->parseArray(json->root());
     CORRADE_VERIFY(array);
 
-    const JsonToken* value = array->find(2);
+    JsonIterator value = array->find(2);
     CORRADE_VERIFY(value);
     CORRADE_COMPARE(value->data(), "3");
     CORRADE_COMPARE((*array)[2].data(), "3");
@@ -3336,6 +3344,72 @@ void JsonTest::parseTokenNotOwned() {
     CORRADE_COMPARE(out, expected);
 }
 
+void JsonTest::iterator() {
+    Containers::Optional<Json> json = Json::fromString("{\"a\": [0, 1], \"b\": false}");
+    CORRADE_VERIFY(json);
+
+    JsonIterator a = json->root().children().begin();
+    JsonIterator a2 = json->root().children().begin();
+    JsonIterator a3 = json->root().children().begin();
+    JsonIterator b = ++json->root().children().begin();
+    JsonIterator b2 = ++json->root().children().begin();
+    JsonIterator c;
+    JsonIterator d = json->root().children().end();
+    /* Construction from a token reference */
+    JsonIterator e = json->root();
+
+    CORRADE_VERIFY(a);
+    CORRADE_VERIFY(b);
+    CORRADE_VERIFY(!c);
+    CORRADE_VERIFY(d);
+    CORRADE_VERIFY(e);
+    CORRADE_VERIFY(a == a);
+    CORRADE_VERIFY(c == c);
+    CORRADE_VERIFY(a != b);
+    CORRADE_VERIFY(a != c);
+    CORRADE_VERIFY(b != a);
+    CORRADE_VERIFY(++a2 == b);
+    CORRADE_VERIFY(++e == a);
+    /* Decrementing the first child iterator should go to the root object */
+    CORRADE_VERIFY(--a3 == json->tokens()[0]);
+    CORRADE_VERIFY(--b2 == a);
+    CORRADE_VERIFY(--d == json->tokens()[6]);
+    CORRADE_COMPARE((*b).data(), "[0, 1]");
+    CORRADE_COMPARE(b->data(), "[0, 1]");
+}
+
+void JsonTest::iteratorInvalid() {
+    CORRADE_SKIP_IF_NO_DEBUG_ASSERT();
+
+    /* Verify it works the same both on the default-constructed iterator and
+       invalid iterator returned from APIs */
+    Containers::Optional<Json> json = Json::fromString("{}");
+    CORRADE_VERIFY(json);
+
+    JsonIterator a = json->root().parent();
+    JsonIterator b;
+
+    Containers::String out;
+    Error redirectError{&out};
+    *a;
+    *b;
+    /* I know, I know, but there's simply no other safe-to-call API that
+       wouldn't lead to an immediate crash. The JsonToken is trivially
+       destructible so this should be fine. */
+    a->~JsonToken();
+    b->~JsonToken();
+    ++b;
+    --b;
+    CORRADE_COMPARE_AS(out,
+        "Utility::JsonIterator::operator*(): the iterator is invalid\n"
+        "Utility::JsonIterator::operator*(): the iterator is invalid\n"
+        "Utility::JsonIterator::operator->(): the iterator is invalid\n"
+        "Utility::JsonIterator::operator->(): the iterator is invalid\n"
+        "Utility::JsonIterator::operator++(): the iterator is invalid\n"
+        "Utility::JsonIterator::operator--(): the iterator is invalid\n",
+        TestSuite::Compare::String);
+}
+
 void JsonTest::iteratorObject() {
     Containers::Optional<Json> json = Json::fromString("{\"a\": 0, \"b\": 1}", Json::Option::ParseLiterals);
     CORRADE_VERIFY(json);
@@ -3364,6 +3438,70 @@ void JsonTest::iteratorArray() {
     CORRADE_VERIFY(b != a);
     CORRADE_VERIFY(++a == b);
     CORRADE_COMPARE((*b).value().data(), "1");
+}
+
+void JsonTest::iterate() {
+    Containers::Optional<Json> json = Json::fromString("{\"a\": [0, 1], \"b\": false}");
+    CORRADE_VERIFY(json);
+
+    JsonView children = json->root().children();
+    CORRADE_COMPARE(children.size(), json->root().childCount());
+    CORRADE_COMPARE(children.size(), 6);
+    CORRADE_VERIFY(!children.isEmpty());
+    CORRADE_VERIFY(children.cbegin() == children.begin());
+    CORRADE_VERIFY(children.cend() == children.end());
+    CORRADE_VERIFY(children.begin() != children.end());
+    CORRADE_COMPARE(children.begin()->data(), "\"a\"");
+    CORRADE_COMPARE(children.front().data(), "\"a\"");
+    CORRADE_COMPARE(children[0].data(), "\"a\"");
+    CORRADE_COMPARE(children[3].data(), "1");
+    CORRADE_COMPARE((--children.end())->data(), "false");
+    CORRADE_COMPARE(children.back().data(), "false");
+    CORRADE_COMPARE(children[5].data(), "false");
+
+    Containers::Array<Containers::StringView> data;
+    for(const JsonToken& a: children)
+        arrayAppend(data, a.data());
+
+    CORRADE_COMPARE_AS(data, (Containers::arrayView<Containers::StringView>({
+        "\"a\"",
+        "[0, 1]", /* the array token spans it as a whole */
+        "0",
+        "1",
+        "\"b\"",
+        "false"
+    })), TestSuite::Compare::Container);
+
+    JsonView empty = children[2].children();
+    CORRADE_COMPARE(empty.size(), 0);
+    CORRADE_VERIFY(empty.isEmpty());
+    CORRADE_VERIFY(empty.begin() == empty.end());
+    CORRADE_VERIFY(empty.cbegin() == empty.cend());
+}
+
+void JsonTest::iterateOutOfRange() {
+    CORRADE_SKIP_IF_NO_DEBUG_ASSERT();
+
+    Containers::Optional<Json> json = Json::fromString("{\"a\": [0, 1], \"b\": false}");
+    CORRADE_VERIFY(json);
+
+    JsonView children = json->root().children();
+    JsonView empty = children[3].children();
+    CORRADE_COMPARE(children.size(), 6);
+    CORRADE_COMPARE(empty.size(), 0);
+
+    Containers::String out;
+    Error redirectError{&out};
+    children[6];
+    empty.front();
+    empty.back();
+    empty[0];
+    CORRADE_COMPARE_AS(out,
+        "Utility::JsonView::operator[](): index 6 out of range for 6 elements\n"
+        "Utility::JsonView::front(): view is empty\n"
+        "Utility::JsonView::back(): view is empty\n"
+        "Utility::JsonView::operator[](): index 0 out of range for 0 elements\n",
+        TestSuite::Compare::String);
 }
 
 void JsonTest::iterateObject() {
@@ -3522,7 +3660,7 @@ void JsonTest::findObjectKey() {
     })", Json::Option::ParseLiterals|Json::Option::ParseStringKeys);
     CORRADE_VERIFY(json);
 
-    const JsonToken* found = json->root().find("this");
+    JsonIterator found = json->root().find("this");
     CORRADE_VERIFY(found);
     CORRADE_COMPARE(found->data(), "[\"or\", \"that\"]");
     CORRADE_COMPARE(json->root()["this"].data(), "[\"or\", \"that\"]");
@@ -3611,7 +3749,7 @@ void JsonTest::findArrayIndex() {
     ])", Json::Option::ParseLiterals);
     CORRADE_VERIFY(json);
 
-    const JsonToken* found = json->root().find(1);
+    JsonIterator found = json->root().find(1);
     CORRADE_VERIFY(found);
     CORRADE_COMPARE(found->data(), "[\"this\", \"is\"]");
     CORRADE_COMPARE(json->root()[1].data(), "[\"this\", \"is\"]");

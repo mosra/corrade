@@ -790,14 +790,14 @@ Utility::Debug{}
 Containers::Optional<Utility::Json> gltf;
 std::size_t i{};
 /* [Json-usage-find] */
-const Utility::JsonToken *gltfNodes, *gltfNode;
+Utility::JsonIterator gltfNodes, gltfNode;
 if(!(gltfNodes = gltf->root().find("nodes")) || !(gltfNode = gltfNodes->find(i)))
     Utility::Fatal{} << "Node" << i << "is not in the file";
 
-if(const Utility::JsonToken* gltfName = gltfNode->find("name"))
+if(Utility::JsonIterator gltfName = gltfNode->find("name"))
     Utility::Debug{} << "Node" << i << "is named" << gltfName->asString();
 
-if(const Utility::JsonToken* gltfMesh = gltfNode->find("mesh"))
+if(Utility::JsonIterator gltfMesh = gltfNode->find("mesh"))
     Utility::Debug{} << "Node" << i << "has a mesh" << gltfMesh->asFloat();
 /* [Json-usage-find] */
 }
@@ -809,13 +809,13 @@ Containers::Optional<Utility::Json> gltf = Utility::Json::fromFile("scene.gltf",
     Utility::Json::Option::ParseLiterals|
     Utility::Json::Option::ParseStringKeys);
 
-const Utility::JsonToken* gltfNode = DOXYGEN_ELLIPSIS({});
+Utility::JsonIterator gltfNode = DOXYGEN_ELLIPSIS({});
 if(!gltfNode || !gltf->parseStrings(*gltfNode) || !gltf->parseFloats(*gltfNode))
     Utility::Fatal{} << "Invalid node" << i;
 /* [Json-usage-selective-parsing] */
 
 /* [Json-usage-selective-parsing-numeric-types] */
-if(const Utility::JsonToken* gltfMesh = gltfNode->find("mesh")) {
+if(Utility::JsonIterator gltfMesh = gltfNode->find("mesh")) {
     if(!gltf->parseUnsignedInts(*gltfMesh))
         Utility::Fatal{} << "Invalid node" << i << "mesh reference";
 
@@ -832,22 +832,22 @@ Containers::Optional<Utility::Json> gltf = Utility::Json::fromFile("scene.gltf")
 if(!gltf->parseObject(gltf->root()))
     Utility::Fatal{} << "Can't parse glTF root";
 
-const Utility::JsonToken* gltfNodes = gltf->root().find("nodes");
+Utility::JsonIterator gltfNodes = gltf->root().find("nodes");
 if(!gltfNodes || !gltf->parseArray(*gltfNodes))
     Utility::Fatal{} << "Missing or invalid nodes array";
 
-const Utility::JsonToken* gltfNode = gltfNodes->find(i);
+Utility::JsonIterator gltfNode = gltfNodes->find(i);
 if(!gltfNode || !gltf->parseObject(*gltfNode))
     Utility::Fatal{} << "Missing or invalid node" << i;
 
-if(const Utility::JsonToken* gltfName = gltfNode->find("name")) {
+if(Utility::JsonIterator gltfName = gltfNode->find("name")) {
     if(Containers::Optional<Containers::StringView> s = gltf->parseString(*gltfName))
         Utility::Debug{} << "Node" << i << "is named" << *s;
     else
         Utility::Fatal{} << "Invalid node" << i << "name";
 }
 
-if(const Utility::JsonToken* gltfMesh = gltfNode->find("mesh")) {
+if(Utility::JsonIterator gltfMesh = gltfNode->find("mesh")) {
     if(Containers::Optional<unsigned> n = gltf->parseUnsignedInt(*gltfMesh))
         Utility::Debug{} << "Node" << i << "has a mesh" << *n;
     else
@@ -857,7 +857,7 @@ if(const Utility::JsonToken* gltfMesh = gltfNode->find("mesh")) {
 }
 
 {
-const Utility::JsonToken *gltfNodes{};
+Utility::JsonIterator gltfNodes;
 /* [Json-usage-iteration] */
 struct Node {
     Containers::StringView name;
@@ -883,7 +883,7 @@ for(Utility::JsonArrayItem gltfNode: gltfNodes->asArray()) {
 }
 
 {
-const Utility::JsonToken *gltfNodes{};
+Utility::JsonIterator gltfNodes;
 /* [Json-usage-iteration-values] */
 Containers::Array<Containers::Reference<const Utility::JsonToken>> gltfNodeMap;
 for(const Utility::JsonToken& gltfNode: gltfNodes->asArray())
@@ -896,12 +896,12 @@ Containers::Optional<Utility::Json> gltf;
 const Utility::JsonToken& gltfNode = gltf->root();
 /* [Json-usage-direct-array-access] */
 Containers::Optional<Containers::StridedArrayView1D<const float>> translation;
-if(const Utility::JsonToken* gltfNodeTranslation = gltfNode.find("translation"))
+if(Utility::JsonIterator gltfNodeTranslation = gltfNode.find("translation"))
     if(!(translation = gltf->parseFloatArray(*gltfNodeTranslation, 3)))
         Utility::Fatal{} << "Node translation is not a 3-component float vector";
 
 Containers::Optional<Containers::StridedArrayView1D<const unsigned>> children;
-if(const Utility::JsonToken* gltfNodeChildren = gltfNode.find("children"))
+if(Utility::JsonIterator gltfNodeChildren = gltfNode.find("children"))
     if(!(children = gltf->parseUnsignedIntArray(*gltfNodeChildren)))
         Utility::Fatal{} << "Node children is not an index list";
 

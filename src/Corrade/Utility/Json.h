@@ -27,7 +27,7 @@
 */
 
 /** @file
- * @brief Class @ref Corrade::Utility::Json, @ref Corrade::Utility::JsonToken, @ref Corrade::Utility::JsonObjectItem, @ref Corrade::Utility::JsonArrayItem, @ref Corrade::Utility::JsonObjectIterator, @ref Corrade::Utility::JsonArrayIterator, @ref Corrade::Utility::JsonObjectView, @ref Corrade::Utility::JsonArrayView
+ * @brief Class @ref Corrade::Utility::Json, @ref Corrade::Utility::JsonToken, @ref Corrade::Utility::JsonObjectItem, @ref Corrade::Utility::JsonArrayItem, @ref Corrade::Utility::JsonIterator, @ref Corrade::Utility::JsonObjectIterator, @ref Corrade::Utility::JsonArrayIterator, @ref Corrade::Utility::JsonView, @ref Corrade::Utility::JsonObjectView, @ref Corrade::Utility::JsonArrayView
  * @m_since_latest
  */
 
@@ -250,8 +250,9 @@ separately, either upfront if @ref Option::ParseStrings is set (or if
 on-demand if @ref parseStrings() / @ref parseStringKeys() / @ref parseString()
 is used.
 
-@see @ref JsonArrayItem, @ref JsonObjectItem, @ref JsonArrayIterator,
-    @ref JsonObjectIterator, @ref JsonObjectView, @ref JsonArrayView
+@see @ref JsonArrayItem, @ref JsonObjectItem, @ref JsonIterator,
+    @ref JsonArrayIterator, @ref JsonObjectIterator, @ref JsonView,
+    @ref JsonObjectView, @ref JsonArrayView
 */
 class CORRADE_UTILITY_EXPORT Json {
     public:
@@ -472,7 +473,7 @@ class CORRADE_UTILITY_EXPORT Json {
          * and is always present, the rest is ordered in a depth-first manner
          * as described in @ref Utility-Json-tokenization.
          */
-        Containers::ArrayView<const JsonToken> tokens() const;
+        JsonView tokens() const;
 
         /**
          * @brief Root JSON token
@@ -1519,18 +1520,19 @@ class CORRADE_UTILITY_EXPORT JsonToken {
          *
          * @see @ref childCount(), @ref parent()
          */
-        Containers::ArrayView<const JsonToken> children() const;
+        JsonView children() const;
 
         /**
          * @brief First child token
          *
-         * Returns first child token or @cpp nullptr @ce if there are no child
-         * tokens. In particular, for a non-empty @ref Type::Object the first
-         * immediate child is a @ref Type::String, which then contains the
-         * value as a child token tree. @ref Type::Null, @ref Type::Bool and
-         * @ref Type::Number tokens return @cpp nullptr @ce always. Accessing
-         * the first child has a @f$ \mathcal{O}(1) @f$ complexity. Returned
-         * value points to data owned by the originating @ref Json instance.
+         * Returns first child token or an invalid iterator if there are no
+         * child tokens. In particular, for a non-empty @ref Type::Object the
+         * first immediate child is a @ref Type::String, which then contains
+         * the value as a child token tree. @ref Type::Null, @ref Type::Bool
+         * and @ref Type::Number tokens return @cpp nullptr @ce always.
+         * Accessing the first child has a @f$ \mathcal{O}(1) @f$ complexity.
+         * Returned iterator points to data owned by the originating @ref Json
+         * instance.
          *
          * @m_class{m-note m-warning}
          *
@@ -1539,17 +1541,17 @@ class CORRADE_UTILITY_EXPORT JsonToken {
          *      @ref JsonToken that has been copied out of the originating
          *      @ref Json instance.
          *
-         * @see @ref parent(), @ref next()
+         * @see @ref JsonIterator::operator bool(), @ref parent(), @ref next()
          */
         /* MinGW complains loudly if the declaration doesn't also have inline */
-        inline const JsonToken* firstChild() const;
+        inline JsonIterator firstChild() const;
 
         /**
          * @brief Next token
          *
-         * Return next token at the same or higher level, or a pointer to (one
-         * value after) the end. Accessing the next token has a
-         * @f$ \mathcal{O}(1) @f$ complexity. Returned value points to data
+         * Return next token at the same or higher level, or an iterator to
+         * (one value after) the end. Accessing the next token has a
+         * @f$ \mathcal{O}(1) @f$ complexity. Returned iterator points to data
          * owned by the originating @ref Json instance.
          *
          * @m_class{m-note m-warning}
@@ -1561,18 +1563,17 @@ class CORRADE_UTILITY_EXPORT JsonToken {
          *
          * @see @ref parent()
          */
-        const JsonToken* next() const {
-            return this + childCount() + 1;
-        }
+        /* MinGW complains loudly if the declaration doesn't also have inline */
+        inline JsonIterator next() const;
 
         /**
          * @brief Parent token
          *
-         * Returns parent token or @cpp nullptr @ce if the token is the root
+         * Returns parent token or an invalid iterator if the token is the root
          * token. Accessing the parent token is done by traversing the token
          * list backwards and thus has a @f$ \mathcal{O}(n) @f$ complexity ---
          * where possible, it's encouraged to remember the parent instead of
-         * using this function. Returned value points to data owned by the
+         * using this function. Returned iterator points to data owned by the
          * originating @ref Json instance.
          *
          * @m_class{m-note m-warning}
@@ -1582,9 +1583,10 @@ class CORRADE_UTILITY_EXPORT JsonToken {
          *      @ref JsonToken that has been copied out of the originating
          *      @ref Json instance.
          *
-         * @see @ref firstChild(), @ref next(), @ref Json::root()
+         * @see @ref JsonIterator::operator bool(), @ref firstChild(),
+         *      @ref next(), @ref Json::root()
          */
-        const JsonToken* parent() const;
+        JsonIterator parent() const;
 
         /**
          * @brief Get an iterable object
@@ -1639,8 +1641,8 @@ class CORRADE_UTILITY_EXPORT JsonToken {
          *
          * Expects that the token is a @ref Type::Object, @ref isParsed() is
          * set and its keys have @ref isParsed() set as well. If @p key is
-         * found, returns the child token corresponding to its value, otherwise
-         * returns @cpp nullptr @ce.
+         * found, returns iterator to the child token corresponding to its
+         * value, otherwise returns an invalid iterator.
          *
          * Note that there's no acceleration structure built at parse time and
          * thus the operation has a @f$ \mathcal{O}(n) @f$ complexity, where
@@ -1655,18 +1657,19 @@ class CORRADE_UTILITY_EXPORT JsonToken {
          *      @ref JsonToken that has been copied out of the originating
          *      @ref Json instance.
          *
-         * @see @ref type(), @ref Json::Option::ParseLiterals,
+         * @see @ref JsonIterator::operator bool(), @ref type(),
+         *      @ref Json::Option::ParseLiterals,
          *      @ref Json::Option::ParseStringKeys, @ref Json::parseLiterals(),
          *      @ref Json::parseStringKeys(), @ref Json::parseObject()
          */
-        const JsonToken* find(Containers::StringView key) const;
+        JsonIterator find(Containers::StringView key) const;
 
         /**
          * @brief Find an array value by index
          *
          * Expects that the token is a @ref Type::Array and @ref isParsed() is
-         * set. If @p index is found, returns the corresponding token,
-         * otherwise returns @cpp nullptr @ce.
+         * set. If @p index is found, returns iterator to the corresponding
+         * token, otherwise returns an invalid iterator.
          *
          * Note that there's no acceleration structure built at parse time and
          * thus the operation has a @f$ \mathcal{O}(n) @f$ complexity, where
@@ -1681,10 +1684,11 @@ class CORRADE_UTILITY_EXPORT JsonToken {
          *      @ref JsonToken that has been copied out of the originating
          *      @ref Json instance.
          *
-         * @see @ref type(), @ref Json::Option::ParseLiterals,
-         *      @ref Json::parseLiterals(), @ref Json::parseArray()
+         * @see @ref JsonIterator::operator bool(), @ref type(),
+         *      @ref Json::Option::ParseLiterals, @ref Json::parseLiterals(),
+         *      @ref Json::parseArray()
          */
-        const JsonToken* find(std::size_t index) const;
+        JsonIterator find(std::size_t index) const;
 
         /**
          * @brief Access an object value by key
@@ -2184,9 +2188,8 @@ class CORRADE_UTILITY_EXPORT JsonObjectItem {
          *
          * Equvialent to accessing @ref JsonToken::firstChild() on the token.
          */
-        const JsonToken& value() const {
-            return *_token->firstChild();
-        }
+        /* MinGW complains loudly if the declaration doesn't also have inline */
+        inline const JsonToken& value() const;
 
         /**
          * @brief Key token
@@ -2238,6 +2241,118 @@ class JsonArrayItem {
 };
 
 /**
+@brief JSON iterator
+@m_since_latest
+
+Iterator for @ref JsonView, which is returned from @ref Json::tokens() and
+@ref JsonToken::children(), and additionally directly returned from
+@ref JsonToken::firstChild(), @ref JsonToken::parent(), @ref JsonToken::find(),
+@ref JsonObjectView::find() and @ref JsonArrayView::find(), where it indicates
+a potentially invalid value.
+
+Compared to @ref JsonObjectIterator and @ref JsonArrayIterator iterates all
+tokens in a depth-first manner instead of just the immediate children, and can
+go both ways, not just forward. See @ref Utility-Json-tokenization for more
+information about the internal representation.
+@experimental
+*/
+class JsonIterator {
+    public:
+        /**
+         * @brief Default constructor
+         *
+         * Creates an invalid iterator, i.e. one with @ref operator bool()
+         * returning @cpp false @ce.
+         */
+        /*implicit*/ JsonIterator(): _token{} {}
+
+        /** @brief Construct from a token reference */
+        /*implicit*/ JsonIterator(const JsonToken& token) noexcept: _token{&token} {}
+
+        /** @brief Equality comparison */
+        bool operator==(const JsonIterator& other) const {
+            return _token == other._token;
+        }
+
+        /** @brief Non-equality comparison */
+        bool operator!=(const JsonIterator& other) const {
+            return _token != other._token;
+        }
+
+        /**
+         * @brief Whether the iterator is valid
+         *
+         * Returns @cpp false @ce if the iterator is default-constructed,
+         * returned from @ref JsonToken::firstChild() of a token that has no
+         * children, from @ref JsonToken::parent() of a token that has no
+         * parent or from @ref JsonToken::find(), @ref JsonObjectView::find()
+         * or @ref JsonArrayView::find() if given key or index wasn't found,
+         * @cpp true @ce otherwise.
+         */
+        explicit operator bool() const {
+            return _token;
+        }
+
+        /**
+         * @brief Advance to previous position
+         *
+         * The iterator is expected to be valid. Note that compared to
+         * @ref JsonObjectIterator and @ref JsonArrayIterator it advances in a
+         * depth-first manner instead of just the immediate children.
+         * @see @ref operator bool()
+         */
+        JsonIterator& operator--() {
+            CORRADE_DEBUG_ASSERT(_token, "Utility::JsonIterator::operator--(): the iterator is invalid", *this);
+            --_token;
+            return *this;
+        }
+
+        /**
+         * @brief Advance to next position
+         *
+         * The iterator is expected to be valid. Note that compared to
+         * @ref JsonObjectIterator and @ref JsonArrayIterator it advances in a
+         * depth-first manner instead of just the immediate children.
+         * @see @ref operator bool()
+         */
+        JsonIterator& operator++() {
+            CORRADE_DEBUG_ASSERT(_token, "Utility::JsonIterator::operator++(): the iterator is invalid", *this);
+            ++_token;
+            return *this;
+        }
+
+        /**
+         * @brief Dereference
+         *
+         * The iterator is expected to be valid.
+         * @see @ref operator bool()
+         */
+        const JsonToken& operator*() const {
+            CORRADE_DEBUG_ASSERT(_token, "Utility::JsonIterator::operator*(): the iterator is invalid", *_token);
+            return *_token;
+        }
+
+        /**
+         * @brief Dereference
+         *
+         * The iterator is expected to be valid.
+         * @see @ref operator bool()
+         */
+        const JsonToken* operator->() const {
+            CORRADE_DEBUG_ASSERT(_token, "Utility::JsonIterator::operator->(): the iterator is invalid", _token);
+            return _token;
+        }
+
+    private:
+        friend JsonToken;
+        friend JsonView;
+
+        explicit JsonIterator(const JsonToken* token) noexcept: _token{token} {}
+
+        const JsonToken* _token;
+};
+
+/**
 @brief JSON object iterator
 @m_since_latest
 
@@ -2265,7 +2380,7 @@ class JsonObjectIterator {
          * Implemented using @ref JsonToken::next().
          */
         JsonObjectIterator& operator++() {
-            _token = _token->next();
+            _token = &*_token->next();
             return *this;
         }
 
@@ -2313,7 +2428,7 @@ class JsonArrayIterator {
          */
         JsonArrayIterator& operator++() {
             ++_index;
-            _token = _token->next();
+            _token = &*_token->next();
             return *this;
         }
 
@@ -2329,6 +2444,103 @@ class JsonArrayIterator {
 
         std::size_t _index;
         const JsonToken* _token;
+};
+
+/**
+@brief JSON token subtree
+@m_since_latest
+
+Returned from @ref Json::tokens() and @ref JsonToken::children(). Note that,
+unlike with @ref JsonObjectView and @ref JsonArrayView, the iteration is
+performed on the whole subtree in a depth-first order, it doesn't iterate just
+the immediate children.
+
+@experimental
+*/
+class JsonView {
+    public:
+        /**
+         * @brief Token count
+         *
+         * Note that the returned value includes all nested children as well,
+         * it isn't just the count of immediate children.
+         * @see @ref size()
+         */
+        std::size_t size() { return _end - _begin; }
+
+        /**
+         * @brief Whether the view is empty
+         *
+         * @see @ref size()
+         */
+        bool isEmpty() const { return _end == _begin; }
+
+        /**
+         * @brief Iterator to the first element
+         *
+         * If the view is empty, the iterator reports itself as valid but may
+         * point outside of the actual token data.
+         * @see @ref isEmpty(), @ref JsonIterator::operator bool(),
+         *      @ref front()
+         */
+        JsonIterator begin() const { return JsonIterator{_begin}; }
+        /** @overload */
+        JsonIterator cbegin() const { return JsonIterator{_begin}; }
+
+        /**
+         * @brief Iterator to (one item after) the last element
+         *
+         * The returned iterator reports itself as valid but may point outside
+         * of the actual token data.
+         * @see @ref JsonIterator::operator bool(), @ref back()
+         */
+        JsonIterator end() const { return JsonIterator{_end}; }
+        /** @overload */
+        JsonIterator cend() const { return JsonIterator{_end}; }
+
+        /**
+         * @brief First token
+         *
+         * Expects there is at least one token.
+         * @see @ref isEmpty(), @ref begin(), @ref operator[]()
+         */
+        const JsonToken& front() const {
+            CORRADE_DEBUG_ASSERT(_begin != _end,
+                "Utility::JsonView::front(): view is empty", *_begin);
+            return *_begin;
+        }
+
+        /**
+         * @brief Last token
+         *
+         * Expects there is at least one token.
+         * @see @ref isEmpty(), @ref end(), @ref operator[]()
+         */
+        const JsonToken& back() const {
+            CORRADE_DEBUG_ASSERT(_begin != _end,
+                "Utility::JsonView::back(): view is empty", *_begin);
+            return *(_end - 1);
+        }
+
+        /**
+         * @brief Token access
+         *
+         * Expects that @p i is less than @ref size().
+         */
+        const JsonToken& operator[](std::size_t i) const {
+            CORRADE_DEBUG_ASSERT(_begin + i < _end,
+                "Utility::JsonView::operator[](): index" << i << "out of range for" << _end - _begin << "elements", *_begin);
+            return *(_begin + i);
+        }
+
+    private:
+        friend Json;
+        friend JsonToken;
+
+        explicit JsonView(const JsonToken* begin, std::size_t size) noexcept: _begin{begin}, _end{begin + size} {}
+
+        const JsonToken* _begin;
+        const JsonToken* _end;
 };
 
 /**
@@ -2359,7 +2571,7 @@ class CORRADE_UTILITY_EXPORT JsonObjectView {
          * enclosing object token. Useful for performing a lookup directly on
          * the value returned from @ref Json::parseObject().
          */
-        const JsonToken* find(Containers::StringView key) const;
+        JsonIterator find(Containers::StringView key) const;
 
         /**
          * @brief Access an object value by key
@@ -2411,7 +2623,7 @@ class CORRADE_UTILITY_EXPORT JsonArrayView {
          * token. Useful for performing a lookup directly on the value returned
          * from @ref Json::parseArray().
          */
-        const JsonToken* find(std::size_t index) const;
+        JsonIterator find(std::size_t index) const;
 
         /**
          * @brief Access an array value by index
@@ -2469,14 +2681,14 @@ inline JsonToken::ParsedType JsonToken::parsedType() const {
     #endif
 }
 
-inline const JsonToken* JsonToken::firstChild() const {
+inline JsonIterator JsonToken::firstChild() const {
     #ifndef CORRADE_TARGET_32BIT
     /* The token has a child if it's an object or an array and has children */
     if((((_sizeFlagsParsedTypeType & TypeMask) == TypeObject ||
          (_sizeFlagsParsedTypeType & TypeMask) == TypeArray) && _childCount) ||
         /* or if it's an object key */
         (_sizeFlagsParsedTypeType & FlagStringKey))
-        return this + 1;
+        return JsonIterator{this + 1};
     #else
     /* The token has a child if it's not a parsed number and */
     if(((_childCountFlagsTypeNan & (NanMask|SignMask)) == NanMask) &&
@@ -2486,9 +2698,13 @@ inline const JsonToken* JsonToken::firstChild() const {
        (_childCountFlagsTypeNan & ChildCountMask)) ||
        /* or it's an object key */
        (_childCountFlagsTypeNan & FlagStringKey)))
-        return this + 1;
+        return JsonIterator{this + 1};
     #endif
-    return nullptr;
+    return {};
+}
+
+inline JsonIterator JsonToken::next() const {
+    return JsonIterator{this + 1 + childCount()};
 }
 
 inline std::nullptr_t JsonToken::asNull() const {
@@ -2548,6 +2764,10 @@ inline std::size_t JsonToken::asSize() const {
     #else
     return _parsedUnsignedInt;
     #endif
+}
+
+inline const JsonToken& JsonObjectItem::value() const {
+    return *_token->firstChild();
 }
 
 }}
