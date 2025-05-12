@@ -3100,7 +3100,7 @@ void JsonTest::parsedObjectFindEmpty() {
     Containers::Optional<JsonObjectView> object = json->parseObject(json->tokens()[data.tokenIndex]);
     CORRADE_VERIFY(object);
 
-    CORRADE_COMPARE(object->find("something"), nullptr);
+    CORRADE_VERIFY(!object->find("something"));
 }
 
 void JsonTest::parsedObjectAccessEmpty() {
@@ -3155,7 +3155,7 @@ void JsonTest::parsedArrayFindEmpty() {
     Containers::Optional<JsonArrayView> array = json->parseArray(json->tokens()[data.tokenIndex]);
     CORRADE_VERIFY(array);
 
-    CORRADE_COMPARE(array->find(0), nullptr);
+    CORRADE_VERIFY(!array->find(0));
 }
 
 void JsonTest::parsedArrayAccessEmpty() {
