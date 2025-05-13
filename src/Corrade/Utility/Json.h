@@ -2113,7 +2113,7 @@ class CORRADE_UTILITY_EXPORT JsonToken {
         };
         #endif
 
-        explicit JsonToken(NoInitT) /*nothing*/ {};
+        explicit JsonToken(NoInitT) /*nothing*/ {}
         constexpr explicit JsonToken(ValueInitT): _data{},
             #ifndef CORRADE_TARGET_32BIT
             _sizeFlagsParsedTypeType{},
