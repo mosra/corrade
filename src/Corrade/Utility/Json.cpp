@@ -1594,33 +1594,42 @@ bool Json::parseStrings(const JsonToken& token) {
 
 JsonIterator JsonObjectView::find(const Containers::StringView key) const {
     /* If the enclosing array/object is not empty, _begin is the first child of
-       it and so parent() is an O(1) operation and its never null. If the
-       enclosing array/object is empty, _begin points to a token after it,
-       which makes parent() either an O(n) operation (which wouldn't return a
-       correct value) or null (in case it's the root token). As finding
-       something in an empty view won't succeed anyway, catch that early and
-       access the parent only if the view is non-empty. */
+       it and so parent() is an O(1) operation and its never null, equivalent
+       to `_begin - 1`. If the enclosing array/object is empty, _begin points
+       to a token after it, which makes parent() either an O(n) operation
+       (which wouldn't return a correct value) or null (in case it's the root
+       token). As finding something in an empty view won't succeed anyway,
+       catch that early and access the parent only if the view is
+       non-empty. */
     if(_begin == _end)
         return {};
-    return _begin->parent()->find(key);
+    /* Assuming non-empty view, the token right before the _begin is the
+       parent */
+    return _begin[-1].find(key);
 }
 
 JsonIterator JsonArrayView::find(const std::size_t index) const {
     if(_begin == _end) /* See the comment above */
         return {};
-    return _begin->parent()->find(index);
+    /* Assuming non-empty view, the token right before the _begin is the
+       parent */
+    return _begin[-1].find(index);
 }
 
 const JsonToken& JsonObjectView::operator[](const Containers::StringView key) const {
     CORRADE_ASSERT(_begin != _end, /* See the comment above */
         "Utility::JsonObjectView::operator[](): view is empty", *_begin);
-    return (*_begin->parent())[key];
+    /* Assuming non-empty view, the token right before the _begin is the
+       parent */
+    return _begin[-1][key];
 }
 
 const JsonToken& JsonArrayView::operator[](const std::size_t index) const {
     CORRADE_ASSERT(_begin != _end, /* See the comment above */
         "Utility::JsonArrayView::operator[](): view is empty", *_begin);
-    return (*_begin->parent())[index];
+    /* Assuming non-empty view, the token right before the _begin is the
+       parent */
+    return _begin[-1][index];
 }
 
 Containers::Optional<JsonObjectView> Json::parseObject(const JsonToken& token) {
