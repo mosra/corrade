@@ -692,8 +692,10 @@ Containers::Optional<Json> Json::tokenize(const Containers::StringView filename,
     /** @todo use a non-reallocating allocator once it exists */
     arrayReserve(json._state->strings, escapedStringCount);
 
-    /* All good. Fill the token data member in the JsonData base and return. */
+    /* All good. Fill the token data + size members in the JsonData base and
+       return. */
     json._state->tokens = json._state->tokenStorage.data();
+    json._state->tokenCount = json._state->tokenStorage.size();
     /* GCC 4.8 needs a bit of help here */
     return Containers::optional(Utility::move(json));
 }

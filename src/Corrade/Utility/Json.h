@@ -2180,6 +2180,7 @@ namespace Implementation {
    be able to inline hot paths but not pull in Array etc. headers */
 struct JsonData {
     const JsonTokenData* tokens;
+    std::size_t tokenCount;
 
     /* Disallow accidental deletion through the base pointer */
     protected:
@@ -2233,24 +2234,28 @@ class JsonIterator {
          * Returns @cpp false @ce if the iterator is default-constructed,
          * returned from @ref JsonToken::firstChild() of a token that has no
          * children, from @ref JsonToken::parent() of a token that has no
-         * parent or from @ref JsonToken::find(), @ref JsonObjectView::find()
-         * or @ref JsonArrayView::find() if given key or index wasn't found,
+         * parent, from @ref JsonToken::find(), @ref JsonObjectView::find()
+         * or @ref JsonArrayView::find() if given key or index wasn't found, or
+         * if it was advanced outside of the bounds of the token stream,
          * @cpp true @ce otherwise.
          */
         explicit operator bool() const {
-            return _json;
+            return _json && _token < _json->tokenCount;
         }
 
         /**
          * @brief Advance to previous position
          *
-         * The iterator is expected to be valid. Note that compared to
-         * @ref JsonObjectIterator and @ref JsonArrayIterator it advances in a
-         * depth-first manner instead of just the immediate children.
+         * The iterator is expected to be valid and not at the begin of the
+         * token stream. Note that compared to @ref JsonObjectIterator and
+         * @ref JsonArrayIterator it advances in a depth-first manner instead
+         * of just the immediate children.
          * @see @ref operator bool()
          */
         JsonIterator& operator--() {
             CORRADE_DEBUG_ASSERT(_json, "Utility::JsonIterator::operator--(): the iterator is invalid", *this);
+            CORRADE_DEBUG_ASSERT(_token > 1, /* token 0 is the sentinel */
+                "Utility::JsonIterator::operator--(): advancing past the begin of the token stream", *this);
             --_token;
             return *this;
         }
@@ -2265,6 +2270,8 @@ class JsonIterator {
          */
         JsonIterator& operator++() {
             CORRADE_DEBUG_ASSERT(_json, "Utility::JsonIterator::operator++(): the iterator is invalid", *this);
+            CORRADE_DEBUG_ASSERT(_token < _json->tokenCount,
+                "Utility::JsonIterator::operator++(): advancing past the end of the token stream", *this);
             ++_token;
             return *this;
         }
@@ -2276,7 +2283,8 @@ class JsonIterator {
          * @see @ref operator bool()
          */
         JsonToken operator*() const {
-            CORRADE_DEBUG_ASSERT(_json, "Utility::JsonIterator::operator*(): the iterator is invalid", (JsonToken{*_json, _token}));
+            CORRADE_DEBUG_ASSERT(_json && _token < _json->tokenCount,
+                "Utility::JsonIterator::operator*(): the iterator is invalid", (JsonToken{*_json, _token}));
             return JsonToken{*_json, _token};
         }
 
@@ -2287,7 +2295,8 @@ class JsonIterator {
          * @see @ref operator bool()
          */
         const JsonToken* operator->() const {
-            CORRADE_DEBUG_ASSERT(_json, "Utility::JsonIterator::operator->(): the iterator is invalid", reinterpret_cast<const JsonToken*>(this));
+            CORRADE_DEBUG_ASSERT(_json && _token < _json->tokenCount,
+                "Utility::JsonIterator::operator->(): the iterator is invalid", reinterpret_cast<const JsonToken*>(this));
             return reinterpret_cast<const JsonToken*>(this);
         }
 
@@ -2337,15 +2346,29 @@ class JsonObjectIterator {
         /**
          * @brief Advance to next position
          *
+         * Expects that the iterator is not at the end of the token stream.
+         * It's however not possible to detect advancing outside of the
+         * iterated object, such iterators have undefined behavior.
          * Implemented using @ref JsonToken::next().
          */
         JsonObjectIterator& operator++() {
+            CORRADE_DEBUG_ASSERT(_token < _json->tokenCount,
+                "Utility::JsonObjectIterator::operator++(): advancing past the end of the token stream", *this);
             _token += _json->tokens[_token].childCount() + 1;
             return *this;
         }
 
-        /** @brief Dereference */
+        /**
+         * @brief Dereference
+         *
+         * Expects that the iterator is not at the end of the token stream.
+         * It's however not possible to detect advancing outside of the
+         * iterated object, dereferencing such iterators has undefined
+         * behavior.
+         */
         JsonObjectItem operator*() const {
+            CORRADE_DEBUG_ASSERT(_token < _json->tokenCount,
+                "Utility::JsonObjectIterator::operator*(): dereferencing iterator at the end of the token stream", (JsonObjectItem{JsonToken{*_json, _token}}));
             return JsonObjectItem{JsonToken{*_json, _token}};
         }
 
@@ -2386,16 +2409,29 @@ class JsonArrayIterator {
         /**
          * @brief Advance to next position
          *
-         * Implemented using @ref JsonToken::next().
+         * Expects that the iterator is not at the end of the token stream.
+         * It's however not possible to detect advancing outside of the
+         * iterated array, such iterators have undefined behavior. Implemented
+         * using @ref JsonToken::next().
          */
         JsonArrayIterator& operator++() {
+            CORRADE_DEBUG_ASSERT(_token < _json->tokenCount,
+                "Utility::JsonArrayIterator::operator++(): advancing past the end of the token stream", *this);
             ++_index;
             _token += _json->tokens[_token].childCount() + 1;
             return *this;
         }
 
-        /** @brief Dereference */
+        /**
+         * @brief Dereference
+         *
+         * Expects that the iterator is not at the end of the token stream.
+         * It's however not possible to detect advancing outside of the
+         * iterated array, dereferencing such iterators has undefined behavior.
+         */
         JsonArrayItem operator*() const {
+            CORRADE_DEBUG_ASSERT(_token < _json->tokenCount,
+                "Utility::JsonArrayIterator::operator*(): dereferencing iterator at the end of the token stream", (JsonArrayItem{_index, JsonToken{*_json, _token}}));
             return JsonArrayItem{_index, JsonToken{*_json, _token}};
         }
 

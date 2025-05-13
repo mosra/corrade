@@ -117,7 +117,9 @@ struct JsonTest: TestSuite::Tester {
         void iterator();
         void iteratorInvalid();
         void iteratorObject();
+        void iteratorObjectInvalid();
         void iteratorArray();
+        void iteratorArrayInvalid();
 
         void iterate();
         void iterateOutOfRange();
@@ -1377,7 +1379,9 @@ JsonTest::JsonTest() {
               &JsonTest::iterator,
               &JsonTest::iteratorInvalid,
               &JsonTest::iteratorObject,
+              &JsonTest::iteratorObjectInvalid,
               &JsonTest::iteratorArray,
+              &JsonTest::iteratorArrayInvalid,
 
               &JsonTest::iterate,
               &JsonTest::iterateOutOfRange,
@@ -3421,7 +3425,7 @@ void JsonTest::iterator() {
     CORRADE_VERIFY(a);
     CORRADE_VERIFY(b);
     CORRADE_VERIFY(!c);
-    CORRADE_VERIFY(d);
+    CORRADE_VERIFY(!d);
     CORRADE_VERIFY(e);
     CORRADE_VERIFY(a == a);
     CORRADE_VERIFY(c == c);
@@ -3452,25 +3456,36 @@ void JsonTest::iteratorInvalid() {
 
     JsonIterator a = json->root().parent();
     JsonIterator b;
+    JsonIterator c = json->root().children().end();
+    JsonIterator d = json->root();
+    JsonIterator e = json->root().children().end();
 
     Containers::String out;
     Error redirectError{&out};
     *a;
     *b;
+    *c;
     /* I know, I know, but there's simply no other safe-to-call API that
        wouldn't lead to an immediate crash. The JsonToken is trivially
        destructible so this should be fine. */
     a->~JsonToken();
     b->~JsonToken();
+    c->~JsonToken();
     ++b;
     --b;
+    --d;
+    ++e;
     CORRADE_COMPARE_AS(out,
         "Utility::JsonIterator::operator*(): the iterator is invalid\n"
         "Utility::JsonIterator::operator*(): the iterator is invalid\n"
+        "Utility::JsonIterator::operator*(): the iterator is invalid\n"
+        "Utility::JsonIterator::operator->(): the iterator is invalid\n"
         "Utility::JsonIterator::operator->(): the iterator is invalid\n"
         "Utility::JsonIterator::operator->(): the iterator is invalid\n"
         "Utility::JsonIterator::operator++(): the iterator is invalid\n"
-        "Utility::JsonIterator::operator--(): the iterator is invalid\n",
+        "Utility::JsonIterator::operator--(): the iterator is invalid\n"
+        "Utility::JsonIterator::operator--(): advancing past the begin of the token stream\n"
+        "Utility::JsonIterator::operator++(): advancing past the end of the token stream\n",
         TestSuite::Compare::String);
 }
 
@@ -3489,6 +3504,25 @@ void JsonTest::iteratorObject() {
     CORRADE_COMPARE((*b).value().data(), "1");
 }
 
+void JsonTest::iteratorObjectInvalid() {
+    CORRADE_SKIP_IF_NO_DEBUG_ASSERT();
+
+    Containers::Optional<Json> json = Json::fromString("{}", Json::Option::ParseLiterals);
+    CORRADE_VERIFY(json);
+    CORRADE_VERIFY(json->root().isParsed());
+
+    JsonObjectIterator a = json->root().asObject().end();
+
+    Containers::String out;
+    Error redirectError{&out};
+    *a;
+    ++a;
+    CORRADE_COMPARE_AS(out,
+        "Utility::JsonObjectIterator::operator*(): dereferencing iterator at the end of the token stream\n"
+        "Utility::JsonObjectIterator::operator++(): advancing past the end of the token stream\n",
+        TestSuite::Compare::String);
+}
+
 void JsonTest::iteratorArray() {
     Containers::Optional<Json> json = Json::fromString("[0, 1, 2]", Json::Option::ParseLiterals);
     CORRADE_VERIFY(json);
@@ -3502,6 +3536,25 @@ void JsonTest::iteratorArray() {
     CORRADE_VERIFY(b != a);
     CORRADE_VERIFY(++a == b);
     CORRADE_COMPARE((*b).value().data(), "1");
+}
+
+void JsonTest::iteratorArrayInvalid() {
+    CORRADE_SKIP_IF_NO_DEBUG_ASSERT();
+
+    Containers::Optional<Json> json = Json::fromString("[]", Json::Option::ParseLiterals);
+    CORRADE_VERIFY(json);
+    CORRADE_VERIFY(json->root().isParsed());
+
+    JsonArrayIterator a = json->root().asArray().end();
+
+    Containers::String out;
+    Error redirectError{&out};
+    *a;
+    ++a;
+    CORRADE_COMPARE_AS(out,
+        "Utility::JsonArrayIterator::operator*(): dereferencing iterator at the end of the token stream\n"
+        "Utility::JsonArrayIterator::operator++(): advancing past the end of the token stream\n",
+        TestSuite::Compare::String);
 }
 
 void JsonTest::iterate() {
