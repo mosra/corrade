@@ -111,6 +111,9 @@ struct JsonTest: TestSuite::Tester {
         void parseArrayError();
         void parseTokenNotOwned();
 
+        void tokenFromTokenData();
+        void tokenFromTokenDataNotOwned();
+
         void iterator();
         void iteratorInvalid();
         void iteratorObject();
@@ -196,6 +199,7 @@ struct JsonTest: TestSuite::Tester {
 
         #ifndef CORRADE_NO_STD_IS_TRIVIALLY_TRAITS
         void tokenConstructCopy();
+        void tokenDataConstructCopy();
         #endif
         void constructCopy();
         void constructMove();
@@ -552,7 +556,7 @@ const struct {
 
 const struct {
     const char* name;
-    bool(Json::*function)(const JsonToken&);
+    bool(Json::*function)(JsonToken);
     std::size_t parseRoot;
     std::size_t tokenParsed, tokenParsedDeep, tokenNotParsed, tokenNotParsedCount;
     JsonToken::ParsedType parsedType;
@@ -678,7 +682,7 @@ const struct {
 
 const struct {
     const char* name;
-    bool(Json::*function)(const JsonToken&);
+    bool(Json::*function)(JsonToken);
     Containers::StringView json; /* testing \0 bytes in strings */
     const char* message;
 } ParseErrorData[]{
@@ -1367,6 +1371,9 @@ JsonTest::JsonTest() {
 
     addTests({&JsonTest::parseTokenNotOwned,
 
+              &JsonTest::tokenFromTokenData,
+              &JsonTest::tokenFromTokenDataNotOwned,
+
               &JsonTest::iterator,
               &JsonTest::iteratorInvalid,
               &JsonTest::iteratorObject,
@@ -1457,6 +1464,7 @@ JsonTest::JsonTest() {
 
               #ifndef CORRADE_NO_STD_IS_TRIVIALLY_TRAITS
               &JsonTest::tokenConstructCopy,
+              &JsonTest::tokenDataConstructCopy,
               #endif
               &JsonTest::constructCopy,
               &JsonTest::constructMove,
@@ -1481,7 +1489,7 @@ void JsonTest::singleObject() {
     CORRADE_COMPARE(json->tokens().size(), 1);
 
     const JsonToken& object = json->tokens()[0];
-    CORRADE_COMPARE(&json->root(), &object);
+    CORRADE_COMPARE(&json->root().token(), &object.token());
     CORRADE_COMPARE(object.data(), "{  \n \r  }");
     CORRADE_COMPARE(object.type(), JsonToken::Type::Object);
     CORRADE_VERIFY(!object.isParsed());
@@ -1498,7 +1506,7 @@ void JsonTest::singleArray() {
     CORRADE_COMPARE(json->tokens().size(), 1);
 
     const JsonToken& array = json->tokens()[0];
-    CORRADE_COMPARE(&json->root(), &array);
+    CORRADE_COMPARE(&json->root().token(), &array.token());
     CORRADE_COMPARE(array.data(), "[  \n \r  ]");
     CORRADE_COMPARE(array.type(), JsonToken::Type::Array);
     CORRADE_VERIFY(!array.isParsed());
@@ -1516,7 +1524,7 @@ void JsonTest::singleNull() {
     CORRADE_COMPARE(json->tokens().size(), 1);
 
     const JsonToken& null = json->tokens()[0];
-    CORRADE_COMPARE(&json->root(), &null);
+    CORRADE_COMPARE(&json->root().token(), &null.token());
     CORRADE_COMPARE(null.data(), "nULLtotallyinvalidyes");
     CORRADE_COMPARE(null.type(), JsonToken::Type::Null);
     CORRADE_VERIFY(!null.isParsed());
@@ -1534,7 +1542,7 @@ void JsonTest::singleBoolean() {
     CORRADE_COMPARE(json->tokens().size(), 1);
 
     const JsonToken& boolean = json->tokens()[0];
-    CORRADE_COMPARE(&json->root(), &boolean);
+    CORRADE_COMPARE(&json->root().token(), &boolean.token());
     CORRADE_COMPARE(boolean.data(), "fALsetotallyinvalidyes");
     CORRADE_COMPARE(boolean.type(), JsonToken::Type::Bool);
     CORRADE_VERIFY(!boolean.isParsed());
@@ -1552,7 +1560,7 @@ void JsonTest::singleNumber() {
     CORRADE_COMPARE(json->tokens().size(), 1);
 
     const JsonToken& number = json->tokens()[0];
-    CORRADE_COMPARE(&json->root(), &number);
+    CORRADE_COMPARE(&json->root().token(), &number.token());
     CORRADE_COMPARE(number.data(), "-hahahahah");
     CORRADE_COMPARE(number.type(), JsonToken::Type::Number);
     CORRADE_VERIFY(!number.isParsed());
@@ -1570,7 +1578,7 @@ void JsonTest::singleString() {
     CORRADE_COMPARE(json->tokens().size(), 1);
 
     const JsonToken& string = json->tokens()[0];
-    CORRADE_COMPARE(&json->root(), &string);
+    CORRADE_COMPARE(&json->root().token(), &string.token());
     CORRADE_COMPARE(string.data(), "\"\\uNICODE yay\\\"\"");
     CORRADE_COMPARE(string.type(), JsonToken::Type::String);
     CORRADE_VERIFY(!string.isParsed());
@@ -1663,8 +1671,8 @@ void JsonTest::simpleObject() {
     CORRADE_VERIFY(object.firstChild());
     CORRADE_VERIFY(object.firstChild()->firstChild() == string1);
     CORRADE_COMPARE(object.children().size(), 16);
-    CORRADE_COMPARE(&object.children().front().children().front(), &string1);
-    CORRADE_COMPARE(&object.children().back(), &bool2);
+    CORRADE_COMPARE(&object.children().front().children().front().token(), &string1.token());
+    CORRADE_COMPARE(&object.children().back().token(), &bool2.token());
     CORRADE_VERIFY(object.next() == json->tokens().end());
     CORRADE_VERIFY(!object.parent());
 
@@ -1752,13 +1760,13 @@ void JsonTest::simpleArray() {
     CORRADE_COMPARE(array.childCount(), 8);
     CORRADE_VERIFY(array.firstChild() == string1);
     CORRADE_COMPARE(array.children().size(), 8);
-    CORRADE_COMPARE(&array.children().front(), &string1);
-    CORRADE_COMPARE(&array.children().back(), &bool2);
+    CORRADE_COMPARE(&array.children().front().token(), &string1.token());
+    CORRADE_COMPARE(&array.children().back().token(), &bool2.token());
     CORRADE_VERIFY(array.next() == json->tokens().end());
     CORRADE_VERIFY(!array.parent());
 
     /* The array children should ... */
-    const JsonToken* prev = nullptr;
+    const JsonTokenData* prev = nullptr;
     for(const JsonToken& i: array.children()) {
         CORRADE_ITERATION(i.data());
         /* Have no children */
@@ -1768,10 +1776,10 @@ void JsonTest::simpleArray() {
         /* All the same parent */
         CORRADE_VERIFY(i.parent() == array);
         /* Next should always point to ... the next */
-        if(prev) CORRADE_VERIFY(prev->next() == i);
-        prev = &i;
+        if(prev) CORRADE_VERIFY(JsonToken{*json, *prev}.next() == i);
+        prev = &i.token();
     }
-    CORRADE_COMPARE(prev, &json->tokens().back());
+    CORRADE_COMPARE(prev, &json->tokens().back().token());
 }
 
 void JsonTest::nested() {
@@ -3260,9 +3268,13 @@ void JsonTest::parseTokenNotOwned() {
     CORRADE_SKIP_IF_NO_ASSERT();
 
     Containers::Optional<Json> json = Json::fromString("{}");
+    Containers::Optional<Json> json2 = Json::fromString("{}");
     CORRADE_VERIFY(json);
+    CORRADE_VERIFY(json2);
 
-    JsonToken token = json->root();
+    /* Taking a token from the second instance but then parsing it with the
+       first */
+    JsonToken token = json2->root();
 
     Containers::String out;
     Error redirectError{&out};
@@ -3344,6 +3356,54 @@ void JsonTest::parseTokenNotOwned() {
     CORRADE_COMPARE(out, expected);
 }
 
+void JsonTest::tokenFromTokenData() {
+    Containers::Optional<Json> json = Json::fromString("{\"a\": [0, 1], \"b\": false}");
+    CORRADE_VERIFY(json);
+
+    JsonToken token = json->tokens()[2];
+    CORRADE_COMPARE(token.data(), "[0, 1]");
+
+    const JsonTokenData& data = token.token();
+    JsonToken tokenFromData{*json, data};
+    CORRADE_COMPARE(&tokenFromData.token(), &token.token());
+    CORRADE_COMPARE(tokenFromData.data(), "[0, 1]");
+}
+
+void JsonTest::tokenFromTokenDataNotOwned() {
+    CORRADE_SKIP_IF_NO_ASSERT();
+
+    Containers::StringView jsonData = "{\"a\": [0, 1], \"b\": false}"_s;
+    Containers::Optional<Json> json1 = Json::fromString(jsonData);
+    /* Same contents (even the same global view) but a different instance, so
+       sharing tokens shouldn't be possible */
+    Containers::Optional<Json> json2 = Json::fromString(jsonData);
+    CORRADE_VERIFY(json1);
+    CORRADE_VERIFY(json2);
+
+    const JsonTokenData& data1 = json1->tokens()[2].token();
+    const JsonTokenData& data2 = json2->tokens()[2].token();
+    JsonTokenData data1Copy = json1->tokens()[2].token();
+    JsonTokenData data2Copy = json2->tokens()[2].token();
+
+    /* Both are fine */
+    JsonToken{*json1, data1};
+    JsonToken{*json2, data2};
+
+    Containers::String out;
+    Error redirectError{&out};
+    JsonToken{*json1, data2};
+    JsonToken{*json2, data1};
+    /* Copies shouldn't work either as the token position is lost that way */
+    JsonToken{*json1, data1Copy};
+    JsonToken{*json2, data2Copy};
+    CORRADE_COMPARE_AS(out,
+        "Utility::JsonToken: token not owned by given Json instance\n"
+        "Utility::JsonToken: token not owned by given Json instance\n"
+        "Utility::JsonToken: token not owned by given Json instance\n"
+        "Utility::JsonToken: token not owned by given Json instance\n",
+        TestSuite::Compare::String);
+}
+
 void JsonTest::iterator() {
     Containers::Optional<Json> json = Json::fromString("{\"a\": [0, 1], \"b\": false}");
     CORRADE_VERIFY(json);
@@ -3374,8 +3434,12 @@ void JsonTest::iterator() {
     CORRADE_VERIFY(--a3 == json->tokens()[0]);
     CORRADE_VERIFY(--b2 == a);
     CORRADE_VERIFY(--d == json->tokens()[6]);
+    /* The operator->() is implemented by reinterpreting the JsonIterator as
+       JsonToken, verify also that the member access gives expected values */
     CORRADE_COMPARE((*b).data(), "[0, 1]");
+    CORRADE_COMPARE(&(*b).token(), &json->tokens()[2].token());
     CORRADE_COMPARE(b->data(), "[0, 1]");
+    CORRADE_COMPARE(&b->token(), &json->tokens()[2].token());
 }
 
 void JsonTest::iteratorInvalid() {
@@ -4653,6 +4717,10 @@ void JsonTest::fromFileParseError() {
 #ifndef CORRADE_NO_STD_IS_TRIVIALLY_TRAITS
 void JsonTest::tokenConstructCopy() {
     CORRADE_VERIFY(std::is_trivially_copyable<JsonToken>{});
+}
+
+void JsonTest::tokenDataConstructCopy() {
+    CORRADE_VERIFY(std::is_trivially_copyable<JsonTokenData>{});
 }
 #endif
 
