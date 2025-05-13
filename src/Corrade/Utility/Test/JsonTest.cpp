@@ -1488,7 +1488,7 @@ void JsonTest::singleObject() {
     CORRADE_VERIFY(json);
     CORRADE_COMPARE(json->tokens().size(), 1);
 
-    const JsonToken& object = json->tokens()[0];
+    JsonToken object = json->tokens()[0];
     CORRADE_COMPARE(&json->root().token(), &object.token());
     CORRADE_COMPARE(object.data(), "{  \n \r  }");
     CORRADE_COMPARE(object.type(), JsonToken::Type::Object);
@@ -1505,7 +1505,7 @@ void JsonTest::singleArray() {
     CORRADE_VERIFY(json);
     CORRADE_COMPARE(json->tokens().size(), 1);
 
-    const JsonToken& array = json->tokens()[0];
+    JsonToken array = json->tokens()[0];
     CORRADE_COMPARE(&json->root().token(), &array.token());
     CORRADE_COMPARE(array.data(), "[  \n \r  ]");
     CORRADE_COMPARE(array.type(), JsonToken::Type::Array);
@@ -1523,7 +1523,7 @@ void JsonTest::singleNull() {
     CORRADE_VERIFY(json);
     CORRADE_COMPARE(json->tokens().size(), 1);
 
-    const JsonToken& null = json->tokens()[0];
+    JsonToken null = json->tokens()[0];
     CORRADE_COMPARE(&json->root().token(), &null.token());
     CORRADE_COMPARE(null.data(), "nULLtotallyinvalidyes");
     CORRADE_COMPARE(null.type(), JsonToken::Type::Null);
@@ -1541,7 +1541,7 @@ void JsonTest::singleBoolean() {
     CORRADE_VERIFY(json);
     CORRADE_COMPARE(json->tokens().size(), 1);
 
-    const JsonToken& boolean = json->tokens()[0];
+    JsonToken boolean = json->tokens()[0];
     CORRADE_COMPARE(&json->root().token(), &boolean.token());
     CORRADE_COMPARE(boolean.data(), "fALsetotallyinvalidyes");
     CORRADE_COMPARE(boolean.type(), JsonToken::Type::Bool);
@@ -1559,7 +1559,7 @@ void JsonTest::singleNumber() {
     CORRADE_VERIFY(json);
     CORRADE_COMPARE(json->tokens().size(), 1);
 
-    const JsonToken& number = json->tokens()[0];
+    JsonToken number = json->tokens()[0];
     CORRADE_COMPARE(&json->root().token(), &number.token());
     CORRADE_COMPARE(number.data(), "-hahahahah");
     CORRADE_COMPARE(number.type(), JsonToken::Type::Number);
@@ -1577,7 +1577,7 @@ void JsonTest::singleString() {
     CORRADE_VERIFY(json);
     CORRADE_COMPARE(json->tokens().size(), 1);
 
-    const JsonToken& string = json->tokens()[0];
+    JsonToken string = json->tokens()[0];
     CORRADE_COMPARE(&json->root().token(), &string.token());
     CORRADE_COMPARE(string.data(), "\"\\uNICODE yay\\\"\"");
     CORRADE_COMPARE(string.type(), JsonToken::Type::String);
@@ -1604,7 +1604,7 @@ void JsonTest::simpleObject() {
     CORRADE_COMPARE(json->tokens().size(), 17);
 
     /* Verify data */
-    const JsonToken& object = json->tokens()[0];
+    JsonToken object = json->tokens()[0];
     /* GCC 4.8 can't handle raw string literals in macros */
     const char* objectData = R"({"key1": "hello",
          "key2":null,
@@ -1617,40 +1617,40 @@ void JsonTest::simpleObject() {
     CORRADE_COMPARE(object.data(), objectData);
     CORRADE_COMPARE(object.type(), JsonToken::Type::Object);
 
-    const JsonToken& string1 = json->tokens()[2];
+    JsonToken string1 = json->tokens()[2];
     CORRADE_COMPARE(string1.data(), "\"hello\"");
     CORRADE_COMPARE(string1.type(), JsonToken::Type::String);
 
-    const JsonToken& null = json->tokens()[4];
+    JsonToken null = json->tokens()[4];
     CORRADE_COMPARE(null.data(), "null");
     CORRADE_COMPARE(null.type(), JsonToken::Type::Null);
 
-    const JsonToken& number1 = json->tokens()[6];
+    JsonToken number1 = json->tokens()[6];
     CORRADE_COMPARE(number1.data(), "-375.26e5");
     CORRADE_COMPARE(number1.type(), JsonToken::Type::Number);
 
-    const JsonToken& number2 = json->tokens()[8];
+    JsonToken number2 = json->tokens()[8];
     CORRADE_COMPARE(number2.data(), "0");
     CORRADE_COMPARE(number2.type(), JsonToken::Type::Number);
 
-    const JsonToken& bool1 = json->tokens()[10];
+    JsonToken bool1 = json->tokens()[10];
     CORRADE_COMPARE(bool1.data(), "false");
     CORRADE_COMPARE(bool1.type(), JsonToken::Type::Bool);
 
-    const JsonToken& string2 = json->tokens()[12];
+    JsonToken string2 = json->tokens()[12];
     CORRADE_COMPARE(string2.data(), "\"abc\"");
     CORRADE_COMPARE(string2.type(), JsonToken::Type::String);
 
-    const JsonToken& array = json->tokens()[14];
+    JsonToken array = json->tokens()[14];
     CORRADE_COMPARE(array.data(), "[]");
     CORRADE_COMPARE(array.type(), JsonToken::Type::Array);
 
-    const JsonToken& bool2 = json->tokens()[16];
+    JsonToken bool2 = json->tokens()[16];
     CORRADE_COMPARE(bool2.data(), "true");
     CORRADE_COMPARE(bool2.type(), JsonToken::Type::Bool);
 
     /* No tokens should be parsed */
-    for(const JsonToken& i: json->tokens()) {
+    for(JsonToken i: json->tokens()) {
         CORRADE_ITERATION(i.data());
         CORRADE_VERIFY(!i.isParsed());
     }
@@ -1658,7 +1658,7 @@ void JsonTest::simpleObject() {
     /* Verify keys */
     for(std::size_t i = 0; i != 8; ++i) {
         CORRADE_ITERATION(i);
-        const JsonToken& key = json->tokens()[1 + 2*i];
+        JsonToken key = json->tokens()[1 + 2*i];
         /* Unlike objects and arrays, the key token data don't contain the
            nested value even the value is a child */
         CORRADE_COMPARE(key.data(), format("\"key{}\"", i + 1));
@@ -1712,46 +1712,46 @@ void JsonTest::simpleArray() {
     CORRADE_COMPARE(json->tokens().size(), 9);
 
     /* Verify data */
-    const JsonToken& array = json->tokens()[0];
+    JsonToken array = json->tokens()[0];
     /* GCC 4.8 can't handle raw string literals in macros */
     const char* arrayData = R"(["hello", null,   -375.26e5,0,   false, "abc",{}, true ])";
     CORRADE_COMPARE(array.data(), arrayData);
     CORRADE_COMPARE(array.type(), JsonToken::Type::Array);
 
-    const JsonToken& string1 = json->tokens()[1];
+    JsonToken string1 = json->tokens()[1];
     CORRADE_COMPARE(string1.data(), "\"hello\"");
     CORRADE_COMPARE(string1.type(), JsonToken::Type::String);
 
-    const JsonToken& null = json->tokens()[2];
+    JsonToken null = json->tokens()[2];
     CORRADE_COMPARE(null.data(), "null");
     CORRADE_COMPARE(null.type(), JsonToken::Type::Null);
 
-    const JsonToken& number1 = json->tokens()[3];
+    JsonToken number1 = json->tokens()[3];
     CORRADE_COMPARE(number1.data(), "-375.26e5");
     CORRADE_COMPARE(number1.type(), JsonToken::Type::Number);
 
-    const JsonToken& number2 = json->tokens()[4];
+    JsonToken number2 = json->tokens()[4];
     CORRADE_COMPARE(number2.data(), "0");
     CORRADE_COMPARE(number2.type(), JsonToken::Type::Number);
 
-    const JsonToken& bool1 = json->tokens()[5];
+    JsonToken bool1 = json->tokens()[5];
     CORRADE_COMPARE(bool1.data(), "false");
     CORRADE_COMPARE(bool1.type(), JsonToken::Type::Bool);
 
-    const JsonToken& string2 = json->tokens()[6];
+    JsonToken string2 = json->tokens()[6];
     CORRADE_COMPARE(string2.data(), "\"abc\"");
     CORRADE_COMPARE(string2.type(), JsonToken::Type::String);
 
-    const JsonToken& object = json->tokens()[7];
+    JsonToken object = json->tokens()[7];
     CORRADE_COMPARE(object.data(), "{}");
     CORRADE_COMPARE(object.type(), JsonToken::Type::Object);
 
-    const JsonToken& bool2 = json->tokens()[8];
+    JsonToken bool2 = json->tokens()[8];
     CORRADE_COMPARE(bool2.data(), "true");
     CORRADE_COMPARE(bool2.type(), JsonToken::Type::Bool);
 
     /* No tokens should be parsed */
-    for(const JsonToken& i: json->tokens()) {
+    for(JsonToken i: json->tokens()) {
         CORRADE_ITERATION(i.data());
         CORRADE_VERIFY(!i.isParsed());
     }
@@ -1767,7 +1767,7 @@ void JsonTest::simpleArray() {
 
     /* The array children should ... */
     const JsonTokenData* prev = nullptr;
-    for(const JsonToken& i: array.children()) {
+    for(JsonToken i: array.children()) {
         CORRADE_ITERATION(i.data());
         /* Have no children */
         CORRADE_COMPARE(i.childCount(), 0);
@@ -1797,7 +1797,7 @@ void JsonTest::nested() {
     CORRADE_COMPARE(json->tokens().size(), 21);
 
     /* Verify data */
-    const JsonToken& array = json->tokens()[0];
+    JsonToken array = json->tokens()[0];
     /* GCC 4.8 can't handle raw string literals in macros */
     const char* arrayData = R"([{"hello": 5,
           "yes": true,
@@ -1810,7 +1810,7 @@ void JsonTest::nested() {
     CORRADE_COMPARE(array.data(), arrayData);
     CORRADE_COMPARE(array.type(), JsonToken::Type::Array);
 
-    const JsonToken& object = json->tokens()[1];
+    JsonToken object = json->tokens()[1];
     /* GCC 4.8 can't handle raw string literals in macros */
     const char* objectData = R"({"hello": 5,
           "yes": true,
@@ -1820,87 +1820,87 @@ void JsonTest::nested() {
     CORRADE_COMPARE(object.data(), objectData);
     CORRADE_COMPARE(object.type(), JsonToken::Type::Object);
 
-    const JsonToken& hello = json->tokens()[2];
+    JsonToken hello = json->tokens()[2];
     CORRADE_COMPARE(hello.data(), "\"hello\"");
     CORRADE_COMPARE(hello.type(), JsonToken::Type::String);
 
-    const JsonToken& five = json->tokens()[3];
+    JsonToken five = json->tokens()[3];
     CORRADE_COMPARE(five.data(), "5");
     CORRADE_COMPARE(five.type(), JsonToken::Type::Number);
 
-    const JsonToken& yes = json->tokens()[4];
+    JsonToken yes = json->tokens()[4];
     CORRADE_COMPARE(yes.data(), "\"yes\"");
     CORRADE_COMPARE(yes.type(), JsonToken::Type::String);
 
-    const JsonToken& true_ = json->tokens()[5];
+    JsonToken true_ = json->tokens()[5];
     CORRADE_COMPARE(true_.data(), "true");
     CORRADE_COMPARE(true_.type(), JsonToken::Type::Bool);
 
-    const JsonToken& matrix = json->tokens()[6];
+    JsonToken matrix = json->tokens()[6];
     CORRADE_COMPARE(matrix.data(), "\"matrix\"");
     CORRADE_COMPARE(matrix.type(), JsonToken::Type::String);
 
-    const JsonToken& matrixArray1 = json->tokens()[7];
+    JsonToken matrixArray1 = json->tokens()[7];
     /* GCC 4.8 can't handle raw string literals in macros */
     const char* matrixArray1Data = R"([[0, 1],
                      [2, 3]])";
     CORRADE_COMPARE(matrixArray1.data(), matrixArray1Data);
     CORRADE_COMPARE(matrixArray1.type(), JsonToken::Type::Array);
 
-    const JsonToken& matrixArray2 = json->tokens()[8];
+    JsonToken matrixArray2 = json->tokens()[8];
     CORRADE_COMPARE(matrixArray2.data(), "[0, 1]");
     CORRADE_COMPARE(matrixArray2.type(), JsonToken::Type::Array);
 
-    const JsonToken& zero = json->tokens()[9];
+    JsonToken zero = json->tokens()[9];
     CORRADE_COMPARE(zero.data(), "0");
     CORRADE_COMPARE(zero.type(), JsonToken::Type::Number);
 
-    const JsonToken& one = json->tokens()[10];
+    JsonToken one = json->tokens()[10];
     CORRADE_COMPARE(one.data(), "1");
     CORRADE_COMPARE(one.type(), JsonToken::Type::Number);
 
-    const JsonToken& matrixArray3 = json->tokens()[11];
+    JsonToken matrixArray3 = json->tokens()[11];
     CORRADE_COMPARE(matrixArray3.data(), "[2, 3]");
     CORRADE_COMPARE(matrixArray3.type(), JsonToken::Type::Array);
 
-    const JsonToken& two = json->tokens()[12];
+    JsonToken two = json->tokens()[12];
     CORRADE_COMPARE(two.data(), "2");
     CORRADE_COMPARE(two.type(), JsonToken::Type::Number);
 
-    const JsonToken& three = json->tokens()[13];
+    JsonToken three = json->tokens()[13];
     CORRADE_COMPARE(three.data(), "3");
     CORRADE_COMPARE(three.type(), JsonToken::Type::Number);
 
-    const JsonToken& braces = json->tokens()[14];
+    JsonToken braces = json->tokens()[14];
     CORRADE_COMPARE(braces.data(), "\"braces\"");
     CORRADE_COMPARE(braces.type(), JsonToken::Type::String);
 
-    const JsonToken& bracesObject = json->tokens()[15];
+    JsonToken bracesObject = json->tokens()[15];
     CORRADE_COMPARE(bracesObject.data(), "{\"again\": {}}");
     CORRADE_COMPARE(bracesObject.type(), JsonToken::Type::Object);
 
-    const JsonToken& again = json->tokens()[16];
+    JsonToken again = json->tokens()[16];
     CORRADE_COMPARE(again.data(), "\"again\"");
     CORRADE_COMPARE(again.type(), JsonToken::Type::String);
 
-    const JsonToken& emptyObject = json->tokens()[17];
+    JsonToken emptyObject = json->tokens()[17];
     CORRADE_COMPARE(emptyObject.data(), "{}");
     CORRADE_COMPARE(emptyObject.type(), JsonToken::Type::Object);
 
-    const JsonToken& number = json->tokens()[18];
+    JsonToken number = json->tokens()[18];
     CORRADE_COMPARE(number.data(), "-15.75");
     CORRADE_COMPARE(number.type(), JsonToken::Type::Number);
 
-    const JsonToken& bye = json->tokens()[19];
+    JsonToken bye = json->tokens()[19];
     CORRADE_COMPARE(bye.data(), "\"bye!\"");
     CORRADE_COMPARE(bye.type(), JsonToken::Type::String);
 
-    const JsonToken& emptyArray = json->tokens()[20];
+    JsonToken emptyArray = json->tokens()[20];
     CORRADE_COMPARE(emptyArray.data(), "[]");
     CORRADE_COMPARE(emptyArray.type(), JsonToken::Type::Array);
 
     /* No tokens should be parsed */
-    for(const JsonToken& i: json->tokens()) {
+    for(JsonToken i: json->tokens()) {
         CORRADE_ITERATION(i.data());
         CORRADE_VERIFY(!i.isParsed());
     }
@@ -1914,13 +1914,13 @@ void JsonTest::nested() {
     CORRADE_COMPARE(matrixArray3.childCount(), 2);
     CORRADE_COMPARE(braces.childCount(), 3);
     CORRADE_COMPARE(bracesObject.childCount(), 2);
-    for(const JsonToken* key: {&hello, &yes, &again}) {
-        CORRADE_ITERATION(key->data());
-        CORRADE_COMPARE(key->childCount(), 1);
+    for(JsonToken key: {hello, yes, again}) {
+        CORRADE_ITERATION(key.data());
+        CORRADE_COMPARE(key.childCount(), 1);
     }
-    for(const JsonToken* value: {&three, &true_, &zero, &one, &two, &three, &number, &emptyObject, &bye, &emptyArray}) {
-        CORRADE_ITERATION(value->data());
-        CORRADE_COMPARE(value->childCount(), 0);
+    for(JsonToken value: {three, true_, zero, one, two, three, number, emptyObject, bye, emptyArray}) {
+        CORRADE_ITERATION(value.data());
+        CORRADE_COMPARE(value.childCount(), 0);
     }
 
     /* Verify first childs */
@@ -2378,7 +2378,7 @@ void JsonTest::parseStringKeys() {
     Containers::String jsonData = format("{{{}: null}}", data.json);
     Containers::Optional<Json> json = Json::fromString({jsonData.data(), jsonData.size(), data.json.flags()});
     CORRADE_VERIFY(json);
-    const JsonToken& token = json->tokens()[1];
+    JsonToken token = json->tokens()[1];
     CORRADE_VERIFY(!token.isParsed());
     CORRADE_COMPARE(token.type(), JsonToken::Type::String);
     CORRADE_COMPARE(token.parsedType(), JsonToken::ParsedType::None);
@@ -2500,17 +2500,17 @@ void JsonTest::parseOption() {
     CORRADE_VERIFY(json);
     CORRADE_COMPARE(json->tokens().size(), 27);
 
-    const JsonToken& tokenParsed = json->tokens()[data.tokenParsed];
+    JsonToken tokenParsed = json->tokens()[data.tokenParsed];
     CORRADE_COMPARE(tokenParsed.data(), data.tokenData);
     CORRADE_COMPARE(tokenParsed.parsedType(), data.parsedType);
 
-    const JsonToken& tokenParsed2 = json->tokens()[data.tokenParsed2];
+    JsonToken tokenParsed2 = json->tokens()[data.tokenParsed2];
     CORRADE_COMPARE(tokenParsed2.data(), data.tokenData);
     CORRADE_COMPARE(tokenParsed2.parsedType(), data.parsedType);
 
     /* Verify tokens of other type are not parsed by accident */
     std::size_t notParsedCount = 0;
-    for(const JsonToken& token: json->tokens())
+    for(JsonToken token: json->tokens())
         if(!token.isParsed()) ++notParsedCount;
     CORRADE_COMPARE(notParsedCount, data.tokenNotParsedCount);
 }
@@ -2551,21 +2551,21 @@ void JsonTest::parseSubtree() {
     CORRADE_COMPARE(json->tokens().size(), 32);
     CORRADE_VERIFY(((*json).*data.function)(json->tokens()[data.parseRoot]));
 
-    const JsonToken& tokenParsed = json->tokens()[data.tokenParsed];
+    JsonToken tokenParsed = json->tokens()[data.tokenParsed];
     CORRADE_COMPARE(tokenParsed.data(), data.tokenData);
     CORRADE_COMPARE(tokenParsed.parsedType(), data.parsedType);
 
-    const JsonToken& tokenParsedDeep = json->tokens()[data.tokenParsedDeep];
+    JsonToken tokenParsedDeep = json->tokens()[data.tokenParsedDeep];
     CORRADE_COMPARE(tokenParsedDeep.data(), data.tokenData);
     CORRADE_COMPARE(tokenParsedDeep.parsedType(), data.parsedType);
 
-    const JsonToken& tokenNotParsedOut = json->tokens()[data.tokenNotParsed];
+    JsonToken tokenNotParsedOut = json->tokens()[data.tokenNotParsed];
     CORRADE_COMPARE(tokenNotParsedOut.data(), data.tokenData);
     CORRADE_VERIFY(!tokenNotParsedOut.isParsed());
 
     /* Verify tokens of other type are not parsed by accident */
     std::size_t notParsedCount = 0;
-    for(const JsonToken& token: json->tokens())
+    for(JsonToken token: json->tokens())
         if(!token.isParsed()) ++notParsedCount;
     CORRADE_COMPARE(notParsedCount, data.tokenNotParsedCount);
 }
@@ -2898,7 +2898,7 @@ void JsonTest::reparseNumberDifferentType() {
     Containers::Optional<Json> json = Json::fromString("35");
     CORRADE_VERIFY(json);
 
-    const JsonToken& token = json->root();
+    JsonToken token = json->root();
     CORRADE_VERIFY(json->parseDoubles(token));
     CORRADE_COMPARE(token.parsedType(), JsonToken::ParsedType::Double);
     CORRADE_COMPARE(token.asDouble(), 35.0);
@@ -2940,7 +2940,7 @@ void JsonTest::reparseSingleNumberDifferentType() {
     Containers::Optional<Json> json = Json::fromString("35");
     CORRADE_VERIFY(json);
 
-    const JsonToken& token = json->root();
+    JsonToken token = json->root();
     CORRADE_COMPARE(json->parseDouble(token), 35.0);
     CORRADE_COMPARE(token.parsedType(), JsonToken::ParsedType::Double);
 
@@ -2974,7 +2974,7 @@ void JsonTest::reparseNumberArrayDifferentType() {
     Containers::Optional<Json> json = Json::fromString("[35, 17]");
     CORRADE_VERIFY(json);
 
-    const JsonToken& token = json->root();
+    JsonToken token = json->root();
     {
         Containers::Optional<Containers::StridedArrayView1D<const double>> out = json->parseDoubleArray(token);
         CORRADE_VERIFY(out);
@@ -3051,8 +3051,8 @@ void JsonTest::parsedObjectChildAccess() {
     })");
     CORRADE_VERIFY(json);
 
-    const JsonToken& object = json->root();
-    for(const JsonToken& i: *json->parseObject(object)) {
+    JsonToken object = json->root();
+    for(JsonToken i: *json->parseObject(object)) {
         CORRADE_ITERATION(i.data());
         CORRADE_COMPARE(i.childCount(), 1);
         CORRADE_VERIFY(i.firstChild());
@@ -3075,7 +3075,7 @@ void JsonTest::parsedObjectChildAccess() {
     CORRADE_VERIFY(json->parseBool(object["bool"]));
     CORRADE_VERIFY(json->parseNull(object["null"]));
 
-    for(const JsonToken& i: object.asObject()) {
+    for(JsonToken i: object.asObject()) {
         CORRADE_ITERATION(i.data());
         CORRADE_COMPARE(i.childCount(), 1);
         CORRADE_VERIFY(i.firstChild());
@@ -3199,8 +3199,8 @@ void JsonTest::parseError() {
     Containers::Optional<Json> json = Json::fromString(format("\n\n     {}", data.json));
     CORRADE_VERIFY(json);
 
-    const JsonToken& token = json->root();
-    const JsonToken::Type type = token.type();
+    JsonToken token = json->root();
+    JsonToken::Type type = token.type();
 
     Containers::String out;
     Error redirectError{&out};
@@ -3524,7 +3524,7 @@ void JsonTest::iterate() {
     CORRADE_COMPARE(children[5].data(), "false");
 
     Containers::Array<Containers::StringView> data;
-    for(const JsonToken& a: children)
+    for(JsonToken a: children)
         arrayAppend(data, a.data());
 
     CORRADE_COMPARE_AS(data, (Containers::arrayView<Containers::StringView>({
@@ -3602,7 +3602,7 @@ void JsonTest::iterateObjectTokens() {
     CORRADE_VERIFY(json);
 
     Containers::Array<Containers::StringView> data;
-    for(const JsonToken& a: json->root().asObject())
+    for(JsonToken a: json->root().asObject())
         arrayAppend(data, a.data());
 
     CORRADE_COMPARE_AS(data, Containers::arrayView({
@@ -3682,7 +3682,7 @@ void JsonTest::iterateArrayTokens() {
     CORRADE_VERIFY(json);
 
     Containers::Array<Containers::StringView> tokens;
-    for(const JsonToken& a: json->root().asArray())
+    for(JsonToken a: json->root().asArray())
         arrayAppend(tokens, a.data());
 
     CORRADE_COMPARE_AS(tokens, Containers::arrayView({
@@ -4647,11 +4647,11 @@ void JsonTest::fromFile() {
     CORRADE_VERIFY(json);
     CORRADE_COMPARE(json->tokens().size(), 2);
 
-    const JsonToken& array = json->tokens()[0];
+    JsonToken array = json->tokens()[0];
     CORRADE_COMPARE(array.data(), "[\n    -haha\n]");
     CORRADE_COMPARE(array.type(), JsonToken::Type::Array);
 
-    const JsonToken& number = json->tokens()[1];
+    JsonToken number = json->tokens()[1];
     CORRADE_COMPARE(number.data(), "-haha");
     CORRADE_COMPARE(number.type(), JsonToken::Type::Number);
 }

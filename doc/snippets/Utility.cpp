@@ -779,7 +779,7 @@ Containers::Optional<Utility::Json> gltf =
 if(!gltf)
     Utility::Fatal{} << "Whoops!";
 
-const Utility::JsonToken& gltfNode = gltf->root()["nodes"][i];
+Utility::JsonToken gltfNode = gltf->root()["nodes"][i];
 Utility::Debug{}
     << "Node" << i << "is named" << gltfNode["name"].asString()
     << "and has a mesh" << gltfNode["mesh"].asFloat();
@@ -886,14 +886,14 @@ for(Utility::JsonArrayItem gltfNode: gltfNodes->asArray()) {
 Utility::JsonIterator gltfNodes;
 /* [Json-usage-iteration-values] */
 Containers::Array<Containers::Reference<const Utility::JsonToken>> gltfNodeMap;
-for(const Utility::JsonToken& gltfNode: gltfNodes->asArray())
+for(Utility::JsonToken gltfNode: gltfNodes->asArray())
     arrayAppend(gltfNodeMap, gltfNode);
 /* [Json-usage-iteration-values] */
 }
 
 {
 Containers::Optional<Utility::Json> gltf;
-const Utility::JsonToken& gltfNode = gltf->root();
+Utility::JsonToken gltfNode = gltf->root();
 /* [Json-usage-direct-array-access] */
 Containers::Optional<Containers::StridedArrayView1D<const float>> translation;
 if(Utility::JsonIterator gltfNodeTranslation = gltfNode.find("translation"))
