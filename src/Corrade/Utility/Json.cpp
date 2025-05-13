@@ -299,13 +299,16 @@ Containers::Optional<Json> Json::tokenize(const Containers::StringView filename,
     json._state->lineOffset = lineOffset;
     json._state->columnOffset = columnOffset;
 
-    /* A sentinel token at the start, to limit Json::parent() */
-    constexpr JsonTokenData sentinel{ValueInit};
-    arrayAppend(json._state->tokenStorage, sentinel);
-
     /* Remember surrounding object or array token index to update its size,
        child count and check matching braces when encountering } / ] */
-    std::size_t objectOrArrayTokenIndex = 0;
+    constexpr std::size_t NoObjectOrArrayEndExpected =
+        #ifndef CORRADE_TARGET_32BIT
+        ~std::size_t{}
+        #else
+        ~std::size_t{} & JsonToken::ChildCountMask
+        #endif
+        ;
+    std::size_t objectOrArrayTokenIndex = NoObjectOrArrayEndExpected;
 
     /* Remember what token to expect next; error printer utility. Can't be a
        free function in an anonymous namespace because it needs access to
@@ -423,7 +426,7 @@ Containers::Optional<Json> Json::tokenize(const Containers::StringView filename,
 
                 /* Next should be a comma or an end depending on what the
                    new parent is */
-                if(!objectOrArrayTokenIndex)
+                if(objectOrArrayTokenIndex == NoObjectOrArrayEndExpected)
                     expecting = Expecting::DocumentEnd;
                 else
                     expecting = (json._state->tokenStorage[objectOrArrayTokenIndex].
@@ -526,7 +529,7 @@ Containers::Optional<Json> Json::tokenize(const Containers::StringView filename,
                 } else if(expecting == Expecting::Value ||
                           expecting == Expecting::ValueOrArrayEnd)
                 {
-                    if(!objectOrArrayTokenIndex)
+                    if(objectOrArrayTokenIndex == NoObjectOrArrayEndExpected)
                         expecting = Expecting::DocumentEnd;
                     else
                         expecting = (json._state->tokenStorage[objectOrArrayTokenIndex].
@@ -602,7 +605,7 @@ Containers::Optional<Json> Json::tokenize(const Containers::StringView filename,
 
                 /* Expecting a comma or end next, depending on what the parent
                    is */
-                if(!objectOrArrayTokenIndex)
+                if(objectOrArrayTokenIndex == NoObjectOrArrayEndExpected)
                     expecting = Expecting::DocumentEnd;
                 else
                     expecting = (json._state->tokenStorage[objectOrArrayTokenIndex].
@@ -673,7 +676,7 @@ Containers::Optional<Json> Json::tokenize(const Containers::StringView filename,
         return {};
     }
 
-    if(objectOrArrayTokenIndex != 0) {
+    if(objectOrArrayTokenIndex != NoObjectOrArrayEndExpected) {
         Error err;
         err << ErrorPrefix << "file too short, expected closing";
         const JsonTokenData& token = json._state->tokenStorage[objectOrArrayTokenIndex];
@@ -775,14 +778,14 @@ Json::~Json() = default;
 Json& Json::operator=(Json&&) noexcept = default;
 
 JsonView Json::tokens() const {
-    return JsonView{*_state, 1, _state->tokenStorage.size() - 1};
+    return JsonView{*_state, 0, _state->tokenStorage.size()};
 }
 
 JsonToken Json::root() const {
     /* An empty file is not a valid JSON, so there should always be at least
-       one token plus sentinel at the start */
-    CORRADE_INTERNAL_ASSERT(_state->tokenStorage.size() >= 2);
-    return JsonToken{*_state, 1};
+       one token */
+    CORRADE_INTERNAL_ASSERT(!_state->tokenStorage.isEmpty());
+    return JsonToken{*_state, 0};
 }
 
 void Json::parseObjectArrayInternal(JsonTokenData& token) {
@@ -2415,12 +2418,11 @@ JsonView JsonToken::children() const {
 
 JsonIterator JsonToken::parent() const {
     /* Traverse backwards until a token that spans over this one is found, or
-       until we reach the sentinel */
-    const JsonTokenData* const data = _json->tokens + _token;
-    const JsonTokenData* prev = data - 1;
-    while(prev->_data && prev + prev->childCount() < data)
+       until we reach begin (and so the value underflows to ~std::size_t{}) */
+    std::size_t prev = _token - 1;
+    while(prev != ~std::size_t{} && prev + _json->tokens[prev].childCount() < _token)
         --prev;
-    return prev->_data ? JsonIterator{_json, std::size_t(_token + prev - data)} : JsonIterator{};
+    return prev != ~std::size_t{} ? JsonIterator{_json, prev} : JsonIterator{};
 }
 
 JsonObjectView JsonToken::asObject() const {

@@ -2051,21 +2051,9 @@ class CORRADE_UTILITY_EXPORT JsonTokenData {
         friend JsonObjectIterator; /* uses childCount() */
         friend JsonArrayIterator; /* uses childCount() */
 
-        /* These constructors are currently private because user code should
-           have no need to create instances of this class directly */
+        /* This constructor is currently private because user code should have
+           no need to create instances of this class directly */
         explicit JsonTokenData(NoInitT) /*nothing*/ {}
-        constexpr explicit JsonTokenData(ValueInitT): _data{},
-            #ifndef CORRADE_TARGET_32BIT
-            _sizeFlagsParsedTypeType{},
-            #else
-            _sizeParsedType{},
-            #endif
-            #ifndef CORRADE_TARGET_32BIT
-            _childCount{}
-            #else
-            _childCountFlagsTypeNan{}
-            #endif
-            {}
 
         /* These are all private because they may depend on spatial locality
            relative to other tokens, which has to be ensured externally */
@@ -2254,7 +2242,7 @@ class JsonIterator {
          */
         JsonIterator& operator--() {
             CORRADE_DEBUG_ASSERT(_json, "Utility::JsonIterator::operator--(): the iterator is invalid", *this);
-            CORRADE_DEBUG_ASSERT(_token > 1, /* token 0 is the sentinel */
+            CORRADE_DEBUG_ASSERT(_token > 0,
                 "Utility::JsonIterator::operator--(): advancing past the begin of the token stream", *this);
             --_token;
             return *this;
