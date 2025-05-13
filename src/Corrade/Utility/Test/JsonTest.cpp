@@ -3033,7 +3033,7 @@ void JsonTest::parsedObjectChildAccess() {
     CORRADE_VERIFY(json);
 
     const JsonToken& object = json->root();
-    for(const Utility::JsonToken& i: *json->parseObject(object)) {
+    for(const JsonToken& i: *json->parseObject(object)) {
         CORRADE_ITERATION(i.data());
         CORRADE_COMPARE(i.childCount(), 1);
         CORRADE_VERIFY(i.firstChild());
@@ -3056,7 +3056,7 @@ void JsonTest::parsedObjectChildAccess() {
     CORRADE_VERIFY(json->parseBool(object["bool"]));
     CORRADE_VERIFY(json->parseNull(object["null"]));
 
-    for(const Utility::JsonToken& i: object.asObject()) {
+    for(const JsonToken& i: object.asObject()) {
         CORRADE_ITERATION(i.data());
         CORRADE_COMPARE(i.childCount(), 1);
         CORRADE_VERIFY(i.firstChild());
@@ -3071,10 +3071,10 @@ void JsonTest::parsedObjectFind() {
     })");
     CORRADE_VERIFY(json);
 
-    Containers::Optional<Utility::JsonObjectView> object = json->parseObject(json->root());
+    Containers::Optional<JsonObjectView> object = json->parseObject(json->root());
     CORRADE_VERIFY(object);
 
-    const Utility::JsonToken* another = object->find("another");
+    const JsonToken* another = object->find("another");
     CORRADE_VERIFY(another);
     CORRADE_COMPARE(another->data(), "3");
     CORRADE_COMPARE((*object)["another"].data(), "3");
@@ -3094,7 +3094,7 @@ void JsonTest::parsedObjectFindEmpty() {
     Containers::Optional<Json> json = Json::fromString(data.jsonObject);
     CORRADE_VERIFY(json);
 
-    Containers::Optional<Utility::JsonObjectView> object = json->parseObject(json->tokens()[data.tokenIndex]);
+    Containers::Optional<JsonObjectView> object = json->parseObject(json->tokens()[data.tokenIndex]);
     CORRADE_VERIFY(object);
 
     CORRADE_COMPARE(object->find("something"), nullptr);
@@ -3109,7 +3109,7 @@ void JsonTest::parsedObjectAccessEmpty() {
     Containers::Optional<Json> json = Json::fromString(data.jsonObject);
     CORRADE_VERIFY(json);
 
-    Containers::Optional<Utility::JsonObjectView> object = json->parseObject(json->tokens()[data.tokenIndex]);
+    Containers::Optional<JsonObjectView> object = json->parseObject(json->tokens()[data.tokenIndex]);
     CORRADE_VERIFY(object);
 
     Containers::String out;
@@ -3126,10 +3126,10 @@ void JsonTest::parsedArrayFind() {
     ])");
     CORRADE_VERIFY(json);
 
-    Containers::Optional<Utility::JsonArrayView> array = json->parseArray(json->root());
+    Containers::Optional<JsonArrayView> array = json->parseArray(json->root());
     CORRADE_VERIFY(array);
 
-    const Utility::JsonToken* value = array->find(2);
+    const JsonToken* value = array->find(2);
     CORRADE_VERIFY(value);
     CORRADE_COMPARE(value->data(), "3");
     CORRADE_COMPARE((*array)[2].data(), "3");
@@ -3149,7 +3149,7 @@ void JsonTest::parsedArrayFindEmpty() {
     Containers::Optional<Json> json = Json::fromString(data.jsonArray);
     CORRADE_VERIFY(json);
 
-    Containers::Optional<Utility::JsonArrayView> array = json->parseArray(json->tokens()[data.tokenIndex]);
+    Containers::Optional<JsonArrayView> array = json->parseArray(json->tokens()[data.tokenIndex]);
     CORRADE_VERIFY(array);
 
     CORRADE_COMPARE(array->find(0), nullptr);
@@ -3164,7 +3164,7 @@ void JsonTest::parsedArrayAccessEmpty() {
     Containers::Optional<Json> json = Json::fromString(data.jsonArray);
     CORRADE_VERIFY(json);
 
-    Containers::Optional<Utility::JsonArrayView> array = json->parseArray(json->tokens()[data.tokenIndex]);
+    Containers::Optional<JsonArrayView> array = json->parseArray(json->tokens()[data.tokenIndex]);
     CORRADE_VERIFY(array);
 
     Containers::String out;
