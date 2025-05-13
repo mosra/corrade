@@ -31,6 +31,7 @@
 #include <sstream>
 
 #include "Corrade/Containers/Array.h"
+#include "Corrade/Containers/BitArray.h"
 #include "Corrade/Containers/GrowableArray.h"
 #include "Corrade/Containers/Optional.h"
 #include "Corrade/Containers/Pair.h"
@@ -1044,11 +1045,10 @@ switch(a) {
 
 {
 std::size_t size{};
-/** @todo use Containers::BoolArray once it exists */
 /* [CORRADE_LIKELY] */
 float* in = DOXYGEN_ELLIPSIS(nullptr);
 float* out = DOXYGEN_ELLIPSIS(nullptr);
-std::vector<bool> mask = DOXYGEN_ELLIPSIS({});
+Containers::BitArray mask = DOXYGEN_ELLIPSIS({});
 for(std::size_t i = 0; i != size; ++i) {
     if CORRADE_LIKELY(mask[i]) {
         out[i] = in[i];
