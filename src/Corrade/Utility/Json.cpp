@@ -2285,7 +2285,7 @@ Containers::Optional<Containers::StringIterable> Json::parseStringArray(const Js
 }
 
 JsonToken::JsonToken(const Json& json, const JsonTokenData& token) noexcept: _json{json._state.get()}, _token{std::size_t(&token - _json->tokens)} {
-    CORRADE_ASSERT(_token < json._state->tokenStorage.size(),
+    CORRADE_ASSERT(_token < _json->tokenCount,
         "Utility::JsonToken: token not owned by given Json instance", );
 }
 
