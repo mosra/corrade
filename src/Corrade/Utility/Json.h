@@ -2087,7 +2087,7 @@ class CORRADE_UTILITY_EXPORT JsonTokenData {
             std::int64_t _parsedLong;
             std::uint32_t _parsedUnsignedInt;
             std::int32_t _parsedInt;
-            Containers::String* _parsedString;
+            std::size_t _parsedString;
         };
 };
 

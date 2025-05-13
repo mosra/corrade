@@ -108,7 +108,7 @@ JSONs with petabyte sizes to exist anytime soon.
     +-------------------+      +-------------------+      +-------------------+
     |    size     | ... |  or  |    size     | ... |  or  |    size     | ... |
     +-------------------+      +-------------------+      +-------------------+
-    |   bool / number   |      |  string pointer   |      |    child count    |
+    |   bool / number   |      |   string index    |      |    child count    |
     +-------------------+      +-------------------+      +-------------------+
 
 In the upper bits of size we store these 9 bits of information:
@@ -128,7 +128,7 @@ And then the final 64bit value is either:
 
 -   a bool value,
 -   a double, float, (unsigned) int or (unsigned) long value,
--   a pointer to an external parsed string,
+-   an index of an external parsed string,
 -   or child count for object and arrays.
 
 ### 32bit case
@@ -323,10 +323,6 @@ Containers::Optional<Json> Json::tokenize(const Containers::StringView filename,
         return Containers::NullOpt;
     };
 
-    /* Remember how many strings contain escape codes to allocate an immovable
-       storage for them */
-    std::size_t escapedStringCount = 0;
-
     /* Go through the file byte by byte */
     const std::size_t size = json._state->string.size();
     const char* const data = json._state->string.data();
@@ -477,7 +473,6 @@ Containers::Optional<Json> Json::tokenize(const Containers::StringView filename,
                         case 't':
                         case 'u': /* Deliberately not validating Unicode here */
                             escapedFlag = JsonToken::FlagStringEscaped;
-                            ++escapedStringCount;
                             break;
                         default: {
                             Error err;
@@ -690,10 +685,9 @@ Containers::Optional<Json> Json::tokenize(const Containers::StringView filename,
         return {};
     }
 
-    /* Reserve memory for parsed string instances -- since the tokens reference
-       them through a pointer, it has to be an immovable allocation */
-    /** @todo use a non-reallocating allocator once it exists */
-    arrayReserve(json._state->strings, escapedStringCount);
+    /* Not reserving memory for parsed string instances with the assumption
+       that only a subset may ultimately get parsed, and they get appended into
+       the array on-demand, without their index fixed */
 
     /* All good. Fill the token data + size members in the JsonData base and
        return. */
@@ -1271,12 +1265,6 @@ bool Json::parseStringInternal(const char* const errorPrefix, JsonTokenData& tok
 
     /* Otherwise parse the escapes */
     const Containers::StringView string = token.data();
-    /** @todo use a non-reallocating allocator for more robustness once it
-        exists */
-    /* This assert would fire if we miscalculated during an initial parse
-       (unlikely). With this check failing the array would get reallocated,
-       causing existing parsed string pointers to become dangling. */
-    CORRADE_INTERNAL_ASSERT(_state->strings.size() < arrayCapacity(_state->strings));
     Containers::String& destination = arrayAppend(_state->strings, InPlaceInit, NoInit, string.size());
 
     /* Ignore the quotes at the begin/end */
@@ -1371,8 +1359,8 @@ bool Json::parseStringInternal(const char* const errorPrefix, JsonTokenData& tok
     else
         destination = Containers::String{destination.release(), std::size_t(out - outBegin), nullptr};
 
-    /* On success save pointer to the parsed string and mark it as parsed */
-    token._parsedString = &destination;
+    /* On success save index of the parsed string and mark it as parsed */
+    token._parsedString = _state->strings.size() - 1;
     #ifndef CORRADE_TARGET_32BIT
     token._sizeFlagsParsedTypeType =
         (token._sizeFlagsParsedTypeType & ~JsonToken::ParsedTypeMask)|
@@ -1874,8 +1862,12 @@ Containers::Optional<Containers::StringView> Json::parseString(const JsonToken t
                 Containers::StringViewFlag::Global : Containers::StringViewFlags{}
         };
 
-    /* Otherwise take the cached version */
-    return Containers::StringView{*token._parsedString};
+    /* Otherwise take the cached version. Compared to _json->tokens the strings
+       pointer isn't stored in the base JsonData array -- it may get changed on
+       every reallocation so it'd have to get updated each time parseString()
+       etc gets called, but we don't need to access that in the header so we
+       can also just peek directly into the derived struct. */
+    return Containers::StringView{state.strings[token._parsedString]};
 }
 
 Containers::Optional<Containers::StridedBitArrayView1D> Json::parseBitArray(const JsonToken token_, const std::size_t expectedSize) {
@@ -2546,8 +2538,12 @@ Containers::StringView JsonToken::asStringInternal() const {
                 Containers::StringViewFlag::Global : Containers::StringViewFlags{}
         };
 
-    /* Otherwise take the cached version */
-    return *data._parsedString;
+    /* Otherwise take the cached version. Compared to _json->tokens the strings
+       pointer isn't stored in the base JsonData array -- it may get changed on
+       every reallocation so it'd have to get updated each time parseString()
+       etc gets called, but we don't need to access that in the header so we
+       can also just peek directly into the derived struct. */
+    return static_cast<const Json::State*>(_json)->strings[data._parsedString];
 }
 
 Containers::StringView JsonToken::asString() const {
