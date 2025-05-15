@@ -320,25 +320,46 @@ const struct {
 const struct {
     const char* name;
     bool singleValue;
+    Containers::StringViewFlags flags;
 } ParseObjectData[]{
-    {"", false},
-    {"single value", true}
+    /* All variants use Global unless said otherwise, to verify that the parsed
+       result is cached and reused */
+    {"", false,
+        Containers::StringViewFlag::Global},
+    {"single value", true,
+        Containers::StringViewFlag::Global},
+    {"non-global but null-terminated input string", false,
+        Containers::StringViewFlag::NullTerminated},
 };
 
 const struct {
     const char* name;
     bool singleValue;
+    Containers::StringViewFlags flags;
 } ParseArrayData[]{
-    {"", false},
-    {"single value", true}
+    /* All variants use Global unless said otherwise, to verify that the parsed
+       result is cached and reused */
+    {"", false,
+        Containers::StringViewFlag::Global},
+    {"single value", true,
+        Containers::StringViewFlag::Global},
+    {"non-global but null-terminated input string", false,
+        Containers::StringViewFlag::NullTerminated},
 };
 
 const struct {
     const char* name;
     bool singleValue;
+    Containers::StringViewFlags flags;
 } ParseNullData[]{
-    {"", false},
-    {"single value", true}
+    /* All variants use Global unless said otherwise, to verify that the parsed
+       result is cached and reused */
+    {"", false,
+        Containers::StringViewFlag::Global},
+    {"single value", true,
+        Containers::StringViewFlag::Global},
+    {"non-global but null-terminated input string", false,
+        Containers::StringViewFlag::NullTerminated},
 };
 
 const struct {
@@ -346,10 +367,18 @@ const struct {
     const char* json;
     bool singleValue;
     bool expected;
+    Containers::StringViewFlags flags;
 } ParseBoolData[]{
-    {"true", "true", false, true},
-    {"false", "false", false, false},
-    {"single value", "true", true, true}
+    /* All variants use Global unless said otherwise, to verify that the parsed
+       result is cached and reused */
+    {"true", "true", false, true,
+        Containers::StringViewFlag::Global},
+    {"false", "false", false, false,
+        Containers::StringViewFlag::Global},
+    {"single value", "true", true, true,
+        Containers::StringViewFlag::Global},
+    {"non-global but null-terminated input string", "true", false, true,
+        Containers::StringViewFlag::NullTerminated},
 };
 
 const struct {
@@ -357,18 +386,31 @@ const struct {
     const char* json;
     bool singleValue;
     double expected;
+    Containers::StringViewFlags flags;
 } ParseDoubleOrFloatData[]{
-    {"", "35.7", false, 35.7},
-    {"negative", "-35.7", false, -35.7},
-    {"negative zero", "-0", false, -0.0}, /** @todo check this more precisely */
-    {"exponent", "-3550.0e-2", false, -35.5},
-    {"exponent uppercase", "-35.5E2", false, -3550},
-    {"exponent explicit plus", "-35.5E+2", false, -3550},
+    /* All variants use Global unless said otherwise, to verify that the parsed
+       result is cached and reused */
+    {"", "35.7", false, 35.7,
+        Containers::StringViewFlag::Global},
+    {"negative", "-35.7", false, -35.7,
+        Containers::StringViewFlag::Global},
+    {"negative zero", "-0", false, -0.0, /** @todo check this more precisely */
+        Containers::StringViewFlag::Global},
+    {"exponent", "-3550.0e-2", false, -35.5,
+        Containers::StringViewFlag::Global},
+    {"exponent uppercase", "-35.5E2", false, -3550,
+        Containers::StringViewFlag::Global},
+    {"exponent explicit plus", "-35.5E+2", false, -3550,
+        Containers::StringViewFlag::Global},
     {"127 characters",
        "1234.567890123456789012345678901234567890" /* 40 chars on a line */
         "1234567890123456789012345678901234567890"
-        "1234567890123456789012345678901234567890123456", false, 1234.567890123456789},
-    {"single value", "35.7", true, 35.7}
+        "1234567890123456789012345678901234567890123456", false, 1234.567890123456789,
+        Containers::StringViewFlag::Global},
+    {"single value", "35.7", true, 35.7,
+        Containers::StringViewFlag::Global},
+    {"non-global but null-terminated input string", "35.7", false, 35.7,
+        Containers::StringViewFlag::NullTerminated},
 };
 
 const struct {
@@ -376,20 +418,31 @@ const struct {
     const char* json;
     bool singleValue;
     std::uint32_t expected;
+    Containers::StringViewFlags flags;
 } ParseUnsignedIntData[]{
-    {"", "357", false, 357},
-    {"zero", "0", false, 0},
+    /* All variants use Global unless said otherwise, to verify that the parsed
+       result is cached and reused */
+    {"", "357", false, 357,
+        Containers::StringViewFlag::Global},
+    {"zero", "0", false, 0,
+        Containers::StringViewFlag::Global},
     /* Verifying both "full bits" and also a value that needs the whole width,
        because apparently if 64 "full bits" get parsed into an int and then
        expanded back to 64bits, you get the correct number. Sigh. */
-    {"max value, full bit width", "4000000000", false, 4000000000},
-    {"max value, all bits set", "4294967295", false, 4294967295},
+    {"max value, full bit width", "4000000000", false, 4000000000,
+        Containers::StringViewFlag::Global},
+    {"max value, all bits set", "4294967295", false, 4294967295,
+        Containers::StringViewFlag::Global},
     {"127 characters",
       // 1234567890123456789012345678901234567890 (40 chars on a line)
         "0000000000000000000000000000000000000000"
         "0000000000000000000000000000000000000000"
-        "00000000000000000000000000000000000000901234567", false, 901234567},
-    {"single value", "357", true, 357}
+        "00000000000000000000000000000000000000901234567", false, 901234567,
+        Containers::StringViewFlag::Global},
+    {"single value", "357", true, 357,
+        Containers::StringViewFlag::Global},
+    {"non-global but null-terminated input string", "357", false, 357,
+        Containers::StringViewFlag::NullTerminated},
 };
 
 const struct {
@@ -397,26 +450,39 @@ const struct {
     const char* json;
     bool singleValue;
     std::int32_t expected;
+    Containers::StringViewFlags flags;
 } ParseIntData[]{
-    {"", "357", false, 357},
-    {"negative", "-464", false, -464},
+    /* All variants use Global unless said otherwise, to verify that the parsed
+       result is cached and reused */
+    {"", "357", false, 357,
+        Containers::StringViewFlag::Global},
+    {"negative", "-464", false, -464,
+        Containers::StringViewFlag::Global},
     /* Verifying both "full bits" and also a value that needs the whole width,
        because apparently if 64 "full bits" get parsed into an int and then
        expanded back to 64bits, you get the correct number. Sigh. */
-    {"min value, full bit width", "-2000000000", false, -2000000000},
+    {"min value, full bit width", "-2000000000", false, -2000000000,
+        Containers::StringViewFlag::Global},
     /* -2147483648 causes an "unary minus operator applied to unsigned type,
        result still unsigned" warning on MSVC, there's simply no way to enter
        that value as a literal. Don't ask how it's with a min negative 64bit
        value, even more terrible. */
-    {"min value, all bits set", "-2147483648", false, -2147483647 - 1},
-    {"max value, full bit width", "2000000000", false, 2000000000},
-    {"max value, all bits set", "2147483647", false, 2147483647},
+    {"min value, all bits set", "-2147483648", false, -2147483647 - 1,
+        Containers::StringViewFlag::Global},
+    {"max value, full bit width", "2000000000", false, 2000000000,
+        Containers::StringViewFlag::Global},
+    {"max value, all bits set", "2147483647", false, 2147483647,
+        Containers::StringViewFlag::Global},
     {"127 characters",
       // 1234567890123456789012345678901234567890 (40 chars on a line)
        "-0000000000000000000000000000000000000000"
         "0000000000000000000000000000000000000000"
-        "0000000000000000000000000000000000000090123456", false, -90123456},
-    {"single value", "-357", true, -357}
+        "0000000000000000000000000000000000000090123456", false, -90123456,
+        Containers::StringViewFlag::Global},
+    {"single value", "-357", true, -357,
+        Containers::StringViewFlag::Global},
+    {"non-global but null-terminated input string", "357", false, 357,
+        Containers::StringViewFlag::NullTerminated},
 };
 
 const struct {
@@ -424,20 +490,31 @@ const struct {
     const char* json;
     bool singleValue;
     std::uint64_t expected;
+    Containers::StringViewFlags flags;
 } ParseUnsignedLongData[]{
-    {"", "357", false, 357},
-    {"zero", "0", false, 0},
+    /* All variants use Global unless said otherwise, to verify that the parsed
+       result is cached and reused */
+    {"", "357", false, 357,
+        Containers::StringViewFlag::Global},
+    {"zero", "0", false, 0,
+        Containers::StringViewFlag::Global},
     /* Verifying both "full bits" and also a value that needs the whole width,
        because apparently if 64 "full bits" get parsed into an int and then
        expanded back to 64bits, you get the correct number. Sigh. */
-    {"max 52bit value, full bit width", "4000000000000000", false, 4000000000000000ull},
-    {"max 52bit value, all bits set", "4503599627370495", false, 4503599627370495ull},
+    {"max 52bit value, full bit width", "4000000000000000", false, 4000000000000000ull,
+        Containers::StringViewFlag::Global},
+    {"max 52bit value, all bits set", "4503599627370495", false, 4503599627370495ull,
+        Containers::StringViewFlag::Global},
     {"127 characters",
       // 1234567890123456789012345678901234567890 (40 chars on a line)
         "0000000000000000000000000000000000000000"
         "0000000000000000000000000000000000000000"
-        "00000000000000000000000000000002345678901234567", false, 2345678901234567ull},
-    {"single value", "357", true, 357}
+        "00000000000000000000000000000002345678901234567", false, 2345678901234567ull,
+        Containers::StringViewFlag::Global},
+    {"single value", "357", true, 357,
+        Containers::StringViewFlag::Global},
+    {"non-global but null-terminated input string", "357", false, 357,
+        Containers::StringViewFlag::NullTerminated},
 };
 
 const struct {
@@ -445,82 +522,99 @@ const struct {
     const char* json;
     bool singleValue;
     std::int64_t expected;
+    Containers::StringViewFlags flags;
 } ParseLongData[]{
-    {"", "357", false, 357},
-    {"negative", "-464", false, -464},
+    /* All variants use Global unless said otherwise, to verify that the parsed
+       result is cached and reused */
+    {"", "357", false, 357,
+        Containers::StringViewFlag::Global},
+    {"negative", "-464", false, -464,
+        Containers::StringViewFlag::Global},
     /* Verifying both "full bits" and also a value that needs the whole width,
        because apparently if 64 "full bits" get parsed into an int and then
        expanded back to 64bits, you get the correct number. Sigh. */
-    {"min 53bit value, full bit width", "-4000000000000000", false, -4000000000000000ll},
-    {"min 53bit value, all bits set", "-4503599627370496", false, -4503599627370496ll},
-    {"max 53bit value, full bit width", "4000000000000000", false, 4000000000000000ll},
-    {"max 53bit value, all bits set", "4503599627370495", false, 4503599627370495ll},
+    {"min 53bit value, full bit width", "-4000000000000000", false, -4000000000000000ll,
+        Containers::StringViewFlag::Global},
+    {"min 53bit value, all bits set", "-4503599627370496", false, -4503599627370496ll,
+        Containers::StringViewFlag::Global},
+    {"max 53bit value, full bit width", "4000000000000000", false, 4000000000000000ll,
+        Containers::StringViewFlag::Global},
+    {"max 53bit value, all bits set", "4503599627370495", false, 4503599627370495ll,
+        Containers::StringViewFlag::Global},
     {"127 characters",
       // 1234567890123456789012345678901234567890 (40 chars on a line)
         "-0000000000000000000000000000000000000000"
         "0000000000000000000000000000000000000000"
-        "0000000000000000000000000000000234567890123456", false, -234567890123456ll},
-    {"single value", "-357", true, -357}
+        "0000000000000000000000000000000234567890123456", false, -234567890123456ll,
+        Containers::StringViewFlag::Global},
+    {"single value", "-357", true, -357,
+        Containers::StringViewFlag::Global},
+    {"non-global but null-terminated input string", "357", false, 357,
+        Containers::StringViewFlag::NullTerminated},
 };
 
 const struct {
-    const char* name;
-    const Containers::StringView json;
+    TestSuite::TestCaseDescriptionSourceLocation name;
+    Containers::StringView json;
     bool singleValue;
-    const Containers::StringView expected;
+    const char* expected;
+    Containers::StringViewFlags expectedFlags;
     const char* expectFail;
 } ParseStringData[]{
     {"",
         "\"hello!\"", false,
-        "hello!", nullptr},
+        "hello!", {}, nullptr},
     {"empty",
         "\"\"", false,
-        "", nullptr},
+        "", {}, nullptr},
     {"escapes",
         "\"\\\"\\\\\\/\\b\\f\\n\\r\\t\"", false,
-        "\"\\/\b\f\n\r\t", nullptr},
+        "\"\\/\b\f\n\r\t", {}, nullptr},
     /* Adapted from UnicodeTest::utf32utf8(), converting the input to hex */
     {"1-character Unicode escape",
         "\"\\u007f\"", false,
-        "\x7f", nullptr},
+        "\x7f", {}, nullptr},
     {"2-character Unicode escape",
         "\"\\u03ac\"", false,
-        "\xce\xac", nullptr},
+        "\xce\xac", {}, nullptr},
     {"3-character Unicode escape",
         "\"\\uae09\"", false,
-        "\xea\xb8\x89", nullptr},
+        "\xea\xb8\x89", {}, nullptr},
     {"uppercase Unicode escape",
         "\"\\uAE09\"", false,
-        "\xea\xb8\x89", nullptr},
+        "\xea\xb8\x89", {}, nullptr},
     {"4-character Unicode escape",
         /* From https://en.wikipedia.org/wiki/JSON#Character_encoding */
         "\"\\ud83d\\ude10\"", false,
-        "\xf0\x9f\x98\x90",
+        "\xf0\x9f\x98\x90", {},
         "UTF-16 surrogate pairs are not decoded properly at the moment."},
     {"SSO string with escapes",
         "\"\\\\\"", false,
-        "\\", nullptr},
+        "\\", {}, nullptr},
     {"non-SSO string with escapes",
         "\"this is a very long escaped\\nstring, \\\"yes\\\"!\"", false,
-        "this is a very long escaped\nstring, \"yes\"!", nullptr},
+        "this is a very long escaped\nstring, \"yes\"!", {}, nullptr},
     {"global literal",
         "\"hello!\""_s, false,
-        "hello!"_s, nullptr},
+        "hello!", Containers::StringViewFlag::Global|Containers::StringViewFlag::NullTerminated, nullptr},
+    {"global non-null-terminated literal",
+        "\"hello!\"!"_s.exceptSuffix(1), false,
+        "hello!", Containers::StringViewFlag::Global, nullptr},
     {"global escaped literal",
         "\"hell\\\"o\\\"!\""_s, false,
-        "hell\"o\"!", nullptr},
+        "hell\"o\"!", {}, nullptr},
     {"single value",
         "\"hello!\"", true,
-        "hello!", nullptr},
+        "hello!", {}, nullptr},
     {"single escaped value",
         "\"hell\\\"o\\\"!\"", true,
-        "hell\"o\"!", nullptr},
+        "hell\"o\"!", {}, nullptr},
     {"single global value",
         "\"hello!\""_s, true,
-        "hello!"_s, nullptr},
+        "hello!", Containers::StringViewFlag::Global, nullptr},
     {"single global escaped value",
         "\"hell\\\"o\\\"!\""_s, true,
-        "hell\"o\"!", nullptr}
+        "hell\"o\"!", {}, nullptr}
 };
 
 const struct {
@@ -1962,12 +2056,21 @@ void JsonTest::parseObjects() {
     auto&& data = ParseObjectData[testCaseInstanceId()];
     setTestCaseDescription(data.name);
 
-    Containers::Optional<Json> json = Json::fromString("{\"a\": [[\"b\"]], \"c\": 3, \"d\": {\"e\": {}}}");
+    Containers::String jsonData = "{\"a\": [[\"b\"]], \"c\": 3, \"d\": {\"e\": {}}}";
+    /* This constructor has ArrayView as the first argument, thus losing all
+       flags from the input */
+    Containers::Optional<Json> json = Json::fromString({jsonData, data.flags});
     CORRADE_VERIFY(json);
     CORRADE_VERIFY(!json->root().isParsed());
     CORRADE_COMPARE(json->root().type(), JsonToken::Type::Object);
     CORRADE_COMPARE(json->root().parsedType(), JsonToken::ParsedType::None);
-    CORRADE_COMPARE(json->root().data(), "{\"a\": [[\"b\"]], \"c\": 3, \"d\": {\"e\": {}}}");
+    CORRADE_COMPARE(json->root().data(), jsonData);
+    /* If global, should point to the original string */
+    if(data.flags & Containers::StringViewFlag::Global)
+        CORRADE_COMPARE(json->root().data().data(), static_cast<const void*>(jsonData.data()));
+    /* Token data should also inherit the Global flag, and potentially
+       NullTerminated if the input is null-terminated */
+    CORRADE_COMPARE(json->root().data().flags(), data.flags);
 
     /* Calling the parse function several times should have the same observed
        behavior, internally it should just skip parsing */
@@ -2004,7 +2107,11 @@ void JsonTest::parseObjects() {
         CORRADE_VERIFY(json->root().isParsed());
         CORRADE_COMPARE(json->root().type(), JsonToken::Type::Object);
         CORRADE_COMPARE(json->root().parsedType(), JsonToken::ParsedType::Other);
-        CORRADE_COMPARE(json->root().data(), "{\"a\": [[\"b\"]], \"c\": 3, \"d\": {\"e\": {}}}");
+        CORRADE_COMPARE(json->root().data(), jsonData);
+        if(data.flags & Containers::StringViewFlag::Global)
+            CORRADE_COMPARE(json->root().data().data(), static_cast<const void*>(jsonData.data()));
+        /* Token data should still inherit the Global flag even after parsing */
+        CORRADE_COMPARE(json->root().data().flags(), data.flags);
     }
 }
 
@@ -2012,12 +2119,21 @@ void JsonTest::parseArrays() {
     auto&& data = ParseArrayData[testCaseInstanceId()];
     setTestCaseDescription(data.name);
 
-    Containers::Optional<Json> json = Json::fromString("[\"a\", [{}], 3]");
+    Containers::String jsonData = "[\"a\", [{}], 3]";
+    /* This constructor has ArrayView as the first argument, thus losing all
+       flags from the input */
+    Containers::Optional<Json> json = Json::fromString({jsonData, data.flags});
     CORRADE_VERIFY(json);
     CORRADE_VERIFY(!json->root().isParsed());
     CORRADE_COMPARE(json->root().type(), JsonToken::Type::Array);
     CORRADE_COMPARE(json->root().parsedType(), JsonToken::ParsedType::None);
-    CORRADE_COMPARE(json->root().data(), "[\"a\", [{}], 3]");
+    CORRADE_COMPARE(json->root().data(), jsonData);
+    /* If global, should point to the original string */
+    if(data.flags & Containers::StringViewFlag::Global)
+        CORRADE_COMPARE(json->root().data().data(), static_cast<const void*>(jsonData.data()));
+    /* Token data should also inherit the Global flag, and potentially
+       NullTerminated if the input is null-terminated */
+    CORRADE_COMPARE(json->root().data().flags(), data.flags);
 
     /* Calling the parse function several times should have the same observed
        behavior, internally it should just skip parsing */
@@ -2042,7 +2158,11 @@ void JsonTest::parseArrays() {
         CORRADE_VERIFY(json->root().isParsed());
         CORRADE_COMPARE(json->root().type(), JsonToken::Type::Array);
         CORRADE_COMPARE(json->root().parsedType(), JsonToken::ParsedType::Other);
-        CORRADE_COMPARE(json->root().data(), "[\"a\", [{}], 3]");
+        CORRADE_COMPARE(json->root().data(), jsonData);
+        if(data.flags & Containers::StringViewFlag::Global)
+            CORRADE_COMPARE(json->root().data().data(), static_cast<const void*>(jsonData.data()));
+        /* Token data should still inherit the Global flag even after parsing */
+        CORRADE_COMPARE(json->root().data().flags(), data.flags);
     }
 }
 
@@ -2051,13 +2171,20 @@ void JsonTest::parseNulls() {
     setTestCaseDescription(data.name);
 
     Containers::String jsonData = "null";
-    Containers::Optional<Json> json = Json::fromString({jsonData,  Containers::StringViewFlag::Global});
+    /* This constructor has ArrayView as the first argument, thus losing all
+       flags from the input */
+    Containers::Optional<Json> json = Json::fromString({jsonData, data.flags});
     CORRADE_VERIFY(json);
     CORRADE_VERIFY(!json->root().isParsed());
     CORRADE_COMPARE(json->root().type(), JsonToken::Type::Null);
     CORRADE_COMPARE(json->root().parsedType(), JsonToken::ParsedType::None);
-    /* Should point to the original string so we can change it below */
-    CORRADE_COMPARE(json->root().data().data(), static_cast<void*>(jsonData.data()));
+    /* If global, should point to the original string so we can change it
+       below */
+    if(data.flags & Containers::StringViewFlag::Global)
+        CORRADE_COMPARE(json->root().data().data(), static_cast<void*>(jsonData.data()));
+    /* Token data should also inherit the Global flag, and potentially
+       NullTerminated if the input is null-terminated */
+    CORRADE_COMPARE(json->root().data().flags(), data.flags);
 
     /* Calling the parse function several times should have the same observed
        behavior, internally it should just skip parsing */
@@ -2072,13 +2199,17 @@ void JsonTest::parseNulls() {
         CORRADE_VERIFY(json->root().isParsed());
         CORRADE_COMPARE(json->root().type(), JsonToken::Type::Null);
         CORRADE_COMPARE(json->root().parsedType(), JsonToken::ParsedType::Other);
-        CORRADE_COMPARE(json->root().data().data(), static_cast<void*>(jsonData.data()));
-        CORRADE_COMPARE(json->root().data().size(), jsonData.size());
+        CORRADE_COMPARE(json->root().data(), jsonData);
+        if(data.flags & Containers::StringViewFlag::Global)
+            CORRADE_COMPARE(json->root().data().data(), static_cast<void*>(jsonData.data()));
+        /* Token data should still inherit the Global flag even after parsing */
+        CORRADE_COMPARE(json->root().data().flags(), data.flags);
         CORRADE_COMPARE(json->root().asNull(), nullptr);
 
-        /* Corrupt the original string. Next time it should use the cached
-           value */
-        jsonData[0] = 'x';
+        /* Corrupt the original string, if global. Next time it should use the
+           cached value. */
+        if(data.flags & Containers::StringViewFlag::Global)
+            jsonData[0] = 'x';
     }
 }
 
@@ -2087,13 +2218,20 @@ void JsonTest::parseBools() {
     setTestCaseDescription(data.name);
 
     Containers::String jsonData = data.json;
-    Containers::Optional<Json> json = Json::fromString({jsonData,  Containers::StringViewFlag::Global});
+    /* This constructor has ArrayView as the first argument, thus losing all
+       flags from the input */
+    Containers::Optional<Json> json = Json::fromString({jsonData, data.flags});
     CORRADE_VERIFY(json);
     CORRADE_VERIFY(!json->root().isParsed());
     CORRADE_COMPARE(json->root().type(), JsonToken::Type::Bool);
     CORRADE_COMPARE(json->root().parsedType(), JsonToken::ParsedType::None);
-    /* Should point to the original string so we can change it below */
-    CORRADE_COMPARE(json->root().data().data(), static_cast<void*>(jsonData.data()));
+    /* If global, should point to the original string so we can change it
+       below */
+    if(data.flags & Containers::StringViewFlag::Global)
+        CORRADE_COMPARE(json->root().data().data(), static_cast<void*>(jsonData.data()));
+    /* Token data should also inherit the Global flag, and potentially
+       NullTerminated if the input is null-terminated */
+    CORRADE_COMPARE(json->root().data().flags(), data.flags);
 
     /* Calling the parse function several times should have the same observed
        behavior, internally it should just skip parsing */
@@ -2108,13 +2246,17 @@ void JsonTest::parseBools() {
         CORRADE_VERIFY(json->root().isParsed());
         CORRADE_COMPARE(json->root().type(), JsonToken::Type::Bool);
         CORRADE_COMPARE(json->root().parsedType(), JsonToken::ParsedType::Other);
-        CORRADE_COMPARE(json->root().data().data(), static_cast<void*>(jsonData.data()));
-        CORRADE_COMPARE(json->root().data().size(), jsonData.size());
+        CORRADE_COMPARE(json->root().data(), jsonData);
+        if(data.flags & Containers::StringViewFlag::Global)
+            CORRADE_COMPARE(json->root().data().data(), static_cast<void*>(jsonData.data()));
+        /* Token data should still inherit the Global flag even after parsing */
+        CORRADE_COMPARE(json->root().data().flags(), data.flags);
         CORRADE_COMPARE(json->root().asBool(), data.expected);
 
-        /* Corrupt the original string. Next time it should use the cached
-           value. */
-        jsonData[0] = 'x';
+        /* Corrupt the original string, if global. Next time it should use the
+           cached value. */
+        if(data.flags & Containers::StringViewFlag::Global)
+            jsonData[0] = 'x';
     }
 }
 
@@ -2123,13 +2265,20 @@ void JsonTest::parseDoubles() {
     setTestCaseDescription(data.name);
 
     Containers::String jsonData = data.json;
-    Containers::Optional<Json> json = Json::fromString({jsonData,  Containers::StringViewFlag::Global});
+    /* This constructor has ArrayView as the first argument, thus losing all
+       flags from the input */
+    Containers::Optional<Json> json = Json::fromString({jsonData, data.flags});
     CORRADE_VERIFY(json);
     CORRADE_VERIFY(!json->root().isParsed());
     CORRADE_COMPARE(json->root().type(), JsonToken::Type::Number);
     CORRADE_COMPARE(json->root().parsedType(), JsonToken::ParsedType::None);
-    /* Should point to the original string so we can change it below */
-    CORRADE_COMPARE(json->root().data().data(), static_cast<void*>(jsonData.data()));
+    /* If global, should point to the original string so we can change it
+       below */
+    if(data.flags & Containers::StringViewFlag::Global)
+        CORRADE_COMPARE(json->root().data().data(), static_cast<void*>(jsonData.data()));
+    /* Token data should also inherit the Global flag, and potentially
+       NullTerminated if the input is null-terminated */
+    CORRADE_COMPARE(json->root().data().flags(), data.flags);
 
     /* Calling the parse function several times should have the same observed
        behavior, internally it should just skip parsing */
@@ -2144,13 +2293,17 @@ void JsonTest::parseDoubles() {
         CORRADE_VERIFY(json->root().isParsed());
         CORRADE_COMPARE(json->root().type(), JsonToken::Type::Number);
         CORRADE_COMPARE(json->root().parsedType(), JsonToken::ParsedType::Double);
-        CORRADE_COMPARE(json->root().data().data(), static_cast<void*>(jsonData.data()));
-        CORRADE_COMPARE(json->root().data().size(), jsonData.size());
+        CORRADE_COMPARE(json->root().data(), jsonData);
+        if(data.flags & Containers::StringViewFlag::Global)
+            CORRADE_COMPARE(json->root().data().data(), static_cast<void*>(jsonData.data()));
+        /* Token data should still inherit the Global flag even after parsing */
+        CORRADE_COMPARE(json->root().data().flags(), data.flags);
         CORRADE_COMPARE(json->root().asDouble(), data.expected);
 
-        /* Corrupt the original string. Next time it should use the cached
-           value. */
-        jsonData[0] = 'x';
+        /* Corrupt the original string, if global. Next time it should use the
+           cached value. */
+        if(data.flags & Containers::StringViewFlag::Global)
+            jsonData[0] = 'x';
     }
 }
 
@@ -2159,13 +2312,20 @@ void JsonTest::parseFloats() {
     setTestCaseDescription(data.name);
 
     Containers::String jsonData = data.json;
-    Containers::Optional<Json> json = Json::fromString({jsonData,  Containers::StringViewFlag::Global});
+    /* This constructor has ArrayView as the first argument, thus losing all
+       flags from the input */
+    Containers::Optional<Json> json = Json::fromString({jsonData, data.flags});
     CORRADE_VERIFY(json);
     CORRADE_VERIFY(!json->root().isParsed());
     CORRADE_COMPARE(json->root().type(), JsonToken::Type::Number);
     CORRADE_COMPARE(json->root().parsedType(), JsonToken::ParsedType::None);
-    /* Should point to the original string so we can change it below */
-    CORRADE_COMPARE(json->root().data().data(), static_cast<void*>(jsonData.data()));
+    /* If global, should point to the original string so we can change it
+       below */
+    if(data.flags & Containers::StringViewFlag::Global)
+        CORRADE_COMPARE(json->root().data().data(), static_cast<void*>(jsonData.data()));
+    /* Token data should also inherit the Global flag, and potentially
+       NullTerminated if the input is null-terminated */
+    CORRADE_COMPARE(json->root().data().flags(), data.flags);
 
     /* Calling the parse function several times should have the same observed
        behavior, internally it should just skip parsing */
@@ -2180,13 +2340,17 @@ void JsonTest::parseFloats() {
         CORRADE_VERIFY(json->root().isParsed());
         CORRADE_COMPARE(json->root().type(), JsonToken::Type::Number);
         CORRADE_COMPARE(json->root().parsedType(), JsonToken::ParsedType::Float);
-        CORRADE_COMPARE(json->root().data().data(), static_cast<void*>(jsonData.data()));
-        CORRADE_COMPARE(json->root().data().size(), jsonData.size());
+        CORRADE_COMPARE(json->root().data(), jsonData);
+        if(data.flags & Containers::StringViewFlag::Global)
+            CORRADE_COMPARE(json->root().data().data(), static_cast<void*>(jsonData.data()));
+        /* Token data should still inherit the Global flag even after parsing */
+        CORRADE_COMPARE(json->root().data().flags(), data.flags);
         CORRADE_COMPARE(json->root().asFloat(), float(data.expected));
 
-        /* Corrupt the original string. Next time it should use the cached
-           value. */
-        jsonData[0] = 'x';
+        /* Corrupt the original string, if global. Next time it should use the
+           cached value. */
+        if(data.flags & Containers::StringViewFlag::Global)
+            jsonData[0] = 'x';
     }
 }
 
@@ -2195,13 +2359,20 @@ void JsonTest::parseUnsignedInts() {
     setTestCaseDescription(data.name);
 
     Containers::String jsonData = data.json;
-    Containers::Optional<Json> json = Json::fromString({jsonData,  Containers::StringViewFlag::Global});
+    /* This constructor has ArrayView as the first argument, thus losing all
+       flags from the input */
+    Containers::Optional<Json> json = Json::fromString({jsonData, data.flags});
     CORRADE_VERIFY(json);
     CORRADE_VERIFY(!json->root().isParsed());
     CORRADE_COMPARE(json->root().type(), JsonToken::Type::Number);
     CORRADE_COMPARE(json->root().parsedType(), JsonToken::ParsedType::None);
-    /* Should point to the original string so we can change it below */
-    CORRADE_COMPARE(json->root().data().data(), static_cast<void*>(jsonData.data()));
+    /* If global, should point to the original string so we can change it
+       below */
+    if(data.flags & Containers::StringViewFlag::Global)
+        CORRADE_COMPARE(json->root().data().data(), static_cast<void*>(jsonData.data()));
+    /* Token data should also inherit the Global flag, and potentially
+       NullTerminated if the input is null-terminated */
+    CORRADE_COMPARE(json->root().data().flags(), data.flags);
 
     /* Calling the parse function several times should have the same observed
        behavior, internally it should just skip parsing */
@@ -2216,13 +2387,17 @@ void JsonTest::parseUnsignedInts() {
         CORRADE_VERIFY(json->root().isParsed());
         CORRADE_COMPARE(json->root().type(), JsonToken::Type::Number);
         CORRADE_COMPARE(json->root().parsedType(), JsonToken::ParsedType::UnsignedInt);
-        CORRADE_COMPARE(json->root().data().data(), static_cast<void*>(jsonData.data()));
-        CORRADE_COMPARE(json->root().data().size(), jsonData.size());
+        CORRADE_COMPARE(json->root().data(), jsonData);
+        if(data.flags & Containers::StringViewFlag::Global)
+            CORRADE_COMPARE(json->root().data().data(), static_cast<void*>(jsonData.data()));
+        /* Token data should still inherit the Global flag even after parsing */
+        CORRADE_COMPARE(json->root().data().flags(), data.flags);
         CORRADE_COMPARE(json->root().asUnsignedInt(), data.expected);
 
-        /* Corrupt the original string. Next time it should use the cached
-           value. */
-        jsonData[0] = 'x';
+        /* Corrupt the original string, if global. Next time it should use the
+           cached value. */
+        if(data.flags & Containers::StringViewFlag::Global)
+            jsonData[0] = 'x';
     }
 }
 
@@ -2231,13 +2406,20 @@ void JsonTest::parseInts() {
     setTestCaseDescription(data.name);
 
     Containers::String jsonData = data.json;
-    Containers::Optional<Json> json = Json::fromString({jsonData,  Containers::StringViewFlag::Global});
+    /* This constructor has ArrayView as the first argument, thus losing all
+       flags from the input */
+    Containers::Optional<Json> json = Json::fromString({jsonData, data.flags});
     CORRADE_VERIFY(json);
     CORRADE_VERIFY(!json->root().isParsed());
     CORRADE_COMPARE(json->root().type(), JsonToken::Type::Number);
     CORRADE_COMPARE(json->root().parsedType(), JsonToken::ParsedType::None);
-    /* Should point to the original string so we can change it below */
-    CORRADE_COMPARE(json->root().data().data(), static_cast<void*>(jsonData.data()));
+    /* If global, should point to the original string so we can change it
+       below */
+    if(data.flags & Containers::StringViewFlag::Global)
+        CORRADE_COMPARE(json->root().data().data(), static_cast<void*>(jsonData.data()));
+    /* Token data should also inherit the Global flag, and potentially
+       NullTerminated if the input is null-terminated */
+    CORRADE_COMPARE(json->root().data().flags(), data.flags);
 
     /* Calling the parse function several times should have the same observed
        behavior, internally it should just skip parsing */
@@ -2252,13 +2434,17 @@ void JsonTest::parseInts() {
         CORRADE_VERIFY(json->root().isParsed());
         CORRADE_COMPARE(json->root().type(), JsonToken::Type::Number);
         CORRADE_COMPARE(json->root().parsedType(), JsonToken::ParsedType::Int);
-        CORRADE_COMPARE(json->root().data().data(), static_cast<void*>(jsonData.data()));
-        CORRADE_COMPARE(json->root().data().size(), jsonData.size());
+        CORRADE_COMPARE(json->root().data(), jsonData);
+        if(data.flags & Containers::StringViewFlag::Global)
+            CORRADE_COMPARE(json->root().data().data(), static_cast<void*>(jsonData.data()));
+        /* Token data should still inherit the Global flag even after parsing */
+        CORRADE_COMPARE(json->root().data().flags(), data.flags);
         CORRADE_COMPARE(json->root().asInt(), data.expected);
 
-        /* Corrupt the original string. Next time it should use the cached
-           value. */
-        jsonData[0] = 'x';
+        /* Corrupt the original string, if global. Next time it should use the
+           cached value. */
+        if(data.flags & Containers::StringViewFlag::Global)
+            jsonData[0] = 'x';
     }
 }
 
@@ -2267,13 +2453,20 @@ void JsonTest::parseUnsignedLongs() {
     setTestCaseDescription(data.name);
 
     Containers::String jsonData = data.json;
-    Containers::Optional<Json> json = Json::fromString({jsonData,  Containers::StringViewFlag::Global});
+    /* This constructor has ArrayView as the first argument, thus losing all
+       flags from the input */
+    Containers::Optional<Json> json = Json::fromString({jsonData, data.flags});
     CORRADE_VERIFY(json);
     CORRADE_VERIFY(!json->root().isParsed());
     CORRADE_COMPARE(json->root().type(), JsonToken::Type::Number);
     CORRADE_COMPARE(json->root().parsedType(), JsonToken::ParsedType::None);
-    /* Should point to the original string so we can change it below */
-    CORRADE_COMPARE(json->root().data().data(), static_cast<void*>(jsonData.data()));
+    /* If global, should point to the original string so we can change it
+       below */
+    if(data.flags & Containers::StringViewFlag::Global)
+        CORRADE_COMPARE(json->root().data().data(), static_cast<void*>(jsonData.data()));
+    /* Token data should also inherit the Global flag, and potentially
+       NullTerminated if the input is null-terminated */
+    CORRADE_COMPARE(json->root().data().flags(), data.flags);
 
     /* Calling the parse function several times should have the same observed
        behavior, internally it should just skip parsing */
@@ -2288,13 +2481,17 @@ void JsonTest::parseUnsignedLongs() {
         CORRADE_VERIFY(json->root().isParsed());
         CORRADE_COMPARE(json->root().type(), JsonToken::Type::Number);
         CORRADE_COMPARE(json->root().parsedType(), JsonToken::ParsedType::UnsignedLong);
-        CORRADE_COMPARE(json->root().data().data(), static_cast<void*>(jsonData.data()));
-        CORRADE_COMPARE(json->root().data().size(), jsonData.size());
+        CORRADE_COMPARE(json->root().data(), jsonData);
+        if(data.flags & Containers::StringViewFlag::Global)
+            CORRADE_COMPARE(json->root().data().data(), static_cast<void*>(jsonData.data()));
+        /* Token data should still inherit the Global flag even after parsing */
+        CORRADE_COMPARE(json->root().data().flags(), data.flags);
         CORRADE_COMPARE(json->root().asUnsignedLong(), data.expected);
 
-        /* Corrupt the original string. Next time it should use the cached
-           value. */
-        jsonData[0] = 'x';
+        /* Corrupt the original string, if global. Next time it should use the
+           cached value. */
+        if(data.flags & Containers::StringViewFlag::Global)
+            jsonData[0] = 'x';
     }
 }
 
@@ -2303,13 +2500,20 @@ void JsonTest::parseLongs() {
     setTestCaseDescription(data.name);
 
     Containers::String jsonData = data.json;
-    Containers::Optional<Json> json = Json::fromString({jsonData,  Containers::StringViewFlag::Global});
+    /* This constructor has ArrayView as the first argument, thus losing all
+       flags from the input */
+    Containers::Optional<Json> json = Json::fromString({jsonData,  data.flags});
     CORRADE_VERIFY(json);
     CORRADE_VERIFY(!json->root().isParsed());
     CORRADE_COMPARE(json->root().type(), JsonToken::Type::Number);
     CORRADE_COMPARE(json->root().parsedType(), JsonToken::ParsedType::None);
-    /* Should point to the original string so we can change it below */
-    CORRADE_COMPARE(json->root().data().data(), static_cast<void*>(jsonData.data()));
+    /* If global, should point to the original string so we can change it
+       below */
+    if(data.flags & Containers::StringViewFlag::Global)
+        CORRADE_COMPARE(json->root().data().data(), static_cast<void*>(jsonData.data()));
+    /* Token data should also inherit the Global flag, and potentially
+       NullTerminated if the input is null-terminated */
+    CORRADE_COMPARE(json->root().data().flags(), data.flags);
 
     /* Calling the parse function several times should have the same observed
        behavior, internally it should just skip parsing */
@@ -2324,13 +2528,17 @@ void JsonTest::parseLongs() {
         CORRADE_VERIFY(json->root().isParsed());
         CORRADE_COMPARE(json->root().type(), JsonToken::Type::Number);
         CORRADE_COMPARE(json->root().parsedType(), JsonToken::ParsedType::Long);
-        CORRADE_COMPARE(json->root().data().data(), static_cast<void*>(jsonData.data()));
-        CORRADE_COMPARE(json->root().data().size(), jsonData.size());
+        CORRADE_COMPARE(json->root().data(), jsonData);
+        if(data.flags & Containers::StringViewFlag::Global)
+            CORRADE_COMPARE(json->root().data().data(), static_cast<void*>(jsonData.data()));
+        /* Token data should still inherit the Global flag even after parsing */
+        CORRADE_COMPARE(json->root().data().flags(), data.flags);
         CORRADE_COMPARE(json->root().asLong(), data.expected);
 
-        /* Corrupt the original string. Next time it should use the cached
-           value. */
-        jsonData[0] = 'x';
+        /* Corrupt the original string, if global. Next time it should use the
+           cached value. */
+        if(data.flags & Containers::StringViewFlag::Global)
+            jsonData[0] = 'x';
     }
 }
 
@@ -2343,13 +2551,21 @@ void JsonTest::parseSizes() {
     setTestCaseDescription(data.name);
 
     Containers::String jsonData = data.json;
-    Containers::Optional<Json> json = Json::fromString({jsonData,  Containers::StringViewFlag::Global});
+    /* This constructor has ArrayView as the first argument, thus losing all
+       flags from the input */
+    Containers::Optional<Json> json = Json::fromString({jsonData,  data.flags});
     CORRADE_VERIFY(json);
     CORRADE_VERIFY(!json->root().isParsed());
     CORRADE_COMPARE(json->root().type(), JsonToken::Type::Number);
     CORRADE_COMPARE(json->root().parsedType(), JsonToken::ParsedType::None);
-    /* Should point to the original string so we can change it below */
-    CORRADE_COMPARE(json->root().data().data(), static_cast<void*>(jsonData.data()));
+    CORRADE_COMPARE(json->root().data(), data.json);
+    /* If global, should point to the original string so we can change it
+       below */
+    if(data.flags & Containers::StringViewFlag::Global)
+        CORRADE_COMPARE(json->root().data().data(), static_cast<void*>(jsonData.data()));
+    /* Token data should also inherit the Global flag, and potentially
+       NullTerminated if the input is null-terminated */
+    CORRADE_COMPARE(json->root().data().flags(), data.flags);
 
     /* Calling the parse function several times should have the same observed
        behavior, internally it should just skip parsing */
@@ -2364,13 +2580,17 @@ void JsonTest::parseSizes() {
         CORRADE_VERIFY(json->root().isParsed());
         CORRADE_COMPARE(json->root().type(), JsonToken::Type::Number);
         CORRADE_COMPARE(json->root().parsedType(), JsonToken::ParsedType::Size);
-        CORRADE_COMPARE(json->root().data().data(), static_cast<void*>(jsonData.data()));
-        CORRADE_COMPARE(json->root().data().size(), jsonData.size());
+        CORRADE_COMPARE(json->root().data(), jsonData);
+        if(data.flags & Containers::StringViewFlag::Global)
+            CORRADE_COMPARE(json->root().data().data(), static_cast<void*>(jsonData.data()));
+        /* Token data should still inherit the Global flag even after parsing */
+        CORRADE_COMPARE(json->root().data().flags(), data.flags);
         CORRADE_COMPARE(json->root().asSize(), data.expected);
 
-        /* Corrupt the original string. Next time it should use the cached
-           value. */
-        jsonData[0] = 'x';
+        /* Corrupt the original string, if global. Next time it should use the
+           cached value. */
+        if(data.flags & Containers::StringViewFlag::Global)
+            jsonData[0] = 'x';
     }
 }
 
@@ -2378,9 +2598,11 @@ void JsonTest::parseStringKeys() {
     auto&& data = ParseStringData[testCaseInstanceId()];
     setTestCaseDescription(data.name);
 
-    /* Fake-propagate original global flags here */
+    /* Fake-propagate original global flags here. This constructor has
+       ArrayView as the first argument, thus losing all flags from the
+       input. */
     Containers::String jsonData = format("{{{}: null}}", data.json);
-    Containers::Optional<Json> json = Json::fromString({jsonData.data(), jsonData.size(), data.json.flags()});
+    Containers::Optional<Json> json = Json::fromString({jsonData, data.json.flags()});
     CORRADE_VERIFY(json);
     JsonToken token = json->tokens()[1];
     CORRADE_VERIFY(!token.isParsed());
@@ -2392,6 +2614,9 @@ void JsonTest::parseStringKeys() {
         CORRADE_COMPARE(token.data().data(), static_cast<void*>(jsonData.data() + 1));
     else
         CORRADE_COMPARE(token.data(), data.json);
+    /* Token data should also inherit the Global flag. NullTerminated is never
+       inherited as this is formatted into an object key with data after */
+    CORRADE_COMPARE(token.data().flags(), data.json.flags() & ~Containers::StringViewFlag::NullTerminated);
 
     /* Calling the parse function several times should have the same observed
        behavior, internally it should just skip parsing */
@@ -2400,7 +2625,7 @@ void JsonTest::parseStringKeys() {
         if(!data.singleValue)
             CORRADE_VERIFY(json->parseStringKeys(json->root()));
         else
-            CORRADE_COMPARE(json->parseString(token), data.expected);
+            CORRADE_COMPARE(*json->parseString(token), data.expected);
 
         /* The token data should not get corrupted by this */
         CORRADE_VERIFY(token.isParsed());
@@ -2412,18 +2637,20 @@ void JsonTest::parseStringKeys() {
         } else {
             CORRADE_COMPARE(token.data(), data.json);
         }
+        /* Token data should still inherit the Global flag even after parsing */
+        CORRADE_COMPARE(json->root().data().flags(), data.json.flags());
         {
             CORRADE_EXPECT_FAIL_IF(data.expectFail, Containers::StringView{data.expectFail});
             CORRADE_COMPARE(token.asString(), data.expected);
         }
         CORRADE_COMPARE(token.asString().flags() & ~Containers::StringViewFlag::NullTerminated,
-            data.expected.flags() & ~Containers::StringViewFlag::NullTerminated);
+            data.expectedFlags & ~Containers::StringViewFlag::NullTerminated);
 
         /* If the input is global but escaped (i.e., expected no longer global),
            corrupt the original string. Next time it should use the cached
            string. */
         if((data.json.flags() & Containers::StringViewFlag::Global) &&
-          !(data.expected.flags() & Containers::StringViewFlag::Global))
+          !(data.expectedFlags & Containers::StringViewFlag::Global))
             jsonData[2] = 'x';
     }
 }
@@ -2445,6 +2672,9 @@ void JsonTest::parseStrings() {
         CORRADE_COMPARE(json->root().data().data(), static_cast<void*>(jsonData.data()));
     else
         CORRADE_COMPARE(json->root().data(), data.json);
+    /* Token data should also inherit the Global flag, and potentially
+       NullTerminated if the input is null-terminated */
+    CORRADE_COMPARE(json->root().data().flags(), data.json.flags());
 
     /* Calling the parse function several times should have the same observed
        behavior, internally it should just skip parsing */
@@ -2453,7 +2683,7 @@ void JsonTest::parseStrings() {
         if(!data.singleValue)
             CORRADE_VERIFY(json->parseStrings(json->root()));
         else
-            CORRADE_COMPARE(json->parseString(json->root()), data.expected);
+            CORRADE_COMPARE(*json->parseString(json->root()), data.expected);
 
         /* The token data should not get corrupted by this */
         CORRADE_VERIFY(json->root().isParsed());
@@ -2465,18 +2695,20 @@ void JsonTest::parseStrings() {
         } else {
             CORRADE_COMPARE(json->root().data(), jsonData);
         }
+        /* Token data should still inherit the Global flag even after parsing */
+        CORRADE_COMPARE(json->root().data().flags(), data.json.flags());
         {
             CORRADE_EXPECT_FAIL_IF(data.expectFail, Containers::StringView{data.expectFail});
             CORRADE_COMPARE(json->root().asString(), data.expected);
         }
         CORRADE_COMPARE(json->root().asString().flags() & ~Containers::StringViewFlag::NullTerminated,
-            data.expected.flags() & ~Containers::StringViewFlag::NullTerminated);
+            data.expectedFlags & ~Containers::StringViewFlag::NullTerminated);
 
         /* If the input is global but escaped (i.e., expected no longer global),
            corrupt the original string. Next time it should use the cached
            string. */
         if((data.json.flags() & Containers::StringViewFlag::Global) &&
-          !(data.expected.flags() & Containers::StringViewFlag::Global))
+          !(data.expectedFlags & Containers::StringViewFlag::Global))
             jsonData[1] = 'x';
     }
 }

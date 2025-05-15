@@ -288,8 +288,7 @@ Containers::Optional<Json> Json::tokenize(const Containers::StringView filename,
     json._state.emplace();
 
     /* Make a copy of the input string if not marked as global */
-    const std::uint64_t globalStringFlag = string_.flags() & Containers::StringViewFlag::Global ? std::uint64_t(JsonToken::FlagStringGlobal) : 0;
-    if(globalStringFlag)
+    if(string_.flags() & Containers::StringViewFlag::Global)
         json._state->string = string_;
     else
         json._state->string = json._state->storage = string_;
@@ -498,12 +497,11 @@ Containers::Optional<Json> Json::tokenize(const Containers::StringView filename,
                 const std::size_t tokenSize = i - start + 1;
                 #ifndef CORRADE_TARGET_32BIT
                 token._sizeFlagsParsedTypeType = tokenSize|
-                    JsonToken::TypeString|escapedFlag|globalStringFlag;
+                    JsonToken::TypeString|escapedFlag;
                 #else
                 token._sizeParsedType = tokenSize;
                 token._childCountFlagsTypeNan =
-                    JsonToken::NanMask|escapedFlag|globalStringFlag|
-                    JsonToken::TypeString;
+                    JsonToken::TypeString|JsonToken::NanMask|escapedFlag;
                 #endif
 
                 /* Remember if this is an object key. In that case we're
@@ -818,7 +816,7 @@ bool Json::parseNullInternal(const char* const errorPrefix, JsonTokenData& token
         #endif
     ) return true;
 
-    const Containers::StringView string = token.data();
+    const Containers::StringView string = tokenData(*_state, token);
     if(string != "null"_s) {
         Error err;
         err << errorPrefix << "invalid null literal" << string << "at";
@@ -850,7 +848,7 @@ bool Json::parseBoolInternal(const char* const errorPrefix, JsonTokenData& token
         #endif
     ) return true;
 
-    const Containers::StringView string = token.data();
+    const Containers::StringView string = tokenData(*_state, token);
     if(string == "true"_s)
         token._parsedBool = true;
     else if(string == "false"_s)
@@ -886,7 +884,7 @@ bool Json::parseDoubleInternal(const char* const errorPrefix, JsonTokenData& tok
         & JsonToken::ParsedTypeMask) == JsonToken::ParsedTypeDouble
     ) return true;
 
-    const Containers::StringView string = token.data();
+    const Containers::StringView string = tokenData(*_state, token);
     /** @todo replace with something that can parse non-null-terminated stuff,
         then drop this "too long" error */
     char buffer[128];
@@ -949,7 +947,7 @@ bool Json::parseFloatInternal(const char* const errorPrefix, JsonTokenData& toke
         & JsonToken::ParsedTypeMask) == JsonToken::ParsedTypeFloat
     ) return true;
 
-    const Containers::StringView string = token.data();
+    const Containers::StringView string = tokenData(*_state, token);
     /** @todo replace with something that can parse non-null-terminated stuff,
         then drop this "too long" error */
     char buffer[128];
@@ -999,7 +997,7 @@ bool Json::parseUnsignedIntInternal(const char* const errorPrefix, JsonTokenData
         & JsonToken::ParsedTypeMask) == JsonToken::ParsedTypeUnsignedInt
     ) return true;
 
-    const Containers::StringView string = token.data();
+    const Containers::StringView string = tokenData(*_state, token);
     /** @todo replace with something that can parse non-null-terminated stuff,
         then drop this "too long" error */
     char buffer[128];
@@ -1061,7 +1059,7 @@ bool Json::parseIntInternal(const char* const errorPrefix, JsonTokenData& token)
         & JsonToken::ParsedTypeMask) == JsonToken::ParsedTypeInt
     ) return true;
 
-    const Containers::StringView string = token.data();
+    const Containers::StringView string = tokenData(*_state, token);
     /** @todo replace with something that can parse non-null-terminated stuff,
         then drop this "too long" error */
     char buffer[128];
@@ -1123,7 +1121,7 @@ bool Json::parseUnsignedLongInternal(const char* const errorPrefix, JsonTokenDat
         & JsonToken::ParsedTypeMask) == JsonToken::ParsedTypeUnsignedLong
     ) return true;
 
-    const Containers::StringView string = token.data();
+    const Containers::StringView string = tokenData(*_state, token);
     /** @todo replace with something that can parse non-null-terminated stuff,
         then drop this "too long" error */
     char buffer[128];
@@ -1183,7 +1181,7 @@ bool Json::parseLongInternal(const char* const errorPrefix, JsonTokenData& token
         & JsonToken::ParsedTypeMask) == JsonToken::ParsedTypeLong
     ) return true;
 
-    const Containers::StringView string = token.data();
+    const Containers::StringView string = tokenData(*_state, token);
     /** @todo replace with something that can parse non-null-terminated stuff,
         then drop this "too long" error */
     char buffer[128];
@@ -1264,7 +1262,7 @@ bool Json::parseStringInternal(const char* const errorPrefix, JsonTokenData& tok
     }
 
     /* Otherwise parse the escapes */
-    const Containers::StringView string = token.data();
+    const Containers::StringView string = tokenData(*_state, token);
     Containers::String& destination = arrayAppend(_state->strings, InPlaceInit, NoInit, string.size());
 
     /* Ignore the quotes at the begin/end */
@@ -1854,12 +1852,9 @@ Containers::Optional<Containers::StringView> Json::parseString(const JsonToken t
             token._sizeParsedType
             #endif
                 - 2,
-            #ifndef CORRADE_TARGET_32BIT
-            token._sizeFlagsParsedTypeType & JsonToken::FlagStringGlobal ?
-            #else
-            token._childCountFlagsTypeNan & JsonToken::FlagStringGlobal ?
-            #endif
-                Containers::StringViewFlag::Global : Containers::StringViewFlags{}
+            /* Inherit the global flag from the input. Not the NullTerminated
+               flag, tho. */
+            state.string.flags() & Containers::StringViewFlag::Global
         };
 
     /* Otherwise take the cached version. Compared to _json->tokens the strings
@@ -2284,31 +2279,21 @@ JsonToken::JsonToken(const Json& json, const JsonTokenData& token) noexcept: _js
         "Utility::JsonToken: token not owned by given Json instance", );
 }
 
-inline Containers::StringView JsonTokenData::data() const {
-    /* This could technically be made to preserve the Global flag, but on 32bit
-       it would mean it'd have to be stored in two places -- either in the NaN
-       bit pattern for object/array/string/literal and unparsed numeric tokens
-       or in the upper bits of size for parsed numeric tokens (as the whole 64
-       bits may be used by the stored number). But not just that, the flag
-       would also have to be transferred from the NaN pattern to the size when
-       parsing the numeric value for the first time, and *not* transferred from
-       there if the numeric value is already parsed (since the bit there would
-       likely mean for something else). And that's just too much logic and
-       testing effort for something with a doubtful usefulness (compared to
-       preserving the flag for asString()), so it's not done. */
+inline Containers::StringView Json::tokenData(const Implementation::JsonData& json, const JsonTokenData& token) {
+    const State& state = static_cast<const State&>(json);
     #ifndef CORRADE_TARGET_32BIT
-    return {_data, _sizeFlagsParsedTypeType & JsonToken::SizeMask};
+    return state.string.sliceSize(token._data, token._sizeFlagsParsedTypeType & JsonToken::SizeMask);
     #else
     /* If NaN is set and sign is 0, the full size is used */
-    if((_childCountFlagsTypeNan & (JsonToken::NanMask|JsonToken::SignMask)) == JsonToken::NanMask)
-        return {_data, _sizeParsedType};
+    if((token._childCountFlagsTypeNan & (JsonToken::NanMask|JsonToken::SignMask)) == JsonToken::NanMask)
+        return state.string.sliceSize(token._data, token._sizeParsedType);
     /* Otherwise it's likely small and the top is repurposed */
-    return {_data, _sizeParsedType & JsonToken::SizeMask};
+    return state.string.sliceSize(token._data, token._sizeParsedType & JsonToken::SizeMask);
     #endif
 }
 
 Containers::StringView JsonToken::data() const {
-    return _json->tokens[_token].data();
+    return Json::tokenData(*_json, _json->tokens[_token]);
 }
 
 Containers::Optional<JsonToken::Type> JsonToken::commonArrayType() const {
@@ -2515,7 +2500,8 @@ JsonToken JsonToken::operator[](const std::size_t index) const {
 
 Containers::StringView JsonToken::asStringInternal() const {
     /* If the string is not escaped, reference it directly */
-    const JsonTokenData& data = _json->tokens[_token];
+    const Json::State& state = *static_cast<const Json::State*>(_json);
+    const JsonTokenData& data = state.tokenStorage[_token];
     if(
         #ifndef CORRADE_TARGET_32BIT
         !(data._sizeFlagsParsedTypeType & FlagStringEscaped)
@@ -2530,12 +2516,9 @@ Containers::StringView JsonToken::asStringInternal() const {
             data._sizeParsedType
             #endif
                 - 2,
-            #ifndef CORRADE_TARGET_32BIT
-            data._sizeFlagsParsedTypeType & FlagStringGlobal ?
-            #else
-            data._childCountFlagsTypeNan & FlagStringGlobal ?
-            #endif
-                Containers::StringViewFlag::Global : Containers::StringViewFlags{}
+            /* Inherit the global flag from the input. Not the NullTerminated
+               flag, tho. */
+            state.string.flags() & Containers::StringViewFlag::Global
         };
 
     /* Otherwise take the cached version. Compared to _json->tokens the strings
@@ -2543,7 +2526,7 @@ Containers::StringView JsonToken::asStringInternal() const {
        every reallocation so it'd have to get updated each time parseString()
        etc gets called, but we don't need to access that in the header so we
        can also just peek directly into the derived struct. */
-    return static_cast<const Json::State*>(_json)->strings[data._parsedString];
+    return state.strings[data._parsedString];
 }
 
 Containers::StringView JsonToken::asString() const {

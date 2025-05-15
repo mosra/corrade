@@ -1076,7 +1076,7 @@ class CORRADE_UTILITY_EXPORT Json {
         Containers::Optional<Containers::StringIterable> parseStringArray(JsonToken token, std::size_t expectedSize = 0);
 
     private:
-        friend JsonToken; /* JsonTokenData constructor needs _state access */
+        friend JsonToken; /* JsonTokenData constructor and data() needs _state access */
 
         struct State;
 
@@ -1087,6 +1087,11 @@ class CORRADE_UTILITY_EXPORT Json {
         CORRADE_UTILITY_LOCAL void printFilePosition(Debug& out, Containers::StringView string) const;
         CORRADE_UTILITY_LOCAL static Containers::Optional<Json> tokenize(Containers::StringView filename, std::size_t lineOffset, std::size_t columnOffset, Containers::StringView string);
         CORRADE_UTILITY_LOCAL static Containers::Optional<Json> tokenize(Containers::StringView filename, std::size_t lineOffset, std::size_t columnOffset, Containers::StringView string, Options options);
+        /* Used by all parse*Internal() below, is here and not on JsonTokenData
+           because it may eventually rely on data outside of given token. Is
+           static because JsonToken::data() has no access to the Json
+           instance, only to the state. */
+        CORRADE_UTILITY_LOCAL static Containers::StringView tokenData(const Implementation::JsonData& json, const JsonTokenData& token);
         /* These are here because they need friended JsonToken, they're not on
            JsonToken in order to print nice file/line info on error (and access
            the string cache in case of parseStringInternal()) */
@@ -1431,9 +1436,9 @@ class CORRADE_UTILITY_EXPORT JsonToken {
          *
          * Returned view points to data owned by the originating @ref Json
          * instance, or to the string passed to @ref Json::fromString() if it
-         * was called with @ref Containers::StringViewFlag::Global set. Due to
-         * implementation complexity reasons, the global flag is not preserved
-         * in the returned value here, only in case of @ref asString().
+         * was called with @ref Containers::StringViewFlag::Global set. The
+         * global flag is preserved in the returned value here, same as with
+         * @ref asString().
          */
         Containers::StringView data() const;
 
@@ -1971,7 +1976,6 @@ class CORRADE_UTILITY_EXPORT JsonToken {
 
             /* Stored before the parsed type in _sizeFlagsParsedTypeType */
             FlagStringKey = 1ull << 57,
-            FlagStringGlobal = 1ull << 56,
             FlagStringEscaped = 1ull << 55,
 
             /* Size is the remaining 55 bits of _sizeFlagsParsedTypeType */
@@ -1995,7 +1999,6 @@ class CORRADE_UTILITY_EXPORT JsonToken {
                if NaN is not set the Parsed* values below are used instead */
             FlagParsed = 1ull << 48,
             FlagStringKey = 1ull << 47,
-            FlagStringGlobal = 1ull << 46,
             FlagStringEscaped = 1ull << 45
             #endif
         };
@@ -2057,7 +2060,6 @@ class CORRADE_UTILITY_EXPORT JsonTokenData {
 
         /* These are all private because they may depend on spatial locality
            relative to other tokens, which has to be ensured externally */
-        Containers::StringView data() const;
         inline JsonToken::Type type() const;
         inline bool isParsed() const;
         inline JsonToken::ParsedType parsedType() const;
