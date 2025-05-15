@@ -901,29 +901,17 @@ const struct {
     /* NAN or INF without a leading - fails during parse already */
     {"negative double INF literal", &Json::parseDoubles,
         "-INF",
-        /* *Has to* be handled on 32bit to avoid clashing with the NaN bit
-           pattern reusal, not done on 64bit for perf reasons -- will be fixed
-           once we have our own parsing routines */
-        #ifndef CORRADE_TARGET_32BIT
-        nullptr
-        #else
-        "parseDoubles(): invalid floating-point literal -INF at <in>:3:6"
-        #endif
-    },
+        /* *Has to* be handled on to avoid clashing with the NaN bit pattern
+           reusal */
+        "parseDoubles(): invalid floating-point literal -INF at <in>:3:6"},
     {"negative float INF literal", &Json::parseFloats,
         "-INF",
         nullptr},
     {"negative double NaN literal", &Json::parseDoubles,
         "-NAN",
-        /* *Has to* be handled on 32bit to avoid clashing with the NaN bit
-           pattern reusal, not done on 64bit for perf reasons -- will be fixed
-           once we have our own parsing routines */
-        #ifndef CORRADE_TARGET_32BIT
-        nullptr
-        #else
-        "parseDoubles(): invalid floating-point literal -NAN at <in>:3:6"
-        #endif
-    },
+        /* *Has to* be handled on to avoid clashing with the NaN bit pattern
+           reusal */
+        "parseDoubles(): invalid floating-point literal -NAN at <in>:3:6"},
     {"negative float NaN literal", &Json::parseFloats,
         "-NAN",
         nullptr},
@@ -4169,6 +4157,8 @@ void JsonTest::commonArrayType() {
     json->parseFloats(json->root());
     json->parseLiterals(json->root());
     json->parseStrings(json->root());
+    /* The array type detection should work the same way after parsing */
+    CORRADE_COMPARE(json->root().commonArrayType(), data.expected);
     CORRADE_COMPARE(json->root().commonParsedArrayType(), data.expectedParsed);
 }
 
@@ -5039,14 +5029,14 @@ void JsonTest::constructMove() {
 
 void JsonTest::debugTokenType() {
     Containers::String out;
-    Debug{&out} << JsonToken::Type::Number << JsonToken::Type(0xdeadbabedeadbabe);
-    CORRADE_COMPARE(out, "Utility::JsonToken::Type::Number Utility::JsonToken::Type(0xdeadbabedeadbabe)\n");
+    Debug{&out} << JsonToken::Type::Number << JsonToken::Type(0xde);
+    CORRADE_COMPARE(out, "Utility::JsonToken::Type::Number Utility::JsonToken::Type(0xde)\n");
 }
 
 void JsonTest::debugTokenParsedType() {
     Containers::String out;
-    Debug{&out} << JsonToken::ParsedType::UnsignedInt << JsonToken::ParsedType(0xdeadbabedeadbabeull);
-    CORRADE_COMPARE(out, "Utility::JsonToken::ParsedType::UnsignedInt Utility::JsonToken::ParsedType(0xdeadbabedeadbabe)\n");
+    Debug{&out} << JsonToken::ParsedType::UnsignedInt << JsonToken::ParsedType(0xad);
+    CORRADE_COMPARE(out, "Utility::JsonToken::ParsedType::UnsignedInt Utility::JsonToken::ParsedType(0xad)\n");
 }
 
 }}}}
