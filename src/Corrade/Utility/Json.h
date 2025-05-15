@@ -1125,9 +1125,7 @@ class CORRADE_UTILITY_EXPORT JsonToken {
          *
          * @see @ref type()
          */
-        enum class Type: std::uint64_t {
-            /* Needs to match the private flags */
-
+        enum class Type: std::uint8_t {
             /**
              * An object, @cb{.json} {} @ce. Its immediate children are
              * @ref Type::String keys, values are children of the keys. The
@@ -1135,30 +1133,14 @@ class CORRADE_UTILITY_EXPORT JsonToken {
              * @ref isParsed() is set always.
              * @see @ref children(), @ref firstChild(), @ref next()
              */
-            #ifndef CORRADE_TARGET_32BIT
-            Object
-                #ifndef DOXYGEN_GENERATING_OUTPUT
-                = 1ull << 61
-                #endif
-                ,
-            #else
-            Object = 1ull << 49,
-            #endif
+            Object,
 
             /**
              * An array, @cb{.json} [] @ce. Its immediate children are values.
              * @ref isParsed() is set always.
              * @see @ref children(), @ref firstChild(), @ref next()
              */
-            #ifndef CORRADE_TARGET_32BIT
-            Array
-                #ifndef DOXYGEN_GENERATING_OUTPUT
-                = 2ull << 61
-                #endif
-                ,
-            #else
-            Array = 2ull << 49,
-            #endif
+            Array,
 
             /**
              * A @cb{.json} null @ce value. Unless @ref isParsed() is set, the
@@ -1166,15 +1148,7 @@ class CORRADE_UTILITY_EXPORT JsonToken {
              * @see @ref asNull(), @ref Json::Option::ParseLiterals,
              *      @ref Json::parseLiterals(), @ref Json::parseNull()
              */
-            #ifndef CORRADE_TARGET_32BIT
-            Null
-                #ifndef DOXYGEN_GENERATING_OUTPUT
-                = 3ull << 61
-                #endif
-                ,
-            #else
-            Null = 3ull << 49,
-            #endif
+            Null,
 
             /**
              * A @cb{.json} true @ce or @cb{.json} false @ce value. Unless
@@ -1182,15 +1156,7 @@ class CORRADE_UTILITY_EXPORT JsonToken {
              * @see @ref asBool(), @ref Json::Option::ParseLiterals,
              *      @ref Json::parseLiterals(), @ref Json::parseBool()
              */
-            #ifndef CORRADE_TARGET_32BIT
-            Bool
-                #ifndef DOXYGEN_GENERATING_OUTPUT
-                = 4ull << 61
-                #endif
-                ,
-            #else
-            Bool = 4ull << 49,
-            #endif
+            Bool,
 
             /**
              * A number. Unless @ref isParsed() is set, the value is not
@@ -1211,15 +1177,7 @@ class CORRADE_UTILITY_EXPORT JsonToken {
              *      @ref Json::parseInt(), @ref Json::parseUnsignedLong(),
              *      @ref Json::parseLong(), @ref Json::parseSize()
              */
-            #ifndef CORRADE_TARGET_32BIT
-            Number
-                #ifndef DOXYGEN_GENERATING_OUTPUT
-                = 5ull << 61
-                #endif
-                ,
-            #else
-            Number = 5ull << 49,
-            #endif
+            Number,
 
             /**
              * A string. Unless @ref isParsed() is set, the value is not
@@ -1229,15 +1187,7 @@ class CORRADE_UTILITY_EXPORT JsonToken {
              *      @ref Json::parseStringKeys(), @ref Json::parseStrings(),
              *      @ref Json::parseString()
              */
-            #ifndef CORRADE_TARGET_32BIT
             String
-                #ifndef DOXYGEN_GENERATING_OUTPUT
-                = 6ull << 61
-                #endif
-                ,
-            #else
-            String = 6ull << 49,
-            #endif
         };
 
         /**
@@ -1245,9 +1195,9 @@ class CORRADE_UTILITY_EXPORT JsonToken {
          *
          * @see @ref parsedType()
          */
-        enum class ParsedType: std::uint64_t {
+        enum class ParsedType: std::uint8_t {
             /** Not parsed yet. */
-            None = 0,
+            None,
 
             /**
              * 64-bit floating-point value.
@@ -1256,15 +1206,7 @@ class CORRADE_UTILITY_EXPORT JsonToken {
              * @ref Json::fromString() or @ref Json::fromFile() or if
              * @ref Json::parseDoubles() is called later.
              */
-            #ifndef CORRADE_TARGET_32BIT
-            Double
-                #ifndef DOXYGEN_GENERATING_OUTPUT
-                = 1ull << 58
-                #endif
-                ,
-            #else
-            Double = 1ull << 29,
-            #endif
+            Double,
 
             /**
              * 32-bit floating-point value.
@@ -1274,15 +1216,7 @@ class CORRADE_UTILITY_EXPORT JsonToken {
              * @ref Json::parseFloats() is called later. Double-precision
              * values that can't be represented as a float are truncated.
              */
-            #ifndef CORRADE_TARGET_32BIT
-            Float
-                #ifndef DOXYGEN_GENERATING_OUTPUT
-                = 2ull << 58
-                #endif
-                ,
-            #else
-            Float = 2ull << 29,
-            #endif
+            Float,
 
             /**
              * 32-bit unsigned integer value.
@@ -1293,15 +1227,7 @@ class CORRADE_UTILITY_EXPORT JsonToken {
              * exponent, if they're negative or if they can't fit into 32 bits.
              * @see @ref ParsedType::Size, @ref Json::parseSizes()
              */
-            #ifndef CORRADE_TARGET_32BIT
-            UnsignedInt
-                #ifndef DOXYGEN_GENERATING_OUTPUT
-                = 3ull << 58
-                #endif
-                ,
-            #else
-            UnsignedInt = 3ull << 29,
-            #endif
+            UnsignedInt,
 
             /**
              * 32-bit signed integer value.
@@ -1311,15 +1237,7 @@ class CORRADE_UTILITY_EXPORT JsonToken {
              * have a non-zero fractional part, if they have an exponent or if
              * they can't fit into 32 bits.
              */
-            #ifndef CORRADE_TARGET_32BIT
-            Int
-                #ifndef DOXYGEN_GENERATING_OUTPUT
-                = 4ull << 58
-                #endif
-                ,
-            #else
-            Int = 4ull << 29,
-            #endif
+            Int,
 
             /**
              * 52-bit unsigned integer value.
@@ -1331,15 +1249,7 @@ class CORRADE_UTILITY_EXPORT JsonToken {
              * (which is the representable unsigned integer range in a JSON).
              * @see @ref ParsedType::Size, @ref Json::parseSizes()
              */
-            #ifndef CORRADE_TARGET_32BIT
-            UnsignedLong
-                #ifndef DOXYGEN_GENERATING_OUTPUT
-                = 5ull << 58
-                #endif
-                ,
-            #else
-            UnsignedLong = 5ull << 29,
-            #endif
+            UnsignedLong,
 
             /**
              * 53-bit signed integer value.
@@ -1350,15 +1260,7 @@ class CORRADE_UTILITY_EXPORT JsonToken {
              * exponent, if they're negative or if they can't fit into 53 bits
              * (which is the representable signed integer range in a JSON).
              */
-            #ifndef CORRADE_TARGET_32BIT
-            Long
-                #ifndef DOXYGEN_GENERATING_OUTPUT
-                = 6ull << 58
-                #endif
-                ,
-            #else
-            Long = 6ull << 29,
-            #endif
+            Long,
 
             /**
              * Size value. Alias to @ref ParsedType::UnsignedInt or
@@ -1377,15 +1279,7 @@ class CORRADE_UTILITY_EXPORT JsonToken {
                 ,
 
             /** An object, array, null, bool or a string value. */
-            #ifndef CORRADE_TARGET_32BIT
-            Other
-                #ifndef DOXYGEN_GENERATING_OUTPUT
-                = 7ull << 58
-                #endif
-                ,
-            #else
-            Other = 7ull << 29,
-            #endif
+            Other = Long + 1
         };
 
         /**
@@ -1951,78 +1845,59 @@ class CORRADE_UTILITY_EXPORT JsonToken {
         CORRADE_UTILITY_LOCAL Containers::StringView asStringInternal() const;
 
         enum: std::uint64_t {
-            #ifndef CORRADE_TARGET_32BIT
-            /* Matching public Type, stored in last 3 bits of
-               _sizeFlagsParsedTypeType */
-            TypeMask = 0x07ull << 61, /* 0b111 */
-            TypeObject = 1ull << 61,
-            TypeArray = 2ull << 61,
-            TypeNull = 3ull << 61,
-            TypeBool = 4ull << 61,
-            TypeNumber = 5ull << 61,
-            TypeString = 6ull << 61,
+            /* If the token has these bits set, type is stored in TypeSmall*
+               / TypeLarge* bits, otherwise the type is in the token size and
+               stored in TypeTokenSize* bits */
+            NanMask = 0xfffull << 52, /* sign bit + NaN, 0b111111111111 */
+            Nan = 0x7ffull << 52, /* +NaN, 0b011111111111 */
 
-            /* Matching public ParsedType, stored before the type in
-               _sizeFlagsParsedTypeType */
-            ParsedTypeMask = 0x07ull << 58, /* 0b111 */
-            ParsedTypeNone = 0ull << 58,
-            ParsedTypeDouble = 1ull << 58,
-            ParsedTypeFloat = 2ull << 58,
-            ParsedTypeUnsignedInt = 3ull << 58,
-            ParsedTypeInt = 4ull << 58,
-            ParsedTypeUnsignedLong = 5ull << 58,
-            ParsedTypeLong = 6ull << 58,
-            ParsedTypeOther = 7ull << 58,
+            /* This bit is set for parsed small or large types. 64-bit types,
+               which are if TypeTokenSizeMask is non-zero, are all parsed. */
+            TypeSmallLargeIsParsed = 0x1ull << 48,          /* 0b0001____ */
 
-            /* Stored before the parsed type in _sizeFlagsParsedTypeType */
-            FlagStringKey = 1ull << 57,
-            FlagStringEscaped = 1ull << 55,
+            TypeSmallMask = NanMask|(0xfcull << 44), /* sign, NaN, 6 bits after */
+            /* All TypeSmall* use just 32 bits for data out of the remaining 46
+               bits. The remaining 14 bits are currently unused. */
+            TypeSmallDataMask = 0xffffffffull, /* the final 32 bits */
+            /* All TypeSmall* have the first two bits out of five zero */
+            /* This bit is set for number types */
+            TypeSmallIsNumber = 0x20ull << 44,              /* 0b001000__ */
+            TypeSmallNull = Nan|(0x00ull << 44),            /* 0b000?00__ */
+            TypeSmallBool = Nan|(0x04ull << 44),            /* 0b000?01__ */
+            TypeSmallNumber = Nan|(0x20ull << 44),          /* 0b001000__ */
+            /* These have both the IsNumber and IsParsed bit implicitly set */
+            TypeSmallFloat = Nan|(0x34ull << 44),           /* 0b001101__ */
+            TypeSmallUnsignedInt = Nan|(0x38ull << 44),     /* 0b001110__ */
+            TypeSmallInt = Nan|(0x3cull << 44),             /* 0b001111__ */
 
-            /* Size is the remaining 55 bits of _sizeFlagsParsedTypeType */
-            SizeMask = (1ull << 55) - 1,
-            #else
-            SignMask = 0x800ull << 52, /* 0b100000000000 */
-            NanMask = 0x7ffull << 52,  /* 0b011111111111 */
-            ChildCountMask = 0xffffffffull,
-
-            /* Matching public Type, stored in _childCountFlagsTypeNan before
-               NaN if NaN is set; if NaN is not set it's implicitly TypeNumber */
-            TypeMask = 0x07ull << 49, /* 0b111 */
-            TypeObject = 1ull << 49,
-            TypeArray = 2ull << 49,
-            TypeNull = 3ull << 49,
-            TypeBool = 4ull << 49,
-            TypeNumber = 5ull << 49,
-            TypeString = 6ull << 49,
-
-            /* Stored in _childCountFlagsTypeNan before the type if NaN is set;
-               if NaN is not set the Parsed* values below are used instead */
-            FlagParsed = 1ull << 48,
-            FlagStringKey = 1ull << 47,
-            FlagStringEscaped = 1ull << 45
-            #endif
+            TypeLargeMask = NanMask|(0xfull << 48), /* sign, NaN, 4 bits after */
+            TypeLargeDataMask = 0xffffffffffffull, /* the final 48 bits */
+            /* All TypeSmall* have the first two bits out of five non-zero */
+            TypeIsLarge = 0xcull << 48,                     /* 0b1100 */
+            /* This bit is set for string types */
+            TypeLargeIsString = 0x8ull << 48,               /* 0b1000 */
+            /* This bit is set for string types that are a key */
+            TypeLargeStringIsKey = 0x4ull << 48,            /* 0b0100 */
+            /* This bit is set for string types that are escaped */
+            TypeLargeStringIsEscaped = 0x2ull << 48,        /* 0b0010 */
+            TypeLargeObject = Nan|(0x4ull << 48),           /* 0b010? */
+            TypeLargeArray = Nan|(0x6ull << 48),            /* 0b011? */
+            TypeLargeString = Nan|(0x8ull << 48),           /* 0b100? */
+            TypeLargeStringEscaped = Nan|(0xaull << 48),    /* 0b101? */
+            TypeLargeStringKey = Nan|(0xcull << 48),        /* 0b110? */
+            TypeLargeStringKeyEscaped = Nan|(0xeull << 48), /* 0b111? */
         };
 
-        #ifdef CORRADE_TARGET_32BIT
-        enum: std::uint32_t {
-            /* Matching public ParsedType, stored in the last bits of
-               _sizeParsedType if NaN is not set; if NaN is set the Flag*
-               values above are used instead */
-            ParsedTypeMask = 0x07u << 29, /* 0b111 */
-            /* ParsedTypeNone does not apply here */
-            ParsedTypeDouble = 1u << 29,
-            ParsedTypeFloat = 2u << 29,
-            ParsedTypeUnsignedInt = 3u << 29,
-            ParsedTypeInt = 4u << 29,
-            ParsedTypeUnsignedLong = 5u << 29,
-            ParsedTypeLong = 6u << 29,
-            /* ParsedTypeOther does not apply here */
-
-            /* If NaN is not set, size is the remaining 28 bits of
-               _sizeParsedType */
-            SizeMask = (1u << 28) - 1
+        /* The final 2 bits of a 32/64-bit token offset are used to distinguish
+           between 64-bit types. If both bits are 0, the token should have
+           NanMask set and the type described by the 4 or 5 bits after it. */
+        enum: std::size_t {
+            TypeTokenSizeMask = 0x3ull << (sizeof(std::size_t)*8 - 2),
+            TypeTokenSizeOther = 0x0ull << (sizeof(std::size_t)*8 - 2),
+            TypeTokenSizeDouble = 0x1ull << (sizeof(std::size_t)*8 - 2),
+            TypeTokenSizeUnsignedLong = 0x2ull << (sizeof(std::size_t)*8 - 2),
+            TypeTokenSizeLong = 0x3ull << (sizeof(std::size_t)*8 - 2),
         };
-        #endif
 
         /* Is never null, just avoiding a Containers::Reference dependency */
         const Implementation::JsonData* _json;
@@ -2060,27 +1935,22 @@ class CORRADE_UTILITY_EXPORT JsonTokenData {
 
         /* These are all private because they may depend on spatial locality
            relative to other tokens, which has to be ensured externally */
-        inline JsonToken::Type type() const;
-        inline bool isParsed() const;
-        inline JsonToken::ParsedType parsedType() const;
+        JsonToken::Type type() const;
+        bool isParsed() const;
+        JsonToken::ParsedType parsedType() const;
         std::size_t childCount() const;
         inline const JsonTokenData& next() const;
 
-        /* See Json.cpp for detailed layout description and differences between
-           32- and 64-bit representation */
+        /* See Json.cpp for detailed layout description */
         const char* _data;
-        #ifndef CORRADE_TARGET_32BIT
-        std::size_t _sizeFlagsParsedTypeType;
-        #else
-        std::size_t _sizeParsedType;
-        #endif
+        /* Upper two bits used for TypeTokenSize* values */
+        std::size_t _sizeType;
         union {
-            /* Child count abused for parent token index during parsing */
-            #ifndef CORRADE_TARGET_32BIT
-            std::uint64_t _childCount;
-            #else
-            std::uint64_t _childCountFlagsTypeNan;
-            #endif
+            /* The upper 12 bits contain a NaN, the next four / five bits
+               contain a type. For objects and arrays, the lower 48 bits is
+               abused for storing parent token index. After tokenization, they
+               contain child count. */
+            std::uint64_t _dataTypeNan;
             /* Wouldn't the shorter types clash with NaN on BE? */
             bool _parsedBool;
             double _parsedDouble;
@@ -2089,7 +1959,6 @@ class CORRADE_UTILITY_EXPORT JsonTokenData {
             std::int64_t _parsedLong;
             std::uint32_t _parsedUnsignedInt;
             std::int32_t _parsedInt;
-            std::size_t _parsedString;
         };
 };
 
@@ -2657,49 +2526,12 @@ inline const JsonTokenData& JsonToken::token() const {
     return _json->tokens[_token];
 }
 
-inline JsonToken::Type JsonTokenData::type() const {
-    #ifndef CORRADE_TARGET_32BIT
-    return JsonToken::Type(_sizeFlagsParsedTypeType & JsonToken::TypeMask);
-    #else
-    /* If NaN is set, the type is stored */
-    if((_childCountFlagsTypeNan & (JsonToken::NanMask|JsonToken::SignMask)) == JsonToken::NanMask)
-        return JsonToken::Type(_childCountFlagsTypeNan & JsonToken::TypeMask);
-    /* Otherwise it's implicitly a number */
-    return JsonToken::Type::Number;
-    #endif
-}
-
 inline JsonToken::Type JsonToken::type() const {
     return _json->tokens[_token].type();
 }
 
-inline bool JsonTokenData::isParsed() const {
-    #ifndef CORRADE_TARGET_32BIT
-    return _sizeFlagsParsedTypeType & JsonToken::ParsedTypeMask;
-    #else
-    /* If NaN is set, it's parsed if any bit of the parsed type is set */
-    if((_childCountFlagsTypeNan & (JsonToken::NanMask|JsonToken::SignMask)) == JsonToken::NanMask)
-        return _childCountFlagsTypeNan & JsonToken::FlagParsed;
-    /* Otherwise it's an already parsed number */
-    return true;
-    #endif
-}
-
 inline bool JsonToken::isParsed() const {
     return _json->tokens[_token].isParsed();
-}
-
-inline JsonToken::ParsedType JsonTokenData::parsedType() const {
-    #ifndef CORRADE_TARGET_32BIT
-    return JsonToken::ParsedType(_sizeFlagsParsedTypeType & JsonToken::ParsedTypeMask);
-    #else
-    /* If NaN is set, the parsed type is either None or Other */
-    if((_childCountFlagsTypeNan & (JsonToken::NanMask|JsonToken::SignMask)) == JsonToken::NanMask)
-        return _childCountFlagsTypeNan & JsonToken::FlagParsed ?
-            JsonToken::ParsedType::Other : JsonToken::ParsedType::None;
-    /* Otherwise it's a number and the parsed type is stored in size */
-    return JsonToken::ParsedType(_sizeParsedType & JsonToken::ParsedTypeMask);
-    #endif
 }
 
 inline JsonToken::ParsedType JsonToken::parsedType() const {
@@ -2707,25 +2539,24 @@ inline JsonToken::ParsedType JsonToken::parsedType() const {
 }
 
 inline JsonIterator JsonToken::firstChild() const {
+    /* The only types that can have children are arrays, objects and string
+       keys, which are all large types */
     const JsonTokenData& data = _json->tokens[_token];
-    #ifndef CORRADE_TARGET_32BIT
-    /* The token has a child if it's an object or an array and has children */
-    if((((data._sizeFlagsParsedTypeType & TypeMask) == TypeObject ||
-         (data._sizeFlagsParsedTypeType & TypeMask) == TypeArray) && data._childCount) ||
-        /* or if it's an object key */
-        (data._sizeFlagsParsedTypeType & FlagStringKey))
-        return JsonIterator{_json, _token + 1};
-    #else
-    /* The token has a child if it's not a parsed number and */
-    if(((data._childCountFlagsTypeNan & (NanMask|SignMask)) == NanMask) &&
-      /* it's an object with non-zero child count */
-    ((((data._childCountFlagsTypeNan & TypeMask) == TypeObject ||
-       (data._childCountFlagsTypeNan & TypeMask) == TypeArray) &&
-       (data._childCountFlagsTypeNan & ChildCountMask)) ||
-       /* or it's an object key */
-       (data._childCountFlagsTypeNan & FlagStringKey)))
-        return JsonIterator{_json, _token + 1};
-    #endif
+    if((data._dataTypeNan & JsonToken::NanMask) == JsonToken::Nan && (data._dataTypeNan & JsonToken::TypeIsLarge)) {
+        /* String keys have at least one child always */
+        if((data._dataTypeNan & JsonToken::TypeLargeIsString) && (data._dataTypeNan & JsonToken::TypeLargeStringIsKey))
+            return JsonIterator{_json, _token + 1};
+
+        /* Arrays and objects have a child only if child count is non-zero */
+        const std::uint64_t type = data._dataTypeNan & JsonToken::TypeLargeMask & ~JsonToken::TypeSmallLargeIsParsed;
+        if(type == JsonToken::TypeLargeArray ||
+           type == JsonToken::TypeLargeObject)
+            return data._dataTypeNan & JsonToken::TypeLargeDataMask ?
+                JsonIterator{_json, _token + 1} : JsonIterator{};
+    }
+
+    /* Otherwise the type is a non-key string or is small (null, bool, number)
+       or it's a 64-bit parsed type, neither of which have children */
     return {};
 }
 
