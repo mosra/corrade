@@ -1490,8 +1490,9 @@ Containers::Optional<JsonObjectView> Json::parseObject(const JsonToken token_) {
     parseObjectArrayInternal(token);
 
     const std::size_t childCount = token.childCount();
-    for(JsonTokenData *i = &token + 1, *iMax = i + childCount; i != iMax; i += i->childCount() + 1) {
-        if(!parseStringInternal("Utility::Json::parseObject():", *i))
+    for(std::size_t i = token_._token + 1, end = i + childCount; i != end; i = i + 1 + state.tokenStorage[i].childCount()) {
+        JsonTokenData& nested = state.tokenStorage[i];
+        if(!parseStringInternal("Utility::Json::parseObject():", nested))
             return {};
     }
 
@@ -1725,17 +1726,18 @@ Containers::Optional<Containers::StridedBitArrayView1D> Json::parseBitArray(cons
     parseObjectArrayInternal(token);
     const std::size_t size = token._dataTypeNan & JsonToken::TypeLargeDataMask;
     /* As this is expected to be a value array, we go by simple incrementing
-       instead of with i->next(). If a nested object or array would be
-       encountered, the type() check fails. */
-    for(JsonTokenData *i = &token + 1, *end = i + size; i != end; ++i) {
-        if((i->_dataTypeNan & JsonToken::TypeSmallMask & ~JsonToken::TypeSmallLargeIsParsed) != JsonToken::TypeSmallBool) {
+       instead of skipping nested.childCount(). If a nested object or array
+       would be encountered, the type() check fails. */
+    for(std::size_t i = token_._token + 1, end = i + size; i != end; ++i) {
+        JsonTokenData& nested = state.tokenStorage[i];
+        if((nested._dataTypeNan & JsonToken::TypeSmallMask & ~JsonToken::TypeSmallLargeIsParsed) != JsonToken::TypeSmallBool) {
             Error err;
-            err << "Utility::Json::parseBitArray(): expected a bool, got" << i->type() << "at";
-            printFilePosition(err, *i);
+            err << "Utility::Json::parseBitArray(): expected a bool, got" << nested.type() << "at";
+            printFilePosition(err, nested);
             return {};
         }
 
-        if(!parseBoolInternal("Utility::Json::parseBitArray():", *i))
+        if(!parseBoolInternal("Utility::Json::parseBitArray():", nested))
             return {};
     }
 
@@ -1778,17 +1780,18 @@ Containers::Optional<Containers::StridedArrayView1D<const double>> Json::parseDo
     parseObjectArrayInternal(token);
     const std::size_t size = token._dataTypeNan & JsonToken::TypeLargeDataMask;
     /* As this is expected to be a value array, we go by simple incrementing
-       instead of with i->next(). If a nested object or array would be
-       encountered, the type() check fails. */
-    for(JsonTokenData *i = &token + 1, *end = i + size; i != end; ++i) {
-        if(!i->isNumber()) {
+       instead of skipping nested.childCount(). If a nested object or array
+       would be encountered, the type() check fails. */
+    for(std::size_t i = token_._token + 1, end = i + size; i != end; ++i) {
+        JsonTokenData& nested = state.tokenStorage[i];
+        if(!nested.isNumber()) {
             Error err;
-            err << "Utility::Json::parseDoubleArray(): expected a number, got" << i->type() << "at";
-            printFilePosition(err, *i);
+            err << "Utility::Json::parseDoubleArray(): expected a number, got" << nested.type() << "at";
+            printFilePosition(err, nested);
             return {};
         }
 
-        if(!parseDoubleInternal("Utility::Json::parseDoubleArray():", *i))
+        if(!parseDoubleInternal("Utility::Json::parseDoubleArray():", nested))
             return {};
     }
 
@@ -1820,17 +1823,18 @@ Containers::Optional<Containers::StridedArrayView1D<const float>> Json::parseFlo
     parseObjectArrayInternal(token);
     const std::size_t size = token._dataTypeNan & JsonToken::TypeLargeDataMask;
     /* As this is expected to be a value array, we go by simple incrementing
-       instead of with i->next(). If a nested object or array would be
-       encountered, the type() check fails. */
-    for(JsonTokenData *i = &token + 1, *end = i + size; i != end; ++i) {
-        if(!i->isNumber()) {
+       instead of skipping nested.childCount(). If a nested object or array
+       would be encountered, the type() check fails. */
+    for(std::size_t i = token_._token + 1, end = i + size; i != end; ++i) {
+        JsonTokenData& nested = state.tokenStorage[i];
+        if(!nested.isNumber()) {
             Error err;
-            err << "Utility::Json::parseFloatArray(): expected a number, got" << i->type() << "at";
-            printFilePosition(err, *i);
+            err << "Utility::Json::parseFloatArray(): expected a number, got" << nested.type() << "at";
+            printFilePosition(err, nested);
             return {};
         }
 
-        if(!parseFloatInternal("Utility::Json::parseFloatArray():", *i))
+        if(!parseFloatInternal("Utility::Json::parseFloatArray():", nested))
             return {};
     }
 
@@ -1862,17 +1866,18 @@ Containers::Optional<Containers::StridedArrayView1D<const std::uint32_t>> Json::
     parseObjectArrayInternal(token);
     const std::size_t size = token._dataTypeNan & JsonToken::TypeLargeDataMask;
     /* As this is expected to be a value array, we go by simple incrementing
-       instead of with i->next(). If a nested object or array would be
-       encountered, the type() check fails. */
-    for(JsonTokenData *i = &token + 1, *end = i + size; i != end; ++i) {
-        if(!i->isNumber()) {
+       instead of skipping nested.childCount(). If a nested object or array
+       would be encountered, the type() check fails. */
+    for(std::size_t i = token_._token + 1, end = i + size; i != end; ++i) {
+        JsonTokenData& nested = state.tokenStorage[i];
+        if(!nested.isNumber()) {
             Error err;
-            err << "Utility::Json::parseUnsignedIntArray(): expected a number, got" << i->type() << "at";
-            printFilePosition(err, *i);
+            err << "Utility::Json::parseUnsignedIntArray(): expected a number, got" << nested.type() << "at";
+            printFilePosition(err, nested);
             return {};
         }
 
-        if(!parseUnsignedIntInternal("Utility::Json::parseUnsignedIntArray():", *i))
+        if(!parseUnsignedIntInternal("Utility::Json::parseUnsignedIntArray():", nested))
             return {};
     }
 
@@ -1904,17 +1909,18 @@ Containers::Optional<Containers::StridedArrayView1D<const std::int32_t>> Json::p
     parseObjectArrayInternal(token);
     const std::size_t size = token._dataTypeNan & JsonToken::TypeLargeDataMask;
     /* As this is expected to be a value array, we go by simple incrementing
-       instead of with i->next(). If a nested object or array would be
-       encountered, the type() check fails. */
-    for(JsonTokenData *i = &token + 1, *end = i + size; i != end; ++i) {
-        if(!i->isNumber()) {
+       instead of skipping nested.childCount(). If a nested object or array
+       would be encountered, the type() check fails. */
+    for(std::size_t i = token_._token + 1, end = i + size; i != end; ++i) {
+        JsonTokenData& nested = state.tokenStorage[i];
+        if(!nested.isNumber()) {
             Error err;
-            err << "Utility::Json::parseIntArray(): expected a number, got" << i->type() << "at";
-            printFilePosition(err, *i);
+            err << "Utility::Json::parseIntArray(): expected a number, got" << nested.type() << "at";
+            printFilePosition(err, nested);
             return {};
         }
 
-        if(!parseIntInternal("Utility::Json::parseIntArray():", *i))
+        if(!parseIntInternal("Utility::Json::parseIntArray():", nested))
             return {};
     }
 
@@ -1946,17 +1952,18 @@ Containers::Optional<Containers::StridedArrayView1D<const std::uint64_t>> Json::
     parseObjectArrayInternal(token);
     const std::size_t size = token._dataTypeNan & JsonToken::TypeLargeDataMask;
     /* As this is expected to be a value array, we go by simple incrementing
-       instead of with i->next(). If a nested object or array would be
-       encountered, the type() check fails. */
-    for(JsonTokenData *i = &token + 1, *end = i + size; i != end; ++i) {
-        if(!i->isNumber()) {
+       instead of skipping nested.childCount(). If a nested object or array
+       would be encountered, the type() check fails. */
+    for(std::size_t i = token_._token + 1, end = i + size; i != end; ++i) {
+        JsonTokenData& nested = state.tokenStorage[i];
+        if(!nested.isNumber()) {
             Error err;
-            err << "Utility::Json::parseUnsignedLongArray(): expected a number, got" << i->type() << "at";
-            printFilePosition(err, *i);
+            err << "Utility::Json::parseUnsignedLongArray(): expected a number, got" << nested.type() << "at";
+            printFilePosition(err, nested);
             return {};
         }
 
-        if(!parseUnsignedLongInternal("Utility::Json::parseUnsignedLongArray():", *i))
+        if(!parseUnsignedLongInternal("Utility::Json::parseUnsignedLongArray():", nested))
             return {};
     }
 
@@ -1988,17 +1995,18 @@ Containers::Optional<Containers::StridedArrayView1D<const std::int64_t>> Json::p
     parseObjectArrayInternal(token);
     const std::size_t size = token._dataTypeNan & JsonToken::TypeLargeDataMask;
     /* As this is expected to be a value array, we go by simple incrementing
-       instead of with i->next(). If a nested object or array would be
-       encountered, the type() check fails. */
-    for(JsonTokenData *i = &token + 1, *end = i + size; i != end; ++i) {
-        if(!i->isNumber()) {
+       instead of skipping nested.childCount(). If a nested object or array
+       would be encountered, the type() check fails. */
+    for(std::size_t i = token_._token + 1, end = i + size; i != end; ++i) {
+        JsonTokenData& nested = state.tokenStorage[i];
+        if(!nested.isNumber()) {
             Error err;
-            err << "Utility::Json::parseLongArray(): expected a number, got" << i->type() << "at";
-            printFilePosition(err, *i);
+            err << "Utility::Json::parseLongArray(): expected a number, got" << nested.type() << "at";
+            printFilePosition(err, nested);
             return {};
         }
 
-        if(!parseLongInternal("Utility::Json::parseLongArray():", *i))
+        if(!parseLongInternal("Utility::Json::parseLongArray():", nested))
             return {};
     }
 
@@ -2042,17 +2050,18 @@ Containers::Optional<Containers::StringIterable> Json::parseStringArray(const Js
     parseObjectArrayInternal(token);
     const std::size_t size = token._dataTypeNan & JsonToken::TypeLargeDataMask;
     /* As this is expected to be a value array, we go by simple incrementing
-       instead of with i->next(). If a nested object or array would be
-       encountered, the type() check fails. */
-    for(JsonTokenData *i = &token + 1, *end = i + size; i != end; ++i) {
-        if((i->_dataTypeNan & JsonToken::TypeLargeMask & ~(JsonToken::TypeLargeStringIsKey|JsonToken::TypeLargeStringIsEscaped| JsonToken::TypeSmallLargeIsParsed)) != JsonToken::TypeLargeString) {
+       instead of skipping nested.childCount(). If a nested object or array
+       would be encountered, the type() check fails. */
+    for(std::size_t i = token_._token + 1, end = i + size; i != end; ++i) {
+        JsonTokenData& nested = state.tokenStorage[i];
+        if((nested._dataTypeNan & JsonToken::TypeLargeMask & ~(JsonToken::TypeLargeStringIsKey|JsonToken::TypeLargeStringIsEscaped| JsonToken::TypeSmallLargeIsParsed)) != JsonToken::TypeLargeString) {
             Error err;
-            err << "Utility::Json::parseStringArray(): expected a string, got" << i->type() << "at";
-            printFilePosition(err, *i);
+            err << "Utility::Json::parseStringArray(): expected a string, got" << nested.type() << "at";
+            printFilePosition(err, nested);
             return {};
         }
 
-        if(!parseStringInternal("Utility::Json::parseStringArray():", *i))
+        if(!parseStringInternal("Utility::Json::parseStringArray():", nested))
             return {};
     }
 
@@ -2152,14 +2161,16 @@ Containers::Optional<JsonToken::Type> JsonToken::commonArrayType() const {
     if(!childCount)
         return {};
 
-    const Type type = (&data)[1].type();
-    for(const JsonTokenData *i = &(&data)[1].next(), *end = &data + 1 + childCount; i != end; i = &i->next())
+    const Type type = _json->tokens[_token + 1].type();
+    /* Iterate from the second array token (i.e., after `_token + 1` and its
+       children and compare to the first token type */
+    for(std::size_t i = (_token + 1) + 1 + _json->tokens[_token + 1].childCount(), end = _token + 1 + childCount; i != end; i += 1 + _json->tokens[i].childCount())
         /* Unlike other checks there isn't really a way to avoid calling the
            complex type() here. Ultimately the commonArrayType() is meant
            mainly for diagnostic, in practice the code will likely want to just
            know "is this array of such type?" rather than "what type is this
            array of so I can branch on it?". */
-        if(i->type() != type)
+        if(_json->tokens[i].type() != type)
             return {};
 
     return type;
@@ -2238,17 +2249,19 @@ Containers::Optional<JsonToken::ParsedType> JsonToken::commonParsedArrayType() c
        ParsedType::None as the common parsed type, since that says nothing
        about the contents -- it could be a heterogeneous mixture of whatever
        and still have a None as a common parsed type. */
-    const ParsedType type = (&data)[1].parsedType();
+    const ParsedType type = _json->tokens[_token + 1].parsedType();
     if(type == ParsedType::None)
         return {};
 
-    for(const JsonTokenData *i = &(&data)[1].next(), *end = &data + 1 + childCount; i != end; i = &i->next())
+    /* Iterate from the second array token (i.e., after `_token + 1` and its
+       children and compare to the first token type */
+    for(std::size_t i = (_token + 1) + 1 + _json->tokens[_token + 1].childCount(), end = _token + 1 + childCount; i != end; i += 1 + _json->tokens[i].childCount())
         /* Unlike other checks there isn't really a way to avoid calling the
            complex parsedType() here. Ultimately the commonParsedArrayType() is
            meant mainly for diagnostic, in practice the code will likely want
            to just know "is this array of such type?" rather than "what type is
            this array of so I can branch on it?". */
-        if(i->parsedType() != type)
+        if(_json->tokens[i].parsedType() != type)
             return {};
 
     return type;
@@ -2331,12 +2344,12 @@ JsonIterator JsonToken::find(const Containers::StringView key) const {
     CORRADE_ASSERT((data._dataTypeNan & TypeLargeMask) == (TypeLargeObject|TypeSmallLargeIsParsed),
         "Utility::JsonToken::find(): token is" << (isParsed() ? "a parsed" : "an unparsed") << type() << Debug::nospace << ", expected a parsed object", *this);
 
-    for(const JsonTokenData *i = &data + 1, *end = i + (data._dataTypeNan & TypeLargeDataMask); i != end; i = &i->next()) {
+    for(std::size_t i = _token + 1, end = i + (data._dataTypeNan & TypeLargeDataMask); i != end; i = i + 1 + _json->tokens[i].childCount()) {
         /* Returning a valid iterator from the assert to not hit a second
            assert from operator[] below when testing */
-        CORRADE_ASSERT((i->_dataTypeNan & JsonToken::TypeLargeMask & ~JsonToken::TypeLargeStringIsEscaped) == (JsonToken::TypeLargeStringKey|JsonToken::TypeSmallLargeIsParsed),
+        CORRADE_ASSERT((_json->tokens[i]._dataTypeNan & JsonToken::TypeLargeMask & ~JsonToken::TypeLargeStringIsEscaped) == (JsonToken::TypeLargeStringKey|JsonToken::TypeSmallLargeIsParsed),
             "Utility::JsonToken::find(): key string isn't parsed", (JsonIterator{_json, _token}));
-        const JsonToken out{*_json, std::size_t(i - _json->tokens)};
+        const JsonToken out{*_json, i};
         if(out.asStringInternal() == key)
             return out.firstChild();
     }
@@ -2361,9 +2374,9 @@ JsonIterator JsonToken::find(const std::size_t index) const {
         "Utility::JsonToken::find(): token is" << (isParsed() ? "a parsed" : "an unparsed") << type() << Debug::nospace << ", expected a parsed array", *this);
 
     std::size_t counter = 0;
-    for(const JsonTokenData *i = &data + 1, *end = i + (data._dataTypeNan & TypeLargeDataMask); i != end; i = &i->next())
+    for(std::size_t i = _token + 1, end = i + (data._dataTypeNan & TypeLargeDataMask); i != end; i = i + 1 + _json->tokens[i].childCount())
         if(counter++ == index)
-            return JsonToken{*_json, std::size_t(i - _json->tokens)};
+            return JsonToken{*_json, i};
 
     return {};
 }
@@ -2411,11 +2424,13 @@ Containers::StridedBitArrayView1D JsonToken::asBitArray(const std::size_t expect
     const std::size_t size = data._dataTypeNan & TypeLargeDataMask;
     #ifndef CORRADE_NO_ASSERT
     /* As this is expected to be a value array, we go by simple incrementing
-       instead of with i->next(). If a nested object or array would be
-       encountered, the type() check fails. */
-    for(const JsonTokenData *i = &data + 1, *end = i + size; i != end; ++i)
-        CORRADE_ASSERT((i->_dataTypeNan & JsonToken::TypeSmallMask) == (JsonToken::TypeSmallBool|JsonToken::TypeSmallLargeIsParsed),
-            "Utility::JsonToken::asBitArray(): token" << i - &data - 1 << "is" << (i->isParsed() ? "a parsed" : "an unparsed") << i->type(), {});
+       instead of skipping nested.childCount(). If a nested object or array
+       would be encountered, the parsedType() check fails. */
+    for(std::size_t i = _token + 1, end = i + size; i != end; ++i) {
+        const JsonTokenData& nested = _json->tokens[i];
+        CORRADE_ASSERT((nested._dataTypeNan & JsonToken::TypeSmallMask) == (JsonToken::TypeSmallBool|JsonToken::TypeSmallLargeIsParsed),
+            "Utility::JsonToken::asBitArray(): token" << i - _token - 1 << "is" << (nested.isParsed() ? "a parsed" : "an unparsed") << nested.type(), {});
+    }
     /* Needs to be after the type-checking loop, otherwise the child count may
        include also nested tokens and the message would be confusing */
     CORRADE_ASSERT(!expectedSize || size == expectedSize,
@@ -2444,11 +2459,13 @@ Containers::StridedArrayView1D<const double> JsonToken::asDoubleArray(const std:
     const std::size_t size = data._dataTypeNan & TypeLargeDataMask;
     #ifndef CORRADE_NO_ASSERT
     /* As this is expected to be a value array, we go by simple incrementing
-       instead of with i->next(). If a nested object or array would be
-       encountered, the parsedType() check fails. */
-    for(const JsonTokenData *i = &data + 1, *end = i + size; i != end; ++i)
-        CORRADE_ASSERT((i->_sizeType & JsonToken::TypeTokenSizeMask) == JsonToken::TypeTokenSizeDouble,
-            "Utility::JsonToken::asDoubleArray(): token" << i - &data - 1 << "is a" << i->type() << "parsed as" << i->parsedType(), {});
+       instead of skipping nested.childCount(). If a nested object or array
+       would be encountered, the parsedType() check fails. */
+    for(std::size_t i = _token + 1, end = i + size; i != end; ++i) {
+        const JsonTokenData& nested = _json->tokens[i];
+        CORRADE_ASSERT((nested._sizeType & JsonToken::TypeTokenSizeMask) == JsonToken::TypeTokenSizeDouble,
+            "Utility::JsonToken::asDoubleArray(): token" << i - _token - 1 << "is a" << nested.type() << "parsed as" << nested.parsedType(), {});
+    }
     /* Needs to be after the type-checking loop, otherwise the child count may
        include also nested tokens and the message would be confusing */
     CORRADE_ASSERT(!expectedSize || size == expectedSize,
@@ -2468,11 +2485,13 @@ Containers::StridedArrayView1D<const float> JsonToken::asFloatArray(const std::s
     const std::size_t size = data._dataTypeNan & TypeLargeDataMask;
     #ifndef CORRADE_NO_ASSERT
     /* As this is expected to be a value array, we go by simple incrementing
-       instead of with i->next(). If a nested object or array would be
-       encountered, the parsedType() check fails. */
-    for(const JsonTokenData *i = &data + 1, *end = i + size; i != end; ++i)
-        CORRADE_ASSERT((i->_dataTypeNan & JsonToken::TypeSmallMask) == JsonToken::TypeSmallFloat,
-            "Utility::JsonToken::asFloatArray(): token" << i - &data - 1 << "is a" << i->type() << "parsed as" << i->parsedType(), {});
+       instead of skipping nested.childCount(). If a nested object or array
+       would be encountered, the parsedType() check fails. */
+    for(std::size_t i = _token + 1, end = i + size; i != end; ++i) {
+        const JsonTokenData& nested = _json->tokens[i];
+        CORRADE_ASSERT((nested._dataTypeNan & JsonToken::TypeSmallMask) == JsonToken::TypeSmallFloat,
+            "Utility::JsonToken::asFloatArray(): token" << i - _token - 1 << "is a" << nested.type() << "parsed as" << nested.parsedType(), {});
+    }
     /* Needs to be after the type-checking loop, otherwise the child count may
        include also nested tokens and the message would be confusing */
     CORRADE_ASSERT(!expectedSize || size == expectedSize,
@@ -2492,11 +2511,13 @@ Containers::StridedArrayView1D<const std::uint32_t> JsonToken::asUnsignedIntArra
     const std::size_t size = data._dataTypeNan & TypeLargeDataMask;
     #ifndef CORRADE_NO_ASSERT
     /* As this is expected to be a value array, we go by simple incrementing
-       instead of with i->next(). If a nested object or array would be
-       encountered, the parsedType() check fails. */
-    for(const JsonTokenData *i = &data + 1, *end = i + size; i != end; ++i)
-        CORRADE_ASSERT((i->_dataTypeNan & JsonToken::TypeSmallMask) == JsonToken::TypeSmallUnsignedInt,
-            "Utility::JsonToken::asUnsignedIntArray(): token" << i - &data - 1 << "is a" << i->type() << "parsed as" << i->parsedType(), {});
+       instead of skipping nested.childCount(). If a nested object or array
+       would be encountered, the parsedType() check fails. */
+    for(std::size_t i = _token + 1, end = i + size; i != end; ++i) {
+        const JsonTokenData& nested = _json->tokens[i];
+        CORRADE_ASSERT((nested._dataTypeNan & JsonToken::TypeSmallMask) == JsonToken::TypeSmallUnsignedInt,
+            "Utility::JsonToken::asUnsignedIntArray(): token" << i - _token - 1 << "is a" << nested.type() << "parsed as" << nested.parsedType(), {});
+    }
     /* Needs to be after the type-checking loop, otherwise the child count may
        include also nested tokens and the message would be confusing */
     CORRADE_ASSERT(!expectedSize || size == expectedSize,
@@ -2516,11 +2537,13 @@ Containers::StridedArrayView1D<const std::int32_t> JsonToken::asIntArray(const s
     const std::size_t size = data._dataTypeNan & TypeLargeDataMask;
     #ifndef CORRADE_NO_ASSERT
     /* As this is expected to be a value array, we go by simple incrementing
-       instead of with i->next(). If a nested object or array would be
-       encountered, the parsedType() check fails. */
-    for(const JsonTokenData *i = &data + 1, *end = i + size; i != end; ++i)
-        CORRADE_ASSERT((i->_dataTypeNan & JsonToken::TypeSmallMask) == JsonToken::TypeSmallInt,
-            "Utility::JsonToken::asIntArray(): token" << i - &data - 1 << "is a" << i->type() << "parsed as" << i->parsedType(), {});
+       instead of skipping nested.childCount(). If a nested object or array
+       would be encountered, the parsedType() check fails. */
+    for(std::size_t i = _token + 1, end = i + size; i != end; ++i) {
+        const JsonTokenData& nested = _json->tokens[i];
+        CORRADE_ASSERT((nested._dataTypeNan & JsonToken::TypeSmallMask) == JsonToken::TypeSmallInt,
+            "Utility::JsonToken::asIntArray(): token" << i - _token - 1 << "is a" << nested.type() << "parsed as" << nested.parsedType(), {});
+    }
     /* Needs to be after the type-checking loop, otherwise the child count may
        include also nested tokens and the message would be confusing */
     CORRADE_ASSERT(!expectedSize || size == expectedSize,
@@ -2540,11 +2563,13 @@ Containers::StridedArrayView1D<const std::uint64_t> JsonToken::asUnsignedLongArr
     const std::size_t size = data._dataTypeNan & TypeLargeDataMask;
     #ifndef CORRADE_NO_ASSERT
     /* As this is expected to be a value array, we go by simple incrementing
-       instead of with i->next(). If a nested object or array would be
-       encountered, the parsedType() check fails. */
-    for(const JsonTokenData *i = &data + 1, *end = i + size; i != end; ++i)
-        CORRADE_ASSERT((i->_sizeType & JsonToken::TypeTokenSizeMask) == JsonToken::TypeTokenSizeUnsignedLong,
-            "Utility::JsonToken::asUnsignedLongArray(): token" << i - &data - 1 << "is a" << i->type() << "parsed as" << i->parsedType(), {});
+       instead of skipping nested.childCount(). If a nested object or array
+       would be encountered, the parsedType() check fails. */
+    for(std::size_t i = _token + 1, end = i + size; i != end; ++i) {
+        const JsonTokenData& nested = _json->tokens[i];
+        CORRADE_ASSERT((nested._sizeType & JsonToken::TypeTokenSizeMask) == JsonToken::TypeTokenSizeUnsignedLong,
+            "Utility::JsonToken::asUnsignedLongArray(): token" << i - _token - 1 << "is a" << nested.type() << "parsed as" << nested.parsedType(), {});
+    }
     /* Needs to be after the type-checking loop, otherwise the child count may
        include also nested tokens and the message would be confusing */
     CORRADE_ASSERT(!expectedSize || size == expectedSize,
@@ -2564,11 +2589,13 @@ Containers::StridedArrayView1D<const std::int64_t> JsonToken::asLongArray(const 
     const std::size_t size = data._dataTypeNan & TypeLargeDataMask;
     #ifndef CORRADE_NO_ASSERT
     /* As this is expected to be a value array, we go by simple incrementing
-       instead of with i->next(). If a nested object or array would be
-       encountered, the parsedType() check fails. */
-    for(const JsonTokenData *i = &data + 1, *end = i + size; i != end; ++i)
-        CORRADE_ASSERT((i->_sizeType & JsonToken::TypeTokenSizeMask) == JsonToken::TypeTokenSizeLong,
-            "Utility::JsonToken::asLongArray(): token" << i - &data - 1 << "is a" << i->type() << "parsed as" << i->parsedType(), {});
+       instead of skipping nested.childCount(). If a nested object or array
+       would be encountered, the parsedType() check fails. */
+    for(std::size_t i = _token + 1, end = i + size; i != end; ++i) {
+        const JsonTokenData& nested = _json->tokens[i];
+        CORRADE_ASSERT((nested._sizeType & JsonToken::TypeTokenSizeMask) == JsonToken::TypeTokenSizeLong,
+            "Utility::JsonToken::asLongArray(): token" << i - _token - 1 << "is a" << nested.type() << "parsed as" << nested.parsedType(), {});
+    }
     /* Needs to be after the type-checking loop, otherwise the child count may
        include also nested tokens and the message would be confusing */
     CORRADE_ASSERT(!expectedSize || size == expectedSize,
@@ -2598,13 +2625,15 @@ Containers::StringIterable JsonToken::asStringArray(const std::size_t expectedSi
     const std::size_t size = data._dataTypeNan & TypeLargeDataMask;
     #ifndef CORRADE_NO_ASSERT
     /* As this is expected to be a value array, we go by simple incrementing
-       instead of with i->next(). If a nested object or array would be
-       encountered, the type() check fails. */
-    for(const JsonTokenData *i = &data + 1, *end = i + size; i != end; ++i)
+       instead of skipping nested.childCount(). If a nested object or array
+       would be encountered, the parsedType() check fails. */
+    for(std::size_t i = _token + 1, end = i + size; i != end; ++i) {
+        const JsonTokenData& nested = _json->tokens[i];
         /* String array values can't be keys so not filtering away the
            TypeLargeStringIsKey bit */
-        CORRADE_ASSERT((i->_dataTypeNan & JsonToken::TypeLargeMask & ~JsonToken::TypeLargeStringIsEscaped) == (JsonToken::TypeLargeString|JsonToken::TypeSmallLargeIsParsed),
-            "Utility::JsonToken::asStringArray(): token" << i - &data - 1 << "is" << (i->isParsed() ? "a parsed" : "an unparsed") << i->type(), {});
+        CORRADE_ASSERT((nested._dataTypeNan & JsonToken::TypeLargeMask & ~JsonToken::TypeLargeStringIsEscaped) == (JsonToken::TypeLargeString|JsonToken::TypeSmallLargeIsParsed),
+            "Utility::JsonToken::asStringArray(): token" << i - _token - 1 << "is" << (nested.isParsed() ? "a parsed" : "an unparsed") << nested.type(), {});
+    }
     /* Needs to be after the type-checking loop, otherwise the child count may
        include also nested tokens and the message would be confusing */
     CORRADE_ASSERT(!expectedSize || size == expectedSize,
