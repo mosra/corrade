@@ -312,6 +312,10 @@ void Json::printFilePosition(Debug& out, const Containers::StringView string) co
     out << _state->filename << Debug::nospace << ":" << Debug::nospace << line << Debug::nospace << ":" << Debug::nospace << (string.size() - lastLineBegin) + 1;
 }
 
+void Json::printFilePosition(Debug& out, const JsonTokenData& token) const {
+    printFilePosition(out, _state->string.prefix(token._data));
+}
+
 Containers::Optional<Json> Json::tokenize(const Containers::StringView filename, const std::size_t lineOffset, const std::size_t columnOffset, const Containers::StringView string_) {
     Json json;
     json._state.emplace();
@@ -401,7 +405,7 @@ Containers::Optional<Json> Json::tokenize(const Containers::StringView filename,
                     /* Printing the filename again, because it will make a
                        useful clickable link in terminal even though a bit
                        redundant */
-                    json.printFilePosition(err, json._state->string.prefix(token._data));
+                    json.printFilePosition(err, token);
                     return {};
                 }
 
@@ -648,7 +652,7 @@ Containers::Optional<Json> Json::tokenize(const Containers::StringView filename,
             err << "] for array";
         else CORRADE_INTERNAL_ASSERT_UNREACHABLE(); /* LCOV_EXCL_LINE */
         err << "starting at";
-        json.printFilePosition(err, json._state->string.prefix(token._data));
+        json.printFilePosition(err, token);
         return {};
     }
 
@@ -774,7 +778,7 @@ bool Json::parseNullInternal(const char* const errorPrefix, JsonTokenData& token
     if(string != "null"_s) {
         Error err;
         err << errorPrefix << "invalid null literal" << string << "at";
-        printFilePosition(err, _state->string.prefix(token._data));
+        printFilePosition(err, token);
         return false;
     }
 
@@ -800,7 +804,7 @@ bool Json::parseBoolInternal(const char* const errorPrefix, JsonTokenData& token
     else {
         Error err;
         err << errorPrefix << "invalid bool literal" << string << "at";
-        printFilePosition(err, _state->string.prefix(token._data));
+        printFilePosition(err, token);
         return false;
     }
 
@@ -831,7 +835,7 @@ bool Json::parseDoubleInternal(const char* const errorPrefix, JsonTokenData& tok
     if(size > Containers::arraySize(buffer) - 1) {
         Error err;
         err << errorPrefix << "too long numeric literal" << string << "at";
-        printFilePosition(err, _state->string.prefix(token._data));
+        printFilePosition(err, token);
         return false;
     }
 
@@ -851,7 +855,7 @@ bool Json::parseDoubleInternal(const char* const errorPrefix, JsonTokenData& tok
     ) {
         Error err;
         err << errorPrefix << "invalid floating-point literal" << string << "at";
-        printFilePosition(err, _state->string.prefix(token._data));
+        printFilePosition(err, token);
         return false;
     }
 
@@ -879,7 +883,7 @@ bool Json::parseFloatInternal(const char* const errorPrefix, JsonTokenData& toke
     if(size > Containers::arraySize(buffer) - 1) {
         Error err;
         err << errorPrefix << "too long numeric literal" << string << "at";
-        printFilePosition(err, _state->string.prefix(token._data));
+        printFilePosition(err, token);
         return false;
     }
 
@@ -890,7 +894,7 @@ bool Json::parseFloatInternal(const char* const errorPrefix, JsonTokenData& toke
     if(std::size_t(end - buffer) != size) {
         Error err;
         err << errorPrefix << "invalid floating-point literal" << string << "at";
-        printFilePosition(err, _state->string.prefix(token._data));
+        printFilePosition(err, token);
         return false;
     }
 
@@ -919,7 +923,7 @@ bool Json::parseUnsignedIntInternal(const char* const errorPrefix, JsonTokenData
     if(size > Containers::arraySize(buffer) - 1) {
         Error err;
         err << errorPrefix << "too long numeric literal" << string << "at";
-        printFilePosition(err, _state->string.prefix(token._data));
+        printFilePosition(err, token);
         return false;
     }
 
@@ -934,13 +938,13 @@ bool Json::parseUnsignedIntInternal(const char* const errorPrefix, JsonTokenData
     if(std::size_t(end - buffer) != size) {
         Error err;
         err << errorPrefix << "invalid unsigned integer literal" << string << "at";
-        printFilePosition(err, _state->string.prefix(token._data));
+        printFilePosition(err, token);
         return false;
     }
     if(outLong > ~std::uint32_t{}) {
         Error err;
         err << errorPrefix << "too large integer literal" << string << "at";
-        printFilePosition(err, _state->string.prefix(token._data));
+        printFilePosition(err, token);
         return false;
     }
 
@@ -971,7 +975,7 @@ bool Json::parseIntInternal(const char* const errorPrefix, JsonTokenData& token)
     if(size > Containers::arraySize(buffer) - 1) {
         Error err;
         err << errorPrefix << "too long numeric literal" << string << "at";
-        printFilePosition(err, _state->string.prefix(token._data));
+        printFilePosition(err, token);
         return false;
     }
 
@@ -986,13 +990,13 @@ bool Json::parseIntInternal(const char* const errorPrefix, JsonTokenData& token)
     if(std::size_t(end - buffer) != size) {
         Error err;
         err << errorPrefix << "invalid integer literal" << string << "at";
-        printFilePosition(err, _state->string.prefix(token._data));
+        printFilePosition(err, token);
         return false;
     }
     if(outLong < INT_MIN || outLong > INT_MAX) {
         Error err;
         err << errorPrefix << "too small or large integer literal" << string << "at";
-        printFilePosition(err, _state->string.prefix(token._data));
+        printFilePosition(err, token);
         return false;
     }
 
@@ -1028,7 +1032,7 @@ bool Json::parseUnsignedLongInternal(const char* const errorPrefix, JsonTokenDat
     if(size > Containers::arraySize(buffer) - 1) {
         Error err;
         err << errorPrefix << "too long numeric literal" << string << "at";
-        printFilePosition(err, _state->string.prefix(token._data));
+        printFilePosition(err, token);
         return false;
     }
 
@@ -1041,13 +1045,13 @@ bool Json::parseUnsignedLongInternal(const char* const errorPrefix, JsonTokenDat
     if(std::size_t(end - buffer) != size) {
         Error err;
         err << errorPrefix << "invalid unsigned integer literal" << string << "at";
-        printFilePosition(err, _state->string.prefix(token._data));
+        printFilePosition(err, token);
         return false;
     }
     if(out >= 1ull << 52) {
         Error err;
         err << errorPrefix << "too large integer literal" << string << "at";
-        printFilePosition(err, _state->string.prefix(token._data));
+        printFilePosition(err, token);
         return false;
     }
 
@@ -1082,7 +1086,7 @@ bool Json::parseLongInternal(const char* const errorPrefix, JsonTokenData& token
     if(size > Containers::arraySize(buffer) - 1) {
         Error err;
         err << errorPrefix << "too long numeric literal" << string << "at";
-        printFilePosition(err, _state->string.prefix(token._data));
+        printFilePosition(err, token);
         return false;
     }
 
@@ -1095,13 +1099,13 @@ bool Json::parseLongInternal(const char* const errorPrefix, JsonTokenData& token
     if(std::size_t(end - buffer) != size) {
         Error err;
         err << errorPrefix << "invalid integer literal" << string << "at";
-        printFilePosition(err, _state->string.prefix(token._data));
+        printFilePosition(err, token);
         return false;
     }
     if(out < -(1ll << 52) || out >= (1ll << 52)) {
         Error err;
         err << errorPrefix << "too small or large integer literal" << string << "at";
-        printFilePosition(err, _state->string.prefix(token._data));
+        printFilePosition(err, token);
         return false;
     }
 
@@ -1479,7 +1483,7 @@ Containers::Optional<JsonObjectView> Json::parseObject(const JsonToken token_) {
     if((token._dataTypeNan & JsonToken::TypeLargeMask & ~JsonToken::TypeSmallLargeIsParsed) != JsonToken::TypeLargeObject) {
         Error err;
         err << "Utility::Json::parseObject(): expected an object, got" << token.type() << "at";
-        printFilePosition(err, _state->string.prefix(token._data));
+        printFilePosition(err, token);
         return {};
     }
 
@@ -1503,7 +1507,7 @@ Containers::Optional<JsonArrayView> Json::parseArray(const JsonToken token_) {
     if((token._dataTypeNan & JsonToken::TypeLargeMask & ~JsonToken::TypeSmallLargeIsParsed) != JsonToken::TypeLargeArray) {
         Error err;
         err << "Utility::Json::parseArray(): expected an array, got" << token.type() << "at";
-        printFilePosition(err, _state->string.prefix(token._data));
+        printFilePosition(err, token);
         return {};
     }
 
@@ -1520,7 +1524,7 @@ Containers::Optional<std::nullptr_t> Json::parseNull(const JsonToken token_) {
     if((token._dataTypeNan & JsonToken::TypeSmallMask & ~JsonToken::TypeSmallLargeIsParsed) != JsonToken::TypeSmallNull) {
         Error err;
         err << "Utility::Json::parseNull(): expected a null, got" << token.type() << "at";
-        printFilePosition(err, _state->string.prefix(token._data));
+        printFilePosition(err, token);
         return {};
     }
     if(!parseNullInternal("Utility::Json::parseNull():", token))
@@ -1537,7 +1541,7 @@ Containers::Optional<bool> Json::parseBool(const JsonToken token_) {
     if((token._dataTypeNan & JsonToken::TypeSmallMask & ~JsonToken::TypeSmallLargeIsParsed) != JsonToken::TypeSmallBool) {
         Error err;
         err << "Utility::Json::parseBool(): expected a bool, got" << token.type() << "at";
-        printFilePosition(err, _state->string.prefix(token._data));
+        printFilePosition(err, token);
         return {};
     }
     if(!parseBoolInternal("Utility::Json::parseBool():", token))
@@ -1554,7 +1558,7 @@ Containers::Optional<double> Json::parseDouble(const JsonToken token_) {
     if(!token.isNumber()) {
         Error err;
         err << "Utility::Json::parseDouble(): expected a number, got" << token.type() << "at";
-        printFilePosition(err, _state->string.prefix(token._data));
+        printFilePosition(err, token);
         return {};
     }
     if(!parseDoubleInternal("Utility::Json::parseDouble():", token))
@@ -1571,7 +1575,7 @@ Containers::Optional<float> Json::parseFloat(const JsonToken token_) {
     if(!token.isNumber()) {
         Error err;
         err << "Utility::Json::parseFloat(): expected a number, got" << token.type() << "at";
-        printFilePosition(err, _state->string.prefix(token._data));
+        printFilePosition(err, token);
         return {};
     }
     if(!parseFloatInternal("Utility::Json::parseFloat():", token))
@@ -1588,7 +1592,7 @@ Containers::Optional<std::uint32_t> Json::parseUnsignedInt(const JsonToken token
     if(!token.isNumber()) {
         Error err;
         err << "Utility::Json::parseUnsignedInt(): expected a number, got" << token.type() << "at";
-        printFilePosition(err, _state->string.prefix(token._data));
+        printFilePosition(err, token);
         return {};
     }
     if(!parseUnsignedIntInternal("Utility::Json::parseUnsignedInt():", token))
@@ -1605,7 +1609,7 @@ Containers::Optional<std::int32_t> Json::parseInt(const JsonToken token_) {
     if(!token.isNumber()) {
         Error err;
         err << "Utility::Json::parseInt(): expected a number, got" << token.type() << "at";
-        printFilePosition(err, _state->string.prefix(token._data));
+        printFilePosition(err, token);
         return {};
     }
     if(!parseIntInternal("Utility::Json::parseInt():", token))
@@ -1622,7 +1626,7 @@ Containers::Optional<std::uint64_t> Json::parseUnsignedLong(const JsonToken toke
     if(!token.isNumber()) {
         Error err;
         err << "Utility::Json::parseUnsignedLong(): expected a number, got" << token.type() << "at";
-        printFilePosition(err, _state->string.prefix(token._data));
+        printFilePosition(err, token);
         return {};
     }
     if(!parseUnsignedLongInternal("Utility::Json::parseUnsignedLong():", token))
@@ -1639,7 +1643,7 @@ Containers::Optional<std::int64_t> Json::parseLong(const JsonToken token_) {
     if(!token.isNumber()) {
         Error err;
         err << "Utility::Json::parseLong(): expected a number, got" << token.type() << "at";
-        printFilePosition(err, _state->string.prefix(token._data));
+        printFilePosition(err, token);
         return {};
     }
     if(!parseLongInternal("Utility::Json::parseLong():", token))
@@ -1656,7 +1660,7 @@ Containers::Optional<std::size_t> Json::parseSize(const JsonToken token_) {
     if(!token.isNumber()) {
         Error err;
         err << "Utility::Json::parseSize(): expected a number, got" << token.type() << "at";
-        printFilePosition(err, _state->string.prefix(token._data));
+        printFilePosition(err, token);
         return {};
     }
     if(!
@@ -1685,7 +1689,7 @@ Containers::Optional<Containers::StringView> Json::parseString(const JsonToken t
     if((token._dataTypeNan & JsonToken::TypeLargeMask & ~(JsonToken::TypeLargeStringIsKey|JsonToken::TypeLargeStringIsEscaped| JsonToken::TypeSmallLargeIsParsed)) != JsonToken::TypeLargeString) {
         Error err;
         err << "Utility::Json::parseString(): expected a string, got" << token.type() << "at";
-        printFilePosition(err, _state->string.prefix(token._data));
+        printFilePosition(err, token);
         return {};
     }
     if(!parseStringInternal("Utility::Json::parseString():", token))
@@ -1717,7 +1721,7 @@ Containers::Optional<Containers::StridedBitArrayView1D> Json::parseBitArray(cons
     if((token._dataTypeNan & JsonToken::TypeLargeMask & ~JsonToken::TypeSmallLargeIsParsed) != JsonToken::TypeLargeArray) {
         Error err;
         err << "Utility::Json::parseBitArray(): expected an array, got" << token.type() << "at";
-        printFilePosition(err, _state->string.prefix(token._data));
+        printFilePosition(err, token);
         return {};
     }
 
@@ -1730,7 +1734,7 @@ Containers::Optional<Containers::StridedBitArrayView1D> Json::parseBitArray(cons
         if((i->_dataTypeNan & JsonToken::TypeSmallMask & ~JsonToken::TypeSmallLargeIsParsed) != JsonToken::TypeSmallBool) {
             Error err;
             err << "Utility::Json::parseBitArray(): expected a bool, got" << i->type() << "at";
-            printFilePosition(err, _state->string.prefix(i->_data));
+            printFilePosition(err, *i);
             return {};
         }
 
@@ -1743,7 +1747,7 @@ Containers::Optional<Containers::StridedBitArrayView1D> Json::parseBitArray(cons
     if(expectedSize && size != expectedSize) {
         Error err;
         err << "Utility::Json::parseBitArray(): expected a" << expectedSize << Debug::nospace << "-element array, got" << size << "at";
-        printFilePosition(err, _state->string.prefix(token._data));
+        printFilePosition(err, token);
         return {};
     }
 
@@ -1770,7 +1774,7 @@ Containers::Optional<Containers::StridedArrayView1D<const double>> Json::parseDo
     if((token._dataTypeNan & JsonToken::TypeLargeMask & ~JsonToken::TypeSmallLargeIsParsed) != JsonToken::TypeLargeArray) {
         Error err;
         err << "Utility::Json::parseDoubleArray(): expected an array, got" << token.type() << "at";
-        printFilePosition(err, _state->string.prefix(token._data));
+        printFilePosition(err, token);
         return {};
     }
 
@@ -1783,7 +1787,7 @@ Containers::Optional<Containers::StridedArrayView1D<const double>> Json::parseDo
         if(!i->isNumber()) {
             Error err;
             err << "Utility::Json::parseDoubleArray(): expected a number, got" << i->type() << "at";
-            printFilePosition(err, _state->string.prefix(i->_data));
+            printFilePosition(err, *i);
             return {};
         }
 
@@ -1796,7 +1800,7 @@ Containers::Optional<Containers::StridedArrayView1D<const double>> Json::parseDo
     if(expectedSize && size != expectedSize) {
         Error err;
         err << "Utility::Json::parseDoubleArray(): expected a" << expectedSize << Debug::nospace << "-element array, got" << size << "at";
-        printFilePosition(err, _state->string.prefix(token._data));
+        printFilePosition(err, token);
         return {};
     }
 
@@ -1812,7 +1816,7 @@ Containers::Optional<Containers::StridedArrayView1D<const float>> Json::parseFlo
     if((token._dataTypeNan & JsonToken::TypeLargeMask & ~JsonToken::TypeSmallLargeIsParsed) != JsonToken::TypeLargeArray) {
         Error err;
         err << "Utility::Json::parseFloatArray(): expected an array, got" << token.type() << "at";
-        printFilePosition(err, _state->string.prefix(token._data));
+        printFilePosition(err, token);
         return {};
     }
 
@@ -1825,7 +1829,7 @@ Containers::Optional<Containers::StridedArrayView1D<const float>> Json::parseFlo
         if(!i->isNumber()) {
             Error err;
             err << "Utility::Json::parseFloatArray(): expected a number, got" << i->type() << "at";
-            printFilePosition(err, _state->string.prefix(i->_data));
+            printFilePosition(err, *i);
             return {};
         }
 
@@ -1838,7 +1842,7 @@ Containers::Optional<Containers::StridedArrayView1D<const float>> Json::parseFlo
     if(expectedSize && size != expectedSize) {
         Error err;
         err << "Utility::Json::parseFloatArray(): expected a" << expectedSize << Debug::nospace << "-element array, got" << size << "at";
-        printFilePosition(err, _state->string.prefix(token._data));
+        printFilePosition(err, token);
         return {};
     }
 
@@ -1854,7 +1858,7 @@ Containers::Optional<Containers::StridedArrayView1D<const std::uint32_t>> Json::
     if((token._dataTypeNan & JsonToken::TypeLargeMask & ~JsonToken::TypeSmallLargeIsParsed) != JsonToken::TypeLargeArray) {
         Error err;
         err << "Utility::Json::parseUnsignedIntArray(): expected an array, got" << token.type() << "at";
-        printFilePosition(err, _state->string.prefix(token._data));
+        printFilePosition(err, token);
         return {};
     }
 
@@ -1867,7 +1871,7 @@ Containers::Optional<Containers::StridedArrayView1D<const std::uint32_t>> Json::
         if(!i->isNumber()) {
             Error err;
             err << "Utility::Json::parseUnsignedIntArray(): expected a number, got" << i->type() << "at";
-            printFilePosition(err, _state->string.prefix(i->_data));
+            printFilePosition(err, *i);
             return {};
         }
 
@@ -1880,7 +1884,7 @@ Containers::Optional<Containers::StridedArrayView1D<const std::uint32_t>> Json::
     if(expectedSize && size != expectedSize) {
         Error err;
         err << "Utility::Json::parseUnsignedIntArray(): expected a" << expectedSize << Debug::nospace << "-element array, got" << size << "at";
-        printFilePosition(err, _state->string.prefix(token._data));
+        printFilePosition(err, token);
         return {};
     }
 
@@ -1896,7 +1900,7 @@ Containers::Optional<Containers::StridedArrayView1D<const std::int32_t>> Json::p
     if((token._dataTypeNan & JsonToken::TypeLargeMask & ~JsonToken::TypeSmallLargeIsParsed) != JsonToken::TypeLargeArray) {
         Error err;
         err << "Utility::Json::parseIntArray(): expected an array, got" << token.type() << "at";
-        printFilePosition(err, _state->string.prefix(token._data));
+        printFilePosition(err, token);
         return {};
     }
 
@@ -1909,7 +1913,7 @@ Containers::Optional<Containers::StridedArrayView1D<const std::int32_t>> Json::p
         if(!i->isNumber()) {
             Error err;
             err << "Utility::Json::parseIntArray(): expected a number, got" << i->type() << "at";
-            printFilePosition(err, _state->string.prefix(i->_data));
+            printFilePosition(err, *i);
             return {};
         }
 
@@ -1922,7 +1926,7 @@ Containers::Optional<Containers::StridedArrayView1D<const std::int32_t>> Json::p
     if(expectedSize && size != expectedSize) {
         Error err;
         err << "Utility::Json::parseIntArray(): expected a" << expectedSize << Debug::nospace << "-element array, got" << size << "at";
-        printFilePosition(err, _state->string.prefix(token._data));
+        printFilePosition(err, token);
         return {};
     }
 
@@ -1938,7 +1942,7 @@ Containers::Optional<Containers::StridedArrayView1D<const std::uint64_t>> Json::
     if((token._dataTypeNan & JsonToken::TypeLargeMask & ~JsonToken::TypeSmallLargeIsParsed) != JsonToken::TypeLargeArray) {
         Error err;
         err << "Utility::Json::parseUnsignedLongArray(): expected an array, got" << token.type() << "at";
-        printFilePosition(err, _state->string.prefix(token._data));
+        printFilePosition(err, token);
         return {};
     }
 
@@ -1951,7 +1955,7 @@ Containers::Optional<Containers::StridedArrayView1D<const std::uint64_t>> Json::
         if(!i->isNumber()) {
             Error err;
             err << "Utility::Json::parseUnsignedLongArray(): expected a number, got" << i->type() << "at";
-            printFilePosition(err, _state->string.prefix(i->_data));
+            printFilePosition(err, *i);
             return {};
         }
 
@@ -1964,7 +1968,7 @@ Containers::Optional<Containers::StridedArrayView1D<const std::uint64_t>> Json::
     if(expectedSize && size != expectedSize) {
         Error err;
         err << "Utility::Json::parseUnsignedLongArray(): expected a" << expectedSize << Debug::nospace << "-element array, got" << size << "at";
-        printFilePosition(err, _state->string.prefix(token._data));
+        printFilePosition(err, token);
         return {};
     }
 
@@ -1980,7 +1984,7 @@ Containers::Optional<Containers::StridedArrayView1D<const std::int64_t>> Json::p
     if((token._dataTypeNan & JsonToken::TypeLargeMask & ~JsonToken::TypeSmallLargeIsParsed) != JsonToken::TypeLargeArray) {
         Error err;
         err << "Utility::Json::parseLongArray(): expected an array, got" << token.type() << "at";
-        printFilePosition(err, _state->string.prefix(token._data));
+        printFilePosition(err, token);
         return {};
     }
 
@@ -1993,7 +1997,7 @@ Containers::Optional<Containers::StridedArrayView1D<const std::int64_t>> Json::p
         if(!i->isNumber()) {
             Error err;
             err << "Utility::Json::parseLongArray(): expected a number, got" << i->type() << "at";
-            printFilePosition(err, _state->string.prefix(i->_data));
+            printFilePosition(err, *i);
             return {};
         }
 
@@ -2006,7 +2010,7 @@ Containers::Optional<Containers::StridedArrayView1D<const std::int64_t>> Json::p
     if(expectedSize && size != expectedSize) {
         Error err;
         err << "Utility::Json::parseLongArray(): expected a" << expectedSize << Debug::nospace << "-element array, got" << size << "at";
-        printFilePosition(err, _state->string.prefix(token._data));
+        printFilePosition(err, token);
         return {};
     }
 
@@ -2034,7 +2038,7 @@ Containers::Optional<Containers::StringIterable> Json::parseStringArray(const Js
     if((token._dataTypeNan & JsonToken::TypeLargeMask & ~JsonToken::TypeSmallLargeIsParsed) != JsonToken::TypeLargeArray) {
         Error err;
         err << "Utility::Json::parseStringArray(): expected an array, got" << token.type() << "at";
-        printFilePosition(err, _state->string.prefix(token._data));
+        printFilePosition(err, token);
         return {};
     }
 
@@ -2047,7 +2051,7 @@ Containers::Optional<Containers::StringIterable> Json::parseStringArray(const Js
         if((i->_dataTypeNan & JsonToken::TypeLargeMask & ~(JsonToken::TypeLargeStringIsKey|JsonToken::TypeLargeStringIsEscaped| JsonToken::TypeSmallLargeIsParsed)) != JsonToken::TypeLargeString) {
             Error err;
             err << "Utility::Json::parseStringArray(): expected a string, got" << i->type() << "at";
-            printFilePosition(err, _state->string.prefix(i->_data));
+            printFilePosition(err, *i);
             return {};
         }
 
@@ -2060,7 +2064,7 @@ Containers::Optional<Containers::StringIterable> Json::parseStringArray(const Js
     if(expectedSize && size != expectedSize) {
         Error err;
         err << "Utility::Json::parseStringArray(): expected a" << expectedSize << Debug::nospace << "-element array, got" << size << "at";
-        printFilePosition(err, _state->string.prefix(token._data));
+        printFilePosition(err, token);
         return {};
     }
 
