@@ -1340,8 +1340,7 @@ class CORRADE_UTILITY_EXPORT JsonToken {
         Containers::StringView data() const;
 
         /** @brief Token type */
-        /* MinGW complains loudly if the declaration doesn't also have inline */
-        inline Type type() const;
+        Type type() const;
 
         /**
          * @brief Common array type
@@ -1387,16 +1386,14 @@ class CORRADE_UTILITY_EXPORT JsonToken {
          * @relativeref{Json,parseLong()}, @relativeref{Json,parseSize()} or
          * @relativeref{Json,parseString()}.
          */
-        /* MinGW complains loudly if the declaration doesn't also have inline */
-        inline bool isParsed() const;
+        bool isParsed() const;
 
         /**
          * @brief Parsed token type
          *
          * @see @ref type(), @ref isParsed()
          */
-        /* MinGW complains loudly if the declaration doesn't also have inline */
-        inline ParsedType parsedType() const;
+        ParsedType parsedType() const;
 
         /**
          * @brief Common parsed array type
@@ -1940,9 +1937,6 @@ class CORRADE_UTILITY_EXPORT JsonTokenData {
            relative to other tokens, which has to be ensured externally */
         std::size_t childCount() const;
         inline bool isNumber() const;
-        JsonToken::Type type() const;
-        bool isParsed() const;
-        JsonToken::ParsedType parsedType() const;
 
         /* See Json.cpp for detailed layout description */
         std::size_t _offset;
@@ -2527,18 +2521,6 @@ class CORRADE_UTILITY_EXPORT JsonArrayView {
 
 inline const JsonTokenData& JsonToken::token() const {
     return _json->tokens[_token];
-}
-
-inline JsonToken::Type JsonToken::type() const {
-    return _json->tokens[_token].type();
-}
-
-inline bool JsonToken::isParsed() const {
-    return _json->tokens[_token].isParsed();
-}
-
-inline JsonToken::ParsedType JsonToken::parsedType() const {
-    return _json->tokens[_token].parsedType();
 }
 
 inline JsonIterator JsonToken::firstChild() const {

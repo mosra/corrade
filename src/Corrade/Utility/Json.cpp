@@ -1482,7 +1482,7 @@ Containers::Optional<JsonObjectView> Json::parseObject(const JsonToken token_) {
     JsonTokenData& token = state.tokenStorage[token_._token];
     if((token._dataTypeNan & JsonToken::TypeLargeMask & ~JsonToken::TypeSmallLargeIsParsed) != JsonToken::TypeLargeObject) {
         Error err;
-        err << "Utility::Json::parseObject(): expected an object, got" << token.type() << "at";
+        err << "Utility::Json::parseObject(): expected an object, got" << JsonToken{state, token_._token}.type() << "at";
         printFilePosition(err, token);
         return {};
     }
@@ -1507,7 +1507,7 @@ Containers::Optional<JsonArrayView> Json::parseArray(const JsonToken token_) {
     JsonTokenData& token = state.tokenStorage[token_._token];
     if((token._dataTypeNan & JsonToken::TypeLargeMask & ~JsonToken::TypeSmallLargeIsParsed) != JsonToken::TypeLargeArray) {
         Error err;
-        err << "Utility::Json::parseArray(): expected an array, got" << token.type() << "at";
+        err << "Utility::Json::parseArray(): expected an array, got" << JsonToken{state, token_._token}.type() << "at";
         printFilePosition(err, token);
         return {};
     }
@@ -1524,7 +1524,7 @@ Containers::Optional<std::nullptr_t> Json::parseNull(const JsonToken token_) {
     JsonTokenData& token = state.tokenStorage[token_._token];
     if((token._dataTypeNan & JsonToken::TypeSmallMask & ~JsonToken::TypeSmallLargeIsParsed) != JsonToken::TypeSmallNull) {
         Error err;
-        err << "Utility::Json::parseNull(): expected a null, got" << token.type() << "at";
+        err << "Utility::Json::parseNull(): expected a null, got" << JsonToken{state, token_._token}.type() << "at";
         printFilePosition(err, token);
         return {};
     }
@@ -1541,7 +1541,7 @@ Containers::Optional<bool> Json::parseBool(const JsonToken token_) {
     JsonTokenData& token = state.tokenStorage[token_._token];
     if((token._dataTypeNan & JsonToken::TypeSmallMask & ~JsonToken::TypeSmallLargeIsParsed) != JsonToken::TypeSmallBool) {
         Error err;
-        err << "Utility::Json::parseBool(): expected a bool, got" << token.type() << "at";
+        err << "Utility::Json::parseBool(): expected a bool, got" << JsonToken{state, token_._token}.type() << "at";
         printFilePosition(err, token);
         return {};
     }
@@ -1558,7 +1558,7 @@ Containers::Optional<double> Json::parseDouble(const JsonToken token_) {
     JsonTokenData& token = state.tokenStorage[token_._token];
     if(!token.isNumber()) {
         Error err;
-        err << "Utility::Json::parseDouble(): expected a number, got" << token.type() << "at";
+        err << "Utility::Json::parseDouble(): expected a number, got" << JsonToken{state, token_._token}.type() << "at";
         printFilePosition(err, token);
         return {};
     }
@@ -1575,7 +1575,7 @@ Containers::Optional<float> Json::parseFloat(const JsonToken token_) {
     JsonTokenData& token = state.tokenStorage[token_._token];
     if(!token.isNumber()) {
         Error err;
-        err << "Utility::Json::parseFloat(): expected a number, got" << token.type() << "at";
+        err << "Utility::Json::parseFloat(): expected a number, got" << JsonToken{state, token_._token}.type() << "at";
         printFilePosition(err, token);
         return {};
     }
@@ -1592,7 +1592,7 @@ Containers::Optional<std::uint32_t> Json::parseUnsignedInt(const JsonToken token
     JsonTokenData& token = state.tokenStorage[token_._token];
     if(!token.isNumber()) {
         Error err;
-        err << "Utility::Json::parseUnsignedInt(): expected a number, got" << token.type() << "at";
+        err << "Utility::Json::parseUnsignedInt(): expected a number, got" << JsonToken{state, token_._token}.type() << "at";
         printFilePosition(err, token);
         return {};
     }
@@ -1609,7 +1609,7 @@ Containers::Optional<std::int32_t> Json::parseInt(const JsonToken token_) {
     JsonTokenData& token = state.tokenStorage[token_._token];
     if(!token.isNumber()) {
         Error err;
-        err << "Utility::Json::parseInt(): expected a number, got" << token.type() << "at";
+        err << "Utility::Json::parseInt(): expected a number, got" << JsonToken{state, token_._token}.type() << "at";
         printFilePosition(err, token);
         return {};
     }
@@ -1626,7 +1626,7 @@ Containers::Optional<std::uint64_t> Json::parseUnsignedLong(const JsonToken toke
     JsonTokenData& token = state.tokenStorage[token_._token];
     if(!token.isNumber()) {
         Error err;
-        err << "Utility::Json::parseUnsignedLong(): expected a number, got" << token.type() << "at";
+        err << "Utility::Json::parseUnsignedLong(): expected a number, got" << JsonToken{state, token_._token}.type() << "at";
         printFilePosition(err, token);
         return {};
     }
@@ -1643,7 +1643,7 @@ Containers::Optional<std::int64_t> Json::parseLong(const JsonToken token_) {
     JsonTokenData& token = state.tokenStorage[token_._token];
     if(!token.isNumber()) {
         Error err;
-        err << "Utility::Json::parseLong(): expected a number, got" << token.type() << "at";
+        err << "Utility::Json::parseLong(): expected a number, got" << JsonToken{state, token_._token}.type() << "at";
         printFilePosition(err, token);
         return {};
     }
@@ -1660,7 +1660,7 @@ Containers::Optional<std::size_t> Json::parseSize(const JsonToken token_) {
     JsonTokenData& token = state.tokenStorage[token_._token];
     if(!token.isNumber()) {
         Error err;
-        err << "Utility::Json::parseSize(): expected a number, got" << token.type() << "at";
+        err << "Utility::Json::parseSize(): expected a number, got" << JsonToken{state, token_._token}.type() << "at";
         printFilePosition(err, token);
         return {};
     }
@@ -1689,7 +1689,7 @@ Containers::Optional<Containers::StringView> Json::parseString(const JsonToken t
     JsonTokenData& token = state.tokenStorage[token_._token];
     if((token._dataTypeNan & JsonToken::TypeLargeMask & ~(JsonToken::TypeLargeStringIsKey|JsonToken::TypeLargeStringIsEscaped| JsonToken::TypeSmallLargeIsParsed)) != JsonToken::TypeLargeString) {
         Error err;
-        err << "Utility::Json::parseString(): expected a string, got" << token.type() << "at";
+        err << "Utility::Json::parseString(): expected a string, got" << JsonToken{state, token_._token}.type() << "at";
         printFilePosition(err, token);
         return {};
     }
@@ -1718,7 +1718,7 @@ Containers::Optional<Containers::StridedBitArrayView1D> Json::parseBitArray(cons
     JsonTokenData& token = state.tokenStorage[token_._token];
     if((token._dataTypeNan & JsonToken::TypeLargeMask & ~JsonToken::TypeSmallLargeIsParsed) != JsonToken::TypeLargeArray) {
         Error err;
-        err << "Utility::Json::parseBitArray(): expected an array, got" << token.type() << "at";
+        err << "Utility::Json::parseBitArray(): expected an array, got" << JsonToken{state, token_._token}.type() << "at";
         printFilePosition(err, token);
         return {};
     }
@@ -1732,7 +1732,7 @@ Containers::Optional<Containers::StridedBitArrayView1D> Json::parseBitArray(cons
         JsonTokenData& nested = state.tokenStorage[i];
         if((nested._dataTypeNan & JsonToken::TypeSmallMask & ~JsonToken::TypeSmallLargeIsParsed) != JsonToken::TypeSmallBool) {
             Error err;
-            err << "Utility::Json::parseBitArray(): expected a bool, got" << nested.type() << "at";
+            err << "Utility::Json::parseBitArray(): expected a bool, got" << JsonToken{state, i}.type() << "at";
             printFilePosition(err, nested);
             return {};
         }
@@ -1772,7 +1772,7 @@ Containers::Optional<Containers::StridedArrayView1D<const double>> Json::parseDo
     JsonTokenData& token = state.tokenStorage[token_._token];
     if((token._dataTypeNan & JsonToken::TypeLargeMask & ~JsonToken::TypeSmallLargeIsParsed) != JsonToken::TypeLargeArray) {
         Error err;
-        err << "Utility::Json::parseDoubleArray(): expected an array, got" << token.type() << "at";
+        err << "Utility::Json::parseDoubleArray(): expected an array, got" << JsonToken{state, token_._token}.type() << "at";
         printFilePosition(err, token);
         return {};
     }
@@ -1786,7 +1786,7 @@ Containers::Optional<Containers::StridedArrayView1D<const double>> Json::parseDo
         JsonTokenData& nested = state.tokenStorage[i];
         if(!nested.isNumber()) {
             Error err;
-            err << "Utility::Json::parseDoubleArray(): expected a number, got" << nested.type() << "at";
+            err << "Utility::Json::parseDoubleArray(): expected a number, got" << JsonToken{state, i}.type() << "at";
             printFilePosition(err, nested);
             return {};
         }
@@ -1815,7 +1815,7 @@ Containers::Optional<Containers::StridedArrayView1D<const float>> Json::parseFlo
     JsonTokenData& token = state.tokenStorage[token_._token];
     if((token._dataTypeNan & JsonToken::TypeLargeMask & ~JsonToken::TypeSmallLargeIsParsed) != JsonToken::TypeLargeArray) {
         Error err;
-        err << "Utility::Json::parseFloatArray(): expected an array, got" << token.type() << "at";
+        err << "Utility::Json::parseFloatArray(): expected an array, got" << JsonToken{state, token_._token}.type() << "at";
         printFilePosition(err, token);
         return {};
     }
@@ -1829,7 +1829,7 @@ Containers::Optional<Containers::StridedArrayView1D<const float>> Json::parseFlo
         JsonTokenData& nested = state.tokenStorage[i];
         if(!nested.isNumber()) {
             Error err;
-            err << "Utility::Json::parseFloatArray(): expected a number, got" << nested.type() << "at";
+            err << "Utility::Json::parseFloatArray(): expected a number, got" << JsonToken{state, i}.type() << "at";
             printFilePosition(err, nested);
             return {};
         }
@@ -1858,7 +1858,7 @@ Containers::Optional<Containers::StridedArrayView1D<const std::uint32_t>> Json::
     JsonTokenData& token = state.tokenStorage[token_._token];
     if((token._dataTypeNan & JsonToken::TypeLargeMask & ~JsonToken::TypeSmallLargeIsParsed) != JsonToken::TypeLargeArray) {
         Error err;
-        err << "Utility::Json::parseUnsignedIntArray(): expected an array, got" << token.type() << "at";
+        err << "Utility::Json::parseUnsignedIntArray(): expected an array, got" << JsonToken{state, token_._token}.type() << "at";
         printFilePosition(err, token);
         return {};
     }
@@ -1872,7 +1872,7 @@ Containers::Optional<Containers::StridedArrayView1D<const std::uint32_t>> Json::
         JsonTokenData& nested = state.tokenStorage[i];
         if(!nested.isNumber()) {
             Error err;
-            err << "Utility::Json::parseUnsignedIntArray(): expected a number, got" << nested.type() << "at";
+            err << "Utility::Json::parseUnsignedIntArray(): expected a number, got" << JsonToken{state, i}.type() << "at";
             printFilePosition(err, nested);
             return {};
         }
@@ -1901,7 +1901,7 @@ Containers::Optional<Containers::StridedArrayView1D<const std::int32_t>> Json::p
     JsonTokenData& token = state.tokenStorage[token_._token];
     if((token._dataTypeNan & JsonToken::TypeLargeMask & ~JsonToken::TypeSmallLargeIsParsed) != JsonToken::TypeLargeArray) {
         Error err;
-        err << "Utility::Json::parseIntArray(): expected an array, got" << token.type() << "at";
+        err << "Utility::Json::parseIntArray(): expected an array, got" << JsonToken{state, token_._token}.type() << "at";
         printFilePosition(err, token);
         return {};
     }
@@ -1915,7 +1915,7 @@ Containers::Optional<Containers::StridedArrayView1D<const std::int32_t>> Json::p
         JsonTokenData& nested = state.tokenStorage[i];
         if(!nested.isNumber()) {
             Error err;
-            err << "Utility::Json::parseIntArray(): expected a number, got" << nested.type() << "at";
+            err << "Utility::Json::parseIntArray(): expected a number, got" << JsonToken{state, i}.type() << "at";
             printFilePosition(err, nested);
             return {};
         }
@@ -1944,7 +1944,7 @@ Containers::Optional<Containers::StridedArrayView1D<const std::uint64_t>> Json::
     JsonTokenData& token = state.tokenStorage[token_._token];
     if((token._dataTypeNan & JsonToken::TypeLargeMask & ~JsonToken::TypeSmallLargeIsParsed) != JsonToken::TypeLargeArray) {
         Error err;
-        err << "Utility::Json::parseUnsignedLongArray(): expected an array, got" << token.type() << "at";
+        err << "Utility::Json::parseUnsignedLongArray(): expected an array, got" << JsonToken{state, token_._token}.type() << "at";
         printFilePosition(err, token);
         return {};
     }
@@ -1958,7 +1958,7 @@ Containers::Optional<Containers::StridedArrayView1D<const std::uint64_t>> Json::
         JsonTokenData& nested = state.tokenStorage[i];
         if(!nested.isNumber()) {
             Error err;
-            err << "Utility::Json::parseUnsignedLongArray(): expected a number, got" << nested.type() << "at";
+            err << "Utility::Json::parseUnsignedLongArray(): expected a number, got" << JsonToken{state, i}.type() << "at";
             printFilePosition(err, nested);
             return {};
         }
@@ -1987,7 +1987,7 @@ Containers::Optional<Containers::StridedArrayView1D<const std::int64_t>> Json::p
     JsonTokenData& token = state.tokenStorage[token_._token];
     if((token._dataTypeNan & JsonToken::TypeLargeMask & ~JsonToken::TypeSmallLargeIsParsed) != JsonToken::TypeLargeArray) {
         Error err;
-        err << "Utility::Json::parseLongArray(): expected an array, got" << token.type() << "at";
+        err << "Utility::Json::parseLongArray(): expected an array, got" << JsonToken{state, token_._token}.type() << "at";
         printFilePosition(err, token);
         return {};
     }
@@ -2001,7 +2001,7 @@ Containers::Optional<Containers::StridedArrayView1D<const std::int64_t>> Json::p
         JsonTokenData& nested = state.tokenStorage[i];
         if(!nested.isNumber()) {
             Error err;
-            err << "Utility::Json::parseLongArray(): expected a number, got" << nested.type() << "at";
+            err << "Utility::Json::parseLongArray(): expected a number, got" << JsonToken{state, i}.type() << "at";
             printFilePosition(err, nested);
             return {};
         }
@@ -2042,7 +2042,7 @@ Containers::Optional<Containers::StringIterable> Json::parseStringArray(const Js
     JsonTokenData& token = state.tokenStorage[token_._token];
     if((token._dataTypeNan & JsonToken::TypeLargeMask & ~JsonToken::TypeSmallLargeIsParsed) != JsonToken::TypeLargeArray) {
         Error err;
-        err << "Utility::Json::parseStringArray(): expected an array, got" << token.type() << "at";
+        err << "Utility::Json::parseStringArray(): expected an array, got" << JsonToken{state, token_._token}.type() << "at";
         printFilePosition(err, token);
         return {};
     }
@@ -2056,7 +2056,7 @@ Containers::Optional<Containers::StringIterable> Json::parseStringArray(const Js
         JsonTokenData& nested = state.tokenStorage[i];
         if((nested._dataTypeNan & JsonToken::TypeLargeMask & ~(JsonToken::TypeLargeStringIsKey|JsonToken::TypeLargeStringIsEscaped| JsonToken::TypeSmallLargeIsParsed)) != JsonToken::TypeLargeString) {
             Error err;
-            err << "Utility::Json::parseStringArray(): expected a string, got" << nested.type() << "at";
+            err << "Utility::Json::parseStringArray(): expected a string, got" << JsonToken{state, i}.type() << "at";
             printFilePosition(err, nested);
             return {};
         }
@@ -2107,40 +2107,42 @@ inline bool JsonTokenData::isNumber() const {
     return true;
 }
 
-JsonToken::Type JsonTokenData::type() const {
+JsonToken::Type JsonToken::type() const {
+    const JsonTokenData& data = _json->tokens[_token];
+
     /* If +NaN is set, the type is stored in the token */
-    if((_dataTypeNan & JsonToken::NanMask) == JsonToken::Nan) {
+    if((data._dataTypeNan & NanMask) == Nan) {
         /* The bits in token size should match this */
-        CORRADE_INTERNAL_DEBUG_ASSERT((_sizeType & JsonToken::TypeTokenSizeMask) == JsonToken::TypeTokenSizeOther);
+        CORRADE_INTERNAL_DEBUG_ASSERT((data._sizeType & TypeTokenSizeMask) == TypeTokenSizeOther);
 
         /* If it's a large type, the type is stored in the next three bits */
-        if(_dataTypeNan & JsonToken::TypeIsLarge) {
-            switch(_dataTypeNan & JsonToken::TypeLargeMask & ~JsonToken::TypeSmallLargeIsParsed) {
-                case JsonToken::TypeLargeObject:
-                    return JsonToken::Type::Object;
-                case JsonToken::TypeLargeArray:
-                    return JsonToken::Type::Array;
-                case JsonToken::TypeLargeString:
-                case JsonToken::TypeLargeStringEscaped:
-                case JsonToken::TypeLargeStringKey:
-                case JsonToken::TypeLargeStringKeyEscaped:
-                    return JsonToken::Type::String;
+        if(data._dataTypeNan & TypeIsLarge) {
+            switch(data._dataTypeNan & TypeLargeMask & ~TypeSmallLargeIsParsed) {
+                case TypeLargeObject:
+                    return Type::Object;
+                case TypeLargeArray:
+                    return Type::Array;
+                case TypeLargeString:
+                case TypeLargeStringEscaped:
+                case TypeLargeStringKey:
+                case TypeLargeStringKeyEscaped:
+                    return Type::String;
             }
 
             CORRADE_INTERNAL_DEBUG_ASSERT_UNREACHABLE(); /* LCOV_EXCL_LINE */
         }
 
         /* Otherwise in the next five bits */
-        switch(_dataTypeNan & JsonToken::TypeSmallMask & ~JsonToken::TypeSmallLargeIsParsed) {
-            case JsonToken::TypeSmallNull:
-                return JsonToken::Type::Null;
-            case JsonToken::TypeSmallBool:
-                return JsonToken::Type::Bool;
-            case JsonToken::TypeSmallNumber & ~JsonToken::TypeSmallLargeIsParsed:
-            case JsonToken::TypeSmallFloat & ~JsonToken::TypeSmallLargeIsParsed:
-            case JsonToken::TypeSmallUnsignedInt & ~JsonToken::TypeSmallLargeIsParsed:
-            case JsonToken::TypeSmallInt & ~JsonToken::TypeSmallLargeIsParsed:
-                return JsonToken::Type::Number;
+        switch(data._dataTypeNan & TypeSmallMask & ~TypeSmallLargeIsParsed) {
+            case TypeSmallNull:
+                return Type::Null;
+            case TypeSmallBool:
+                return Type::Bool;
+            case TypeSmallNumber & ~TypeSmallLargeIsParsed:
+            case TypeSmallFloat & ~TypeSmallLargeIsParsed:
+            case TypeSmallUnsignedInt & ~TypeSmallLargeIsParsed:
+            case TypeSmallInt & ~TypeSmallLargeIsParsed:
+                return Type::Number;
         }
 
         CORRADE_INTERNAL_DEBUG_ASSERT_UNREACHABLE(); /* LCOV_EXCL_LINE */
@@ -2148,8 +2150,8 @@ JsonToken::Type JsonTokenData::type() const {
 
     /* Otherwise (-NaN, 0, or anything else in the exponent bits) it can only
        be a (64-bit) number */
-    CORRADE_INTERNAL_DEBUG_ASSERT((_sizeType & JsonToken::TypeTokenSizeMask) != JsonToken::TypeTokenSizeOther);
-    return JsonToken::Type::Number;
+    CORRADE_INTERNAL_DEBUG_ASSERT((data._sizeType & TypeTokenSizeMask) != TypeTokenSizeOther);
+    return Type::Number;
 }
 
 Containers::Optional<JsonToken::Type> JsonToken::commonArrayType() const {
@@ -2161,7 +2163,7 @@ Containers::Optional<JsonToken::Type> JsonToken::commonArrayType() const {
     if(!childCount)
         return {};
 
-    const Type type = _json->tokens[_token + 1].type();
+    const Type type = JsonToken{*_json, _token + 1}.type();
     /* Iterate from the second array token (i.e., after `_token + 1` and its
        children and compare to the first token type */
     for(std::size_t i = (_token + 1) + 1 + _json->tokens[_token + 1].childCount(), end = _token + 1 + childCount; i != end; i += 1 + _json->tokens[i].childCount())
@@ -2170,65 +2172,69 @@ Containers::Optional<JsonToken::Type> JsonToken::commonArrayType() const {
            mainly for diagnostic, in practice the code will likely want to just
            know "is this array of such type?" rather than "what type is this
            array of so I can branch on it?". */
-        if(_json->tokens[i].type() != type)
+        if(JsonToken{*_json, i}.type() != type)
             return {};
 
     return type;
 }
 
-bool JsonTokenData::isParsed() const {
+bool JsonToken::isParsed() const {
+    const JsonTokenData& data = _json->tokens[_token];
+
     /* If +NaN is set, the information about whether it was parsed is stored in
        the token */
-    if((_dataTypeNan & JsonToken::NanMask) == JsonToken::Nan) {
+    if((data._dataTypeNan & NanMask) == Nan) {
         /* The bits in token size should match this */
-        CORRADE_INTERNAL_DEBUG_ASSERT((_sizeType & JsonToken::TypeTokenSizeMask) == JsonToken::TypeTokenSizeOther);
+        CORRADE_INTERNAL_DEBUG_ASSERT((data._sizeType & TypeTokenSizeMask) == TypeTokenSizeOther);
 
-        return _dataTypeNan & JsonToken::TypeSmallLargeIsParsed;
+        return data._dataTypeNan & TypeSmallLargeIsParsed;
     }
 
     /* Otherwise (-NaN, 0, or anything else in the exponent bits) it can only
        be an (64-bit, already parsed) number */
-    CORRADE_INTERNAL_DEBUG_ASSERT((_sizeType & JsonToken::TypeTokenSizeMask) != JsonToken::TypeTokenSizeOther);
+    CORRADE_INTERNAL_DEBUG_ASSERT((data._sizeType & TypeTokenSizeMask) != TypeTokenSizeOther);
     return true;
 }
 
-JsonToken::ParsedType JsonTokenData::parsedType() const {
+JsonToken::ParsedType JsonToken::parsedType() const {
+    const JsonTokenData& data = _json->tokens[_token];
+
     /* If +NaN is set, the parsed state and type is stored in the token */
-    if((_dataTypeNan & JsonToken::NanMask) == JsonToken::Nan) {
+    if((data._dataTypeNan & NanMask) == Nan) {
         /* The bits in token size should match this */
-        CORRADE_INTERNAL_DEBUG_ASSERT((_sizeType & JsonToken::TypeTokenSizeMask) == JsonToken::TypeTokenSizeOther);
+        CORRADE_INTERNAL_DEBUG_ASSERT((data._sizeType & TypeTokenSizeMask) == TypeTokenSizeOther);
 
-        if(_dataTypeNan & JsonToken::TypeSmallLargeIsParsed) {
+        if(data._dataTypeNan & TypeSmallLargeIsParsed) {
             /* Large types are all non-numeric */
-            if(_dataTypeNan & JsonToken::TypeIsLarge)
-                return JsonToken::ParsedType::Other;
+            if(data._dataTypeNan & TypeIsLarge)
+                return ParsedType::Other;
 
-            switch(_dataTypeNan & JsonToken::TypeSmallMask) {
-                case JsonToken::TypeSmallNull|JsonToken::TypeSmallLargeIsParsed:
-                case JsonToken::TypeSmallBool|JsonToken::TypeSmallLargeIsParsed:
-                    return JsonToken::ParsedType::Other;
-                case JsonToken::TypeSmallFloat:
-                    return JsonToken::ParsedType::Float;
-                case JsonToken::TypeSmallUnsignedInt:
-                    return JsonToken::ParsedType::UnsignedInt;
-                case JsonToken::TypeSmallInt:
-                    return JsonToken::ParsedType::Int;
+            switch(data._dataTypeNan & TypeSmallMask) {
+                case TypeSmallNull|TypeSmallLargeIsParsed:
+                case TypeSmallBool|TypeSmallLargeIsParsed:
+                    return ParsedType::Other;
+                case TypeSmallFloat:
+                    return ParsedType::Float;
+                case TypeSmallUnsignedInt:
+                    return ParsedType::UnsignedInt;
+                case TypeSmallInt:
+                    return ParsedType::Int;
             }
 
             CORRADE_INTERNAL_DEBUG_ASSERT_UNREACHABLE(); /* LCOV_EXCL_LINE */
         }
 
-        return JsonToken::ParsedType::None;
+        return ParsedType::None;
     }
 
     /* Otherwise it's in the upper bits of the token size */
-    switch(_sizeType & JsonToken::TypeTokenSizeMask) {
-        case JsonToken::TypeTokenSizeDouble:
-            return JsonToken::ParsedType::Double;
-        case JsonToken::TypeTokenSizeUnsignedLong:
-            return JsonToken::ParsedType::UnsignedLong;
-        case JsonToken::TypeTokenSizeLong:
-            return JsonToken::ParsedType::Long;
+    switch(data._sizeType & TypeTokenSizeMask) {
+        case TypeTokenSizeDouble:
+            return ParsedType::Double;
+        case TypeTokenSizeUnsignedLong:
+            return ParsedType::UnsignedLong;
+        case TypeTokenSizeLong:
+            return ParsedType::Long;
         /* It should definitely not be JsonToken::TypeTokenSizeOther, as that
            should have entered the branch above. See the UNREACHABLE below. */
     }
@@ -2249,7 +2255,7 @@ Containers::Optional<JsonToken::ParsedType> JsonToken::commonParsedArrayType() c
        ParsedType::None as the common parsed type, since that says nothing
        about the contents -- it could be a heterogeneous mixture of whatever
        and still have a None as a common parsed type. */
-    const ParsedType type = _json->tokens[_token + 1].parsedType();
+    const ParsedType type = JsonToken{*_json, _token + 1}.parsedType();
     if(type == ParsedType::None)
         return {};
 
@@ -2261,7 +2267,7 @@ Containers::Optional<JsonToken::ParsedType> JsonToken::commonParsedArrayType() c
            meant mainly for diagnostic, in practice the code will likely want
            to just know "is this array of such type?" rather than "what type is
            this array of so I can branch on it?". */
-        if(_json->tokens[i].parsedType() != type)
+        if(JsonToken{*_json, i}.parsedType() != type)
             return {};
 
     return type;
@@ -2426,11 +2432,9 @@ Containers::StridedBitArrayView1D JsonToken::asBitArray(const std::size_t expect
     /* As this is expected to be a value array, we go by simple incrementing
        instead of skipping nested.childCount(). If a nested object or array
        would be encountered, the parsedType() check fails. */
-    for(std::size_t i = _token + 1, end = i + size; i != end; ++i) {
-        const JsonTokenData& nested = _json->tokens[i];
-        CORRADE_ASSERT((nested._dataTypeNan & JsonToken::TypeSmallMask) == (JsonToken::TypeSmallBool|JsonToken::TypeSmallLargeIsParsed),
-            "Utility::JsonToken::asBitArray(): token" << i - _token - 1 << "is" << (nested.isParsed() ? "a parsed" : "an unparsed") << nested.type(), {});
-    }
+    for(std::size_t i = _token + 1, end = i + size; i != end; ++i)
+        CORRADE_ASSERT((_json->tokens[i]._dataTypeNan & JsonToken::TypeSmallMask) == (JsonToken::TypeSmallBool|JsonToken::TypeSmallLargeIsParsed),
+            "Utility::JsonToken::asBitArray(): token" << i - _token - 1 << "is" << (JsonToken{*_json, i}.isParsed() ? "a parsed" : "an unparsed") << (JsonToken{*_json, i}.type()), {});
     /* Needs to be after the type-checking loop, otherwise the child count may
        include also nested tokens and the message would be confusing */
     CORRADE_ASSERT(!expectedSize || size == expectedSize,
@@ -2461,11 +2465,9 @@ Containers::StridedArrayView1D<const double> JsonToken::asDoubleArray(const std:
     /* As this is expected to be a value array, we go by simple incrementing
        instead of skipping nested.childCount(). If a nested object or array
        would be encountered, the parsedType() check fails. */
-    for(std::size_t i = _token + 1, end = i + size; i != end; ++i) {
-        const JsonTokenData& nested = _json->tokens[i];
-        CORRADE_ASSERT((nested._sizeType & JsonToken::TypeTokenSizeMask) == JsonToken::TypeTokenSizeDouble,
-            "Utility::JsonToken::asDoubleArray(): token" << i - _token - 1 << "is a" << nested.type() << "parsed as" << nested.parsedType(), {});
-    }
+    for(std::size_t i = _token + 1, end = i + size; i != end; ++i)
+        CORRADE_ASSERT((_json->tokens[i]._sizeType & JsonToken::TypeTokenSizeMask) == JsonToken::TypeTokenSizeDouble,
+            "Utility::JsonToken::asDoubleArray(): token" << i - _token - 1 << "is a" << (JsonToken{*_json, i}.type()) << "parsed as" << (JsonToken{*_json, i}.parsedType()), {});
     /* Needs to be after the type-checking loop, otherwise the child count may
        include also nested tokens and the message would be confusing */
     CORRADE_ASSERT(!expectedSize || size == expectedSize,
@@ -2487,11 +2489,9 @@ Containers::StridedArrayView1D<const float> JsonToken::asFloatArray(const std::s
     /* As this is expected to be a value array, we go by simple incrementing
        instead of skipping nested.childCount(). If a nested object or array
        would be encountered, the parsedType() check fails. */
-    for(std::size_t i = _token + 1, end = i + size; i != end; ++i) {
-        const JsonTokenData& nested = _json->tokens[i];
-        CORRADE_ASSERT((nested._dataTypeNan & JsonToken::TypeSmallMask) == JsonToken::TypeSmallFloat,
-            "Utility::JsonToken::asFloatArray(): token" << i - _token - 1 << "is a" << nested.type() << "parsed as" << nested.parsedType(), {});
-    }
+    for(std::size_t i = _token + 1, end = i + size; i != end; ++i)
+        CORRADE_ASSERT((_json->tokens[i]._dataTypeNan & JsonToken::TypeSmallMask) == JsonToken::TypeSmallFloat,
+            "Utility::JsonToken::asFloatArray(): token" << i - _token - 1 << "is a" << (JsonToken{*_json, i}.type()) << "parsed as" << (JsonToken{*_json, i}.parsedType()), {});
     /* Needs to be after the type-checking loop, otherwise the child count may
        include also nested tokens and the message would be confusing */
     CORRADE_ASSERT(!expectedSize || size == expectedSize,
@@ -2513,11 +2513,9 @@ Containers::StridedArrayView1D<const std::uint32_t> JsonToken::asUnsignedIntArra
     /* As this is expected to be a value array, we go by simple incrementing
        instead of skipping nested.childCount(). If a nested object or array
        would be encountered, the parsedType() check fails. */
-    for(std::size_t i = _token + 1, end = i + size; i != end; ++i) {
-        const JsonTokenData& nested = _json->tokens[i];
-        CORRADE_ASSERT((nested._dataTypeNan & JsonToken::TypeSmallMask) == JsonToken::TypeSmallUnsignedInt,
-            "Utility::JsonToken::asUnsignedIntArray(): token" << i - _token - 1 << "is a" << nested.type() << "parsed as" << nested.parsedType(), {});
-    }
+    for(std::size_t i = _token + 1, end = i + size; i != end; ++i)
+        CORRADE_ASSERT((_json->tokens[i]._dataTypeNan & JsonToken::TypeSmallMask) == JsonToken::TypeSmallUnsignedInt,
+            "Utility::JsonToken::asUnsignedIntArray(): token" << i - _token - 1 << "is a" << (JsonToken{*_json, i}.type()) << "parsed as" << (JsonToken{*_json, i}.parsedType()), {});
     /* Needs to be after the type-checking loop, otherwise the child count may
        include also nested tokens and the message would be confusing */
     CORRADE_ASSERT(!expectedSize || size == expectedSize,
@@ -2539,11 +2537,9 @@ Containers::StridedArrayView1D<const std::int32_t> JsonToken::asIntArray(const s
     /* As this is expected to be a value array, we go by simple incrementing
        instead of skipping nested.childCount(). If a nested object or array
        would be encountered, the parsedType() check fails. */
-    for(std::size_t i = _token + 1, end = i + size; i != end; ++i) {
-        const JsonTokenData& nested = _json->tokens[i];
-        CORRADE_ASSERT((nested._dataTypeNan & JsonToken::TypeSmallMask) == JsonToken::TypeSmallInt,
-            "Utility::JsonToken::asIntArray(): token" << i - _token - 1 << "is a" << nested.type() << "parsed as" << nested.parsedType(), {});
-    }
+    for(std::size_t i = _token + 1, end = i + size; i != end; ++i)
+        CORRADE_ASSERT((_json->tokens[i]._dataTypeNan & JsonToken::TypeSmallMask) == JsonToken::TypeSmallInt,
+            "Utility::JsonToken::asIntArray(): token" << i - _token - 1 << "is a" << (JsonToken{*_json, i}.type()) << "parsed as" << (JsonToken{*_json, i}.parsedType()), {});
     /* Needs to be after the type-checking loop, otherwise the child count may
        include also nested tokens and the message would be confusing */
     CORRADE_ASSERT(!expectedSize || size == expectedSize,
@@ -2565,11 +2561,9 @@ Containers::StridedArrayView1D<const std::uint64_t> JsonToken::asUnsignedLongArr
     /* As this is expected to be a value array, we go by simple incrementing
        instead of skipping nested.childCount(). If a nested object or array
        would be encountered, the parsedType() check fails. */
-    for(std::size_t i = _token + 1, end = i + size; i != end; ++i) {
-        const JsonTokenData& nested = _json->tokens[i];
-        CORRADE_ASSERT((nested._sizeType & JsonToken::TypeTokenSizeMask) == JsonToken::TypeTokenSizeUnsignedLong,
-            "Utility::JsonToken::asUnsignedLongArray(): token" << i - _token - 1 << "is a" << nested.type() << "parsed as" << nested.parsedType(), {});
-    }
+    for(std::size_t i = _token + 1, end = i + size; i != end; ++i)
+        CORRADE_ASSERT((_json->tokens[i]._sizeType & JsonToken::TypeTokenSizeMask) == JsonToken::TypeTokenSizeUnsignedLong,
+            "Utility::JsonToken::asUnsignedLongArray(): token" << i - _token - 1 << "is a" << (JsonToken{*_json, i}.type()) << "parsed as" << (JsonToken{*_json, i}.parsedType()), {});
     /* Needs to be after the type-checking loop, otherwise the child count may
        include also nested tokens and the message would be confusing */
     CORRADE_ASSERT(!expectedSize || size == expectedSize,
@@ -2591,11 +2585,9 @@ Containers::StridedArrayView1D<const std::int64_t> JsonToken::asLongArray(const 
     /* As this is expected to be a value array, we go by simple incrementing
        instead of skipping nested.childCount(). If a nested object or array
        would be encountered, the parsedType() check fails. */
-    for(std::size_t i = _token + 1, end = i + size; i != end; ++i) {
-        const JsonTokenData& nested = _json->tokens[i];
-        CORRADE_ASSERT((nested._sizeType & JsonToken::TypeTokenSizeMask) == JsonToken::TypeTokenSizeLong,
-            "Utility::JsonToken::asLongArray(): token" << i - _token - 1 << "is a" << nested.type() << "parsed as" << nested.parsedType(), {});
-    }
+    for(std::size_t i = _token + 1, end = i + size; i != end; ++i)
+        CORRADE_ASSERT((_json->tokens[i]._sizeType & JsonToken::TypeTokenSizeMask) == JsonToken::TypeTokenSizeLong,
+            "Utility::JsonToken::asLongArray(): token" << i - _token - 1 << "is a" << (JsonToken{*_json, i}.type()) << "parsed as" << (JsonToken{*_json, i}.parsedType()), {});
     /* Needs to be after the type-checking loop, otherwise the child count may
        include also nested tokens and the message would be confusing */
     CORRADE_ASSERT(!expectedSize || size == expectedSize,
@@ -2627,13 +2619,11 @@ Containers::StringIterable JsonToken::asStringArray(const std::size_t expectedSi
     /* As this is expected to be a value array, we go by simple incrementing
        instead of skipping nested.childCount(). If a nested object or array
        would be encountered, the parsedType() check fails. */
-    for(std::size_t i = _token + 1, end = i + size; i != end; ++i) {
-        const JsonTokenData& nested = _json->tokens[i];
+    for(std::size_t i = _token + 1, end = i + size; i != end; ++i)
         /* String array values can't be keys so not filtering away the
            TypeLargeStringIsKey bit */
-        CORRADE_ASSERT((nested._dataTypeNan & JsonToken::TypeLargeMask & ~JsonToken::TypeLargeStringIsEscaped) == (JsonToken::TypeLargeString|JsonToken::TypeSmallLargeIsParsed),
-            "Utility::JsonToken::asStringArray(): token" << i - _token - 1 << "is" << (nested.isParsed() ? "a parsed" : "an unparsed") << nested.type(), {});
-    }
+        CORRADE_ASSERT((_json->tokens[i]._dataTypeNan & JsonToken::TypeLargeMask & ~JsonToken::TypeLargeStringIsEscaped) == (JsonToken::TypeLargeString|JsonToken::TypeSmallLargeIsParsed),
+            "Utility::JsonToken::asStringArray(): token" << i - _token - 1 << "is" << (JsonToken{*_json, i}.isParsed() ? "a parsed" : "an unparsed") << (JsonToken{*_json, i}.type()), {});
     /* Needs to be after the type-checking loop, otherwise the child count may
        include also nested tokens and the message would be confusing */
     CORRADE_ASSERT(!expectedSize || size == expectedSize,
