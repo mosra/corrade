@@ -60,6 +60,7 @@ class Fatal;
 class Json;
 class JsonToken;
 class JsonTokenData;
+class JsonTokenOffsetSize;
 class JsonObjectItem;
 class JsonArrayItem;
 class JsonView;

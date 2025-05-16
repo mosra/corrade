@@ -258,9 +258,10 @@ struct Json::State: Implementation::JsonData {
     std::size_t lineOffset;
     std::size_t columnOffset;
 
-    /* Needs to be in sync with the JsonData::tokens pointer that's used by the
-       implementation in the header */
+    /* Needs to be in sync with the JsonData::tokens and ::tokenOffsetsSizes
+       pointers that are used by the implementation in the header */
     Containers::Array<JsonTokenData> tokenStorage;
+    Containers::Array<JsonTokenOffsetSize> tokenOffsetSizeStorage;
 
     Containers::Array<Containers::String> strings;
 };
@@ -313,7 +314,9 @@ void Json::printFilePosition(Debug& out, const Containers::StringView string) co
 }
 
 void Json::printFilePosition(Debug& out, const JsonTokenData& token) const {
-    printFilePosition(out, _state->string.prefix(token._offset));
+    const State& state = *_state;
+    const std::size_t tokenIndex = &token - state.tokenStorage;
+    printFilePosition(out, state.string.prefix(state.tokenOffsetSizeStorage[tokenIndex]._offset));
 }
 
 Containers::Optional<Json> Json::tokenize(const Containers::StringView filename, const std::size_t lineOffset, const std::size_t columnOffset, const Containers::StringView string_) {
@@ -367,15 +370,19 @@ Containers::Optional<Json> Json::tokenize(const Containers::StringView filename,
 
                 /* Token holding the whole object / array */
                 JsonTokenData token{NoInit};
-                token._offset = i;
-                /* Size and child count gets filled in once } / ] is
-                   encountered. Until then, abuse the _dataTypeNan field to
-                   store the previous object / array index and remember this
-                   index for when we get to } / ]. */
+                /* Child count gets filled in once } / ] is encountered. Until
+                   then, abuse the _dataTypeNan field to store the previous
+                   object / array index and remember this index for when we get
+                   to } / ]. */
                 token._dataTypeNan =
                     (c == '{' ? JsonToken::TypeLargeObject : JsonToken::TypeLargeArray)|objectOrArrayTokenIndex;
                 objectOrArrayTokenIndex = json._state->tokenStorage.size();
                 arrayAppend(json._state->tokenStorage, token);
+                arrayAppend(json._state->tokenOffsetSizeStorage, InPlaceInit,
+                    i,
+                    /* Like with child count, size gets filled once } / ] is
+                       encountered */
+                    0u);
 
                 /* If we're in an object, we're expecting an object key (or
                    end) next, otherwise a value (or end) */
@@ -394,6 +401,7 @@ Containers::Optional<Json> Json::tokenize(const Containers::StringView filename,
 
                 /* Get the object / array token, check that the brace matches */
                 JsonTokenData& token = json._state->tokenStorage[objectOrArrayTokenIndex];
+                JsonTokenOffsetSize& tokenOffsetSize = json._state->tokenOffsetSizeStorage[objectOrArrayTokenIndex];
                 const std::uint64_t tokenType = token._dataTypeNan & JsonToken::TypeLargeMask;
                 CORRADE_INTERNAL_DEBUG_ASSERT(tokenType == JsonToken::TypeLargeObject || tokenType == JsonToken::TypeLargeArray);
                 const bool isObject = tokenType == JsonToken::TypeLargeObject;
@@ -419,7 +427,7 @@ Containers::Optional<Json> Json::tokenize(const Containers::StringView filename,
                 /* Update the token size to contain everything parsed until
                    now. The upper two bits, used for type, are non-0 only for
                    parsed numbers, so no need for any special handling here. */
-                token._sizeType = i - token._offset + 1;
+                tokenOffsetSize._sizeType = i - tokenOffsetSize._offset + 1;
 
                 /* Next should be a comma or an end depending on what the
                    new parent is */
@@ -492,10 +500,6 @@ Containers::Optional<Json> Json::tokenize(const Containers::StringView filename,
                    well. The i then gets incremented after the final " by the
                    outer loop. */
                 JsonTokenData token{NoInit};
-                token._offset = start;
-                /* The upper two bits, used for type, are non-0 only for parsed
-                   numbers, so no need for any special handling here */
-                token._sizeType = i - start + 1;
                 /* The key flag, if any, gets added below */
                 token._dataTypeNan = JsonToken::TypeLargeString|escapedFlag;
 
@@ -523,6 +527,12 @@ Containers::Optional<Json> Json::tokenize(const Containers::StringView filename,
                 } else CORRADE_INTERNAL_ASSERT_UNREACHABLE(); /* LCOV_EXCL_LINE */
 
                 arrayAppend(json._state->tokenStorage, token);
+                arrayAppend(json._state->tokenOffsetSizeStorage, InPlaceInit,
+                    start,
+                    /* The upper two bits, used for type, are non-0 only for
+                       parsed numbers, so no need for any special handling
+                       here */
+                    i - start + 1);
 
             } break;
 
@@ -564,18 +574,20 @@ Containers::Optional<Json> Json::tokenize(const Containers::StringView filename,
                 --i;
 
                 JsonTokenData token{NoInit};
-                token._offset = start;
                 if(c == 'n')
                     token._dataTypeNan = JsonToken::TypeSmallNull;
                 else if(c == 't' || c == 'f')
                     token._dataTypeNan = JsonToken::TypeSmallBool;
                 else
                     token._dataTypeNan = JsonToken::TypeSmallNumber;
-                /* The upper two bits, used for type, are non-0 only for parsed
-                   numbers, so no need for any special handling here */
-                token._sizeType = i - start + 1;
 
                 arrayAppend(json._state->tokenStorage, token);
+                arrayAppend(json._state->tokenOffsetSizeStorage, InPlaceInit,
+                    start,
+                    /* The upper two bits, used for type, are non-0 only for
+                       parsed numbers, so no need for any special handling
+                       here */
+                    i - start + 1);
 
                 /* Expecting a comma or end next, depending on what the parent
                    is */
@@ -663,6 +675,7 @@ Containers::Optional<Json> Json::tokenize(const Containers::StringView filename,
     /* All good. Fill the token data + size members in the JsonData base and
        return. */
     json._state->tokens = json._state->tokenStorage.data();
+    json._state->tokenOffsetsSizes = json._state->tokenOffsetSizeStorage.data();
     json._state->tokenCount = json._state->tokenStorage.size();
     /* GCC 4.8 needs a bit of help here */
     return Containers::optional(Utility::move(json));
@@ -819,7 +832,9 @@ bool Json::parseDoubleInternal(const char* const errorPrefix, JsonTokenData& tok
        checked for correct token type, otherwise, while the condition is true
        only if it's indeed a parsed double, the token type could be just about
        anything if the condition is false. */
-    if((token._sizeType & JsonToken::TypeTokenSizeMask) == JsonToken::TypeTokenSizeDouble) {
+    State& state = *_state;
+    JsonTokenOffsetSize& tokenOffsetSize = state.tokenOffsetSizeStorage[&token - state.tokens];
+    if((tokenOffsetSize._sizeType & JsonToken::TypeTokenSizeMask) == JsonToken::TypeTokenSizeDouble) {
         /* Just a sanity check, as JSON doesn't support NaNs, the NaN bits
            shouldn't match. If they would, type detection elsewhere would fail
            miserably. */
@@ -863,7 +878,7 @@ bool Json::parseDoubleInternal(const char* const errorPrefix, JsonTokenData& tok
        didn't end up with NaN bits set. */
     token._parsedDouble = out;
     CORRADE_INTERNAL_DEBUG_ASSERT((token._dataTypeNan & JsonToken::Nan) != JsonToken::Nan);
-    token._sizeType = (token._sizeType & ~JsonToken::TypeTokenSizeMask)|JsonToken::TypeTokenSizeDouble;
+    tokenOffsetSize._sizeType = (tokenOffsetSize._sizeType & ~JsonToken::TypeTokenSizeMask)|JsonToken::TypeTokenSizeDouble;
     return true;
 }
 
@@ -903,7 +918,9 @@ bool Json::parseFloatInternal(const char* const errorPrefix, JsonTokenData& toke
     token._dataTypeNan = (token._dataTypeNan & ~JsonToken::TypeSmallMask)|JsonToken::TypeSmallFloat;
     /* Reset the 64-bit type identifier in the size field, in case it was
        parsed as a double before, for example */
-    token._sizeType = (token._sizeType & ~JsonToken::TypeTokenSizeMask)|JsonToken::TypeTokenSizeOther;
+    State& state = *_state;
+    JsonTokenOffsetSize& tokenOffsetSize = state.tokenOffsetSizeStorage[&token - state.tokens];
+    tokenOffsetSize._sizeType = (tokenOffsetSize._sizeType & ~JsonToken::TypeTokenSizeMask)|JsonToken::TypeTokenSizeOther;
     return true;
 }
 
@@ -955,7 +972,9 @@ bool Json::parseUnsignedIntInternal(const char* const errorPrefix, JsonTokenData
     token._dataTypeNan = (token._dataTypeNan & ~JsonToken::TypeSmallMask)|JsonToken::TypeSmallUnsignedInt;
     /* Reset the 64-bit type identifier in the size field, in case it was
        parsed as a double before, for example */
-    token._sizeType = (token._sizeType & ~JsonToken::TypeTokenSizeMask)|JsonToken::TypeTokenSizeOther;
+    State& state = *_state;
+    JsonTokenOffsetSize& tokenOffsetSize = state.tokenOffsetSizeStorage[&token - state.tokens];
+    tokenOffsetSize._sizeType = (tokenOffsetSize._sizeType & ~JsonToken::TypeTokenSizeMask)|JsonToken::TypeTokenSizeOther;
     return true;
 }
 
@@ -1007,7 +1026,9 @@ bool Json::parseIntInternal(const char* const errorPrefix, JsonTokenData& token)
     token._dataTypeNan = (token._dataTypeNan & ~JsonToken::TypeSmallMask)|JsonToken::TypeSmallInt;
     /* Reset the 64-bit type identifier in the size field, in case it was
        parsed as a double before, for example */
-    token._sizeType = (token._sizeType & ~JsonToken::TypeTokenSizeMask)|JsonToken::TypeTokenSizeOther;
+    State& state = *_state;
+    JsonTokenOffsetSize& tokenOffsetSize = state.tokenOffsetSizeStorage[&token - state.tokens];
+    tokenOffsetSize._sizeType = (tokenOffsetSize._sizeType & ~JsonToken::TypeTokenSizeMask)|JsonToken::TypeTokenSizeOther;
     return true;
 }
 
@@ -1016,7 +1037,9 @@ bool Json::parseUnsignedLongInternal(const char* const errorPrefix, JsonTokenDat
        checked for correct token type, otherwise, while the condition is true
        only if it's indeed a parsed unsigned long, the token type could be just
        about anything if the condition is false. */
-    if((token._sizeType & JsonToken::TypeTokenSizeMask) == JsonToken::TypeTokenSizeUnsignedLong) {
+    State& state = *_state;
+    JsonTokenOffsetSize& tokenOffsetSize = state.tokenOffsetSizeStorage[&token - state.tokens];
+    if((tokenOffsetSize._sizeType & JsonToken::TypeTokenSizeMask) == JsonToken::TypeTokenSizeUnsignedLong) {
         /* Just a sanity check, as only 52-bit unsigned types are supported,
            the NaN bits and the sign bit should be all zero. If they wouldn't,
            type detection elsewhere would fail miserably. */
@@ -1059,7 +1082,7 @@ bool Json::parseUnsignedLongInternal(const char* const errorPrefix, JsonTokenDat
        didn't end up with any NaN bits set. */
     token._parsedUnsignedLong = out;
     CORRADE_INTERNAL_DEBUG_ASSERT((token._dataTypeNan & JsonToken::NanMask) == 0);
-    token._sizeType = (token._sizeType & ~JsonToken::TypeTokenSizeMask)|JsonToken::TypeTokenSizeUnsignedLong;
+    tokenOffsetSize._sizeType = (tokenOffsetSize._sizeType & ~JsonToken::TypeTokenSizeMask)|JsonToken::TypeTokenSizeUnsignedLong;
     return true;
 }
 
@@ -1068,7 +1091,9 @@ bool Json::parseLongInternal(const char* const errorPrefix, JsonTokenData& token
        checked for correct token type, otherwise, while the condition is true
        only if it's indeed a parsed long, the token type could be just about
        anything if the condition is false. */
-    if((token._sizeType & JsonToken::TypeTokenSizeMask) == JsonToken::TypeTokenSizeLong) {
+    State& state = *_state;
+    JsonTokenOffsetSize& tokenOffsetSize = state.tokenOffsetSizeStorage[&token - state.tokens];
+    if((tokenOffsetSize._sizeType & JsonToken::TypeTokenSizeMask) == JsonToken::TypeTokenSizeLong) {
         /* Just a sanity check, as only 53-bit signed types are supported, the
            NaN bits and the sign bit should be either all zero or all one. If
            they wouldn't, type detection elsewhere would fail miserably. */
@@ -1115,7 +1140,7 @@ bool Json::parseLongInternal(const char* const errorPrefix, JsonTokenData& token
     CORRADE_INTERNAL_DEBUG_ASSERT(
         (token._dataTypeNan & JsonToken::NanMask) == 0 ||
         (token._dataTypeNan & JsonToken::NanMask) == JsonToken::NanMask);
-    token._sizeType = (token._sizeType & ~JsonToken::TypeTokenSizeMask)|JsonToken::TypeTokenSizeLong;
+    tokenOffsetSize._sizeType = (tokenOffsetSize._sizeType & ~JsonToken::TypeTokenSizeMask)|JsonToken::TypeTokenSizeLong;
     return true;
 }
 
@@ -1275,7 +1300,7 @@ bool Json::parseDoubles(const JsonToken token) {
         /* Skip tokens that are already parsed as doubles (which is the simpler
            check, so do it first) and non-number tokens */
         JsonTokenData& nestedToken = state.tokenStorage[i];
-        if((nestedToken._sizeType & JsonToken::TypeTokenSizeMask) == JsonToken::TypeTokenSizeDouble ||
+        if((state.tokenOffsetsSizes[i]._sizeType & JsonToken::TypeTokenSizeMask) == JsonToken::TypeTokenSizeDouble ||
            !nestedToken.isNumber())
             continue;
 
@@ -1355,7 +1380,7 @@ bool Json::parseUnsignedLongs(const JsonToken token) {
         /* Skip tokens that are already parsed as unsigned longs (which is the
            simpler check, so do it first) and non-number tokens */
         JsonTokenData& nestedToken = state.tokenStorage[i];
-        if((nestedToken._sizeType & JsonToken::TypeTokenSizeMask) == JsonToken::TypeTokenSizeUnsignedLong ||
+        if((state.tokenOffsetsSizes[i]._sizeType & JsonToken::TypeTokenSizeMask) == JsonToken::TypeTokenSizeUnsignedLong ||
            !nestedToken.isNumber())
             continue;
 
@@ -1375,7 +1400,7 @@ bool Json::parseLongs(const JsonToken token) {
         /* Skip tokens that are already parsed as longs (which is the simpler
            check, so do it first) and non-number tokens */
         JsonTokenData& nestedToken = state.tokenStorage[i];
-        if((nestedToken._sizeType & JsonToken::TypeTokenSizeMask) == JsonToken::TypeTokenSizeLong ||
+        if((state.tokenOffsetsSizes[i]._sizeType & JsonToken::TypeTokenSizeMask) == JsonToken::TypeTokenSizeLong ||
            !nestedToken.isNumber())
             continue;
 
@@ -1699,8 +1724,8 @@ Containers::Optional<Containers::StringView> Json::parseString(const JsonToken t
     /* If the string is not escaped, reference it directly */
     if(!(token._dataTypeNan & JsonToken::TypeLargeStringIsEscaped))
         return state.string.sliceSize(
-            token._offset + 1,
-            (token._sizeType & ~JsonToken::TypeTokenSizeMask) - 2);
+            state.tokenOffsetsSizes[token_._token]._offset + 1,
+            (state.tokenOffsetsSizes[token_._token]._sizeType & ~JsonToken::TypeTokenSizeMask) - 2);
 
     /* Otherwise take the cached version. Compared to _json->tokens the strings
        pointer isn't stored in the base JsonData array -- it may get changed on
@@ -2085,7 +2110,8 @@ JsonToken::JsonToken(const Json& json, const JsonTokenData& token) noexcept: _js
 }
 
 inline Containers::StringView Json::tokenData(const Implementation::JsonData& json, const JsonTokenData& token) {
-    return static_cast<const State&>(json).string.sliceSize(token._offset, token._sizeType & ~JsonToken::TypeTokenSizeMask);
+    const std::size_t index = &token - json.tokens;
+    return static_cast<const State&>(json).string.sliceSize(json.tokenOffsetsSizes[index]._offset, json.tokenOffsetsSizes[index]._sizeType & ~JsonToken::TypeTokenSizeMask);
 }
 
 Containers::StringView JsonToken::data() const {
@@ -2101,9 +2127,9 @@ inline bool JsonTokenData::isNumber() const {
         return !(_dataTypeNan & JsonToken::TypeIsLarge) && (_dataTypeNan & JsonToken::TypeSmallIsNumber);
 
     /* Otherwise, if +NaN is not set, it's a parsed 64-bit number with the
-       type stored in the token size. Only do a sanity check that it's indeed
-       the case. */
-    CORRADE_INTERNAL_DEBUG_ASSERT((_sizeType & JsonToken::TypeTokenSizeMask) != JsonToken::TypeTokenSizeOther);
+       type stored in the token size. Unfortunately from here it's impossible
+       to access the separate tokenOffsetsSizes array so can't do even a sanity
+       debug-only check. */
     return true;
 }
 
@@ -2113,7 +2139,7 @@ JsonToken::Type JsonToken::type() const {
     /* If +NaN is set, the type is stored in the token */
     if((data._dataTypeNan & NanMask) == Nan) {
         /* The bits in token size should match this */
-        CORRADE_INTERNAL_DEBUG_ASSERT((data._sizeType & TypeTokenSizeMask) == TypeTokenSizeOther);
+        CORRADE_INTERNAL_DEBUG_ASSERT((_json->tokenOffsetsSizes[_token]._sizeType & TypeTokenSizeMask) == TypeTokenSizeOther);
 
         /* If it's a large type, the type is stored in the next three bits */
         if(data._dataTypeNan & TypeIsLarge) {
@@ -2150,7 +2176,7 @@ JsonToken::Type JsonToken::type() const {
 
     /* Otherwise (-NaN, 0, or anything else in the exponent bits) it can only
        be a (64-bit) number */
-    CORRADE_INTERNAL_DEBUG_ASSERT((data._sizeType & TypeTokenSizeMask) != TypeTokenSizeOther);
+    CORRADE_INTERNAL_DEBUG_ASSERT((_json->tokenOffsetsSizes[_token]._sizeType & TypeTokenSizeMask) != TypeTokenSizeOther);
     return Type::Number;
 }
 
@@ -2185,14 +2211,14 @@ bool JsonToken::isParsed() const {
        the token */
     if((data._dataTypeNan & NanMask) == Nan) {
         /* The bits in token size should match this */
-        CORRADE_INTERNAL_DEBUG_ASSERT((data._sizeType & TypeTokenSizeMask) == TypeTokenSizeOther);
+        CORRADE_INTERNAL_DEBUG_ASSERT((_json->tokenOffsetsSizes[_token]._sizeType & TypeTokenSizeMask) == TypeTokenSizeOther);
 
         return data._dataTypeNan & TypeSmallLargeIsParsed;
     }
 
     /* Otherwise (-NaN, 0, or anything else in the exponent bits) it can only
        be an (64-bit, already parsed) number */
-    CORRADE_INTERNAL_DEBUG_ASSERT((data._sizeType & TypeTokenSizeMask) != TypeTokenSizeOther);
+    CORRADE_INTERNAL_DEBUG_ASSERT((_json->tokenOffsetsSizes[_token]._sizeType & TypeTokenSizeMask) != TypeTokenSizeOther);
     return true;
 }
 
@@ -2202,7 +2228,7 @@ JsonToken::ParsedType JsonToken::parsedType() const {
     /* If +NaN is set, the parsed state and type is stored in the token */
     if((data._dataTypeNan & NanMask) == Nan) {
         /* The bits in token size should match this */
-        CORRADE_INTERNAL_DEBUG_ASSERT((data._sizeType & TypeTokenSizeMask) == TypeTokenSizeOther);
+        CORRADE_INTERNAL_DEBUG_ASSERT((_json->tokenOffsetsSizes[_token]._sizeType & TypeTokenSizeMask) == TypeTokenSizeOther);
 
         if(data._dataTypeNan & TypeSmallLargeIsParsed) {
             /* Large types are all non-numeric */
@@ -2228,7 +2254,7 @@ JsonToken::ParsedType JsonToken::parsedType() const {
     }
 
     /* Otherwise it's in the upper bits of the token size */
-    switch(data._sizeType & TypeTokenSizeMask) {
+    switch(_json->tokenOffsetsSizes[_token]._sizeType & TypeTokenSizeMask) {
         case TypeTokenSizeDouble:
             return ParsedType::Double;
         case TypeTokenSizeUnsignedLong:
@@ -2404,8 +2430,8 @@ Containers::StringView JsonToken::asStringInternal() const {
     const JsonTokenData& data = state.tokenStorage[_token];
     if(!(data._dataTypeNan & JsonToken::TypeLargeStringIsEscaped))
         return state.string.sliceSize(
-            data._offset + 1,
-            (data._sizeType & ~JsonToken::TypeTokenSizeMask) - 2);
+            state.tokenOffsetsSizes[_token]._offset + 1,
+            (state.tokenOffsetsSizes[_token]._sizeType & ~JsonToken::TypeTokenSizeMask) - 2);
 
     /* Otherwise take the cached version. Compared to _json->tokens the strings
        pointer isn't stored in the base JsonData array -- it may get changed on
@@ -2466,7 +2492,7 @@ Containers::StridedArrayView1D<const double> JsonToken::asDoubleArray(const std:
        instead of skipping nested.childCount(). If a nested object or array
        would be encountered, the parsedType() check fails. */
     for(std::size_t i = _token + 1, end = i + size; i != end; ++i)
-        CORRADE_ASSERT((_json->tokens[i]._sizeType & JsonToken::TypeTokenSizeMask) == JsonToken::TypeTokenSizeDouble,
+        CORRADE_ASSERT((_json->tokenOffsetsSizes[i]._sizeType & JsonToken::TypeTokenSizeMask) == JsonToken::TypeTokenSizeDouble,
             "Utility::JsonToken::asDoubleArray(): token" << i - _token - 1 << "is a" << (JsonToken{*_json, i}.type()) << "parsed as" << (JsonToken{*_json, i}.parsedType()), {});
     /* Needs to be after the type-checking loop, otherwise the child count may
        include also nested tokens and the message would be confusing */
@@ -2562,7 +2588,7 @@ Containers::StridedArrayView1D<const std::uint64_t> JsonToken::asUnsignedLongArr
        instead of skipping nested.childCount(). If a nested object or array
        would be encountered, the parsedType() check fails. */
     for(std::size_t i = _token + 1, end = i + size; i != end; ++i)
-        CORRADE_ASSERT((_json->tokens[i]._sizeType & JsonToken::TypeTokenSizeMask) == JsonToken::TypeTokenSizeUnsignedLong,
+        CORRADE_ASSERT((_json->tokenOffsetsSizes[i]._sizeType & JsonToken::TypeTokenSizeMask) == JsonToken::TypeTokenSizeUnsignedLong,
             "Utility::JsonToken::asUnsignedLongArray(): token" << i - _token - 1 << "is a" << (JsonToken{*_json, i}.type()) << "parsed as" << (JsonToken{*_json, i}.parsedType()), {});
     /* Needs to be after the type-checking loop, otherwise the child count may
        include also nested tokens and the message would be confusing */
@@ -2586,7 +2612,7 @@ Containers::StridedArrayView1D<const std::int64_t> JsonToken::asLongArray(const 
        instead of skipping nested.childCount(). If a nested object or array
        would be encountered, the parsedType() check fails. */
     for(std::size_t i = _token + 1, end = i + size; i != end; ++i)
-        CORRADE_ASSERT((_json->tokens[i]._sizeType & JsonToken::TypeTokenSizeMask) == JsonToken::TypeTokenSizeLong,
+        CORRADE_ASSERT((_json->tokenOffsetsSizes[i]._sizeType & JsonToken::TypeTokenSizeMask) == JsonToken::TypeTokenSizeLong,
             "Utility::JsonToken::asLongArray(): token" << i - _token - 1 << "is a" << (JsonToken{*_json, i}.type()) << "parsed as" << (JsonToken{*_json, i}.parsedType()), {});
     /* Needs to be after the type-checking loop, otherwise the child count may
        include also nested tokens and the message would be confusing */

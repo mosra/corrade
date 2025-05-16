@@ -203,6 +203,7 @@ struct JsonTest: TestSuite::Tester {
         #ifndef CORRADE_NO_STD_IS_TRIVIALLY_TRAITS
         void tokenConstructCopy();
         void tokenDataConstructCopy();
+        void tokenOffsetSizeConstructCopy();
         #endif
         void constructCopy();
         void constructMove();
@@ -1554,6 +1555,7 @@ JsonTest::JsonTest() {
               #ifndef CORRADE_NO_STD_IS_TRIVIALLY_TRAITS
               &JsonTest::tokenConstructCopy,
               &JsonTest::tokenDataConstructCopy,
+              &JsonTest::tokenOffsetSizeConstructCopy,
               #endif
               &JsonTest::constructCopy,
               &JsonTest::constructMove,
@@ -5013,6 +5015,10 @@ void JsonTest::tokenConstructCopy() {
 
 void JsonTest::tokenDataConstructCopy() {
     CORRADE_VERIFY(std::is_trivially_copyable<JsonTokenData>{});
+}
+
+void JsonTest::tokenOffsetSizeConstructCopy() {
+    CORRADE_VERIFY(std::is_trivially_copyable<JsonTokenOffsetSize>{});
 }
 #endif
 
