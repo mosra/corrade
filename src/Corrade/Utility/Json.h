@@ -1935,11 +1935,12 @@ class CORRADE_UTILITY_EXPORT JsonTokenData {
 
         /* These are all private because they may depend on spatial locality
            relative to other tokens, which has to be ensured externally */
+        std::size_t childCount() const;
+        inline const JsonTokenData& next() const;
+        inline bool isNumber() const;
         JsonToken::Type type() const;
         bool isParsed() const;
         JsonToken::ParsedType parsedType() const;
-        std::size_t childCount() const;
-        inline const JsonTokenData& next() const;
 
         /* See Json.cpp for detailed layout description */
         const char* _data;
@@ -2569,61 +2570,71 @@ inline JsonIterator JsonToken::next() const {
 }
 
 inline std::nullptr_t JsonToken::asNull() const {
-    CORRADE_ASSERT(type() == Type::Null && isParsed(),
+    CORRADE_ASSERT((_json->tokens[_token]._dataTypeNan & TypeSmallMask) == (TypeSmallNull|TypeSmallLargeIsParsed),
         /* {} causes a -Wzero-as-null-pointer-constant warning on GCC 4.8 */
         "Utility::JsonToken::asNull(): token is" << (isParsed() ? "a parsed" : "an unparsed") << type(), nullptr);
     return nullptr;
 }
 
 inline bool JsonToken::asBool() const {
-    CORRADE_ASSERT(type() == Type::Bool && isParsed(),
+    const JsonTokenData& data = _json->tokens[_token];
+    CORRADE_ASSERT((data._dataTypeNan & TypeSmallMask) == (TypeSmallBool|TypeSmallLargeIsParsed),
         "Utility::JsonToken::asBool(): token is" << (isParsed() ? "a parsed" : "an unparsed") << type(), {});
-    return _json->tokens[_token]._parsedBool;
+    return data._parsedBool;
 }
 
 inline double JsonToken::asDouble() const {
-    CORRADE_ASSERT(parsedType() == ParsedType::Double,
+    const JsonTokenData& data = _json->tokens[_token];
+    CORRADE_ASSERT((data._sizeType & TypeTokenSizeMask) == TypeTokenSizeDouble,
         "Utility::JsonToken::asDouble(): token is a" << type() << "parsed as" << parsedType(), {});
-    return _json->tokens[_token]._parsedDouble;
+    return data._parsedDouble;
 }
 
 inline float JsonToken::asFloat() const {
-    CORRADE_ASSERT(parsedType() == ParsedType::Float,
+    const JsonTokenData& data = _json->tokens[_token];
+    CORRADE_ASSERT((data._dataTypeNan & TypeSmallMask) == TypeSmallFloat,
         "Utility::JsonToken::asFloat(): token is a" << type() << "parsed as" << parsedType(), {});
-    return _json->tokens[_token]._parsedFloat;
+    return data._parsedFloat;
 }
 
 inline std::uint32_t JsonToken::asUnsignedInt() const {
-    CORRADE_ASSERT(parsedType() == ParsedType::UnsignedInt,
+    const JsonTokenData& data = _json->tokens[_token];
+    CORRADE_ASSERT((data._dataTypeNan & TypeSmallMask) == TypeSmallUnsignedInt,
         "Utility::JsonToken::asUnsignedInt(): token is a" << type() << "parsed as" << parsedType(), {});
-    return _json->tokens[_token]._parsedUnsignedInt;
+    return data._parsedUnsignedInt;
 }
 
 inline std::int32_t JsonToken::asInt() const {
-    CORRADE_ASSERT(parsedType() == ParsedType::Int,
+    const JsonTokenData& data = _json->tokens[_token];
+    CORRADE_ASSERT((data._dataTypeNan & TypeSmallMask) == TypeSmallInt,
         "Utility::JsonToken::asInt(): token is a" << type() << "parsed as" << parsedType(), {});
-    return _json->tokens[_token]._parsedInt;
+    return data._parsedInt;
 }
 
 inline std::uint64_t JsonToken::asUnsignedLong() const {
-    CORRADE_ASSERT(parsedType() == ParsedType::UnsignedLong,
+    const JsonTokenData& data = _json->tokens[_token];
+    CORRADE_ASSERT((data._sizeType & TypeTokenSizeMask) == TypeTokenSizeUnsignedLong,
         "Utility::JsonToken::asUnsignedLong(): token is a" << type() << "parsed as" << parsedType(), {});
-    return _json->tokens[_token]._parsedUnsignedLong;
+    return data._parsedUnsignedLong;
 }
 
 inline std::int64_t JsonToken::asLong() const {
-    CORRADE_ASSERT(parsedType() == ParsedType::Long,
+    const JsonTokenData& data = _json->tokens[_token];
+    CORRADE_ASSERT((data._sizeType & TypeTokenSizeMask) == TypeTokenSizeLong,
         "Utility::JsonToken::asLong(): token is a" << type() << "parsed as" << parsedType(), {});
-    return _json->tokens[_token]._parsedLong;
+    return data._parsedLong;
 }
 
 inline std::size_t JsonToken::asSize() const {
-    CORRADE_ASSERT(parsedType() == ParsedType::Size,
-        "Utility::JsonToken::asSize(): token is a" << type() << "parsed as" << parsedType(), {});
+    const JsonTokenData& data = _json->tokens[_token];
     #ifndef CORRADE_TARGET_32BIT
-    return _json->tokens[_token]._parsedUnsignedLong;
+    CORRADE_ASSERT((data._sizeType & TypeTokenSizeMask) == TypeTokenSizeUnsignedLong,
+        "Utility::JsonToken::asSize(): token is a" << type() << "parsed as" << parsedType(), {});
+    return data._parsedUnsignedLong;
     #else
-    return _json->tokens[_token]._parsedUnsignedInt;
+    CORRADE_ASSERT((data._dataTypeNan & TypeSmallMask) == TypeSmallUnsignedInt,
+        "Utility::JsonToken::asSize(): token is a" << type() << "parsed as" << parsedType(), {});
+    return data._parsedUnsignedInt;
     #endif
 }
 
