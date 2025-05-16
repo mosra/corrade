@@ -1939,9 +1939,6 @@ class CORRADE_UTILITY_EXPORT JsonTokenData {
         inline bool isNumber() const;
 
         /* See Json.cpp for detailed layout description */
-        std::size_t _offset;
-        /* Upper two bits used for TypeTokenSize* values */
-        std::size_t _sizeType;
         union {
             /* The upper 12 bits contain a NaN, the next four / five bits
                contain a type. For objects and arrays, the lower 48 bits is
@@ -2037,6 +2034,12 @@ namespace Implementation {
 struct JsonData {
     const JsonTokenData* tokens;
     std::size_t tokenCount;
+    /* Custom struct and not a Pair to make it clear that upper two bits of
+       size are used for TypeTokenSize* values */
+    const struct TokenOffsetSize {
+        std::size_t offset;
+        std::size_t sizeType;
+    }* tokenOffsetsSizes;
 
     /* Disallow accidental deletion through the base pointer */
     protected:
@@ -2564,10 +2567,9 @@ inline bool JsonToken::asBool() const {
 }
 
 inline double JsonToken::asDouble() const {
-    const JsonTokenData& data = _json->tokens[_token];
-    CORRADE_ASSERT((data._sizeType & TypeTokenSizeMask) == TypeTokenSizeDouble,
+    CORRADE_ASSERT((_json->tokenOffsetsSizes[_token].sizeType & TypeTokenSizeMask) == TypeTokenSizeDouble,
         "Utility::JsonToken::asDouble(): token is a" << type() << "parsed as" << parsedType(), {});
-    return data._parsedDouble;
+    return _json->tokens[_token]._parsedDouble;
 }
 
 inline float JsonToken::asFloat() const {
@@ -2592,23 +2594,21 @@ inline std::int32_t JsonToken::asInt() const {
 }
 
 inline std::uint64_t JsonToken::asUnsignedLong() const {
-    const JsonTokenData& data = _json->tokens[_token];
-    CORRADE_ASSERT((data._sizeType & TypeTokenSizeMask) == TypeTokenSizeUnsignedLong,
+    CORRADE_ASSERT((_json->tokenOffsetsSizes[_token].sizeType & TypeTokenSizeMask) == TypeTokenSizeUnsignedLong,
         "Utility::JsonToken::asUnsignedLong(): token is a" << type() << "parsed as" << parsedType(), {});
-    return data._parsedUnsignedLong;
+    return _json->tokens[_token]._parsedUnsignedLong;
 }
 
 inline std::int64_t JsonToken::asLong() const {
-    const JsonTokenData& data = _json->tokens[_token];
-    CORRADE_ASSERT((data._sizeType & TypeTokenSizeMask) == TypeTokenSizeLong,
+    CORRADE_ASSERT((_json->tokenOffsetsSizes[_token].sizeType & TypeTokenSizeMask) == TypeTokenSizeLong,
         "Utility::JsonToken::asLong(): token is a" << type() << "parsed as" << parsedType(), {});
-    return data._parsedLong;
+    return _json->tokens[_token]._parsedLong;
 }
 
 inline std::size_t JsonToken::asSize() const {
     const JsonTokenData& data = _json->tokens[_token];
     #ifndef CORRADE_TARGET_32BIT
-    CORRADE_ASSERT((data._sizeType & TypeTokenSizeMask) == TypeTokenSizeUnsignedLong,
+    CORRADE_ASSERT((_json->tokenOffsetsSizes[_token].sizeType & TypeTokenSizeMask) == TypeTokenSizeUnsignedLong,
         "Utility::JsonToken::asSize(): token is a" << type() << "parsed as" << parsedType(), {});
     return data._parsedUnsignedLong;
     #else
