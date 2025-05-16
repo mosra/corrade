@@ -1939,7 +1939,6 @@ class CORRADE_UTILITY_EXPORT JsonTokenData {
         /* These are all private because they may depend on spatial locality
            relative to other tokens, which has to be ensured externally */
         std::size_t childCount() const;
-        inline const JsonTokenData& next() const;
         inline bool isNumber() const;
         JsonToken::Type type() const;
         bool isParsed() const;
@@ -2562,10 +2561,6 @@ inline JsonIterator JsonToken::firstChild() const {
     /* Otherwise the type is a non-key string or is small (null, bool, number)
        or it's a 64-bit parsed type, neither of which have children */
     return {};
-}
-
-inline const JsonTokenData& JsonTokenData::next() const {
-    return *(this + childCount() + 1);
 }
 
 inline JsonIterator JsonToken::next() const {
