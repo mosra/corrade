@@ -1333,7 +1333,9 @@ class CORRADE_UTILITY_EXPORT JsonToken {
          * instance, or to the string passed to @ref Json::fromString() if it
          * was called with @ref Containers::StringViewFlag::Global set. The
          * global flag is preserved in the returned value here, same as with
-         * @ref asString().
+         * @ref asString(). The @ref Containers::StringViewFlag::NullTerminated
+         * flag may also be present, in case the token data are exactly at the
+         * end of a null-terminated input string.
          */
         Containers::StringView data() const;
 
@@ -1944,7 +1946,7 @@ class CORRADE_UTILITY_EXPORT JsonTokenData {
         JsonToken::ParsedType parsedType() const;
 
         /* See Json.cpp for detailed layout description */
-        const char* _data;
+        std::size_t _offset;
         /* Upper two bits used for TypeTokenSize* values */
         std::size_t _sizeType;
         union {

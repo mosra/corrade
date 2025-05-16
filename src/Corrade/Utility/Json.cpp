@@ -313,7 +313,7 @@ void Json::printFilePosition(Debug& out, const Containers::StringView string) co
 }
 
 void Json::printFilePosition(Debug& out, const JsonTokenData& token) const {
-    printFilePosition(out, _state->string.prefix(token._data));
+    printFilePosition(out, _state->string.prefix(token._offset));
 }
 
 Containers::Optional<Json> Json::tokenize(const Containers::StringView filename, const std::size_t lineOffset, const std::size_t columnOffset, const Containers::StringView string_) {
@@ -367,7 +367,7 @@ Containers::Optional<Json> Json::tokenize(const Containers::StringView filename,
 
                 /* Token holding the whole object / array */
                 JsonTokenData token{NoInit};
-                token._data = data + i;
+                token._offset = i;
                 /* Size and child count gets filled in once } / ] is
                    encountered. Until then, abuse the _dataTypeNan field to
                    store the previous object / array index and remember this
@@ -419,7 +419,7 @@ Containers::Optional<Json> Json::tokenize(const Containers::StringView filename,
                 /* Update the token size to contain everything parsed until
                    now. The upper two bits, used for type, are non-0 only for
                    parsed numbers, so no need for any special handling here. */
-                token._sizeType = data + i - token._data + 1;
+                token._sizeType = i - token._offset + 1;
 
                 /* Next should be a comma or an end depending on what the
                    new parent is */
@@ -492,7 +492,7 @@ Containers::Optional<Json> Json::tokenize(const Containers::StringView filename,
                    well. The i then gets incremented after the final " by the
                    outer loop. */
                 JsonTokenData token{NoInit};
-                token._data = data + start;
+                token._offset = start;
                 /* The upper two bits, used for type, are non-0 only for parsed
                    numbers, so no need for any special handling here */
                 token._sizeType = i - start + 1;
@@ -564,7 +564,7 @@ Containers::Optional<Json> Json::tokenize(const Containers::StringView filename,
                 --i;
 
                 JsonTokenData token{NoInit};
-                token._data = data + start;
+                token._offset = start;
                 if(c == 'n')
                     token._dataTypeNan = JsonToken::TypeSmallNull;
                 else if(c == 't' || c == 'f')
@@ -1697,12 +1697,9 @@ Containers::Optional<Containers::StringView> Json::parseString(const JsonToken t
 
     /* If the string is not escaped, reference it directly */
     if(!(token._dataTypeNan & JsonToken::TypeLargeStringIsEscaped))
-        return Containers::StringView{token._data + 1,
-            (token._sizeType & ~JsonToken::TypeTokenSizeMask) - 2,
-            /* Inherit the global flag from the input. Not the NullTerminated
-               flag, tho. */
-            state.string.flags() & Containers::StringViewFlag::Global
-        };
+        return state.string.sliceSize(
+            token._offset + 1,
+            (token._sizeType & ~JsonToken::TypeTokenSizeMask) - 2);
 
     /* Otherwise take the cached version. Compared to _json->tokens the strings
        pointer isn't stored in the base JsonData array -- it may get changed on
@@ -2079,7 +2076,7 @@ JsonToken::JsonToken(const Json& json, const JsonTokenData& token) noexcept: _js
 }
 
 inline Containers::StringView Json::tokenData(const Implementation::JsonData& json, const JsonTokenData& token) {
-    return static_cast<const State&>(json).string.sliceSize(token._data, token._sizeType & ~JsonToken::TypeTokenSizeMask);
+    return static_cast<const State&>(json).string.sliceSize(token._offset, token._sizeType & ~JsonToken::TypeTokenSizeMask);
 }
 
 Containers::StringView JsonToken::data() const {
@@ -2387,12 +2384,9 @@ Containers::StringView JsonToken::asStringInternal() const {
     const Json::State& state = *static_cast<const Json::State*>(_json);
     const JsonTokenData& data = state.tokenStorage[_token];
     if(!(data._dataTypeNan & JsonToken::TypeLargeStringIsEscaped))
-        return {data._data + 1,
-            (data._sizeType & ~JsonToken::TypeTokenSizeMask) - 2,
-            /* Inherit the global flag from the input. Not the NullTerminated
-               flag, tho. */
-            state.string.flags() & Containers::StringViewFlag::Global
-        };
+        return state.string.sliceSize(
+            data._offset + 1,
+            (data._sizeType & ~JsonToken::TypeTokenSizeMask) - 2);
 
     /* Otherwise take the cached version. Compared to _json->tokens the strings
        pointer isn't stored in the base JsonData array -- it may get changed on
