@@ -1085,6 +1085,7 @@ class CORRADE_UTILITY_EXPORT Json {
         /* These are here because they need friended JsonToken and/or access to
            State */
         CORRADE_UTILITY_LOCAL void printFilePosition(Debug& out, Containers::StringView string) const;
+        CORRADE_UTILITY_LOCAL void printFilePosition(Debug& out, const JsonTokenData& token) const;
         CORRADE_UTILITY_LOCAL static Containers::Optional<Json> tokenize(Containers::StringView filename, std::size_t lineOffset, std::size_t columnOffset, Containers::StringView string);
         CORRADE_UTILITY_LOCAL static Containers::Optional<Json> tokenize(Containers::StringView filename, std::size_t lineOffset, std::size_t columnOffset, Containers::StringView string, Options options);
         /* Used by all parse*Internal() below, is here and not on JsonTokenData
