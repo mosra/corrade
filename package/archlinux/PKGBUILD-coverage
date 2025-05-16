@@ -45,7 +45,7 @@ check() {
     # circleci.yml, please
     # TODO figure out a way to avoid adding --ignore-errors mismatch
     lcov --ignore-errors mismatch,inconsistent --directory . --capture --output-file coverage.info
-    lcov --extract coverage.info "*/src/Corrade/*" --output-file coverage.info
+    lcov --ignore-errors inconsistent --extract coverage.info "*/src/Corrade/*" --output-file coverage.info
     lcov --remove coverage.info "*/Test/*" --output-file coverage.info
     genhtml --no-function-coverage --missed --output-directory ./coverage coverage.info
 }
