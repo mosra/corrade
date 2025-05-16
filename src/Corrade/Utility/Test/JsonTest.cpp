@@ -61,6 +61,7 @@ struct JsonTest: TestSuite::Tester {
         void nested();
 
         void error();
+        void errorOption();
 
         void parseObjects();
         void parseArrays();
@@ -1358,6 +1359,8 @@ JsonTest::JsonTest() {
     addInstancedTests({&JsonTest::error},
         Containers::arraySize(ErrorData));
 
+    addTests({&JsonTest::errorOption});
+
     addInstancedTests({&JsonTest::parseObjects},
         Containers::arraySize(ParseObjectData));
 
@@ -1567,6 +1570,19 @@ void JsonTest::error() {
     Error redirectError{&out};
     CORRADE_VERIFY(!Json::fromString(data.data));
     CORRADE_COMPARE(out, format("Utility::Json: {}\n", data.message));
+}
+
+void JsonTest::errorOption() {
+    /* The particular corner cases got all tested in error(), here just
+       verifying that the tokenization error gets correctly propagated also
+       when using the overload with (empty) Json::Option (which is a separate
+       codepath to allow for the parsing code to be DCEd if not used). Parsing
+       errors when using Option are tested in parseOptionError(). */
+
+    Containers::String out;
+    Error redirectError{&out};
+    CORRADE_VERIFY(!Json::fromString("]", Json::Options{}));
+    CORRADE_COMPARE(out, "Utility::Json: expected a value but got ] at <in>:1:1\n");
 }
 
 void JsonTest::singleObject() {
@@ -3443,7 +3459,8 @@ void JsonTest::parseError() {
 void JsonTest::parseOptionError() {
     /* The particular corner cases got all tested in parseError(), here just
        verifying that the error gets correctly propagated also when using
-       Json::Option */
+       Json::Option. Tokenization errors when using Json::Option are tested
+       in errorOption(). */
 
     auto&& data = ParseOptionErrorData[testCaseInstanceId()];
     setTestCaseDescription(data.name);
