@@ -31,6 +31,9 @@
 #include <cstring>
 
 #include "Corrade/Containers/Array.h"
+#ifndef CORRADE_NO_ASSERT
+#include "Corrade/Containers/BitArray.h"
+#endif
 #include "Corrade/Containers/EnumSet.hpp"
 #include "Corrade/Containers/GrowableArray.h"
 #include "Corrade/Containers/Optional.h"
@@ -860,7 +863,8 @@ bool Json::parseDoubleInternal(const char* const errorPrefix, JsonTokenData& tok
     /* Not saving to token._parsedDouble directly to avoid a failure corrupting
        the existing value */
     const double out = std::strtod(buffer, &end);
-    if(std::size_t(end - buffer) != size
+    /* The token being empty (such as with external data) is also an error */
+    if(!size || std::size_t(end - buffer) != size
         /* Explicitly disallowing NaNs to not clash with the NaN bit pattern
            stuffing. NAN and INF literals in a JSON are non-conforming behavior
            (see all XFAILs in tests) */
@@ -908,7 +912,8 @@ bool Json::parseFloatInternal(const char* const errorPrefix, JsonTokenData& toke
     /* Not saving to token._parsedFloat directly to avoid a failure corrupting
        the existing value */
     const float out = std::strtof(buffer, &end);
-    if(std::size_t(end - buffer) != size) {
+    /* The token being empty (such as with external data) is also an error */
+    if(!size || std::size_t(end - buffer) != size) {
         Error err;
         err << errorPrefix << "invalid floating-point literal" << string << "at";
         printFilePosition(err, token);
@@ -957,7 +962,8 @@ bool Json::parseUnsignedIntInternal(const char* const errorPrefix, JsonTokenData
     /** @todo replace with something that can report errors in a non-insane
         way */
     const std::uint64_t outLong = std::strtoull(buffer, &end, 10);
-    if(std::size_t(end - buffer) != size) {
+    /* The token being empty (such as with external data) is also an error */
+    if(!size || std::size_t(end - buffer) != size) {
         Error err;
         err << errorPrefix << "invalid unsigned integer literal" << string << "at";
         printFilePosition(err, token);
@@ -1012,7 +1018,8 @@ bool Json::parseIntInternal(const char* const errorPrefix, JsonTokenData& token)
     /** @todo replace with something that can report errors in a non-insane
         way */
     const std::int64_t outLong = std::strtoll(buffer, &end, 10);
-    if(std::size_t(end - buffer) != size) {
+    /* The token being empty (such as with external data) is also an error */
+    if(!size || std::size_t(end - buffer) != size) {
         Error err;
         err << errorPrefix << "invalid integer literal" << string << "at";
         printFilePosition(err, token);
@@ -1071,7 +1078,8 @@ bool Json::parseUnsignedLongInternal(const char* const errorPrefix, JsonTokenDat
     /* Not saving to token._parsedUnsignedLong directly to avoid a failure
        corrupting the existing value */
     const std::uint64_t out = std::strtoull(buffer, &end, 10);
-    if(std::size_t(end - buffer) != size) {
+    /* The token being empty (such as with external data) is also an error */
+    if(!size || std::size_t(end - buffer) != size) {
         Error err;
         err << errorPrefix << "invalid unsigned integer literal" << string << "at";
         printFilePosition(err, token);
@@ -1127,7 +1135,8 @@ bool Json::parseLongInternal(const char* const errorPrefix, JsonTokenData& token
     /* Not saving to token._parsedLong directly to avoid a failure corrupting
        the existing value */
     const std::int64_t out = std::strtoll(buffer, &end, 10);
-    if(std::size_t(end - buffer) != size) {
+    /* The token being empty (such as with external data) is also an error */
+    if(!size || std::size_t(end - buffer) != size) {
         Error err;
         err << errorPrefix << "invalid integer literal" << string << "at";
         printFilePosition(err, token);
@@ -2715,6 +2724,177 @@ Debug& operator<<(Debug& debug, const JsonToken::ParsedType value) {
     }
 
     return debug << "(" << Debug::nospace << Debug::hex << std::uint8_t(value) << Utility::Debug::nospace << ")";
+}
+
+Json::Json(Containers::String&& string, Containers::Array<JsonTokenData>&& tokens, Containers::Array<JsonTokenOffsetSize>&& tokenOffsetsSizes, Containers::Array<Containers::String>&& strings): _state{InPlaceInit} {
+    CORRADE_ASSERT(!tokens.isEmpty(),
+        "Utility::Json: expected at least one token", );
+    CORRADE_ASSERT(tokens.size() == tokenOffsetsSizes.size(),
+        "Utility::Json: expected token and offset/size arrays to have the same size but got" << tokens.size() << "and" << tokenOffsetsSizes.size(), );
+
+    /* These are set before the remaining asserts so it's possible to form
+       JsonToken instances for type printing and such. The actual storage is
+       moved only after however, to be able to still reference the original
+       input arrays. */
+    _state->tokens = tokens.data();
+    _state->tokenOffsetsSizes = tokenOffsetsSizes.data();
+    _state->tokenCount = tokens.size();
+    /* This is just for (doomed to fail) diagnostic in parse*() */
+    _state->filename = Containers::String::nullTerminatedGlobalView("<in>"_s);
+
+    #ifndef CORRADE_NO_ASSERT
+    /* Check that token child counts don't overlap. Do this before everything
+       else to avoid strange failures in subsequent checks that rely on child
+       counts being correct. */
+    Containers::Array<std::size_t> ends;
+    for(std::size_t i = 0; i != tokens.size(); ++i) {
+        /* The stack can be only empty for the very first token, if it becomes
+           empty before the end it means there's more than one root token */
+        CORRADE_ASSERT(i == 0 || !ends.isEmpty(),
+            "Utility::Json: extraneous root token" << i, );
+
+        /* Not calling childCount() as it could blow up if called on a string
+           key that's errorneously last in the object. Check for that is
+           below. */
+        const JsonTokenData& token = tokens[i];
+        if((token._dataTypeNan & JsonToken::TypeLargeMask & ~JsonToken::TypeSmallLargeIsParsed) == JsonToken::TypeLargeArray ||
+           (token._dataTypeNan & JsonToken::TypeLargeMask & ~JsonToken::TypeSmallLargeIsParsed) == JsonToken::TypeLargeObject) {
+            const std::size_t childCount = token._dataTypeNan & JsonToken::TypeLargeDataMask;
+            CORRADE_ASSERT(i + childCount + 1 <= (ends.isEmpty() ? tokens.size() : ends.back()),
+                "Utility::Json: token" << i << "has" << childCount << "children but expected at most" << (ends.isEmpty() ? tokens.size() : ends.back()) - i - 1, );
+            arrayAppend(ends, i + childCount + 1);
+        }
+
+        while(!ends.isEmpty() && ends.back() == i + 1)
+            arrayRemoveSuffix(ends);
+    }
+    /* The ends are guaranteed to be empty afterwards. If they wouldn't be it
+       means that the root object child count is larger than token count, which
+       should have been caught by the assert above already. */
+    CORRADE_INTERNAL_ASSERT(ends.isEmpty());
+
+    /* Check that object keys are strings and are marked as keys. Also remember
+       which tokens are keys to verify non-key strings aren't marked as such in
+       a subsequent loop. */
+    Containers::BitArray keys{ValueInit, tokens.size()};
+    for(std::size_t i = 0; i != tokens.size(); ++i) {
+        const JsonTokenData& token = tokens[i];
+        if((token._dataTypeNan & JsonToken::TypeLargeMask & ~JsonToken::TypeSmallLargeIsParsed) != JsonToken::TypeLargeObject)
+            continue;
+
+        /* Compared to above, here it *is* using childCount() in order to
+           correctly skip over object values that are arrays or objects. But as
+           every iteration verifies that the token is a string with a key bit
+           is set, it should be correct. For the keys at least, there still can
+           be non-key strings errorneously marked as keys, which gets checked
+           in the next loop below. */
+        for(std::size_t j = i + 1, end = j + token.childCount(); j != end; ) {
+            CORRADE_ASSERT((tokens[j]._dataTypeNan & JsonToken::TypeLargeMask & ~(JsonToken::TypeLargeStringIsEscaped|JsonToken::TypeLargeStringIsKey|JsonToken::TypeSmallLargeIsParsed)) == JsonToken::TypeLargeString,
+                "Utility::Json: token" << j << "expected to be a string key but is" << (JsonToken{*this, tokens[j]}).type(), );
+            CORRADE_ASSERT(tokens[j]._dataTypeNan & JsonToken::TypeLargeStringIsKey,
+                "Utility::Json: string token" << j << "is not marked as a key", );
+            keys.set(j);
+
+            /* A string token marked as a key is expected to have at least one
+               child. If it doesn't have it, it'll either blow up in the
+               asserts above, depending on whether the next token is a string
+               or not. Or, if it's at object end, the next token will be
+               calculated outside of the object, which has to be caught
+               explicitly as well. */
+            std::size_t next = j + 1 + tokens[j].childCount();
+            CORRADE_ASSERT(next <= end,
+                "Utility::Json: string key token" << j << "has no value", );
+            j = next;
+        }
+    }
+
+    /* Verify remaining token properties that aren't reliant on child counts
+       and keys */
+    for(std::size_t i = 0; i != tokens.size(); ++i) {
+        const JsonTokenData& token = tokens[i];
+
+        /* Check token offset and size */
+        CORRADE_ASSERT(tokenOffsetsSizes[i]._offset + (tokenOffsetsSizes[i]._sizeType & ~JsonToken::TypeTokenSizeMask) <= string.size(),
+            "Utility::Json: token" << i << "offset" << tokenOffsetsSizes[i]._offset << "and size" << (tokenOffsetsSizes[i]._sizeType & ~JsonToken::TypeTokenSizeMask) << "out of range for input of size" << string.size(), );
+
+        /* String token properties */
+        if((token._dataTypeNan & JsonToken::TypeLargeMask & ~(JsonToken::TypeSmallLargeIsParsed|JsonToken::TypeLargeStringIsEscaped|JsonToken::TypeLargeStringIsKey)) == JsonToken::TypeLargeString) {
+            /* If a token is a string, it should be either a key (verified
+               above) or not marked as such */
+            CORRADE_ASSERT(keys[i] || !(token._dataTypeNan & JsonToken::TypeLargeStringIsKey),
+                "Utility::Json: string token" << i << "is not expected to be a key", );
+
+            /* Check escaped token index */
+            if(token._dataTypeNan & JsonToken::TypeLargeStringIsEscaped)
+                CORRADE_ASSERT((token._dataTypeNan & JsonToken::TypeLargeDataMask) < strings.size(),
+                    "Utility::Json: escaped string token" << i << "index" << (token._dataTypeNan & JsonToken::TypeLargeDataMask) << "out of range for" << strings.size() << "escaped strings", );
+            /* Otherwise the token should be at least 2 bytes, containing the
+               initial and final quote (which isn't checked anywhere however
+               and could be even a ' character for all I care) */
+            else
+                CORRADE_ASSERT((tokenOffsetsSizes[i]._sizeType & ~JsonToken::TypeTokenSizeMask) >= 2,
+                    "Utility::Json: string token" << i << "should be at least two bytes but got" << (tokenOffsetsSizes[i]._sizeType & ~JsonToken::TypeTokenSizeMask), );
+        }
+    }
+    #endif
+
+    /* All good, take ownership over everything */
+    _state->string = _state->storage = Utility::move(string);
+    _state->tokenStorage = Utility::move(tokens);
+    _state->tokenOffsetSizeStorage = Utility::move(tokenOffsetsSizes);
+    _state->strings = Utility::move(strings);
+}
+
+JsonTokenData::JsonTokenData(const JsonToken::Type type, const std::uint64_t childCountOrStringIndex, bool stringIsKey) {
+    if(type == JsonToken::Type::Object || type == JsonToken::Type::Array) {
+        CORRADE_ASSERT(childCountOrStringIndex <= JsonToken::TypeLargeDataMask,
+            "Utility::JsonTokenData: expected child count to fit into 48 bits, got" << childCountOrStringIndex, );
+        CORRADE_ASSERT(!stringIsKey,
+            "Utility::JsonTokenData: object or array can't be a key", );
+        _dataTypeNan = childCountOrStringIndex|(type == JsonToken::Type::Object ? JsonToken::TypeLargeObject : JsonToken::TypeLargeArray)|JsonToken::TypeSmallLargeIsParsed;
+    } else if(type == JsonToken::Type::String) {
+        CORRADE_ASSERT(childCountOrStringIndex == ~std::uint64_t{} || childCountOrStringIndex <= JsonToken::TypeLargeDataMask,
+            "Utility::JsonTokenData: expected escaped string index to be either all 1s or fit into 48 bits but got" << childCountOrStringIndex, );
+        _dataTypeNan = (childCountOrStringIndex != ~std::uint64_t{} ? childCountOrStringIndex : 0)|JsonToken::TypeLargeString|(stringIsKey ? std::uint64_t(JsonToken::TypeLargeStringIsKey) : 0)|(childCountOrStringIndex != ~std::uint64_t{} ? std::uint64_t(JsonToken::TypeLargeStringIsEscaped) : 0)|JsonToken::TypeSmallLargeIsParsed;
+    } else CORRADE_ASSERT_UNREACHABLE("Utility::JsonTokenData: expected object, array or a string type but got" << type, );
+}
+
+JsonTokenData::JsonTokenData(std::nullptr_t): _dataTypeNan{JsonToken::TypeSmallNull|JsonToken::TypeSmallLargeIsParsed} {}
+
+JsonTokenData::JsonTokenData(const bool value): _dataTypeNan{JsonToken::TypeSmallBool|JsonToken::TypeSmallLargeIsParsed} {
+    _parsedBool = value;
+}
+
+JsonTokenData::JsonTokenData(const double value, JsonTokenOffsetSize& offsetSize): _parsedDouble{value} {
+    CORRADE_ASSERT(!std::isnan(value) && !std::isinf(value),
+        "Utility::JsonTokenData: invalid floating-point value" << value, );
+    offsetSize._sizeType |= JsonToken::TypeTokenSizeDouble;
+}
+
+JsonTokenData::JsonTokenData(const float value): _dataTypeNan{JsonToken::TypeSmallFloat|JsonToken::TypeSmallLargeIsParsed} {
+    CORRADE_ASSERT(!std::isnan(value) && !std::isinf(value),
+        "Utility::JsonTokenData: invalid floating-point value" << value, );
+    _parsedFloat = value;
+}
+
+JsonTokenData::JsonTokenData(const std::uint32_t value): _dataTypeNan{JsonToken::TypeSmallUnsignedInt|JsonToken::TypeSmallLargeIsParsed} {
+    _parsedUnsignedInt = value;
+}
+
+JsonTokenData::JsonTokenData(const std::int32_t value): _dataTypeNan{JsonToken::TypeSmallInt|JsonToken::TypeSmallLargeIsParsed} {
+    _parsedInt = value;
+}
+
+JsonTokenData::JsonTokenData(const unsigned long long value, JsonTokenOffsetSize& offsetSize): _parsedUnsignedLong{value} {
+    CORRADE_ASSERT(value < 1ull << 52,
+        "Utility::JsonTokenData: too large integer value" << value, );
+    offsetSize._sizeType |= JsonToken::TypeTokenSizeUnsignedLong;
+}
+
+JsonTokenData::JsonTokenData(const long long value, JsonTokenOffsetSize& offsetSize): _parsedLong{value} {
+    CORRADE_ASSERT(value >= -(1ll << 52) && value < (1ll << 52),
+        "Utility::JsonTokenData: too small or large integer value" << value, );
+    offsetSize._sizeType |= JsonToken::TypeTokenSizeLong;
 }
 
 }}

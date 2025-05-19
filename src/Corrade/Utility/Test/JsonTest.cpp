@@ -24,6 +24,9 @@
     DEALINGS IN THE SOFTWARE.
 */
 
+#include <climits> /* *LONG_MAX */
+#include <cmath> /* NAN, INFINITY */
+
 #include "Corrade/Containers/Array.h"
 #include "Corrade/Containers/GrowableArray.h"
 #include "Corrade/Containers/Optional.h"
@@ -203,6 +206,9 @@ struct JsonTest: TestSuite::Tester {
 
         #ifndef CORRADE_NO_STD_IS_TRIVIALLY_TRAITS
         void tokenConstructCopy();
+        #endif
+        void tokenDataConstructInvalid();
+        #ifndef CORRADE_NO_STD_IS_TRIVIALLY_TRAITS
         void tokenDataConstructCopy();
         void tokenOffsetSizeConstructCopy();
         #endif
@@ -211,6 +217,40 @@ struct JsonTest: TestSuite::Tester {
 
         void debugTokenType();
         void debugTokenParsedType();
+
+        void fromTokenDataNull();
+        void fromTokenDataBool();
+        void fromTokenDataDouble();
+        void fromTokenDataFloat();
+        void fromTokenDataUnsignedInt();
+        void fromTokenDataInt();
+        void fromTokenDataUnsignedLong();
+        void fromTokenDataLong();
+        void fromTokenDataTheOtherUnsignedLongType();
+        void fromTokenDataTheOtherLongType();
+        void fromTokenDataSize();
+        void fromTokenDataString();
+        void fromTokenDataStringEscaped();
+        void fromTokenDataArrayEmpty();
+        void fromTokenDataArray();
+        void fromTokenDataObjectEmpty();
+        void fromTokenDataObject();
+        void fromTokenDataNested();
+        void fromTokenDataNoTokens();
+        void fromTokenDataInvalidTokenArraySizes();
+        void fromTokenDataTokenOffsetSizeOutOfBounds();
+        void fromTokenDataStringTokenDataSizeTooSmall();
+        void fromTokenDataEscapedStringOutOfBounds();
+        void fromTokenDataObjectKeyWithNoValue();
+        void fromTokenDataObjectKeyNotString();
+        void fromTokenDataObjectStringNotKey();
+        void fromTokenDataStringValueKey();
+        void fromTokenDataInvalidObjectChildCount();
+        void fromTokenDataInvalidArrayChildCount();
+        void fromTokenDataInvalidNestedObjectChildCount();
+        void fromTokenDataInvalidNestedArrayChildCount();
+        void fromTokenDataExtraRootTokens();
+        void fromTokenDataParseEmpty();
 };
 
 const struct {
@@ -1556,6 +1596,9 @@ JsonTest::JsonTest() {
 
               #ifndef CORRADE_NO_STD_IS_TRIVIALLY_TRAITS
               &JsonTest::tokenConstructCopy,
+              #endif
+              &JsonTest::tokenDataConstructInvalid,
+              #ifndef CORRADE_NO_STD_IS_TRIVIALLY_TRAITS
               &JsonTest::tokenDataConstructCopy,
               &JsonTest::tokenOffsetSizeConstructCopy,
               #endif
@@ -1563,7 +1606,41 @@ JsonTest::JsonTest() {
               &JsonTest::constructMove,
 
               &JsonTest::debugTokenType,
-              &JsonTest::debugTokenParsedType});
+              &JsonTest::debugTokenParsedType,
+
+              &JsonTest::fromTokenDataNull,
+              &JsonTest::fromTokenDataBool,
+              &JsonTest::fromTokenDataDouble,
+              &JsonTest::fromTokenDataFloat,
+              &JsonTest::fromTokenDataUnsignedInt,
+              &JsonTest::fromTokenDataInt,
+              &JsonTest::fromTokenDataUnsignedLong,
+              &JsonTest::fromTokenDataLong,
+              &JsonTest::fromTokenDataTheOtherUnsignedLongType,
+              &JsonTest::fromTokenDataTheOtherLongType,
+              &JsonTest::fromTokenDataSize,
+              &JsonTest::fromTokenDataString,
+              &JsonTest::fromTokenDataStringEscaped,
+              &JsonTest::fromTokenDataArrayEmpty,
+              &JsonTest::fromTokenDataArray,
+              &JsonTest::fromTokenDataObjectEmpty,
+              &JsonTest::fromTokenDataObject,
+              &JsonTest::fromTokenDataNested,
+              &JsonTest::fromTokenDataNoTokens,
+              &JsonTest::fromTokenDataInvalidTokenArraySizes,
+              &JsonTest::fromTokenDataTokenOffsetSizeOutOfBounds,
+              &JsonTest::fromTokenDataStringTokenDataSizeTooSmall,
+              &JsonTest::fromTokenDataEscapedStringOutOfBounds,
+              &JsonTest::fromTokenDataObjectKeyWithNoValue,
+              &JsonTest::fromTokenDataObjectKeyNotString,
+              &JsonTest::fromTokenDataObjectStringNotKey,
+              &JsonTest::fromTokenDataStringValueKey,
+              &JsonTest::fromTokenDataInvalidObjectChildCount,
+              &JsonTest::fromTokenDataInvalidArrayChildCount,
+              &JsonTest::fromTokenDataInvalidNestedObjectChildCount,
+              &JsonTest::fromTokenDataInvalidNestedArrayChildCount,
+              &JsonTest::fromTokenDataExtraRootTokens,
+              &JsonTest::fromTokenDataParseEmpty});
 }
 
 void JsonTest::error() {
@@ -5086,7 +5163,87 @@ void JsonTest::fromFileParseError() {
 void JsonTest::tokenConstructCopy() {
     CORRADE_VERIFY(std::is_trivially_copyable<JsonToken>{});
 }
+#endif
 
+void JsonTest::tokenDataConstructInvalid() {
+    CORRADE_SKIP_IF_NO_ASSERT();
+
+    JsonTokenOffsetSize offsetSize;
+
+    /* These are all fine */
+    JsonTokenData{4503599627370495ull, offsetSize};
+    JsonTokenData{4503599627370495ll, offsetSize};
+    JsonTokenData{-4503599627370496ll, offsetSize};
+    JsonTokenData{JsonToken::Type::Object, (1ull << 48) - 1};
+    JsonTokenData{JsonToken::Type::Array, (1ull << 48) - 1};
+    JsonTokenData{JsonToken::Type::String, (1ull << 48) - 1};
+
+    Containers::String out;
+    Error redirectError{&out};
+    /* Invalid floats / doubles, too large 64-bit values. MinGW is stupid and
+       has NAN as a double, while it's said to be a float by the standard and
+       all other compilers. So have to cast in both cases. */
+    JsonTokenData{float(NAN)};
+    JsonTokenData{float(INFINITY)};
+    JsonTokenData{double(NAN), offsetSize};
+    JsonTokenData{double(INFINITY), offsetSize};
+    JsonTokenData{4503599627370496ull, offsetSize};
+    JsonTokenData{4503599627370496ll, offsetSize};
+    JsonTokenData{-4503599627370497ll, offsetSize};
+    /* Too many children / too large index */
+    JsonTokenData{JsonToken::Type::Object, 1ull << 48};
+    JsonTokenData{JsonToken::Type::Array, 1ull << 48};
+    JsonTokenData{JsonToken::Type::String, 1ull << 48};
+    /* Objects / arrays marked as strings */
+    JsonTokenData{JsonToken::Type::Object, 0, true};
+    JsonTokenData{JsonToken::Type::Array, 0, true};
+    /* A type other than object / array / string passed to object / array /
+       string constructor */
+    JsonTokenData{JsonToken::Type::Bool, 0};
+    /* MSVC (w/o clang-cl) before 2019 shows -nan(ind), clang-cl shows
+       -nan(ind) in 2022 17.10 but not in 2022 17.11 */
+    #if defined(CORRADE_TARGET_MSVC) && (_MSC_VER < 1920 /* MSVC <2019 */ || (defined(CORRADE_TARGET_CLANG_CL) && _MSC_VER < 1941 /* <17.11 */))
+    CORRADE_COMPARE_AS(out,
+       "Utility::JsonTokenData: invalid floating-point value -nan(ind)\n"
+       "Utility::JsonTokenData: invalid floating-point value inf\n"
+       "Utility::JsonTokenData: invalid floating-point value -nan(ind)\n"
+       "Utility::JsonTokenData: invalid floating-point value inf\n"
+       "Utility::JsonTokenData: too large integer value 4503599627370496\n"
+       "Utility::JsonTokenData: too small or large integer value 4503599627370496\n"
+       "Utility::JsonTokenData: too small or large integer value -4503599627370497\n"
+
+        "Utility::JsonTokenData: expected child count to fit into 48 bits, got 281474976710656\n"
+        "Utility::JsonTokenData: expected child count to fit into 48 bits, got 281474976710656\n"
+        "Utility::JsonTokenData: expected escaped string index to be either all 1s or fit into 48 bits but got 281474976710656\n"
+
+        "Utility::JsonTokenData: object or array can't be a key\n"
+        "Utility::JsonTokenData: object or array can't be a key\n"
+
+        "Utility::JsonTokenData: expected object, array or a string type but got Utility::JsonToken::Type::Bool\n",
+        TestSuite::Compare::String);
+    #else
+    CORRADE_COMPARE_AS(out,
+       "Utility::JsonTokenData: invalid floating-point value nan\n"
+       "Utility::JsonTokenData: invalid floating-point value inf\n"
+       "Utility::JsonTokenData: invalid floating-point value nan\n"
+       "Utility::JsonTokenData: invalid floating-point value inf\n"
+       "Utility::JsonTokenData: too large integer value 4503599627370496\n"
+       "Utility::JsonTokenData: too small or large integer value 4503599627370496\n"
+       "Utility::JsonTokenData: too small or large integer value -4503599627370497\n"
+
+        "Utility::JsonTokenData: expected child count to fit into 48 bits, got 281474976710656\n"
+        "Utility::JsonTokenData: expected child count to fit into 48 bits, got 281474976710656\n"
+        "Utility::JsonTokenData: expected escaped string index to be either all 1s or fit into 48 bits but got 281474976710656\n"
+
+        "Utility::JsonTokenData: object or array can't be a key\n"
+        "Utility::JsonTokenData: object or array can't be a key\n"
+
+        "Utility::JsonTokenData: expected object, array or a string type but got Utility::JsonToken::Type::Bool\n",
+        TestSuite::Compare::String);
+    #endif
+}
+
+#ifndef CORRADE_NO_STD_IS_TRIVIALLY_TRAITS
 void JsonTest::tokenDataConstructCopy() {
     CORRADE_VERIFY(std::is_trivially_copyable<JsonTokenData>{});
 }
@@ -5134,6 +5291,1022 @@ void JsonTest::debugTokenParsedType() {
     Containers::String out;
     Debug{&out} << JsonToken::ParsedType::UnsignedInt << JsonToken::ParsedType(0xad);
     CORRADE_COMPARE(out, "Utility::JsonToken::ParsedType::UnsignedInt Utility::JsonToken::ParsedType(0xad)\n");
+}
+
+void JsonTest::fromTokenDataNull() {
+    Utility::Json json{{"so, hello?"}, {InPlaceInit, {
+        JsonTokenData{nullptr}
+    }}, {InPlaceInit, {
+        {4, 5}
+    }}, {}};
+    CORRADE_COMPARE(json.tokens().size(), 1);
+
+    JsonToken root = json.root();
+    CORRADE_COMPARE(root.type(), JsonToken::Type::Null);
+    CORRADE_VERIFY(root.isParsed());
+    CORRADE_COMPARE(root.parsedType(), JsonToken::ParsedType::Other);
+    CORRADE_COMPARE(root.data(), "hello");
+    CORRADE_COMPARE(root.asNull(), nullptr);
+}
+
+void JsonTest::fromTokenDataBool() {
+    /* Can only test one value at a time because otherwise it'd have to be
+       wrapped in an array which I want to test separately */
+
+    {
+        Json json{"well, yes!", {InPlaceInit, {
+            JsonTokenData{true}
+        }}, {InPlaceInit, {
+            {6, 3}
+        }}, {}};
+        CORRADE_COMPARE(json.tokens().size(), 1);
+
+        JsonToken root = json.root();
+        CORRADE_COMPARE(root.type(), JsonToken::Type::Bool);
+        CORRADE_VERIFY(root.isParsed());
+        CORRADE_COMPARE(root.parsedType(), JsonToken::ParsedType::Other);
+        CORRADE_COMPARE(root.data(), "yes");
+        CORRADE_VERIFY(root.asBool());
+    } {
+        Json json{"NEIN", {InPlaceInit, {
+            JsonTokenData{false}
+        }}, {InPlaceInit, {
+            {0, 4}
+        }}, {}};
+        CORRADE_COMPARE(json.tokens().size(), 1);
+
+        JsonToken root = json.root();
+        CORRADE_COMPARE(root.type(), JsonToken::Type::Bool);
+        CORRADE_VERIFY(root.isParsed());
+        CORRADE_COMPARE(root.parsedType(), JsonToken::ParsedType::Other);
+        CORRADE_COMPARE(root.data(), "NEIN");
+        CORRADE_VERIFY(!root.asBool());
+    }
+}
+
+void JsonTest::fromTokenDataDouble() {
+    /* The 64-bit constructors patch the associated JsonTokenOffsetSize, so I
+       have to create the arrays separately to ensure correct initialization
+       order */
+
+    Containers::Array<JsonTokenOffsetSize> offsetsSizes{InPlaceInit, {
+        {3, 7}
+    }};
+    Containers::Array<JsonTokenData> tokens{InPlaceInit, {
+        JsonTokenData{3.14159, offsetsSizes.front()}
+    }};
+
+    Json json{"pi=3.1415926", Utility::move(tokens), Utility::move(offsetsSizes), {}};
+    CORRADE_COMPARE(json.tokens().size(), 1);
+
+    JsonToken root = json.root();
+    CORRADE_COMPARE(root.type(), JsonToken::Type::Number);
+    CORRADE_VERIFY(root.isParsed());
+    CORRADE_COMPARE(root.parsedType(), JsonToken::ParsedType::Double);
+    CORRADE_COMPARE(root.data(), "3.14159");
+    CORRADE_COMPARE(root.asDouble(), 3.14159);
+}
+
+void JsonTest::fromTokenDataFloat() {
+    Json json{"e = 2.many", {InPlaceInit, {
+        JsonTokenData{2.73f}
+    }}, {InPlaceInit, {
+        {4, 2}
+    }}, {}};
+    CORRADE_COMPARE(json.tokens().size(), 1);
+
+    JsonToken root = json.root();
+    CORRADE_COMPARE(root.type(), JsonToken::Type::Number);
+    CORRADE_VERIFY(root.isParsed());
+    CORRADE_COMPARE(root.parsedType(), JsonToken::ParsedType::Float);
+    CORRADE_COMPARE(root.data(), "2.");
+    CORRADE_COMPARE(root.asFloat(), 2.73f);
+}
+
+void JsonTest::fromTokenDataUnsignedInt() {
+    Json json{"the answer is 42!", {InPlaceInit, {
+        JsonTokenData{42u}
+    }}, {InPlaceInit, {
+        {14, 3}
+    }}, {}};
+    CORRADE_COMPARE(json.tokens().size(), 1);
+
+    JsonToken root = json.root();
+    CORRADE_COMPARE(root.type(), JsonToken::Type::Number);
+    CORRADE_VERIFY(root.isParsed());
+    CORRADE_COMPARE(root.parsedType(), JsonToken::ParsedType::UnsignedInt);
+    CORRADE_COMPARE(root.data(), "42!");
+    CORRADE_COMPARE(root.asUnsignedInt(), 42);
+}
+
+void JsonTest::fromTokenDataInt() {
+    Json json{"-42, is not the answer", {InPlaceInit, {
+        JsonTokenData{-42}
+    }}, {InPlaceInit, {
+        {0, 4}
+    }}, {}};
+    CORRADE_COMPARE(json.tokens().size(), 1);
+
+    JsonToken root = json.root();
+    CORRADE_COMPARE(root.type(), JsonToken::Type::Number);
+    CORRADE_VERIFY(root.isParsed());
+    CORRADE_COMPARE(root.parsedType(), JsonToken::ParsedType::Int);
+    CORRADE_COMPARE(root.data(), "-42,");
+    CORRADE_COMPARE(root.asInt(), -42);
+}
+
+void JsonTest::fromTokenDataUnsignedLong() {
+    /* The 64-bit constructors patch the associated JsonTokenOffsetSize, so I
+       have to create the arrays separately to ensure correct initialization
+       order */
+
+    Containers::Array<JsonTokenOffsetSize> offsetsSizes{InPlaceInit, {
+        {4, 13}
+    }};
+    Containers::Array<JsonTokenData> tokens{InPlaceInit, {
+        JsonTokenData{5000000000ull, offsetsSizes.front()}
+    }};
+
+    Json json{"so, five billions?", Utility::move(tokens), Utility::move(offsetsSizes), {}};
+    CORRADE_COMPARE(json.tokens().size(), 1);
+
+    JsonToken root = json.root();
+    CORRADE_COMPARE(root.type(), JsonToken::Type::Number);
+    CORRADE_VERIFY(root.isParsed());
+    CORRADE_COMPARE(root.parsedType(), JsonToken::ParsedType::UnsignedLong);
+    CORRADE_COMPARE(root.data(), "five billions");
+    CORRADE_COMPARE(root.asUnsignedLong(), 5000000000ull);
+}
+
+void JsonTest::fromTokenDataLong() {
+    /* The 64-bit constructors patch the associated JsonTokenOffsetSize, so I
+       have to create the arrays separately to ensure correct initialization
+       order */
+
+    Containers::Array<JsonTokenOffsetSize> offsetsSizes{InPlaceInit, {
+        {6, 18}
+    }};
+    Containers::Array<JsonTokenData> tokens{InPlaceInit, {
+        JsonTokenData{-5000000000ll, offsetsSizes.front()}
+    }};
+
+    Json json{"well, five billions less.", Utility::move(tokens), Utility::move(offsetsSizes), {}};
+    CORRADE_COMPARE(json.tokens().size(), 1);
+
+    JsonToken root = json.root();
+    CORRADE_COMPARE(root.type(), JsonToken::Type::Number);
+    CORRADE_VERIFY(root.isParsed());
+    CORRADE_COMPARE(root.parsedType(), JsonToken::ParsedType::Long);
+    CORRADE_COMPARE(root.data(), "five billions less");
+    CORRADE_COMPARE(root.asLong(), -5000000000ll);
+}
+
+void JsonTest::fromTokenDataTheOtherUnsignedLongType() {
+    /* Like fromTokenDataUnsignedLong() or fromTokenDataUnsignedInt() but with
+       a `ul` literal instead of `u` / `ull` */
+
+    #if ULONG_MAX == ULLONG_MAX
+    Containers::Array<JsonTokenOffsetSize> offsetsSizes{InPlaceInit, {
+        {4, 7}
+    }};
+    Containers::Array<JsonTokenData> tokens{InPlaceInit, {
+        JsonTokenData{1000000ul, offsetsSizes.front()}
+    }};
+    Json json{"one million.", Utility::move(tokens), Utility::move(offsetsSizes), {}};
+    #else
+    Json json{"one million.", {InPlaceInit, {
+        JsonTokenData{1000000ul}
+    }}, {InPlaceInit, {
+        {4, 7}
+    }}, {}};
+    #endif
+    CORRADE_COMPARE(json.tokens().size(), 1);
+
+    JsonToken root = json.root();
+    CORRADE_COMPARE(root.type(), JsonToken::Type::Number);
+    CORRADE_VERIFY(root.isParsed());
+    CORRADE_COMPARE(root.data(), "million");
+    #if ULONG_MAX == ULLONG_MAX
+    CORRADE_COMPARE(root.parsedType(), JsonToken::ParsedType::UnsignedLong);
+    CORRADE_COMPARE(root.asUnsignedLong(), 1000000);
+    #else
+    CORRADE_COMPARE(root.parsedType(), JsonToken::ParsedType::UnsignedInt);
+    CORRADE_COMPARE(root.asUnsignedInt(), 1000000);
+    #endif
+}
+
+void JsonTest::fromTokenDataTheOtherLongType() {
+    /* Like fromTokenDataLong() or fromTokenDataInt() but with a `l` literal
+       instead of `` / `ll` */
+
+    #if LONG_MAX == LLONG_MAX
+    Containers::Array<JsonTokenOffsetSize> offsetsSizes{InPlaceInit, {
+        {4, 8}
+    }};
+    Containers::Array<JsonTokenData> tokens{InPlaceInit, {
+        JsonTokenData{-1000000l, offsetsSizes.front()}
+    }};
+    Json json{"one -million.", Utility::move(tokens), Utility::move(offsetsSizes), {}};
+    #else
+    Json json{"one -million.", {InPlaceInit, {
+        JsonTokenData{-1000000l}
+    }}, {InPlaceInit, {
+        {4, 8}
+    }}, {}};
+    #endif
+    CORRADE_COMPARE(json.tokens().size(), 1);
+
+    JsonToken root = json.root();
+    CORRADE_COMPARE(root.type(), JsonToken::Type::Number);
+    CORRADE_VERIFY(root.isParsed());
+    CORRADE_COMPARE(root.data(), "-million");
+    #if LONG_MAX == LLONG_MAX
+    CORRADE_COMPARE(root.parsedType(), JsonToken::ParsedType::Long);
+    CORRADE_COMPARE(root.asLong(), -1000000);
+    #else
+    CORRADE_COMPARE(root.parsedType(), JsonToken::ParsedType::Int);
+    CORRADE_COMPARE(root.asInt(), -1000000);
+    #endif
+}
+
+void JsonTest::fromTokenDataSize() {
+    /* Like fromTokenDataUnsignedLong() or fromTokenDataUnsignedInt() but using
+       std::size_t to verify it doesn't cause ambiguities */
+
+    #ifndef CORRADE_TARGET_32BIT
+    Containers::Array<JsonTokenOffsetSize> offsetsSizes{InPlaceInit, {
+        {4, 7}
+    }};
+    Containers::Array<JsonTokenData> tokens{InPlaceInit, {
+        JsonTokenData{std::size_t{1000000}, offsetsSizes.front()}
+    }};
+    Json json{"one million.", Utility::move(tokens), Utility::move(offsetsSizes), {}};
+    #else
+    Json json{"one million.", {InPlaceInit, {
+        JsonTokenData{std::size_t{1000000}}
+    }}, {InPlaceInit, {
+        {4, 7}
+    }}, {}};
+    #endif
+    CORRADE_COMPARE(json.tokens().size(), 1);
+
+    JsonToken root = json.root();
+    CORRADE_COMPARE(root.type(), JsonToken::Type::Number);
+    CORRADE_VERIFY(root.isParsed());
+    CORRADE_COMPARE(root.parsedType(), JsonToken::ParsedType::Size);
+    CORRADE_COMPARE(root.data(), "million");
+    CORRADE_COMPARE(root.asSize(), 1000000);
+}
+
+void JsonTest::fromTokenDataString() {
+    Json json{"she said \"no :(\"...", {InPlaceInit, {
+        JsonTokenData{JsonToken::Type::String, ~std::uint64_t{}}
+    }}, {InPlaceInit, {
+        {9, 7}
+    }}, {}};
+    CORRADE_COMPARE(json.tokens().size(), 1);
+
+    JsonToken root = json.root();
+    CORRADE_COMPARE(root.type(), JsonToken::Type::String);
+    CORRADE_VERIFY(root.isParsed());
+    CORRADE_COMPARE(root.parsedType(), JsonToken::ParsedType::Other);
+    CORRADE_COMPARE(root.data(), "\"no :(\"");
+    CORRADE_COMPARE(root.asString(), "no :(");
+}
+
+void JsonTest::fromTokenDataStringEscaped() {
+    Json json{"she said \"\\\"no\\\" :)\"...", {InPlaceInit, {
+        JsonTokenData{JsonToken::Type::String, 1}
+    }}, {InPlaceInit, {
+        {9, 11}
+    }}, {InPlaceInit, {
+        "YEAH", "\"no\" :)"
+    }}};
+    CORRADE_COMPARE(json.tokens().size(), 1);
+
+    JsonToken root = json.root();
+    CORRADE_COMPARE(root.type(), JsonToken::Type::String);
+    CORRADE_VERIFY(root.isParsed());
+    CORRADE_COMPARE(root.parsedType(), JsonToken::ParsedType::Other);
+    CORRADE_COMPARE(root.data(), "\"\\\"no\\\" :)\"");
+    CORRADE_COMPARE(root.asString(), "\"no\" :)");
+}
+
+void JsonTest::fromTokenDataArrayEmpty() {
+    Json json{"nothing", {InPlaceInit, {
+        JsonTokenData{JsonToken::Type::Array, 0}
+    }}, {InPlaceInit, {
+        {6, 0}
+    }}, {}};
+    CORRADE_COMPARE(json.tokens().size(), 1);
+
+    JsonToken root = json.root();
+    CORRADE_COMPARE(root.type(), JsonToken::Type::Array);
+    CORRADE_VERIFY(root.isParsed());
+    CORRADE_COMPARE(root.parsedType(), JsonToken::ParsedType::Other);
+    CORRADE_COMPARE(root.data(), "");
+    CORRADE_COMPARE(root.childCount(), 0);
+    CORRADE_VERIFY(root.asArray().begin() == root.asArray().end());
+}
+
+void JsonTest::fromTokenDataArray() {
+    Json json{"ar01234", {InPlaceInit, {
+        JsonTokenData{JsonToken::Type::Array, 4},
+        JsonTokenData{false},
+        JsonTokenData{3.65f},
+        JsonTokenData{nullptr},
+        JsonTokenData{13},
+    }}, {InPlaceInit, {
+        {0, 2},
+        {2, 1},
+        {3, 1},
+        {4, 1},
+        {5, 1},
+    }}, {}};
+    CORRADE_COMPARE(json.tokens().size(), 5);
+
+    JsonToken root = json.root();
+    CORRADE_COMPARE(root.type(), JsonToken::Type::Array);
+    CORRADE_VERIFY(root.isParsed());
+    CORRADE_COMPARE(root.parsedType(), JsonToken::ParsedType::Other);
+    CORRADE_COMPARE(root.data(), "ar");
+    CORRADE_COMPARE(root.childCount(), 4);
+
+    int i = 0;
+    for(JsonArrayItem child: root.asArray()) {
+        CORRADE_ITERATION(i);
+        CORRADE_COMPARE(child.index(), i);
+        char index[]{char('0' + i), '\0'};
+        CORRADE_COMPARE(child.value().data(), index);
+        CORRADE_COMPARE(JsonToken{child}.childCount(), 0);
+        ++i;
+    }
+    CORRADE_COMPARE(i, 4);
+}
+
+void JsonTest::fromTokenDataObjectEmpty() {
+    Json json{"nothing", {InPlaceInit, {
+        JsonTokenData{JsonToken::Type::Object, 0}
+    }}, {InPlaceInit, {
+        {6, 0}
+    }}, {}};
+    CORRADE_COMPARE(json.tokens().size(), 1);
+
+    JsonToken root = json.root();
+    CORRADE_COMPARE(root.type(), JsonToken::Type::Object);
+    CORRADE_VERIFY(root.isParsed());
+    CORRADE_COMPARE(root.parsedType(), JsonToken::ParsedType::Other);
+    CORRADE_COMPARE(root.data(), "");
+    CORRADE_COMPARE(root.childCount(), 0);
+    CORRADE_VERIFY(root.asObject().begin() == root.asObject().end());
+}
+
+void JsonTest::fromTokenDataObject() {
+    Json json{"{\"a\"25\"X\"0.31\"c\"!", {InPlaceInit, {
+        JsonTokenData{JsonToken::Type::Object, 6},
+        JsonTokenData{JsonToken::Type::String, ~std::uint64_t{}, true},
+        JsonTokenData{2255u},
+        /* An escaped key */
+        JsonTokenData{JsonToken::Type::String, 1, true},
+        JsonTokenData{0.31f},
+        JsonTokenData{JsonToken::Type::String, ~std::uint64_t{}, true},
+        /* A (data-less) escaped string value as well */
+        JsonTokenData{JsonToken::Type::String, 0}
+    }}, {InPlaceInit, {
+        {1, 15},
+        {1, 3},
+        {4, 2},
+        {6, 3},
+        {9, 4},
+        {13, 3},
+        {},
+    }}, {InPlaceInit, {
+        "hello",
+        "b",
+    }}};
+    CORRADE_COMPARE(json.tokens().size(), 7);
+
+    JsonToken root = json.root();
+    CORRADE_COMPARE(root.type(), JsonToken::Type::Object);
+    CORRADE_VERIFY(root.isParsed());
+    CORRADE_COMPARE(root.parsedType(), JsonToken::ParsedType::Other);
+    CORRADE_COMPARE(root.data(), "\"a\"25\"X\"0.31\"c\"");
+    CORRADE_COMPARE(root.childCount(), 6);
+
+    /* Key data should be wrapped in quotes, key values should be a, b, c
+       independently of whether it's a direct reference or escaped */
+    int i = 0;
+    for(JsonObjectItem child: root.asObject()) {
+        CORRADE_ITERATION(i);
+        CORRADE_COMPARE(JsonToken{child}.data().front(), '"');
+        CORRADE_COMPARE(JsonToken{child}.data().back(), '"');
+        char key[]{char('a' + i), '\0'};
+        CORRADE_COMPARE(child.key(), key);
+        CORRADE_COMPARE(JsonToken{child}.childCount(), 1);
+        ++i;
+    }
+    CORRADE_COMPARE(i, 3); /* There's six child tokens which is three keys */
+
+    /* Values */
+    JsonToken a = json.tokens()[2];
+    CORRADE_COMPARE(a.type(), JsonToken::Type::Number);
+    CORRADE_VERIFY(a.isParsed());
+    CORRADE_COMPARE(a.parsedType(), JsonToken::ParsedType::UnsignedInt);
+    CORRADE_COMPARE(a.data(), "25");
+    CORRADE_COMPARE(a.childCount(), 0);
+    CORRADE_COMPARE(a.asUnsignedInt(), 2255);
+
+    JsonToken b = json.tokens()[4];
+    CORRADE_COMPARE(b.type(), JsonToken::Type::Number);
+    CORRADE_VERIFY(b.isParsed());
+    CORRADE_COMPARE(b.parsedType(), JsonToken::ParsedType::Float);
+    CORRADE_COMPARE(b.data(), "0.31");
+    CORRADE_COMPARE(b.childCount(), 0);
+    CORRADE_COMPARE(b.asFloat(), 0.31f);
+
+    JsonToken c = json.tokens()[6];
+    CORRADE_COMPARE(c.type(), JsonToken::Type::String);
+    CORRADE_VERIFY(c.isParsed());
+    CORRADE_COMPARE(c.parsedType(), JsonToken::ParsedType::Other);
+    CORRADE_COMPARE(c.data(), "");
+    CORRADE_COMPARE(c.childCount(), 0);
+    CORRADE_COMPARE(c.asString(), "hello");
+}
+
+void JsonTest::fromTokenDataNested() {
+    /* Especially verifying nested empty arrays/objects and multiple
+       arrays/objects ending at the same token */
+
+    Json json{"01\"A\"a56b\"I\"i82", {InPlaceInit, {
+        /* Top-level array at level 0, items 0, 1, 2 */
+        JsonTokenData{JsonToken::Type::Array, 12},
+        /* Array nested at level 1, empty */
+        JsonTokenData{JsonToken::Type::Array, 0},                       /* 0 */
+        /* Object nested at level 2, items A, B */
+        JsonTokenData{JsonToken::Type::Object, 9},                      /* 1 */
+        JsonTokenData{JsonToken::Type::String, ~std::uint64_t{}, true}, /* A */
+        /* Array nested at level 3, items 5, 6 */
+        JsonTokenData{JsonToken::Type::Array, 2},                       /* a */
+        JsonTokenData{false},                                           /* 5 */
+        JsonTokenData{-33},                                             /* 6 */
+        /* Back to level 2 */
+        JsonTokenData{JsonToken::Type::String, 1, true},                /* B */
+        /* Object nested at level 3, item I */
+        JsonTokenData{JsonToken::Type::Object, 3},                      /* b */
+        JsonTokenData{JsonToken::Type::String, ~std::uint64_t{}, true}, /* I */
+        /* Array nested at level 4, item 8 */
+        JsonTokenData{JsonToken::Type::Array, 1},                       /* i */
+        /* Object nested at level 5, empty */
+        JsonTokenData{JsonToken::Type::Object, 0},                      /* 8 */
+        /* Back to level 4, 3, 2, 1 */
+        JsonTokenData{2.5f}                                             /* 2 */
+    }}, {InPlaceInit, {
+        {},
+        {0, 1},  /* 0 */
+        {1, 1},  /* 1 */
+        {2, 3},  /* "A" */
+        {5, 1},  /* a */
+        {6, 1},  /* 5 */
+        {7, 1},  /* 6 */
+        {},
+        {8, 1},  /* b */
+        {9, 3},  /* "I" */
+        {12, 1}, /* i */
+        {13, 1}, /* 8 */
+        {14, 1}, /* 2 */
+    }}, {InPlaceInit, {
+        "", /* unused */
+        "B"
+    }}};
+    CORRADE_COMPARE(json.tokens().size(), 13);
+
+    /* Verifying just by iterating over array items and object keys, checking
+       that the .data() are as expected */
+
+    /* Top-level array at level 0, items 0, 1, 2 */
+    int array0 = 0;
+    for(JsonToken i: json.root().asArray()) {
+        CORRADE_ITERATION(array0);
+        char data[]{char('0' + array0), '\0'};
+        CORRADE_COMPARE(i.data(), data);
+        ++array0;
+    }
+    CORRADE_COMPARE(array0, 3);
+
+    /* Array nested at level 1, empty */
+    CORRADE_VERIFY(json.root()[0].asArray().begin() ==
+                   json.root()[0].asArray().end());
+
+    /* Object nested at level 2, items A, B */
+    int objectA = 0;
+    for(JsonObjectItem i: json.root()[1].asObject()) {
+        CORRADE_ITERATION(objectA);
+        char key[]{char('A' + objectA), '\0'};
+        char data[]{char('a' + objectA), '\0'};
+        CORRADE_COMPARE(i.key(), key);
+        CORRADE_COMPARE(i.value().data(), data);
+        ++objectA;
+    }
+    CORRADE_COMPARE(objectA, 2);
+
+    /* Array nested at level 3, items 5, 6 */
+    int array5 = 0;
+    for(JsonToken i: json.root()[1]["A"].asArray()) {
+        CORRADE_ITERATION(array5);
+        char data[]{char('5' + array5), '\0'};
+        CORRADE_COMPARE(i.data(), data);
+        ++array5;
+    }
+    CORRADE_COMPARE(array5, 2);
+
+    /* Object nested at level 3, item I */
+    int objectB = 0;
+    for(JsonObjectItem i: json.root()[1]["B"].asObject()) {
+        CORRADE_ITERATION(objectB);
+        char key[]{char('I' + objectB), '\0'};
+        char data[]{char('i' + objectB), '\0'};
+        CORRADE_COMPARE(i.key(), key);
+        CORRADE_COMPARE(i.value().data(), data);
+        ++objectB;
+    }
+    CORRADE_COMPARE(objectB, 1);
+
+    /* Array nested at level 4, item 8 */
+    int array8 = 0;
+    for(JsonToken i: json.root()[1]["B"]["I"].asArray()) {
+        CORRADE_ITERATION(array8);
+        char data[]{char('8' + array8), '\0'};
+        CORRADE_COMPARE(i.data(), data);
+        ++array8;
+    }
+    CORRADE_COMPARE(array8, 1);
+
+    /* Object nested at level 5, empty */
+    CORRADE_VERIFY(json.root()[1]["B"]["I"][0].asObject().begin() ==
+                   json.root()[1]["B"]["I"][0].asObject().end());
+}
+
+void JsonTest::fromTokenDataNoTokens() {
+    CORRADE_SKIP_IF_NO_ASSERT();
+
+    Containers::String out;
+    Error redirectError{&out};
+    Utility::Json json{{}, {}, {}, {}};
+    CORRADE_COMPARE(out, "Utility::Json: expected at least one token\n");
+}
+
+void JsonTest::fromTokenDataInvalidTokenArraySizes() {
+    CORRADE_SKIP_IF_NO_ASSERT();
+
+    Containers::String out;
+    Error redirectError{&out};
+    Json{{}, {InPlaceInit, {
+        JsonTokenData{JsonToken::Type::Array, 4},
+        JsonTokenData{nullptr},
+        JsonTokenData{nullptr},
+        JsonTokenData{nullptr},
+        JsonTokenData{nullptr},
+    }}, {InPlaceInit, {
+        {}, {}, {}, {}
+    }}, {}};
+    CORRADE_COMPARE(out, "Utility::Json: expected token and offset/size arrays to have the same size but got 5 and 4\n");
+}
+
+void JsonTest::fromTokenDataTokenOffsetSizeOutOfBounds() {
+    CORRADE_SKIP_IF_NO_ASSERT();
+
+    Containers::Array<JsonTokenOffsetSize> offsetsSizes{InPlaceInit, {
+        {2, 4}, /* this is fine */
+        {},
+        {3, 4}  /* this not */
+    }};
+    Containers::Array<JsonTokenData> tokens{InPlaceInit, {
+        JsonTokenData{JsonToken::Type::Array, 2},
+        JsonTokenData{nullptr},
+        JsonTokenData{35ull, offsetsSizes.back()},
+    }};
+
+    Containers::String out;
+    Error redirectError{&out};
+    /* Small types */
+    Json{"0123456", {InPlaceInit, {
+        JsonTokenData{JsonToken::Type::Array, 2},
+        JsonTokenData{nullptr},
+        JsonTokenData{nullptr},
+    }}, {InPlaceInit, {
+        {2, 5}, /* this is fine */
+        {},
+        {3, 5}  /* this not */
+    }}, {}};
+    /* Large types that contain type encoded in the offset/size */
+    Json{"012345", Utility::move(tokens), Utility::move(offsetsSizes), {}};
+    CORRADE_COMPARE_AS(out,
+        "Utility::Json: token 2 offset 3 and size 5 out of range for input of size 7\n"
+        "Utility::Json: token 2 offset 3 and size 4 out of range for input of size 6\n",
+        TestSuite::Compare::String);
+}
+
+void JsonTest::fromTokenDataStringTokenDataSizeTooSmall() {
+    CORRADE_SKIP_IF_NO_ASSERT();
+
+    Containers::String out;
+    Error redirectError{&out};
+    Json{"abcdef", {InPlaceInit, {
+        JsonTokenData{JsonToken::Type::Array, 3},
+        JsonTokenData{nullptr},
+        JsonTokenData{JsonToken::Type::String, ~std::uint64_t{}},
+        JsonTokenData{nullptr},
+    }}, {InPlaceInit, {
+        {}, {}, {3, 1}, {}
+    }}, {}};
+    CORRADE_COMPARE(out, "Utility::Json: string token 2 should be at least two bytes but got 1\n");
+}
+
+void JsonTest::fromTokenDataEscapedStringOutOfBounds() {
+    CORRADE_SKIP_IF_NO_ASSERT();
+
+    Containers::String out;
+    Error redirectError{&out};
+    /* Escaped value */
+    Json{{}, {InPlaceInit, {
+        JsonTokenData{JsonToken::Type::Array, 2},
+        JsonTokenData{JsonToken::Type::String, 4},
+        JsonTokenData{nullptr},
+    }}, {InPlaceInit, {
+        {}, {}, {}
+    }}, {InPlaceInit, {
+        "yes",
+        "hello?",
+        "it's",
+        "me"
+    }}};
+    /* Escaped key */
+    Json{{}, {InPlaceInit, {
+        JsonTokenData{JsonToken::Type::Object, 2},
+        JsonTokenData{JsonToken::Type::String, 2, true},
+        JsonTokenData{nullptr},
+    }}, {InPlaceInit, {
+        {}, {}, {}
+    }}, {InPlaceInit, {
+        "",
+        "NEIN"
+    }}};
+    CORRADE_COMPARE_AS(out,
+        "Utility::Json: escaped string token 1 index 4 out of range for 4 escaped strings\n"
+        "Utility::Json: escaped string token 1 index 2 out of range for 2 escaped strings\n",
+        TestSuite::Compare::String);
+}
+
+void JsonTest::fromTokenDataObjectKeyWithNoValue() {
+    CORRADE_SKIP_IF_NO_ASSERT();
+
+    Containers::String out;
+    Error redirectError{&out};
+    Json{{}, {InPlaceInit, {
+        JsonTokenData{JsonToken::Type::Array, 7},
+        /* Child count accidentally 5 instead of 6, causing the last key to not
+           have any value, which is instead treated as an array item */
+        JsonTokenData{JsonToken::Type::Object, 5},
+        JsonTokenData{JsonToken::Type::String, 0, true},
+        /* Verifying that the check correctly handles key child count > 1 */
+        JsonTokenData{JsonToken::Type::Array, 2},
+        JsonTokenData{35},
+        JsonTokenData{false},
+        JsonTokenData{JsonToken::Type::String, 1, true}, /* Has no value */
+        JsonTokenData{17},
+    }}, {InPlaceInit, {
+        {}, {}, {}, {},
+        {}, {}, {}, {},
+    }}, {InPlaceInit, {
+        "a",
+        "b"
+    }}};
+    CORRADE_COMPARE(out, "Utility::Json: string key token 6 has no value\n");
+}
+
+void JsonTest::fromTokenDataObjectKeyNotString() {
+    CORRADE_SKIP_IF_NO_ASSERT();
+
+    Containers::String out;
+    Error redirectError{&out};
+    Json{{}, {InPlaceInit, {
+        JsonTokenData{JsonToken::Type::Array, 8},
+        /* Child count accidentally 7 instead of 6, causing the 3.5f token to
+           be interpreted as a key instead of an array item */
+        JsonTokenData{JsonToken::Type::Object, 7},
+        JsonTokenData{JsonToken::Type::String, 0, true},
+        /* Verifying that the check correctly handles key child count > 1 */
+        JsonTokenData{JsonToken::Type::Array, 2},
+        JsonTokenData{35},
+        JsonTokenData{false},
+        JsonTokenData{JsonToken::Type::String, 1, true},
+        JsonTokenData{17},
+        JsonTokenData{3.5f}, /* This one is expected to be a key */
+    }}, {InPlaceInit, {
+        {}, {}, {}, {},
+        {}, {}, {}, {},
+        {},
+    }}, {InPlaceInit, {
+        "a",
+        "b"
+    }}};
+    CORRADE_COMPARE(out, "Utility::Json: token 8 expected to be a string key but is Utility::JsonToken::Type::Number\n");
+}
+
+void JsonTest::fromTokenDataObjectStringNotKey() {
+    CORRADE_SKIP_IF_NO_ASSERT();
+
+    Containers::String out;
+    Error redirectError{&out};
+    Json{{}, {InPlaceInit, {
+        JsonTokenData{JsonToken::Type::Array, 7},
+        JsonTokenData{JsonToken::Type::Object, 6},
+        JsonTokenData{JsonToken::Type::String, 0, true},
+        /* Verifying that the check correctly handles key child count > 1 */
+        JsonTokenData{JsonToken::Type::Array, 2},
+        JsonTokenData{35},
+        JsonTokenData{false},
+        JsonTokenData{JsonToken::Type::String, 1}, /* Not marked as a key */
+        JsonTokenData{17},
+    }}, {InPlaceInit, {
+        {}, {}, {}, {},
+        {}, {}, {}, {},
+    }}, {InPlaceInit, {
+        "a",
+        "b"
+    }}};
+    CORRADE_COMPARE(out, "Utility::Json: string token 6 is not marked as a key\n");
+}
+
+void JsonTest::fromTokenDataStringValueKey() {
+    CORRADE_SKIP_IF_NO_ASSERT();
+
+    Containers::String out;
+    Error redirectError{&out};
+    /* Escaped */
+    Json{{}, {InPlaceInit, {
+        JsonTokenData{JsonToken::Type::Array, 4},
+        JsonTokenData{35},
+        JsonTokenData{JsonToken::Type::String, 1},
+        JsonTokenData{JsonToken::Type::String, 0, true}, /* Wrongly marked */
+        JsonTokenData{false},
+    }}, {InPlaceInit, {
+        {}, {}, {}, {},
+        {},
+    }}, {InPlaceInit, {
+        "a",
+        "b"
+    }}};
+    /* Non-escaped */
+    Json{"\"b\"", {InPlaceInit, {
+        JsonTokenData{JsonToken::Type::Object, 2},
+        JsonTokenData{JsonToken::Type::String, 0, true}, /* This is okay */
+        JsonTokenData{JsonToken::Type::String, ~std::uint64_t{}, true}
+    }}, {InPlaceInit, {
+        {}, {}, {0, 3},
+    }}, {InPlaceInit, {
+        "a"
+    }}};
+    CORRADE_COMPARE_AS(out,
+        "Utility::Json: string token 3 is not expected to be a key\n"
+        "Utility::Json: string token 2 is not expected to be a key\n",
+        TestSuite::Compare::String);
+}
+
+void JsonTest::fromTokenDataInvalidObjectChildCount() {
+    CORRADE_SKIP_IF_NO_ASSERT();
+
+    Containers::String out;
+    Error redirectError{&out};
+    Json{{}, {InPlaceInit, {
+        /* Child count larger than the remaining token count (and thus also
+           total count). Child count larger than the remaining count but not
+           total can only happen for a nested object/array, and in that case
+           it'd be also larger than the parent object/array child count. That
+           is tested in fromTokenDataInvalidNestedObjectChildCount() below. */
+        JsonTokenData{JsonToken::Type::Object, 5},
+        JsonTokenData{JsonToken::Type::String, 0, true},
+        JsonTokenData{false},
+        JsonTokenData{JsonToken::Type::String, 1, true},
+        JsonTokenData{35},
+    }}, {InPlaceInit, {
+        {}, {}, {}, {},
+        {},
+    }}, {InPlaceInit, {
+        "a",
+        "b"
+    }}};
+    CORRADE_COMPARE(out, "Utility::Json: token 0 has 5 children but expected at most 4\n");
+}
+
+void JsonTest::fromTokenDataInvalidArrayChildCount() {
+    CORRADE_SKIP_IF_NO_ASSERT();
+
+    Containers::String out;
+    Error redirectError{&out};
+    Json{{}, {InPlaceInit, {
+        /* Child count larger than the remaining token count (and thus also
+           total count). Child count larger than the remaining count but not
+           total can only happen for a nested object/array, and in that case
+           it'd be also larger than the parent object/array child count. That
+           is tested in fromTokenDataInvalidNestedArrayChildCount() below. */
+        JsonTokenData{JsonToken::Type::Array, 4},
+        JsonTokenData{false},
+        JsonTokenData{JsonToken::Type::String, 0},
+        JsonTokenData{-33},
+    }}, {InPlaceInit, {
+        {}, {}, {}, {},
+    }}, {InPlaceInit, {
+        "a"
+    }}};
+    CORRADE_COMPARE(out, "Utility::Json: token 0 has 4 children but expected at most 3\n");
+}
+
+void JsonTest::fromTokenDataInvalidNestedObjectChildCount() {
+    CORRADE_SKIP_IF_NO_ASSERT();
+
+    Containers::String out;
+    Error redirectError{&out};
+    Json{{}, {InPlaceInit, {
+        JsonTokenData{JsonToken::Type::Array, 10},
+        JsonTokenData{true},
+        JsonTokenData{false},
+        /* If this would be 6 instead of 5, it would be okay */
+        JsonTokenData{JsonToken::Type::Array, 5},
+        JsonTokenData{35},
+        JsonTokenData{JsonToken::Type::Object, 4},
+        JsonTokenData{JsonToken::Type::String, 0, true},
+        JsonTokenData{-3.5f},
+        JsonTokenData{JsonToken::Type::String, 1, true},
+        JsonTokenData{nullptr},
+        JsonTokenData{17},
+    }}, {InPlaceInit, {
+        {}, {}, {}, {},
+        {}, {}, {}, {},
+        {}, {}, {},
+    }}, {InPlaceInit, {
+        "a",
+        "b"
+    }}};
+    CORRADE_COMPARE(out, "Utility::Json: token 5 has 4 children but expected at most 3\n");
+}
+
+void JsonTest::fromTokenDataInvalidNestedArrayChildCount() {
+    CORRADE_SKIP_IF_NO_ASSERT();
+
+    Containers::String out;
+    Error redirectError{&out};
+    Json{{}, {InPlaceInit, {
+        JsonTokenData{JsonToken::Type::Array, 9},
+        JsonTokenData{true},
+        JsonTokenData{JsonToken::Type::Object, 6},
+        JsonTokenData{JsonToken::Type::String, 0, true},
+        JsonTokenData{35},
+        JsonTokenData{JsonToken::Type::String, 1, true},
+        /* If this would be 2 instead of 3, it would be okay. Making the
+           enclosing object 7-item wouldn't because then there would be no
+           key for the extra item. */
+        JsonTokenData{JsonToken::Type::Array, 3},
+        JsonTokenData{-3.5f},
+        JsonTokenData{nullptr},
+        JsonTokenData{17},
+    }}, {InPlaceInit, {
+        {}, {}, {}, {},
+        {}, {}, {}, {},
+        {}, {},
+    }}, {InPlaceInit, {
+        "a",
+        "b"
+    }}};
+    CORRADE_COMPARE(out, "Utility::Json: token 6 has 3 children but expected at most 2\n");
+}
+
+void JsonTest::fromTokenDataExtraRootTokens() {
+    CORRADE_SKIP_IF_NO_ASSERT();
+
+    Containers::String out;
+    Error redirectError{&out};
+    /* Two values one after each other */
+    Json{{}, {InPlaceInit, {
+        JsonTokenData{35.6f},
+        JsonTokenData{true},
+    }}, {InPlaceInit, {
+        {}, {}
+    }}, {}};
+    /* Value after a non-empty array */
+    Json{{}, {InPlaceInit, {
+        JsonTokenData{JsonToken::Type::Array, 2},
+        JsonTokenData{true},
+        JsonTokenData{false},
+        JsonTokenData{nullptr},
+    }}, {InPlaceInit, {
+        {}, {}, {}, {}
+    }}, {}};
+    /* Non-empty array after a value. The array makes the stack non-empty so
+       the check has to be done before the stack is added to. */
+    Json{{}, {InPlaceInit, {
+        JsonTokenData{nullptr},
+        JsonTokenData{JsonToken::Type::Array, 2},
+        JsonTokenData{true},
+        JsonTokenData{false},
+    }}, {InPlaceInit, {
+        {}, {}, {}, {}
+    }}, {}};
+    /* Empty array / object one after each other */
+    Json{{}, {InPlaceInit, {
+        JsonTokenData{JsonToken::Type::Array, 0},
+        JsonTokenData{JsonToken::Type::Object, 0},
+    }}, {InPlaceInit, {
+        {}, {}
+    }}, {}};
+    CORRADE_COMPARE_AS(out,
+        "Utility::Json: extraneous root token 1\n"
+        "Utility::Json: extraneous root token 3\n"
+        "Utility::Json: extraneous root token 1\n"
+        "Utility::Json: extraneous root token 1\n",
+        TestSuite::Compare::String);
+}
+
+void JsonTest::fromTokenDataParseEmpty() {
+    /* All tokens are empty but numeric ones are pointing to a random place in
+       the input to test the location appears correctly in the error */
+    Containers::Array<JsonTokenOffsetSize> offsetsSizes{InPlaceInit, {
+        {}, {}, {}, {},
+        {7, 0}, {5, 0}, {8, 0}, {3, 0},
+        {}, {}, {},
+    }};
+    Containers::Array<JsonTokenData> tokens{InPlaceInit, {
+        JsonTokenData{JsonToken::Type::Array, 10},  /* 0 */
+        JsonTokenData{JsonToken::Type::Object, 0},  /* 1 */
+        JsonTokenData{nullptr},                     /* 2 */
+        JsonTokenData{true},                        /* 3 */
+        JsonTokenData{35.0, offsetsSizes[4]},       /* 4 */
+        JsonTokenData{35.0f},                       /* 5 */
+        JsonTokenData{35u},                         /* 6 */
+        JsonTokenData{-35},                         /* 7 */
+        JsonTokenData{35ull, offsetsSizes[8]},      /* 8 */
+        JsonTokenData{-35ll, offsetsSizes[9]},      /* 9 */
+        JsonTokenData{JsonToken::Type::String, 0},  /* 10 */
+    }};
+
+    Json json{"0\n\n\n4567\n8",
+        Utility::move(tokens),
+        Utility::move(offsetsSizes),
+        {InPlaceInit, {"hello"}}};
+
+    /* These are all parsed and cannot be reparsed as a different type, so
+       they are no-op and won't fail even though empty */
+    CORRADE_VERIFY(json.parseArray(json.tokens()[0]));
+    CORRADE_VERIFY(json.parseObject(json.tokens()[1]));
+    CORRADE_VERIFY(json.parseNull(json.tokens()[2]));
+    CORRADE_VERIFY(json.parseBool(json.tokens()[3]));
+    CORRADE_VERIFY(json.parseString(json.tokens()[10]));
+
+    /* Parsing as the same type should be no-op as well */
+    CORRADE_VERIFY(json.parseDouble(json.tokens()[4]));
+    CORRADE_VERIFY(json.parseFloat(json.tokens()[5]));
+    CORRADE_VERIFY(json.parseUnsignedInt(json.tokens()[6]));
+    CORRADE_VERIFY(json.parseInt(json.tokens()[7]));
+    CORRADE_VERIFY(json.parseUnsignedLong(json.tokens()[8]));
+    CORRADE_VERIFY(json.parseLong(json.tokens()[9]));
+
+    /* These should fail predictably. Definitely not succeed, as that would
+       mean the original data get lost because there's nothing to parse the
+       data from now. */
+    {
+        Containers::String out;
+        Error redirectError{&out};
+        CORRADE_VERIFY(!json.parseFloat(json.tokens()[4])); /* was Double */
+        CORRADE_VERIFY(!json.parseDouble(json.tokens()[5])); /* was Float */
+        CORRADE_VERIFY(!json.parseInt(json.tokens()[6])); /* was UnsignedInt */
+        CORRADE_VERIFY(!json.parseUnsignedInt(json.tokens()[7])); /* was Int */
+        CORRADE_VERIFY(!json.parseLong(json.tokens()[8])); /* was UnsignedLong */
+        CORRADE_VERIFY(!json.parseUnsignedLong(json.tokens()[9])); /* was Long */
+        CORRADE_COMPARE_AS(out,
+            "Utility::Json::parseFloat(): invalid floating-point literal  at <in>:4:4\n"
+            "Utility::Json::parseDouble(): invalid floating-point literal  at <in>:4:2\n"
+            "Utility::Json::parseInt(): invalid integer literal  at <in>:4:5\n"
+            "Utility::Json::parseUnsignedInt(): invalid unsigned integer literal  at <in>:3:1\n"
+            "Utility::Json::parseLong(): invalid integer literal  at <in>:1:1\n"
+            "Utility::Json::parseUnsignedLong(): invalid unsigned integer literal  at <in>:1:1\n",
+            TestSuite::Compare::String);
+    }
+
+    /* They also shouldn't get broken by that, i.e. should stay in the original
+       type and with the value unchanged */
+    CORRADE_COMPARE(json.tokens()[4].parsedType(), JsonToken::ParsedType::Double);
+    CORRADE_COMPARE(json.tokens()[5].parsedType(), JsonToken::ParsedType::Float);
+    CORRADE_COMPARE(json.tokens()[6].parsedType(), JsonToken::ParsedType::UnsignedInt);
+    CORRADE_COMPARE(json.tokens()[7].parsedType(), JsonToken::ParsedType::Int);
+    CORRADE_COMPARE(json.tokens()[8].parsedType(), JsonToken::ParsedType::UnsignedLong);
+    CORRADE_COMPARE(json.tokens()[9].parsedType(), JsonToken::ParsedType::Long);
+
+    CORRADE_COMPARE(json.tokens()[4].asDouble(), 35.0);
+    CORRADE_COMPARE(json.tokens()[5].asFloat(), 35.0f);
+    CORRADE_COMPARE(json.tokens()[6].asUnsignedInt(), 35);
+    CORRADE_COMPARE(json.tokens()[7].asInt(), -35);
+    CORRADE_COMPARE(json.tokens()[8].asUnsignedLong(), 35);
+    CORRADE_COMPARE(json.tokens()[9].asLong(), -35);
 }
 
 }}}}

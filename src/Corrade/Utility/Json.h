@@ -458,6 +458,36 @@ class CORRADE_UTILITY_EXPORT Json {
         static Containers::Optional<Json> fromFile(Containers::StringView filename, Options options);
         #endif
 
+        /**
+         * @brief Construct from existing token data
+         * @param string    Input text representation the @p tokenOffsetsSizes
+         *      point to
+         * @param tokens    Token data
+         * @param tokenOffsetsSizes  Token offsets and sizes
+         * @param strings   Parsed escaped strings the @p tokens point to.
+         *
+         * Meant to be used to make externally parsed data available through a
+         * JSON-compatible interface. Expects that @p tokens and
+         * @p tokenOffsetsSizes are non-empty, have the same size and there's
+         * at most one root token. Root object and array token child counts are
+         * expected to not be larger than the remaining count of tokens in the
+         * @p tokens array, child counts of nested object and array tokens are
+         * expected to not go outside of the parent object or array token
+         * count. Immediate object token children are expected to be strings
+         * marked as keys, with each having at least one child token.
+         * Non-escaped string tokens are expected to have the token at least
+         * two bytes large for the initial and final quote character, indices
+         * of escaped string tokens are expected to be less than the @p strings
+         * array size. Strings that are not object keys are expected to not be
+         * marked as such.
+         *
+         * @attention As this functionality is closely tied to the internal
+         *      data representation, it may change whenever the internal
+         *      representation changes with little possibility to keep
+         *      backwards compatibility.
+         */
+        explicit Json(Containers::String&& string, Containers::Array<JsonTokenData>&& tokens, Containers::Array<JsonTokenOffsetSize>&& tokenOffsetsSizes, Containers::Array<Containers::String>&& strings);
+
         /** @brief Copying is not allowed */
         Json(const Json&) = delete;
 
@@ -1920,9 +1950,127 @@ referenced from @ref JsonToken instances and accessible through
 @ref JsonToken::JsonToken(const Json&, const JsonTokenData&) to access the data
 it references.
 
+Together with @ref JsonTokenOffsetSize can be also used to create a @ref Json
+instance directly from individual tokens, such as when it's desirable to make
+externally parsed data available through a JSON-compatible interface.
+
 @experimental
 */
 class CORRADE_UTILITY_EXPORT JsonTokenData {
+    public:
+        /**
+         * @brief Construct a parsed object, array or string token
+         * @param type  Token type. Expected to be @ref JsonToken::Type::Object,
+         *      @ref JsonToken::Type::Array or @ref JsonToken::Type::String.
+         * @param childCountOrStringIndex Child token count for an object or
+         *      array or escaped string index for a string. Set to
+         *      @cpp ~std::uint64_t{} @ce for a non-escaped string that's
+         *      referenced directly from the input data.
+         * @param stringIsKey Set to @cpp true @ce if it's a string token
+         *      that's an object key. Expected to be @cpp false @ce otherwise.
+         */
+        explicit JsonTokenData(JsonToken::Type type, std::uint64_t childCountOrStringIndex, bool stringIsKey = false);
+
+        /**
+         * @brief Construct a parsed null token
+         *
+         * Results in a @ref JsonToken::Type::Null token.
+         */
+        explicit JsonTokenData(std::nullptr_t);
+
+        /**
+         * @brief Construct a parsed bool token
+         *
+         * Results in a @ref JsonToken::Type::Bool token.
+         */
+        explicit JsonTokenData(bool value);
+
+        /**
+         * @brief Construct a parsed 64-bit floating-point token
+         * @param value         The numeric value
+         * @param offsetSize    Matching token offset and size instance where
+         *      to store the token type.
+         *
+         * Results in a @ref JsonToken::Type::Number token with
+         * @ref JsonToken::ParsedType::Double. The value is expected to not be
+         * a NaN or an infinity, as the internal representation relies on JSON
+         * format restrictions for efficient data packing.
+         */
+        explicit JsonTokenData(double value, JsonTokenOffsetSize& offsetSize);
+
+        /**
+         * @brief Construct a parsed 32-bit floating-point token
+         *
+         * Results in a @ref JsonToken::Type::Number token with
+         * @ref JsonToken::ParsedType::Float. The value is expected to not be a
+         * NaN or an infinity, as the internal representation relies on JSON
+         * format restrictions for efficient data packing.
+         */
+        explicit JsonTokenData(float value);
+
+        /**
+         * @brief Construct a parsed unsigned 32-bit integer token
+         *
+         * Results in a @ref JsonToken::Type::Number token with
+         * @ref JsonToken::ParsedType::UnsignedInt.
+         */
+        explicit JsonTokenData(std::uint32_t value);
+
+        /**
+         * @brief Construct a parsed signed 32-bit integer token
+         *
+         * Results in a @ref JsonToken::Type::Number token with
+         * @ref JsonToken::ParsedType::Int.
+         */
+        explicit JsonTokenData(std::int32_t value);
+
+        #ifdef DOXYGEN_GENERATING_OUTPUT
+        /**
+         * @brief Construct a parsed unsigned 52-bit integer token
+         * @param value         The numeric value
+         * @param offsetSize    Matching token offset and size instance where
+         *      to store the token type.
+         *
+         * Results in a @ref JsonToken::Type::Number token with
+         * @ref JsonToken::ParsedType::UnsignedLong. The value is expected to
+         * fit into 52 bits, as the internal representation relies on JSON
+         * format restrictions for efficient data packing.
+         */
+        explicit JsonTokenData(std::uint64_t value, JsonTokenOffsetSize& offsetSize);
+        #else
+        explicit JsonTokenData(unsigned long long value, JsonTokenOffsetSize& offsetSize);
+        /* Hey, C and C++, your types *and* your typedefs are stupid! Similar
+           shit has to be done in JsonWriter::write() as well. */
+        template<class U = unsigned long, class = typename std::enable_if<sizeof(U) == 4>::type> explicit JsonTokenData(unsigned long value):
+            JsonTokenData{static_cast<unsigned int>(value)} {}
+        template<class U = unsigned long, class = typename std::enable_if<sizeof(U) == 8>::type> explicit JsonTokenData(unsigned long value, JsonTokenOffsetSize& offsetSize):
+            JsonTokenData{static_cast<unsigned long long>(value), offsetSize} {}
+        #endif
+
+        #ifdef DOXYGEN_GENERATING_OUTPUT
+        /**
+         * @brief Construct a parsed signed 52-bit integer token
+         * @param value         The numeric value
+         * @param offsetSize    Matching token offset and size instance where
+         *      to store the token type.
+         *
+         * Results in a @ref JsonToken::Type::Number token with
+         * @ref JsonToken::ParsedType::Long. The value
+         * is expected to fit into 52 bits, excluding the sign, as the internal
+         * representation relies on JSON format restrictions for efficient data
+         * packing.
+         */
+        explicit JsonTokenData(std::int64_t value, JsonTokenOffsetSize& offsetSize);
+        #else
+        explicit JsonTokenData(long long value, JsonTokenOffsetSize& offsetSize);
+        /* Hey, C and C++, your types *and* your typedefs are stupid! Similar
+           shit has to be done in JsonWriter::write() as well. */
+        template<class U = long, class = typename std::enable_if<sizeof(U) == 4>::type> explicit JsonTokenData(long value):
+            JsonTokenData{static_cast<int>(value)} {}
+        template<class U = long, class = typename std::enable_if<sizeof(U) == 8>::type> explicit JsonTokenData(long value, JsonTokenOffsetSize& offsetSize):
+            JsonTokenData{static_cast<long long>(value), offsetSize} {}
+        #endif
+
     private:
         friend Json;
         friend JsonToken;
@@ -1956,22 +2104,43 @@ class CORRADE_UTILITY_EXPORT JsonTokenData {
         };
 };
 
-#ifndef DOXYGEN_GENERATING_OUTPUT
-/* Will become a public API eventually, so just hiding it from Doxygen for now
-   to avoid having to rename half the code later. Not using a Pair to make it
-   clear that upper two bits of size are used for TypeTokenSize* values */
+/**
+@brief JSON token offset and size
+@m_since_latest
+
+Together with @ref JsonTokenData used as an input when creating a @ref Json
+instance directly from individual tokens, such as when it's desirable to make
+externally parsed data available through a JSON-compatible interface.
+
+@experimental
+*/
 class JsonTokenOffsetSize {
     public:
+        /**
+         * @brief Constructor
+         * @param offset        Token offset from the start of the string
+         * @param size          Token size
+         */
         /*implicit*/ JsonTokenOffsetSize(std::size_t offset, std::size_t size): _offset{offset}, _sizeType{size} {}
+
+        /**
+         * @brief Construct an empty token
+         *
+         * An empty token only contains the parsed value and cannot be reparsed
+         * to a different numeric type, for example. Meant to be used in cases
+         * where the token data represent something other than a JSON, such as
+         * CBOR or various other JSON-compatible binary representations.
+         */
+        /*implicit*/ JsonTokenOffsetSize(): _offset{}, _sizeType{} {}
 
     private:
         friend Json;
         friend JsonToken;
+        friend JsonTokenData;
 
         std::size_t _offset;
         std::size_t _sizeType;
 };
-#endif
 
 /**
 @brief JSON object item

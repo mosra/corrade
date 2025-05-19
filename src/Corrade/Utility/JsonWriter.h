@@ -568,7 +568,8 @@ class CORRADE_UTILITY_EXPORT JsonWriter {
         #else
         JsonWriter& write(unsigned long long value);
         JsonWriter& write(unsigned long value) {
-            /* Hey, C and C++, your types *and* your typedefs are stupid! */
+            /* Hey, C and C++, your types *and* your typedefs are stupid!
+               Similar shit has to be done in JsonTokenData as well. */
             return write(static_cast<typename std::conditional<sizeof(unsigned long) == 8, unsigned long long, unsigned int>::type>(value));
         }
         #endif
@@ -590,7 +591,8 @@ class CORRADE_UTILITY_EXPORT JsonWriter {
         #else
         JsonWriter& write(long long value);
         JsonWriter& write(long value) {
-            /* Hey, C and C++, your types *and* your typedefs are stupid! */
+            /* Hey, C and C++, your types *and* your typedefs are stupid!
+               Similar shit has to be done in JsonTokenData as well. */
             return write(static_cast<typename std::conditional<sizeof(long) == 8, long long, int>::type>(value));
         }
         #endif
