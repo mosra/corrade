@@ -28,7 +28,8 @@
 #   CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #
 
-cmake_minimum_required(VERSION 3.5)
+# Matches Corrade requirement, see root CMakeLists for more information.
+cmake_minimum_required(VERSION 3.5...3.10)
 
 project(CorradeExamples CXX)
 
