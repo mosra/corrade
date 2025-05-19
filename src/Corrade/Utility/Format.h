@@ -78,7 +78,7 @@ In order to write a literal curly brace to the output, simply double it:
 
 | Type                                  | Default behavior
 | ------------------------------------- | ------------------------------------
-| @cpp char @ce, @cpp unsigned char @ce | Written as a base-10 integer (*not as a character*)
+| @cpp char @ce, @cpp signed char @ce, @cpp unsigned char @ce | Written as a base-10 integer (*not as a character*)
 | @cpp short @ce, @cpp unsigned short @ce | Written as a base-10 integer
 | @cpp int @ce, @cpp unsigned int @ce   | Written as a base-10 integer
 | @cpp long @ce, @cpp unsigned long @ce | Written as a base-10 integer
@@ -242,15 +242,24 @@ template<> struct Formatter<int> {
     static CORRADE_UTILITY_EXPORT std::size_t format(const Containers::MutableStringView& buffer, int value, int precision, FormatType type);
     static CORRADE_UTILITY_EXPORT void format(std::FILE* file, int value, int precision, FormatType type);
 };
-template<> struct Formatter<char>: Formatter<int> {};
 template<> struct Formatter<short>: Formatter<int> {};
 
 template<> struct Formatter<unsigned int> {
     static CORRADE_UTILITY_EXPORT std::size_t format(const Containers::MutableStringView& buffer, unsigned int value, int precision, FormatType type);
     static CORRADE_UTILITY_EXPORT void format(std::FILE* file, unsigned int value, int precision, FormatType type);
 };
-template<> struct Formatter<unsigned char>: Formatter<unsigned int> {};
 template<> struct Formatter<unsigned short>: Formatter<unsigned int> {};
+
+/* The char is signed or unsigned depending on platform (ARM has it unsigned by
+   default for example, because it maps better to the instruction set), and
+   thus std::int8_t is usually a typedef to `signed char`. Be sure to support
+   that as well, `signed short` and such OTOH isn't so important. Also, while I
+   could delegate `char` to `std::conditional<std::is_signed<char>::value, int,
+   unsigned int>::type`, it doesn't matter because the two variants currently
+   don't behave any different and `int` will cover the whole range easily. */
+template<> struct Formatter<char>: Formatter<int> {};
+template<> struct Formatter<signed char>: Formatter<int> {};
+template<> struct Formatter<unsigned char>: Formatter<unsigned int> {};
 
 template<> struct Formatter<long long> {
     static CORRADE_UTILITY_EXPORT std::size_t format(const Containers::MutableStringView& buffer, long long value, int precision, FormatType type);

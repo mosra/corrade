@@ -205,13 +205,17 @@ void FormatTest::escapes() {
 }
 
 void FormatTest::integerChar() {
+    /* The char is signed or unsigned depending on platform (ARM has it
+       unsigned by default for example, because it maps better to the
+       instruction set) */
     if(std::is_signed<char>::value) {
         CORRADE_COMPARE(format<char>("{}", -15), "-15");
     } else {
         CORRADE_INFO("char is unsigned");
-        /* Android simulator does this. Huh? */
         CORRADE_COMPARE(format<char>("{}", -15), "241");
     }
+    /* This is what std::int8_t is usually typedef'd to */
+    CORRADE_COMPARE(format<signed char>("{}", -15), "-15");
     CORRADE_COMPARE(format<unsigned char>("{}", 230), "230");
 }
 
