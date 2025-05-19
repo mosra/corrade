@@ -97,6 +97,7 @@ struct JsonTest: TestSuite::Tester {
         void reparseNumberDifferentType();
         void reparseSingleNumberDifferentType();
         void reparseNumberArrayDifferentType();
+        void reparseNumberDifferentTypeFailKeepOriginalValue();
 
         void parsedObjectChildAccess();
         void parsedObjectFind();
@@ -1431,6 +1432,7 @@ JsonTest::JsonTest() {
     addTests({&JsonTest::reparseNumberDifferentType,
               &JsonTest::reparseSingleNumberDifferentType,
               &JsonTest::reparseNumberArrayDifferentType,
+              &JsonTest::reparseNumberDifferentTypeFailKeepOriginalValue,
 
               &JsonTest::parsedObjectChildAccess,
               &JsonTest::parsedObjectFind});
@@ -3268,6 +3270,78 @@ void JsonTest::reparseNumberArrayDifferentType() {
         CORRADE_COMPARE_AS(*out, Containers::arrayView({
             35.0, 17.0
         }), TestSuite::Compare::Container);
+    }
+}
+
+void JsonTest::reparseNumberDifferentTypeFailKeepOriginalValue() {
+    Containers::String jsonData = "35.7";
+    /* This constructor has ArrayView as the first argument, thus losing all
+       flags from the input */
+    Containers::Optional<Json> json = Json::fromString({jsonData, Containers::StringViewFlag::NullTerminated|Containers::StringViewFlag::Global});
+    CORRADE_VERIFY(json);
+
+    /* Parse the token and corrupt the original data so it cannot be reparsed.
+       Corrupt not the first letter but a later one so the parsing still
+       produces some (but broken) value. */
+    JsonToken token = json->root();
+    CORRADE_COMPARE(json->parseFloat(token), 35.7f);
+    jsonData[1] = 'x';
+
+    /* Reparsing as a different type should fail but preserve the original
+       parsed type and value untouched */
+    {
+        Containers::String out;
+        Error redirectError{&out};
+        CORRADE_VERIFY(!json->parseDouble(token));
+        CORRADE_COMPARE(out, "Utility::Json::parseDouble(): invalid floating-point literal 3x.7 at <in>:1:1\n");
+        CORRADE_COMPARE(token.parsedType(), JsonToken::ParsedType::Float);
+        CORRADE_COMPARE(token.asFloat(), 35.7f);
+    } {
+        Containers::String out;
+        Error redirectError{&out};
+        CORRADE_VERIFY(!json->parseUnsignedInt(token));
+        CORRADE_COMPARE(out, "Utility::Json::parseUnsignedInt(): invalid unsigned integer literal 3x.7 at <in>:1:1\n");
+        CORRADE_COMPARE(token.parsedType(), JsonToken::ParsedType::Float);
+        CORRADE_COMPARE(token.asFloat(), 35.7f);
+    } {
+        Containers::String out;
+        Error redirectError{&out};
+        CORRADE_VERIFY(!json->parseInt(token));
+        CORRADE_COMPARE(out, "Utility::Json::parseInt(): invalid integer literal 3x.7 at <in>:1:1\n");
+        CORRADE_COMPARE(token.parsedType(), JsonToken::ParsedType::Float);
+        CORRADE_COMPARE(token.asFloat(), 35.7f);
+    } {
+        Containers::String out;
+        Error redirectError{&out};
+        CORRADE_VERIFY(!json->parseUnsignedLong(token));
+        CORRADE_COMPARE(out, "Utility::Json::parseUnsignedLong(): invalid unsigned integer literal 3x.7 at <in>:1:1\n");
+        CORRADE_COMPARE(token.parsedType(), JsonToken::ParsedType::Float);
+        CORRADE_COMPARE(token.asFloat(), 35.7f);
+    } {
+        Containers::String out;
+        Error redirectError{&out};
+        CORRADE_VERIFY(!json->parseLong(token));
+        CORRADE_COMPARE(out, "Utility::Json::parseLong(): invalid integer literal 3x.7 at <in>:1:1\n");
+        CORRADE_COMPARE(token.parsedType(), JsonToken::ParsedType::Float);
+        CORRADE_COMPARE(token.asFloat(), 35.7f);
+    }
+
+    /* De-corrupt the data, parse as an int and corrupt again so we can test
+       parseFloat() failure also, Not testing with a double because it may
+       attempt to reinterpret the partially broken float as a double and arrive
+       at something almost reasonable, making the test suspiciously pass. */
+    jsonData[1] = '7';
+    jsonData[2] = '5';
+    CORRADE_COMPARE(json->parseUnsignedLong(token), 3757);
+    CORRADE_COMPARE(token.asUnsignedLong(), 3757);
+    jsonData[1] = 'x';
+    {
+        Containers::String out;
+        Error redirectError{&out};
+        CORRADE_VERIFY(!json->parseFloat(token));
+        CORRADE_COMPARE(out, "Utility::Json::parseFloat(): invalid floating-point literal 3x57 at <in>:1:1\n");
+        CORRADE_COMPARE(token.parsedType(), JsonToken::ParsedType::UnsignedLong);
+        CORRADE_COMPARE(token.asUnsignedLong(), 3757);
     }
 }
 

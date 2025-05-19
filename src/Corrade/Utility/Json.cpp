@@ -858,7 +858,7 @@ bool Json::parseDoubleInternal(const char* const errorPrefix, JsonTokenData& tok
     buffer[size] = '\0';
     char* end;
     /* Not saving to token._parsedDouble directly to avoid a failure corrupting
-       the high bits storing token type */
+       the existing value */
     const double out = std::strtod(buffer, &end);
     if(std::size_t(end - buffer) != size
         /* Explicitly disallowing NaNs to not clash with the NaN bit pattern
@@ -905,7 +905,9 @@ bool Json::parseFloatInternal(const char* const errorPrefix, JsonTokenData& toke
     std::memcpy(buffer, string.data(), size);
     buffer[size] = '\0';
     char* end;
-    token._parsedFloat = std::strtof(buffer, &end);
+    /* Not saving to token._parsedFloat directly to avoid a failure corrupting
+       the existing value */
+    const float out = std::strtof(buffer, &end);
     if(std::size_t(end - buffer) != size) {
         Error err;
         err << errorPrefix << "invalid floating-point literal" << string << "at";
@@ -913,8 +915,10 @@ bool Json::parseFloatInternal(const char* const errorPrefix, JsonTokenData& toke
         return false;
     }
 
-    /* On success save the parsed token type. It aliases the _parsedFloat field
-       that was set above so be sure to preserve existing contents. */
+    /* On success save the parsed value and its type. The type aliases the
+       _parsedFloat field that was set above so be sure to preserve existing
+       contents. */
+    token._parsedFloat = out;
     token._dataTypeNan = (token._dataTypeNan & ~JsonToken::TypeSmallMask)|JsonToken::TypeSmallFloat;
     /* Reset the 64-bit type identifier in the size field, in case it was
        parsed as a double before, for example */
@@ -948,7 +952,8 @@ bool Json::parseUnsignedIntInternal(const char* const errorPrefix, JsonTokenData
     buffer[size] = '\0';
     char* end;
     /* Not using strtoul() here as on Windows it's 32-bit and we wouldn't be
-       able to detect overflows */
+       able to detect overflows. Also not saving to token._parsedUnsignedInt
+       directly to avoid a failure corrupting the existing value. */
     /** @todo replace with something that can report errors in a non-insane
         way */
     const std::uint64_t outLong = std::strtoull(buffer, &end, 10);
@@ -1002,7 +1007,8 @@ bool Json::parseIntInternal(const char* const errorPrefix, JsonTokenData& token)
     buffer[size] = '\0';
     char* end;
     /* Not using strtol() here as on Windows it's 32-bit and we wouldn't be
-       able to detect overflows */
+       able to detect overflows. Also not saving to token._parsedInt directly
+       to avoid a failure corrupting the existing value. */
     /** @todo replace with something that can report errors in a non-insane
         way */
     const std::int64_t outLong = std::strtoll(buffer, &end, 10);
@@ -1063,7 +1069,7 @@ bool Json::parseUnsignedLongInternal(const char* const errorPrefix, JsonTokenDat
     buffer[size] = '\0';
     char* end;
     /* Not saving to token._parsedUnsignedLong directly to avoid a failure
-       corrupting the high bits storing token type */
+       corrupting the existing value */
     const std::uint64_t out = std::strtoull(buffer, &end, 10);
     if(std::size_t(end - buffer) != size) {
         Error err;
@@ -1119,7 +1125,7 @@ bool Json::parseLongInternal(const char* const errorPrefix, JsonTokenData& token
     buffer[size] = '\0';
     char* end;
     /* Not saving to token._parsedLong directly to avoid a failure corrupting
-       the high bits storing token type */
+       the existing value */
     const std::int64_t out = std::strtoll(buffer, &end, 10);
     if(std::size_t(end - buffer) != size) {
         Error err;
