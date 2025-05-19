@@ -429,6 +429,8 @@ JsonWriterTest::JsonWriterTest() {
                        &JsonWriterTest::singleNumber<std::int64_t>,
                        &JsonWriterTest::singleNumber<TheOtherUnsignedLongType>,
                        &JsonWriterTest::singleNumber<TheOtherLongType>,
+                       /* Explicitly verifying this doesn't cause any ambiguity */
+                       &JsonWriterTest::singleNumber<std::size_t>,
                        &JsonWriterTest::singleString,
                        &JsonWriterTest::singleRawJson},
         Containers::arraySize(SingleValueData));
@@ -443,6 +445,8 @@ JsonWriterTest::JsonWriterTest() {
         &JsonWriterTest::singleEmptyNumberArray<std::int64_t>,
         &JsonWriterTest::singleEmptyNumberArray<TheOtherUnsignedLongType>,
         &JsonWriterTest::singleEmptyNumberArray<TheOtherLongType>,
+        /* Explicitly verifying this doesn't cause any ambiguity */
+        &JsonWriterTest::singleEmptyNumberArray<std::size_t>,
         &JsonWriterTest::singleEmptyStringArray,
         &JsonWriterTest::singleBoolArray,
         &JsonWriterTest::singleNumberArray<float>,
@@ -453,6 +457,8 @@ JsonWriterTest::JsonWriterTest() {
         &JsonWriterTest::singleNumberArray<std::int64_t>,
         &JsonWriterTest::singleNumberArray<TheOtherUnsignedLongType>,
         &JsonWriterTest::singleNumberArray<TheOtherLongType>,
+        /* Explicitly verifying this doesn't cause any ambiguity */
+        &JsonWriterTest::singleNumberArray<std::size_t>,
         &JsonWriterTest::singleStringArray
     }, Containers::arraySize(SingleArrayValueData));
 
