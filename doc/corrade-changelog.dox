@@ -252,6 +252,9 @@ namespace Corrade {
     their non-`DEBUG` counterparts on debug builds and get compiled out on
     release builds; as well as a @ref CORRADE_NO_DEBUG_ASSERT define for
     querying if debug assertions are enabled. See also [mosra/corrade#136](https://github.com/mosra/corrade/issues/136).
+-   New @ref CORRADE_ASSERT_ABORT(), @ref CORRADE_ASSERT_MESSAGE_ABORT() and
+    @ref CORRADE_ASSERT_INCLUDE macros for overriding behavior for all
+    assertions at once.
 -   New @ref CORRADE_LIKELY() and @ref CORRADE_UNLIKELY() macros for
     instruction cache microoptimizations in tight loops
 -   New @ref CORRADE_PASSTHROUGH() helper macro, an inverse of

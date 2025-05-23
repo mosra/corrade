@@ -1411,3 +1411,39 @@ class MYLIBRARY_EXPORT ExportedClass {
 };
 /* [CORRADE_VISIBILITY_INLINE_MEMBER_EXPORT] */
 }
+
+/* These are placed at the very end to not have the redefinitions mess with
+   assertion macros by accident */
+#undef CORRADE_ASSERT_ABORT
+/* The header is included above already, doing it a second time should be a
+   no-op */
+/* [CORRADE_ASSERT_ABORT] */
+[[noreturn]] void abortWithBacktrace();
+
+#define CORRADE_ASSERT_ABORT() abortWithBacktrace()
+
+#include <Corrade/Utility/Assert.h>
+/* [CORRADE_ASSERT_ABORT] */
+#undef CORRADE_ASSERT_ABORT
+#define CORRADE_ASSERT_ABORT() std::abort()
+
+#undef CORRADE_ASSERT_MESSAGE_ABORT
+/* The header is included above already, doing it a second time should be a
+   no-op */
+/* [CORRADE_ASSERT_MESSAGE_ABORT] */
+void logAndReportAssertion(const char* message);
+
+#define CORRADE_ASSERT_MESSAGE_ABORT(...)                                   \
+    Corrade::Containers::String out;                                        \
+    Corrade::Utility::Error{&out, Corrade::Utility::Error::Flag::NoNewlineAtTheEnd} \
+        << __VA_ARGS__;                                                     \
+    logAndReportAssertion(out.data());                                      \
+    Corrade::Utility::Error{Corrade::Utility::Error::defaultOutput()} << out; \
+    CORRADE_ASSERT_ABORT();
+
+#include <Corrade/Utility/Assert.h>
+/* [CORRADE_ASSERT_MESSAGE_ABORT] */
+#undef CORRADE_ASSERT_MESSAGE_ABORT
+#define CORRADE_ASSERT_MESSAGE_ABORT(...)                                   \
+    Corrade::Utility::Error{Corrade::Utility::Error::defaultOutput()} << __VA_ARGS__; \
+    CORRADE_ASSERT_ABORT();
