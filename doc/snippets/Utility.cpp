@@ -911,6 +911,80 @@ if(Utility::JsonIterator gltfNodeChildren = gltfNode.find("children"))
 }
 
 {
+/* [Json-from-tokens] */
+Utility::Json json{
+    /*  1           13            28                   */
+    R"({"negative": -1.5, string: "hello", hex: 0xcafe})",
+    {InPlaceInit, {
+        /* An object with 6 tokens inside, i.e. all remaining ones */
+        Utility::JsonTokenData{Utility::JsonToken::Type::Object, 6},
+        /* A key referenced directly from the input at byte 1. The `true`
+           distinguishes between a string key and a value. */
+        Utility::JsonTokenData{Utility::JsonToken::Type::String,
+            ~std::uint64_t{}, true},
+        /* Parsed float value, referencing the input at byte 13 */
+        Utility::JsonTokenData{-1.5f},
+        /* JSON5 allows keys without quotes so this cannot reference the input,
+           instead it points to a parsed string at position 0 */
+        Utility::JsonTokenData{Utility::JsonToken::Type::String, 0, true},
+        /* Quoted string value (not a key and thus no `true`), referencing the
+           input at position 28 */
+        Utility::JsonTokenData{Utility::JsonToken::Type::String,
+            ~std::uint64_t{}},
+        /* Another unquoted key, referencing a parsed string at position 1 */
+        Utility::JsonTokenData{Utility::JsonToken::Type::String, 1, true},
+        /* Parsed hexadecimal value, not referencing the input because a
+           hexadecimal number is not a valid JSON */
+        Utility::JsonTokenData{0xcafe},
+    }},
+    {InPlaceInit, {
+        {},
+        {1, 10}, /* "negative" */
+        {13, 4}, /* -1.5 */
+        {},
+        {28, 7}, /* "hello" */
+        {},
+        {},
+    }},
+    {InPlaceInit, {
+        "string",
+        "hex"
+    }}};
+/* [Json-from-tokens] */
+
+/* [Json-from-tokens-access] */
+Utility::Debug{} << json.root()["negative"].asFloat();  // prints 1.5
+Utility::Debug{} << json.root()["string"].asString();   // prints hello
+/* [Json-from-tokens-access] */
+}
+
+{
+/* [Json-from-tokens-alone] */
+Utility::Json json{{},
+    {InPlaceInit, {
+        Utility::JsonTokenData{Utility::JsonToken::Type::Object, 6},
+        Utility::JsonTokenData{Utility::JsonToken::Type::String, 0, true},
+        Utility::JsonTokenData{-1.5f},
+        Utility::JsonTokenData{Utility::JsonToken::Type::String, 1, true},
+        Utility::JsonTokenData{Utility::JsonToken::Type::String, 2},
+        Utility::JsonTokenData{Utility::JsonToken::Type::String, 3, true},
+        Utility::JsonTokenData{0xcafe},
+    }},
+    {InPlaceInit, {
+        /* There's no input string so no tokens reference anything in it */
+        {}, {}, {}, {}, {}, {}, {},
+    }},
+    {InPlaceInit, {
+        "negative",
+        "string",
+        "hello",
+        "hex"
+    }}};
+/* [Json-from-tokens-alone] */
+
+}
+
+{
 /* [JsonWriter-usage1] */
 Utility::JsonWriter gltf{
     Utility::JsonWriter::Option::Wrap|

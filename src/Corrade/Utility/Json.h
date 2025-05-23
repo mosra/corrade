@@ -256,6 +256,43 @@ separately, either upfront if @ref Option::ParseStrings is set (or if
 on-demand if @ref parseStrings() / @ref parseStringKeys() / @ref parseString()
 is used.
 
+@section Utility-Json-from-tokens Creating an instance from externally parsed tokens
+
+The internal representation isn't limited to just JSON, you can create a
+@ref Json instance describing any JSON-compatible format --- i.e., arbitrarily
+nested arrays, objects, null, boolean, numeric and string values. The
+@ref Json(Containers::String&&, Containers::Array<JsonTokenData>&&, Containers::Array<JsonTokenOffsetSize>&&, Containers::Array<Containers::String>&&)
+constructor takes the input string the tokens refer to, list of
+@ref JsonTokenData instances containing the actual parsed values, corresponding
+@ref JsonTokenOffsetSize instances matching the token with the input string, if
+applicable, and an array of parsed strings if needed. The following snippet
+shows how a [JSON5](https://json5.org) source could be expressed this way ---
+tokens that are compatible with JSON refer to the input, other tokens such as
+unquoted object keys or hexadecimal numbers contain just the parsed value:
+
+@snippet Utility.cpp Json-from-tokens
+
+Ultimately, the instance can also be just a sequence of parsed tokens alone,
+with no input string specified, which is useful in case the input is a binary
+such as a [CBOR](https://en.wikipedia.org/wiki/CBOR):
+
+@snippet Utility.cpp Json-from-tokens-alone
+
+With either of the above, the @ref Json instance behaves the same as if it was
+created from a JSON source --- you can iterate it, search for array items or
+object keys and can access token values as well. Numeric tokens can be also
+reparsed with a different type if needed, but only if they were specified with
+a valid non-empty @ref JsonTokenOffsetSize. So for example you could call
+@ref parseDouble() on the @cpp -1.5 @ce JSON5 token and get a @cpp double @ce
+instead of a @cpp float @ce, but not on the hexadecimal @cpp 0xcafe @ce value
+that doesn't have any input string associated.
+
+@snippet Utility.cpp Json-from-tokens-access
+
+The constructor as well as particular @ref JsonTokenData constructors have
+various checks in place to ensure the supplied representation is consistent and
+matches expectations of the internal implementation. See their documentation
+for more information.
 @see @ref JsonArrayItem, @ref JsonObjectItem, @ref JsonIterator,
     @ref JsonArrayIterator, @ref JsonObjectIterator, @ref JsonView,
     @ref JsonObjectView, @ref JsonArrayView
@@ -467,19 +504,20 @@ class CORRADE_UTILITY_EXPORT Json {
          * @param strings   Parsed escaped strings the @p tokens point to.
          *
          * Meant to be used to make externally parsed data available through a
-         * JSON-compatible interface. Expects that @p tokens and
-         * @p tokenOffsetsSizes are non-empty, have the same size and there's
-         * at most one root token. Root object and array token child counts are
-         * expected to not be larger than the remaining count of tokens in the
-         * @p tokens array, child counts of nested object and array tokens are
-         * expected to not go outside of the parent object or array token
-         * count. Immediate object token children are expected to be strings
-         * marked as keys, with each having at least one child token.
-         * Non-escaped string tokens are expected to have the token at least
-         * two bytes large for the initial and final quote character, indices
-         * of escaped string tokens are expected to be less than the @p strings
-         * array size. Strings that are not object keys are expected to not be
-         * marked as such.
+         * JSON-compatible interface. See @ref Utility-Json-from-tokens for
+         * more information and a detailed usage example. Expects that
+         * @p tokens and @p tokenOffsetsSizes are non-empty, have the same size
+         * and there's at most one root token. Root object and array token
+         * child counts are expected to not be larger than the remaining count
+         * of tokens in the @p tokens array, child counts of nested object and
+         * array tokens are expected to not go outside of the parent object or
+         * array token count. Immediate object token children are expected to
+         * be strings marked as keys, with each having at least one child
+         * token. Non-escaped string tokens are expected to have the token at
+         * least two bytes large for the initial and final quote character,
+         * indices of escaped string tokens are expected to be less than the
+         * @p strings array size. Strings that are not object keys are expected
+         * to not be marked as such.
          *
          * @attention As this functionality is closely tied to the internal
          *      data representation, it may change whenever the internal
@@ -1952,7 +1990,9 @@ it references.
 
 Together with @ref JsonTokenOffsetSize can be also used to create a @ref Json
 instance directly from individual tokens, such as when it's desirable to make
-externally parsed data available through a JSON-compatible interface.
+externally parsed data available through a JSON-compatible interface. See
+@ref Utility-Json-from-tokens for more information and a detailed usage
+example.
 
 @experimental
 */
@@ -2110,7 +2150,9 @@ class CORRADE_UTILITY_EXPORT JsonTokenData {
 
 Together with @ref JsonTokenData used as an input when creating a @ref Json
 instance directly from individual tokens, such as when it's desirable to make
-externally parsed data available through a JSON-compatible interface.
+externally parsed data available through a JSON-compatible interface. See
+@ref Utility-Json-from-tokens for more information and a detailed usage
+example.
 
 @experimental
 */
