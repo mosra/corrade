@@ -27,16 +27,28 @@
 */
 
 /** @file
- * @brief Macro @ref CORRADE_ASSERT(), @ref CORRADE_CONSTEXPR_ASSERT(), @ref CORRADE_ASSERT_OUTPUT(), @ref CORRADE_ASSERT_UNREACHABLE(), @ref CORRADE_INTERNAL_ASSERT(), @ref CORRADE_INTERNAL_CONSTEXPR_ASSERT(), @ref CORRADE_INTERNAL_ASSERT_OUTPUT(), @ref CORRADE_INTERNAL_ASSERT_EXPRESSION(), @ref CORRADE_INTERNAL_ASSERT_UNREACHABLE(), @ref CORRADE_NO_ASSERT, @ref CORRADE_GRACEFUL_ASSERT, @ref CORRADE_STANDARD_ASSERT
+ * @brief Macro @ref CORRADE_ASSERT(), @ref CORRADE_CONSTEXPR_ASSERT(), @ref CORRADE_ASSERT_OUTPUT(), @ref CORRADE_ASSERT_UNREACHABLE(), @ref CORRADE_INTERNAL_ASSERT(), @ref CORRADE_INTERNAL_CONSTEXPR_ASSERT(), @ref CORRADE_INTERNAL_ASSERT_OUTPUT(), @ref CORRADE_INTERNAL_ASSERT_EXPRESSION(), @ref CORRADE_INTERNAL_ASSERT_UNREACHABLE(), @ref CORRADE_NO_ASSERT, @ref CORRADE_GRACEFUL_ASSERT, @ref CORRADE_STANDARD_ASSERT, @ref CORRADE_ASSERT_INCLUDE, @ref CORRADE_ASSERT_ABORT(), @ref CORRADE_ASSERT_MESSAGE_ABORT()
  */
 
 #include "Corrade/configure.h"
+/* Pull in the dependencies only if there's at least one macro that isn't fully
+   defined or overriden yet */
 #if !defined(CORRADE_NO_ASSERT) && (!defined(CORRADE_ASSERT) || !defined(CORRADE_CONSTEXPR_ASSERT) || !defined(CORRADE_ASSERT_OUTPUT) || !defined(CORRADE_ASSERT_UNREACHABLE) || !defined(CORRADE_INTERNAL_ASSERT) || !defined(CORRADE_INTERNAL_CONSTEXPR_ASSERT) || !defined(CORRADE_INTERNAL_ASSERT_OUTPUT) || !defined(CORRADE_INTERNAL_ASSERT_EXPRESSION) || !defined(CORRADE_INTERNAL_ASSERT_UNREACHABLE))
 #ifndef CORRADE_STANDARD_ASSERT
+/* If CORRADE_ASSERT_ABORT() is defined by the user, it's assumed it pulls in
+   everything it needs. Otherwise include the std::abort() definition. */
+#ifndef CORRADE_ASSERT_ABORT
 #include <cstdlib>
-
+#endif
+/* Similarly, if CORRADE_ASSERT_MESSAGE_ABORT() is defined, it's assumed to
+   pull in Debug if it needs it or not pull it in if not. Have to include it
+   with CORRADE_GRACEFUL_ASSERT tho as the asserts are using Error directly. */
+#if !defined(CORRADE_ASSERT_MESSAGE_ABORT) || defined(CORRADE_GRACEFUL_ASSERT)
 #include "Corrade/Utility/Debug.h"
+#endif
 #include "Corrade/Utility/Macros.h" /* CORRADE_LINE_STRING */
+/* For CORRADE_STANDARD_ASSERT we define the macros to be no-op if NDEBUG is
+   set to not need this either */
 #elif !defined(NDEBUG)
 #include <cassert>
 #endif
@@ -44,6 +56,10 @@
 /* Utility::forward(), used only by CORRADE_INTERNAL_ASSERT_EXPRESSION */
 #if !defined(CORRADE_INTERNAL_ASSERT_EXPRESSION) && !defined(CORRADE_NO_ASSERT) && !(defined(CORRADE_STANDARD_ASSERT) && defined(NDEBUG))
 #include "Corrade/Utility/Move.h"
+#endif
+/* Include the user-provided header if desired */
+#ifdef CORRADE_ASSERT_INCLUDE
+#include CORRADE_ASSERT_INCLUDE
 #endif
 
 /* There's deliberately no namespace Corrade::Utility in order to avoid noise
@@ -121,6 +137,108 @@ When this macro is defined, @ref CORRADE_NO_ASSERT and the standard
 */
 #define CORRADE_STANDARD_ASSERT
 #undef CORRADE_STANDARD_ASSERT
+
+/**
+@brief Assertion include
+@m_since_latest
+
+This macro is not defined by Corrade, but rather meant to be defined by the
+user. If defined, it's used as @cpp #include CORRADE_ASSERT_INCLUDE @ce at the
+top of this file and its value has to include the enclosing `<>` or `""`
+characters as well. The file can then contain overrides for either the
+@ref CORRADE_ASSERT_ABORT() and @ref CORRADE_ASSERT_MESSAGE_ABORT() macros that
+affect all asserts or modify just individual macros one by one. The desired use
+case is to pass it via compiler flags to override the assert behavior for the
+whole project, for example with `-DCORRADE_ASSERT_INCLUDE="<assertOverrides.h>"`
+or `-DCORRADE_ASSERT_INCLUDE="\"assertOverrides.h\""`. Note that different
+toolchains and buildsystems may need various workarounds to pass the angle
+brackets or inner quotes through.
+*/
+#define CORRADE_ASSERT_INCLUDE
+#undef CORRADE_ASSERT_INCLUDE
+#endif
+
+/** @hideinitializer
+@brief Assertion abort implementation
+@m_since_latest
+
+Used by all Corrade assertion macros if @ref CORRADE_STANDARD_ASSERT is not
+defined, calls @ref std::abort() by default. If @ref CORRADE_STANDARD_ASSERT is
+defined, this macro isn't used as standard @cpp assert() @ce is called instead.
+
+You can override this implementation by placing your own
+@cpp #define CORRADE_ASSERT_ABORT() @ce before including the
+@ref Corrade/Utility/Assert.h header. The macro value is expected to be a
+single expression without a trailing semicolon and the called function being
+marked as @cpp [[noreturn]] @ce, otherwise any use of
+@ref CORRADE_ASSERT_UNREACHABLE() and similar macros may result in the compiler
+complaining that not all code paths return a value. Also note that if this
+macro is overriden, the header doesn't @cpp #include <cstdlib> @ce for
+@ref std::abort() anymore, you have to do that yourself if needed. See also
+@ref CORRADE_ASSERT_MESSAGE_ABORT() for a way to override both the message
+printing and the abort.
+
+Example usage, assuming the @cpp abortWithBacktrace() @ce function is defined
+somewhere else:
+
+@snippet Utility.cpp CORRADE_ASSERT_ABORT
+
+Alternatively you can put the @cpp #define CORRADE_ASSERT_ABORT() @ce macro
+into a  dedicated header file and pass e.g.
+`-DCORRADE_ASSERT_INCLUDE="\"abortWithBacktrace.h\\""` in compiler flags to
+override the abort behavior for the whole project. See
+@ref CORRADE_ASSERT_INCLUDE for more information.
+@todoc The \" and \\" in the above are deliberate, Doxygen stupidly eats the
+    second backslash otherwise. And putting a double backslash at the front
+    makes it shown twice, so it has to be inconsistent like that.
+*/
+#ifndef CORRADE_ASSERT_ABORT
+#define CORRADE_ASSERT_ABORT() std::abort()
+#endif
+
+/** @hideinitializer
+@brief Assertion message and abort implementation
+@m_since_latest
+
+Used by all Corrade assertion macros if neither @ref CORRADE_STANDARD_ASSERT
+nor @ref CORRADE_GRACEFUL_ASSERT is defined. If @ref CORRADE_STANDARD_ASSERT is
+defined, this macro isn't used as standard @cpp assert() @ce is called instead,
+if @ref CORRADE_GRACEFUL_ASSERT is defined, the message printing cannot be
+overriden, only abort behavior.
+
+You can override this implementation by placing your own
+@cpp #define CORRADE_ASSERT_MESSAGE_ABORT(...) @ce before including the
+@ref Corrade/Utility/Assert.h header. The macro value is expected to be a
+sequence of expressions each with a trailing semicolon. Note that if this macro
+is overriden, the header doesn't @cpp #include <Corrade/Utility/Debug.h> @ce
+for @relativeref{Corrade,Utility::Debug} anymore, you have to do that yourself
+if needed. You can also override just @ref CORRADE_ASSERT_ABORT() if you only
+need to control the abort behavior but not message printing.
+
+Example usage, assuming the @cpp logAndReportAssertion() @ce function is
+defined somewhere else. The override formats the message to a string, passes it
+to this function but still also prints it to @relativeref{Corrade,Utility::Error}
+to have it shown in the standard error output as well, and delegates to
+@ref CORRADE_ASSERT_ABORT() at the end. You can do any abort-like operation
+instead of calling that macro, but in that case it's recommended to override
+the @ref CORRADE_ASSERT_ABORT() implementation directly, as it will affect all
+such cases in that case, not just aborts with messages.
+
+@snippet Utility.cpp CORRADE_ASSERT_MESSAGE_ABORT
+
+Alternatively you can put the @cpp #define CORRADE_ASSERT_MESSAGE_ABORT(...) @ce
+macro into a  dedicated header file and pass e.g.
+`-DCORRADE_ASSERT_INCLUDE="\"logAndReportAssertion.h\\""` in compiler flags to
+override the abort behavior for the whole project. See
+@ref CORRADE_ASSERT_INCLUDE for more information.
+@todoc The \" and \\" in the above are deliberate, Doxygen stupidly eats the
+    second backslash otherwise. And putting a double backslash at the front
+    makes it shown twice, so it has to be inconsistent like that.
+*/
+#ifndef CORRADE_ASSERT_MESSAGE_ABORT
+#define CORRADE_ASSERT_MESSAGE_ABORT(...)                                   \
+    Corrade::Utility::Error{Corrade::Utility::Error::defaultOutput()} << __VA_ARGS__; \
+    CORRADE_ASSERT_ABORT();
 #endif
 
 /** @hideinitializer
@@ -176,8 +294,9 @@ You can use stream output operators for formatting just like when printing to
 
 You can override this implementation by placing your own
 @cpp #define CORRADE_ASSERT @ce before including the
-@ref Corrade/Utility/Assert.h header.
-
+@ref Corrade/Utility/Assert.h header. See also @ref CORRADE_ASSERT_ABORT(),
+@ref CORRADE_ASSERT_MESSAGE_ABORT() and @ref CORRADE_ASSERT_INCLUDE for a way
+to override behavior for all assertions at once.
 @see @ref CORRADE_DEBUG_ASSERT(), @ref CORRADE_CONSTEXPR_ASSERT(),
     @ref CORRADE_INTERNAL_ASSERT(), @ref CORRADE_ASSUME()
 */
@@ -191,7 +310,8 @@ You can override this implementation by placing your own
     do {                                                                    \
         if(!(condition)) {                                                  \
             Corrade::Utility::Error{} << message;                           \
-            if(Corrade::Utility::Error::defaultOutput() == Corrade::Utility::Error::output()) std::abort(); \
+            if(Corrade::Utility::Error::defaultOutput() == Corrade::Utility::Error::output()) \
+                CORRADE_ASSERT_ABORT();                                     \
             return returnValue;                                             \
         }                                                                   \
     } while(false)
@@ -199,8 +319,7 @@ You can override this implementation by placing your own
 #define CORRADE_ASSERT(condition, message, returnValue)                     \
     do {                                                                    \
         if(!(condition)) {                                                  \
-            Corrade::Utility::Error{Corrade::Utility::Error::defaultOutput()} << message; \
-            std::abort();                                                   \
+            CORRADE_ASSERT_MESSAGE_ABORT(message)                           \
             return returnValue;                                             \
         }                                                                   \
     } while(false)
@@ -236,8 +355,9 @@ article by Andrzej Krzemieński and the followup discussion.
 
 You can override this implementation by placing your own
 @cpp #define CORRADE_CONSTEXPR_ASSERT @ce before including the
-@ref Corrade/Utility/Assert.h header.
-
+@ref Corrade/Utility/Assert.h header. See also @ref CORRADE_ASSERT_ABORT(),
+@ref CORRADE_ASSERT_MESSAGE_ABORT() and @ref CORRADE_ASSERT_INCLUDE for a way
+to override behavior for all assertions at once.
 @see @ref CORRADE_CONSTEXPR_DEBUG_ASSERT(),
     @ref CORRADE_INTERNAL_CONSTEXPR_ASSERT()
 */
@@ -253,13 +373,13 @@ You can override this implementation by placing your own
 #define CORRADE_CONSTEXPR_ASSERT(condition, message)                        \
     static_cast<void>((condition) ? 0 : ([&]() {                            \
         Corrade::Utility::Error{} << message;                               \
-        if(Corrade::Utility::Error::defaultOutput() == Corrade::Utility::Error::output()) std::abort(); \
+        if(Corrade::Utility::Error::defaultOutput() == Corrade::Utility::Error::output()) \
+            CORRADE_ASSERT_ABORT();                                         \
     }(), 0))
 #else
 #define CORRADE_CONSTEXPR_ASSERT(condition, message)                        \
     static_cast<void>((condition) ? 0 : ([&]() {                            \
-        Corrade::Utility::Error{Corrade::Utility::Error::defaultOutput()} << message; \
-        std::abort();                                                       \
+        CORRADE_ASSERT_MESSAGE_ABORT(message)                               \
     }(), 0))
 #endif
 #endif
@@ -280,8 +400,9 @@ usage:
 
 You can override this implementation by placing your own
 @cpp #define CORRADE_ASSERT_OUTPUT @ce before including the
-@ref Corrade/Utility/Assert.h header.
-
+@ref Corrade/Utility/Assert.h header. See also @ref CORRADE_ASSERT_ABORT(),
+@ref CORRADE_ASSERT_MESSAGE_ABORT() and @ref CORRADE_ASSERT_INCLUDE for a way
+to override behavior for all assertions at once.
 @see @ref CORRADE_DEBUG_ASSERT_OUTPUT(), @ref CORRADE_INTERNAL_ASSERT_OUTPUT(),
     @ref CORRADE_ASSUME()
 */
@@ -296,7 +417,8 @@ You can override this implementation by placing your own
     do {                                                                    \
         if(!(call)) {                                                       \
             Corrade::Utility::Error{} << message;                           \
-            if(Corrade::Utility::Error::defaultOutput() == Corrade::Utility::Error::output()) std::abort(); \
+            if(Corrade::Utility::Error::defaultOutput() == Corrade::Utility::Error::output()) \
+                CORRADE_ASSERT_ABORT();                                     \
             return returnValue;                                             \
         }                                                                   \
     } while(false)
@@ -304,8 +426,7 @@ You can override this implementation by placing your own
 #define CORRADE_ASSERT_OUTPUT(call, message, returnValue)                   \
     do {                                                                    \
         if(!(call)) {                                                       \
-            Corrade::Utility::Error{Corrade::Utility::Error::defaultOutput()} << message; \
-            std::abort();                                                   \
+            CORRADE_ASSERT_MESSAGE_ABORT(message)                           \
             return returnValue;                                             \
         }                                                                   \
     } while(false)
@@ -326,16 +447,18 @@ defined, this macro expands to @cpp assert(!"unreachable code") @ce. If
 @ref CORRADE_NO_ASSERT is defined (or if both @ref CORRADE_STANDARD_ASSERT and
 @cpp NDEBUG @ce are defined), this macro hints to the compiler that given code
 is not reachable, possibly helping the optimizer (using a compiler builtin on
-GCC, Clang and MSVC; calling @ref std::abort() otherwise). A @cpp return @ce
-statement can thus be safely omitted in a code path following this macro
-without causing any compiler warnings or errors. Example usage:
+GCC, Clang and MSVC; calling @ref CORRADE_ASSERT_ABORT(), which is
+@ref std::abort() by default, otherwise). A @cpp return @ce statement can thus
+be safely omitted in a code path following this macro without causing any
+compiler warnings or errors. Example usage:
 
 @snippet Utility.cpp CORRADE_ASSERT_UNREACHABLE
 
 You can override this implementation by placing your own
 @cpp #define CORRADE_ASSERT_UNREACHABLE @ce before including the
-@ref Corrade/Utility/Assert.h header.
-
+@ref Corrade/Utility/Assert.h header. See also @ref CORRADE_ASSERT_ABORT(),
+@ref CORRADE_ASSERT_MESSAGE_ABORT() and @ref CORRADE_ASSERT_INCLUDE for a way
+to override behavior for all assertions at once.
 @see @ref CORRADE_DEBUG_ASSERT_UNREACHABLE(),
     @ref CORRADE_INTERNAL_ASSERT_UNREACHABLE(), @ref CORRADE_ASSERT(),
     @ref CORRADE_INTERNAL_ASSERT(), @ref CORRADE_ASSUME()
@@ -347,7 +470,7 @@ You can override this implementation by placing your own
 #elif defined(CORRADE_TARGET_MSVC)
 #define CORRADE_ASSERT_UNREACHABLE(message, returnValue) __assume(0)
 #else
-#define CORRADE_ASSERT_UNREACHABLE(message, returnValue) std::abort()
+#define CORRADE_ASSERT_UNREACHABLE(message, returnValue) CORRADE_ASSERT_ABORT()
 #endif
 #elif defined(CORRADE_STANDARD_ASSERT)
 #define CORRADE_ASSERT_UNREACHABLE(message, returnValue) assert(!"unreachable code")
@@ -355,14 +478,14 @@ You can override this implementation by placing your own
 #define CORRADE_ASSERT_UNREACHABLE(message, returnValue)                    \
     do {                                                                    \
         Corrade::Utility::Error{} << message;                               \
-        if(Corrade::Utility::Error::defaultOutput() == Corrade::Utility::Error::output()) std::abort(); \
+        if(Corrade::Utility::Error::defaultOutput() == Corrade::Utility::Error::output()) \
+            CORRADE_ASSERT_ABORT();                                         \
         return returnValue;                                                 \
     } while(false)
 #else
 #define CORRADE_ASSERT_UNREACHABLE(message, returnValue)                                        \
     do {                                                                    \
-        Corrade::Utility::Error{Corrade::Utility::Error::defaultOutput()} << message; \
-        std::abort();                                                       \
+        CORRADE_ASSERT_MESSAGE_ABORT(message)                               \
     } while(false)
 #endif
 #endif
@@ -406,8 +529,9 @@ Example usage:
 
 You can override this implementation by placing your own
 @cpp #define CORRADE_INTERNAL_ASSERT @ce before including the
-@ref Corrade/Utility/Assert.h header.
-
+@ref Corrade/Utility/Assert.h header. See also @ref CORRADE_ASSERT_ABORT(),
+@ref CORRADE_ASSERT_MESSAGE_ABORT() and @ref CORRADE_ASSERT_INCLUDE for a way
+to override behavior for all assertions at once.
 @see @ref CORRADE_INTERNAL_DEBUG_ASSERT(),
     @ref CORRADE_INTERNAL_CONSTEXPR_ASSERT(),
     @ref CORRADE_ASSERT_UNREACHABLE(), @ref CORRADE_ASSUME()
@@ -421,8 +545,7 @@ You can override this implementation by placing your own
 #define CORRADE_INTERNAL_ASSERT(condition)                                  \
     do {                                                                    \
         if(!(condition)) {                                                  \
-            Corrade::Utility::Error{Corrade::Utility::Error::defaultOutput()} << "Assertion " #condition " failed at " __FILE__ ":" CORRADE_LINE_STRING; \
-            std::abort();                                                   \
+            CORRADE_ASSERT_MESSAGE_ABORT("Assertion " #condition " failed at " __FILE__ ":" CORRADE_LINE_STRING) \
         }                                                                   \
     } while(false)
 #endif
@@ -447,8 +570,9 @@ expands to @cpp static_cast<void>(0) @ce.
 
 You can override this implementation by placing your own
 @cpp #define CORRADE_INTERNAL_CONSTEXPR_ASSERT @ce before including the
-@ref Corrade/Utility/Assert.h header.
-
+@ref Corrade/Utility/Assert.h header. See also @ref CORRADE_ASSERT_ABORT(),
+@ref CORRADE_ASSERT_MESSAGE_ABORT() and @ref CORRADE_ASSERT_INCLUDE for a way
+to override behavior for all assertions at once.
 @see @ref CORRADE_INTERNAL_CONSTEXPR_DEBUG_ASSERT(),
     @ref CORRADE_CONSTEXPR_ASSERT()
 */
@@ -463,8 +587,7 @@ You can override this implementation by placing your own
 #else
 #define CORRADE_INTERNAL_CONSTEXPR_ASSERT(condition)                        \
     static_cast<void>((condition) ? 0 : ([&]() {                            \
-        Corrade::Utility::Error{Corrade::Utility::Error::defaultOutput()} << "Assertion " #condition " failed at " __FILE__ ":" CORRADE_LINE_STRING; \
-        std::abort();                                                       \
+        CORRADE_ASSERT_MESSAGE_ABORT("Assertion " #condition " failed at " __FILE__ ":" CORRADE_LINE_STRING) \
     }(), 0))
 #endif
 #endif
@@ -483,8 +606,9 @@ Example usage:
 
 You can override this implementation by placing your own
 @cpp #define CORRADE_INTERNAL_ASSERT_OUTPUT @ce before including the
-@ref Corrade/Utility/Assert.h header.
-
+@ref Corrade/Utility/Assert.h header. See also @ref CORRADE_ASSERT_ABORT(),
+@ref CORRADE_ASSERT_MESSAGE_ABORT() and @ref CORRADE_ASSERT_INCLUDE for a way
+to override behavior for all assertions at once.
 @see @ref CORRADE_INTERNAL_DEBUG_ASSERT_OUTPUT(),
     @ref CORRADE_INTERNAL_ASSERT_EXPRESSION()
 */
@@ -498,8 +622,7 @@ You can override this implementation by placing your own
 #define CORRADE_INTERNAL_ASSERT_OUTPUT(call)                                \
     do {                                                                    \
         if(!(call)) {                                                       \
-            Corrade::Utility::Error{Corrade::Utility::Error::defaultOutput()} << "Assertion " #call " failed at " __FILE__ ":" CORRADE_LINE_STRING; \
-            std::abort();                                                   \
+            CORRADE_ASSERT_MESSAGE_ABORT("Assertion " #call " failed at " __FILE__ ":" CORRADE_LINE_STRING) \
         }                                                                   \
     } while(false)
 #endif
@@ -515,8 +638,7 @@ namespace Corrade { namespace Utility { namespace Implementation {
     #else
     template<class T> T assertExpression(T&& value, const char* message) {
         if(!value) {
-            Corrade::Utility::Error{Corrade::Utility::Error::defaultOutput()} << message;
-            std::abort();
+            CORRADE_ASSERT_MESSAGE_ABORT(message)
         }
 
         return Corrade::Utility::forward<T>(value);
@@ -554,8 +676,9 @@ parenthesized expression out of it.
 
 You can override this implementation by placing your own
 @cpp #define CORRADE_INTERNAL_ASSERT_EXPRESSION @ce before including the
-@ref Corrade/Utility/Assert.h header.
-
+@ref Corrade/Utility/Assert.h header. See also @ref CORRADE_ASSERT_ABORT(),
+@ref CORRADE_ASSERT_MESSAGE_ABORT() and @ref CORRADE_ASSERT_INCLUDE for a way
+to override behavior for all assertions at once.
 @see @ref CORRADE_INTERNAL_DEBUG_ASSERT_EXPRESSION()
 
 @todo In C++14 this could use an inline templated lambda, which means we could
@@ -588,16 +711,17 @@ line is printed to error output and the application aborts. If
 if both @ref CORRADE_STANDARD_ASSERT and @cpp NDEBUG @ce are defined), this
 macro hints to the compiler that given code is not reachable, possibly helping
 the optimizer (using a compiler builtin on GCC, Clang and MSVC; calling
-@ref std::abort() otherwise). A @cpp return @ce statement can thus be safely
-omitted in a code path following this macro without causing any compiler
-warnings or errors. Example usage:
+@ref CORRADE_ASSERT_ABORT(), which is @ref std::abort() by default, otherwise).
+A @cpp return @ce statement can thus be safely omitted in a code path following
+this macro without causing any compiler warnings or errors. Example usage:
 
 @snippet Utility.cpp CORRADE_INTERNAL_ASSERT_UNREACHABLE
 
 You can override this implementation by placing your own
 @cpp #define CORRADE_INTERNAL_ASSERT_UNREACHABLE @ce before including the
-@ref Corrade/Utility/Assert.h header.
-
+@ref Corrade/Utility/Assert.h header. See also @ref CORRADE_ASSERT_ABORT(),
+@ref CORRADE_ASSERT_MESSAGE_ABORT() and @ref CORRADE_ASSERT_INCLUDE for a way
+to override behavior for all assertions at once.
 @see @ref CORRADE_INTERNAL_DEBUG_ASSERT_UNREACHABLE()
 */
 #ifndef CORRADE_INTERNAL_ASSERT_UNREACHABLE
@@ -607,15 +731,14 @@ You can override this implementation by placing your own
 #elif defined(CORRADE_TARGET_MSVC)
 #define CORRADE_INTERNAL_ASSERT_UNREACHABLE() __assume(0)
 #else
-#define CORRADE_INTERNAL_ASSERT_UNREACHABLE() std::abort()
+#define CORRADE_INTERNAL_ASSERT_UNREACHABLE() CORRADE_ASSERT_ABORT()
 #endif
 #elif defined(CORRADE_STANDARD_ASSERT)
 #define CORRADE_INTERNAL_ASSERT_UNREACHABLE() assert(!"unreachable code")
 #else
 #define CORRADE_INTERNAL_ASSERT_UNREACHABLE()                                        \
     do {                                                                    \
-        Corrade::Utility::Error{Corrade::Utility::Error::defaultOutput()} << "Reached unreachable code at " __FILE__ ":" CORRADE_LINE_STRING; \
-        std::abort();                                                       \
+        CORRADE_ASSERT_MESSAGE_ABORT("Reached unreachable code at " __FILE__ ":" CORRADE_LINE_STRING) \
     } while(false)
 #endif
 #endif

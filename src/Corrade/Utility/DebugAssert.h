@@ -37,12 +37,15 @@ asserts.
 */
 
 #include "Corrade/configure.h"
+/* The *_ASSERT_UNREACHABLE() assertions use CORRADE_ASSERT_ABORT() directly as
+   a fallback on certain platforms so if they're not overriden and a custom CORRADE_ASSERT_ABORT() isn't defined either, include the std::abort()
+   definition. Done before including Assert.h which has CORRADE_ASSERT_ABORT()
+   defined itself. */
+#if (defined(CORRADE_NO_ASSERT) || (!defined(CORRADE_IS_DEBUG_BUILD) && defined(NDEBUG))) && (!defined(CORRADE_DEBUG_ASSERT_UNREACHABLE) || !defined(CORRADE_INTERNAL_DEBUG_ASSERT_UNREACHABLE)) && !defined(CORRADE_TARGET_GCC) && !defined(CORRADE_TARGET_MSVC) && !defined(CORRADE_ASSERT_ABORT)
+#include <cstdlib>
+#endif
 #if !defined(CORRADE_NO_ASSERT) && (defined(CORRADE_IS_DEBUG_BUILD) || !defined(NDEBUG)) && (!defined(CORRADE_DEBUG_ASSERT) || !defined(CORRADE_CONSTEXPR_DEBUG_ASSERT) || !defined(CORRADE_DEBUG_ASSERT_OUTPUT) || !defined(CORRADE_DEBUG_ASSERT_UNREACHABLE) || !defined(CORRADE_INTERNAL_DEBUG_ASSERT) || !defined(CORRADE_INTERNAL_CONSTEXPR_DEBUG_ASSERT) || !defined(CORRADE_INTERNAL_DEBUG_ASSERT_OUTPUT) || !defined(CORRADE_INTERNAL_DEBUG_ASSERT_UNREACHABLE))
 #include "Corrade/Utility/Assert.h"
-#endif
-
-#if (defined(CORRADE_NO_ASSERT) || (!defined(CORRADE_IS_DEBUG_BUILD) && defined(NDEBUG))) && (!defined(CORRADE_DEBUG_ASSERT_UNREACHABLE) || !defined(CORRADE_INTERNAL_DEBUG_ASSERT_UNREACHABLE)) && !defined(CORRADE_TARGET_GCC) && !defined(CORRADE_TARGET_MSVC)
-#include <cstdlib> /* std::abort() where unreachable builtin not available */
 #endif
 
 /* There's deliberately no namespace Corrade::Utility in order to avoid noise
@@ -144,9 +147,10 @@ You can override this implementation by placing your own
 
 Expands to @ref CORRADE_ASSERT_UNREACHABLE() if @ref CORRADE_NO_DEBUG_ASSERT is
 not defined. Otherwise expands to a compiler builtin on GCC, Clang and
-MSVC; calls @ref std::abort() otherwise. A @cpp return @ce statement can thus
-be safely omitted in a code path following this macro even in a release build
-without causing any compiler warnings or errors.
+MSVC; calls @ref CORRADE_ASSERT_ABORT() (which is @ref std::abort() by default)
+otherwise. A @cpp return @ce statement can thus be safely omitted in a code
+path following this macro even in a release build without causing any compiler
+warnings or errors.
 
 You can override this implementation by placing your own
 @cpp #define CORRADE_DEBUG_ASSERT_UNREACHABLE @ce before including the
@@ -162,7 +166,7 @@ You can override this implementation by placing your own
 #elif defined(CORRADE_TARGET_MSVC)
 #define CORRADE_DEBUG_ASSERT_UNREACHABLE(message, returnValue) __assume(0)
 #else
-#define CORRADE_DEBUG_ASSERT_UNREACHABLE(message, returnValue) std::abort()
+#define CORRADE_DEBUG_ASSERT_UNREACHABLE(message, returnValue) CORRADE_ASSERT_ABORT()
 #endif
 #endif
 #endif
@@ -257,10 +261,10 @@ You can override this implementation by placing your own
 
 Expands to @ref CORRADE_INTERNAL_ASSERT_UNREACHABLE() if
 @ref CORRADE_NO_DEBUG_ASSERT is not defined. Otherwise expands to a compiler
-builtin on GCC, Clang and MSVC; calls @ref std::abort() otherwise. A
-@cpp return @ce statement can thus be safely omitted in a code path following
-this macro even in a release build without causing any compiler warnings or
-errors.
+builtin on GCC, Clang and MSVC; calls @ref CORRADE_ASSERT_ABORT() (which is
+@ref std::abort() by default) otherwise. A @cpp return @ce statement can thus
+be safely omitted in a code path following this macro even in a release build
+without causing any compiler warnings or errors.
 
 You can override this implementation by placing your own
 @cpp #define CORRADE_INTERNAL_DEBUG_ASSERT_UNREACHABLE @ce before including the
@@ -276,7 +280,7 @@ You can override this implementation by placing your own
 #elif defined(CORRADE_TARGET_MSVC)
 #define CORRADE_INTERNAL_DEBUG_ASSERT_UNREACHABLE() __assume(0)
 #else
-#define CORRADE_INTERNAL_DEBUG_ASSERT_UNREACHABLE() std::abort()
+#define CORRADE_INTERNAL_DEBUG_ASSERT_UNREACHABLE() CORRADE_ASSERT_ABORT()
 #endif
 #endif
 #endif

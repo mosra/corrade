@@ -65,11 +65,17 @@ set_tests_properties(UtilityArgumentsTest
 
 add_library(AssertTestObjects OBJECT AssertTest.cpp)
 add_library(DebugAssertTestObjects OBJECT AssertTest.cpp)
+add_library(AssertOverridesTestObjects OBJECT AssertTest.cpp)
 target_include_directories(AssertTestObjects PRIVATE $<TARGET_PROPERTY:CorradeUtility,INTERFACE_INCLUDE_DIRECTORIES>)
+target_include_directories(AssertOverridesTestObjects PRIVATE $<TARGET_PROPERTY:CorradeUtility,INTERFACE_INCLUDE_DIRECTORIES>)
 target_include_directories(DebugAssertTestObjects PRIVATE $<TARGET_PROPERTY:CorradeUtility,INTERFACE_INCLUDE_DIRECTORIES>)
+target_compile_definitions(AssertOverridesTestObjects PRIVATE "CORRADE_ASSERT_INCLUDE=\"Corrade/Utility/Test/AssertTestOverrides.h\"")
 target_compile_definitions(DebugAssertTestObjects PRIVATE "TEST_DEBUG_ASSERT")
 corrade_add_test(UtilityAssertTest
     $<TARGET_OBJECTS:AssertTestObjects>
+    ${_CORRADE_OBJECT_ONLY_TARGET_DUMMY_CPP}) # XCode workaround
+corrade_add_test(UtilityAssertOverridesTest
+    $<TARGET_OBJECTS:AssertOverridesTestObjects>
     ${_CORRADE_OBJECT_ONLY_TARGET_DUMMY_CPP}) # XCode workaround
 corrade_add_test(UtilityDebugAssertTest
     $<TARGET_OBJECTS:DebugAssertTestObjects>
@@ -187,6 +193,15 @@ if(CORRADE_TARGET_EMSCRIPTEN OR CORRADE_TARGET_ANDROID)
         UtilityAssertTestFailInterAssUnre___
         UtilityDebugAssertTestFailInAssUn___
         PROPERTIES PASS_REGULAR_EXPRESSION "Reached unreachable code at ")
+
+    # Assert overrides tested just for one variant, that should be enough
+    corrade_add_test(UtilityAssertOverridesTestFailAssert
+        $<TARGET_OBJECTS:AssertOverridesTestObjects>
+        ${_CORRADE_OBJECT_ONLY_TARGET_DUMMY_CPP} # XCode workaround
+        ARGUMENTS --fail-on-assert true)
+    set_tests_properties(
+        UtilityAssertOverridesTestFailAssert
+        PROPERTIES PASS_REGULAR_EXPRESSION "Here comes an assertion: A should be zero\nABORTING.")
 endif()
 
 # The same as above, but using CORRADE_STANDARD_ASSERT
