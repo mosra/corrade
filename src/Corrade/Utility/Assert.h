@@ -292,6 +292,8 @@ You can use stream output operators for formatting just like when printing to
 @par
     @snippet Utility.cpp CORRADE_ASSERT-unreachable
 
+<b></b>
+
 You can override this implementation by placing your own
 @cpp #define CORRADE_ASSERT @ce before including the
 @ref Corrade/Utility/Assert.h header. See also @ref CORRADE_ASSERT_ABORT(),
