@@ -30,7 +30,7 @@
  * @brief Macro @ref CORRADE_ASSERT(), @ref CORRADE_CONSTEXPR_ASSERT(), @ref CORRADE_ASSERT_OUTPUT(), @ref CORRADE_ASSERT_UNREACHABLE(), @ref CORRADE_INTERNAL_ASSERT(), @ref CORRADE_INTERNAL_CONSTEXPR_ASSERT(), @ref CORRADE_INTERNAL_ASSERT_OUTPUT(), @ref CORRADE_INTERNAL_ASSERT_EXPRESSION(), @ref CORRADE_INTERNAL_ASSERT_UNREACHABLE(), @ref CORRADE_NO_ASSERT, @ref CORRADE_GRACEFUL_ASSERT, @ref CORRADE_STANDARD_ASSERT
  */
 
-#include "Corrade/Utility/Move.h"
+#include "Corrade/configure.h"
 #if !defined(CORRADE_NO_ASSERT) && (!defined(CORRADE_ASSERT) || !defined(CORRADE_CONSTEXPR_ASSERT) || !defined(CORRADE_ASSERT_OUTPUT) || !defined(CORRADE_ASSERT_UNREACHABLE) || !defined(CORRADE_INTERNAL_ASSERT) || !defined(CORRADE_INTERNAL_CONSTEXPR_ASSERT) || !defined(CORRADE_INTERNAL_ASSERT_OUTPUT) || !defined(CORRADE_INTERNAL_ASSERT_EXPRESSION) || !defined(CORRADE_INTERNAL_ASSERT_UNREACHABLE))
 #ifndef CORRADE_STANDARD_ASSERT
 #include <cstdlib>
@@ -40,6 +40,10 @@
 #elif !defined(NDEBUG)
 #include <cassert>
 #endif
+#endif
+/* Utility::forward(), used only by CORRADE_INTERNAL_ASSERT_EXPRESSION */
+#if !defined(CORRADE_INTERNAL_ASSERT_EXPRESSION) && !defined(CORRADE_NO_ASSERT) && !(defined(CORRADE_STANDARD_ASSERT) && defined(NDEBUG))
+#include "Corrade/Utility/Move.h"
 #endif
 
 /* There's deliberately no namespace Corrade::Utility in order to avoid noise
