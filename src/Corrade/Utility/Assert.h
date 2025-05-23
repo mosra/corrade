@@ -69,11 +69,17 @@ given macro behavior.
 This macro is not defined by Corrade, but rather meant to be defined by the
 user. Unlike @ref CORRADE_NO_ASSERT and in case the error output is redirected
 (i.e., in a test verifying the assert behavior) this macro checks assertions
-and prints a message on error, but does not call @ref std::abort(). Useful for
-testing assertion behavior. See documentation of @ref CORRADE_ASSERT(),
-@ref CORRADE_CONSTEXPR_ASSERT(), @ref CORRADE_ASSERT_OUTPUT() and
-@ref CORRADE_ASSERT_UNREACHABLE() for detailed description of given macro
-behavior. The @ref CORRADE_INTERNAL_ASSERT(),
+and prints a message on error, but calls @cpp return @ce instead of aborting.
+
+@attention
+    Meant solely for use in tests to verify assertion behavior and message
+    formatting. Is *not recommended* to be enabled in regular code as the early
+    returns are likely to cause internal state mismatches, crashes and other
+    undefined behavior.
+
+See documentation of @ref CORRADE_ASSERT(), @ref CORRADE_CONSTEXPR_ASSERT(),
+@ref CORRADE_ASSERT_OUTPUT() and @ref CORRADE_ASSERT_UNREACHABLE() for detailed
+description of given macro behavior. The @ref CORRADE_INTERNAL_ASSERT(),
 @ref CORRADE_INTERNAL_CONSTEXPR_ASSERT(), @ref CORRADE_INTERNAL_ASSERT_OUTPUT(),
 @ref CORRADE_INTERNAL_ASSERT_EXPRESSION() and
 @ref CORRADE_INTERNAL_ASSERT_UNREACHABLE() are meant to check internal
