@@ -994,16 +994,22 @@ void JsonWriterTest::rawJsonInObjectValue() {
     json.beginObject()
         .writeKey("key")
         .writeJson("/* A comment */ false")
+        /* Test using it more than once to verify it doesn't do something
+           unexpected */
+        .writeKey("another")
+        .writeJson("-13")
         .endObject();
-    CORRADE_COMPARE(json.toString(), "{\"key\":/* A comment */ false}");
+    CORRADE_COMPARE(json.toString(), "{\"key\":/* A comment */ false,\"another\":-13}");
 }
 
 void JsonWriterTest::rawJsonInArray() {
     JsonWriter json;
     json.beginArray()
         .writeJson("/* A comment */ 6776")
+        /* Test using it more than once to verify it prints a comma before */
+        .writeJson("0x3567")
         .endArray();
-    CORRADE_COMPARE(json.toString(), "[/* A comment */ 6776]");
+    CORRADE_COMPARE(json.toString(), "[/* A comment */ 6776,0x3567]");
 }
 
 void JsonWriterTest::toStringFlags() {
