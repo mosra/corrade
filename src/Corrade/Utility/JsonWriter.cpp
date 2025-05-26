@@ -669,6 +669,8 @@ JsonWriter& JsonWriter::writeArray(const Containers::StringIterable& values, con
 
 JsonWriter& JsonWriter::writeJson(const Containers::StringView json) {
     State& state = *_state;
+    /* Object key is *not* expected for consistency with write() / writeKey(),
+       writeJsonKey() is meant for keys instead */
     CORRADE_ASSERT(
         state.expecting == Expecting::Value ||
         state.expecting == Expecting::ObjectValue ||
@@ -684,6 +686,26 @@ JsonWriter& JsonWriter::writeJson(const Containers::StringView json) {
     /* Decide what to expect next or finalize the document if the top level
        value got written */
     finalizeValue();
+
+    return *this;
+}
+
+JsonWriter& JsonWriter::writeJsonKey(const Containers::StringView json) {
+    State& state = *_state;
+    CORRADE_ASSERT(state.expecting == Expecting::ObjectKeyOrEnd,
+        "Utility::JsonWriter::writeJsonKey(): expected" << ExpectingString[int(state.expecting)], *this);
+
+    /* Comma, newline and indent */
+    writeCommaNewlineIndentInternal();
+
+    /* Literal value */
+    arrayAppend(state.out, json);
+
+    /* Colon */
+    arrayAppend(state.out, state.colonAndSpace);
+
+    /* Next expecting an object value (i.e., not indented, no comma) */
+    state.expecting = Expecting::ObjectValue;
 
     return *this;
 }

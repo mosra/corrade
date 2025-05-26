@@ -744,9 +744,27 @@ class CORRADE_UTILITY_EXPORT JsonWriter {
          * Internally it's treated as writing a single value, separated by `,`
          * if there's another value before, with outside spacing and
          * indentation as appropriate, but no spacing or indentation performed
-         * inside the string.
+         * inside the string. Expected to not be called after the top-level
+         * JSON value was closed and, similarly as with the distinction of
+         * @ref write(Containers::StringView) vs
+         * @ref writeKey(Containers::StringView), not when an object key is
+         * expected --- use @ref writeJsonKey() in that case instead.
          */
         JsonWriter& writeJson(Containers::StringView json);
+
+        /**
+         * @brief Write a raw JSON string as an object key
+         * @return Reference to self (for method chaining)
+         *
+         * The string is assumed to be a valid and complete JSON string literal
+         * but its validity isn't checked. Internally it's treated as writing a
+         * single key, separated by `,` if there's another value before,
+         * followed by a `:`, with spacing and indentation as appropriate.
+         * Expected to be called only inside an object scope either at the
+         * beginning or after a value for the previous key was written.
+         * @see @ref writeJson(Containers::StringView)
+         */
+        JsonWriter& writeJsonKey(Containers::StringView json);
 
         /**
          * @brief Get the result as a string

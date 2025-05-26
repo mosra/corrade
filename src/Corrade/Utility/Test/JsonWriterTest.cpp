@@ -971,22 +971,17 @@ void JsonWriterTest::unclosedObjectOrArrayOnDestruction() {
 }
 
 void JsonWriterTest::rawJsonInObjectKey() {
-    /* This could eventually get allowed if a compelling use case is found, but
-       right now it's not as it makes the implementation of writeJson()
-       simpler. Or maybe it would have to be writeJsonKey() or some such
-       because why have the distinction in write() vs writeKey() but not in
-       writeJson()? */
-
-    CORRADE_SKIP_IF_NO_ASSERT();
+    /* Accidentally using writeJson() for writing a key is tested in
+       objectKeyButValueExpected() */
 
     JsonWriter json;
-    json.beginObject();
-
-    Containers::String out;
-    Error redirectError{&out};
-    json.writeJson("/* A comment*/ \"key\"");
-    CORRADE_COMPARE(out,
-        "Utility::JsonWriter::writeJson(): expected an object key or object end\n");
+    json.beginObject()
+        .writeJsonKey("/* A comment*/ \"key\"")
+        .write(-13)
+        .writeJsonKey("another")
+        .write(false)
+        .endObject();
+    CORRADE_COMPARE(json.toString(), "{/* A comment*/ \"key\":-13,another:false}");
 }
 
 void JsonWriterTest::rawJsonInObjectValue() {
@@ -1155,8 +1150,11 @@ void JsonWriterTest::objectKeyButValueExpected() {
 
     Containers::String out;
     Error redirectError{&out};
-    json.writeKey("hello");
-    CORRADE_COMPARE(out, "Utility::JsonWriter::writeKey(): expected an object value\n");
+    json.writeKey("hello")
+        .writeJsonKey("\"hello?\"");
+    CORRADE_COMPARE(out,
+        "Utility::JsonWriter::writeKey(): expected an object value\n"
+        "Utility::JsonWriter::writeJsonKey(): expected an object value\n");
 }
 
 void JsonWriterTest::objectKeyButDocumentEndExpected() {
@@ -1167,8 +1165,11 @@ void JsonWriterTest::objectKeyButDocumentEndExpected() {
 
     Containers::String out;
     Error redirectError{&out};
-    json.writeKey("hello");
-    CORRADE_COMPARE(out, "Utility::JsonWriter::writeKey(): expected document end\n");
+    json.writeKey("hello")
+        .writeJsonKey("\"hello?\"");
+    CORRADE_COMPARE(out,
+        "Utility::JsonWriter::writeKey(): expected document end\n"
+        "Utility::JsonWriter::writeJsonKey(): expected document end\n");
 }
 
 void JsonWriterTest::valueButDocumentEndExpected() {
