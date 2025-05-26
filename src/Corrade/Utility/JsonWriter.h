@@ -605,12 +605,14 @@ class CORRADE_UTILITY_EXPORT JsonWriter {
          * by `,` if there's another value before, with spacing and indentation
          * as appropriate. Expected to not be called after the top-level JSON
          * value was closed and not when an object key is expected --- use
-         * @ref writeKey() in that case instead. The string is expected to be
-         * in UTF-8 but its validity isn't checked. Only the `"`, `\`, bell
-         * (@cpp '\b' @ce), form feed (@cpp '\f' @ce), newline (@cpp '\n' @ce),
-         * tab (@cpp '\t' @ce) and carriage return (@cpp '\r' @ce) values are
-         * escaped, the `/` character and UTF-8 bytes are written verbatim
-         * without escaping.
+         * @ref writeKey() in that case instead. Enforcing a dedicated function
+         * for writing keys prevents accidents when a key was accidentally
+         * missed and a subsequent string value gets mistakenly treated as a
+         * key. The string is expected to be in UTF-8 but its validity isn't
+         * checked. Only the `"`, `\`, bell (@cpp '\b' @ce), form feed (
+         * @cpp '\f' @ce), newline (@cpp '\n' @ce), tab (@cpp '\t' @ce) and
+         * carriage return (@cpp '\r' @ce) values are escaped, the `/`
+         * character and UTF-8 bytes are written verbatim without escaping.
          * @see @ref writeArray(const Containers::StringIterable&, std::uint32_t)
          */
         JsonWriter& write(Containers::StringView value);
@@ -736,7 +738,7 @@ class CORRADE_UTILITY_EXPORT JsonWriter {
          * @brief Write a raw JSON string
          * @return Reference to self (for method chaining)
          *
-         * The string is expected to be non-empty and a valid and closed JSON
+         * The string is assumed to be non-empty and a valid and closed JSON
          * value, i.e., a null, bool numeric or a string literal, a complete
          * object or a complete array, but its validity isn't checked.
          * Internally it's treated as writing a single value, separated by `,`

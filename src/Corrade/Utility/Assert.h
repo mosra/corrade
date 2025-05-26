@@ -150,9 +150,18 @@ characters as well. The file can then contain overrides for either the
 affect all asserts or modify just individual macros one by one. The desired use
 case is to pass it via compiler flags to override the assert behavior for the
 whole project, for example with `-DCORRADE_ASSERT_INCLUDE="<assertOverrides.h>"`
-or `-DCORRADE_ASSERT_INCLUDE="\"assertOverrides.h\""`. Note that different
+or `-DCORRADE_ASSERT_INCLUDE="\"assertOverrides.h\\""`. Note that different
 toolchains and buildsystems may need various workarounds to pass the angle
 brackets or inner quotes through.
+
+If you need to also link a certain library in addition to the include, specify
+it among linker flags. In case of CMake for example, while adding this define
+meant editing `CMAKE_CXX_FLAGS`, specifying the library to link to means
+modifying the `CMAKE_SHARED_LINKER_FLAGS` and/or `CMAKE_EXE_LINKER_FLAGS`
+variables.
+@todoc The \" and \\" in the above are deliberate, Doxygen stupidly eats the
+    second backslash otherwise. And putting a double backslash at the front
+    makes it shown twice, so it has to be inconsistent like that.
 */
 #define CORRADE_ASSERT_INCLUDE
 #undef CORRADE_ASSERT_INCLUDE

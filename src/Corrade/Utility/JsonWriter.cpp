@@ -533,6 +533,9 @@ JsonWriter& JsonWriter::write(const Containers::StringView value) {
     #ifndef CORRADE_NO_ASSERT
     State& state = *_state;
     #endif
+    /* Object key is *not* expected to prevent accidents where a missing key
+       would mean the next (string) value is wrongly interpreted as a key
+       instead of failing directly when writing a value without a key before */
     CORRADE_ASSERT(
         state.expecting == Expecting::Value ||
         state.expecting == Expecting::ObjectValue ||
