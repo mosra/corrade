@@ -187,6 +187,14 @@ its children. This can be used for example to pretty-print a minified JSON file
 or to extract parts of a larger JSON file:
 
 @snippet Utility.cpp JsonWriter-tokens
+
+<b></b>
+
+@m_class{m-note m-success}
+
+@par
+    See the @ref json-pretty-printer example for a self-contained executable
+    making use of this functionality.
 */
 class CORRADE_UTILITY_EXPORT JsonWriter {
     public:

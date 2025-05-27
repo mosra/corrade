@@ -60,7 +60,8 @@ encouraged to build them on top of the parsed output.
 
 The @ref JsonWriter class provides a write-only counterpart for saving a JSON
 file. It can also directly write contents of a @ref Json instance, see
-@ref Utility-JsonWriter-tokens.
+@ref Utility-JsonWriter-tokens and a corresponding @ref json-pretty-printer
+example.
 
 @experimental
 

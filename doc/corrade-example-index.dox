@@ -36,6 +36,7 @@ see @ref building-corrade-examples for more information.
 -   @subpage resource-management --- @copybrief resource-management
 -   @subpage plugin-management --- @copybrief plugin-management
 -   @subpage interconnect --- @copybrief interconnect
+-   @subpage json-pretty-printer --- @copybrief json-pretty-printer
 
 While Corrade itself and its documentation is licensed under the MIT/Expat
 license, all example code is put into public domain (or UNLICENSE) to free you

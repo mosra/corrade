@@ -28,24 +28,17 @@
 #   CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #
 
-# Matches Corrade requirement, see root CMakeLists for more information.
 cmake_minimum_required(VERSION 3.5...3.10)
 
-project(CorradeExamples CXX)
+project(CorradeJsonExample CXX)
 
-# On MSVC remove /W3, as we are replacing it with /W4
-if(CMAKE_CXX_COMPILER_ID STREQUAL "MSVC" OR CMAKE_CXX_SIMULATE_ID STREQUAL "MSVC")
-    string(REPLACE "/W3" "" CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
+# Add module path in case this is project root
+if(PROJECT_SOURCE_DIR STREQUAL CMAKE_SOURCE_DIR)
+    set(CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/../../../modules" ${CMAKE_MODULE_PATH})
 endif()
 
-# Just for CORRADE_PLUGINMANAGER_NO_DYNAMIC_PLUGIN_SUPPORT, not needed at this
-# level otherwise
-find_package(Corrade REQUIRED)
+find_package(Corrade REQUIRED Utility)
+set_directory_properties(PROPERTIES CORRADE_USE_PEDANTIC_FLAGS ON)
 
-add_subdirectory(interconnect)
-add_subdirectory(json)
-if(NOT CORRADE_PLUGINMANAGER_NO_DYNAMIC_PLUGIN_SUPPORT)
-    add_subdirectory(pluginmanager)
-endif()
-add_subdirectory(resource)
-add_subdirectory(testsuite)
+add_executable(corrade-json main.cpp)
+target_link_libraries(corrade-json PRIVATE Corrade::Utility)
