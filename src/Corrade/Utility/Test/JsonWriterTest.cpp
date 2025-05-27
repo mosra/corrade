@@ -1072,7 +1072,11 @@ void JsonWriterTest::rawJsonParsedTokens() {
 
     JsonWriter output;
     output.writeJson(input.root());
-    CORRADE_COMPARE(output.toString(), R"([null,[],true,{},6.52,6.52,652,-652,652,-652,{"key":"value","\"escaped\"":"\"also\""}])");
+    /* Can't use raw string literals because idiotic MSVC 2015, 2017, 2019
+       *and* 2022 then thinks the `"\"escaped` is an "invalid escape sequence"
+       and subsequently a user-defined literal named `escaped`?! What the
+       hell. */
+    CORRADE_COMPARE(output.toString(), "[null,[],true,{},6.52,6.52,652,-652,652,-652,{\"key\":\"value\",\"\\\"escaped\\\"\":\"\\\"also\\\"\"}]");
 }
 
 void JsonWriterTest::rawJsonTokenStringKey() {
