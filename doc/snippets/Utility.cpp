@@ -1102,6 +1102,19 @@ gltf.endObject();
 }
 
 {
+/* [JsonWriter-tokens] */
+Containers::Optional<Utility::Json> json = Utility::Json::fromFile(DOXYGEN_ELLIPSIS({}));
+
+/* Wrap and indent the input with two spaces */
+Utility::JsonWriter writer{
+    Utility::JsonWriter::Option::Wrap|
+    Utility::JsonWriter::Option::TypographicalSpace, 2};
+writer.writeJson(json->root());
+writer.toFile(DOXYGEN_ELLIPSIS({}));
+/* [JsonWriter-tokens] */
+}
+
+{
 int a = 2;
 int d[5]{};
 int e[5]{};

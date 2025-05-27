@@ -59,7 +59,8 @@ for fast lookup of keys and array indices --- if that's desired, users are
 encouraged to build them on top of the parsed output.
 
 The @ref JsonWriter class provides a write-only counterpart for saving a JSON
-file.
+file. It can also directly write contents of a @ref Json instance, see
+@ref Utility-JsonWriter-tokens.
 
 @experimental
 

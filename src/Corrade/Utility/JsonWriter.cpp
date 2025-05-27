@@ -37,6 +37,7 @@
 #include "Corrade/Containers/String.h"
 #include "Corrade/Containers/StringIterable.h"
 #include "Corrade/Utility/Format.h" /* numeric JsonWriter::write() */
+#include "Corrade/Utility/Json.h"
 #include "Corrade/Utility/Macros.h" /* CORRADE_FALLTHROUGH */
 #include "Corrade/Utility/Path.h"
 
@@ -706,6 +707,99 @@ JsonWriter& JsonWriter::writeJsonKey(const Containers::StringView json) {
 
     /* Next expecting an object value (i.e., not indented, no comma) */
     state.expecting = Expecting::ObjectValue;
+
+    return *this;
+}
+
+JsonWriter& JsonWriter::writeJson(const JsonToken json) {
+    State& state = *_state;
+    /* Object key is *not* expected for consistency with the StringView
+       overload. There's also no writeJsonKey() for JsonToken, because it's
+       so far unclear whether such a token should be processed including its
+       children (and thus writing its value as well) or as just a key. Might
+       loosen up the requirements once a practical use case emerges. */
+    CORRADE_ASSERT(
+        state.expecting == Expecting::Value ||
+        state.expecting == Expecting::ObjectValue ||
+        state.expecting == Expecting::ArrayValueOrArrayEnd,
+        "Utility::JsonWriter::writeJson(): expected" << ExpectingString[int(state.expecting)], *this);
+
+    /* Complementary to the above, if the token is a string, it should be a
+       string value, not a key (with children) */
+    CORRADE_ASSERT(json.type() != JsonToken::Type::String || json.children().isEmpty(),
+        "Utility::JsonWriter::writeJson(): expected a value token but got an object key", *this);
+
+    /* Iterate arrays and recurse */
+    const JsonToken::Type type = json.type();
+    if(type == JsonToken::Type::Array) {
+        beginArray();
+        /* Not using asArray() as that only works if the array is parsed. If
+           the array is empty, firstChild() is an invalid iterator, test that
+           as well. */
+        for(JsonIterator i = json.firstChild(), end = json.next(); i && i != end; i = i->next())
+            writeJson(*i);
+        endArray();
+
+    /* Iterate objects and recurse */
+    } else if(type == JsonToken::Type::Object) {
+        beginObject();
+        /* Not using asArray() as that only works if the object is parsed. If
+           the object is empty, firstChild() is an invalid iterator, test that
+           as well. */
+        for(JsonIterator i = json.firstChild(), end = json.next(); i && i != end; i = i->next()) {
+            if(i->isParsed())
+                writeKey(i->asString());
+            else
+                writeJsonKey(i->data());
+            writeJson(*i->firstChild());
+        }
+        endObject();
+
+    /* Write values */
+    } else switch(json.parsedType()) {
+        case JsonToken::ParsedType::None:
+            writeJson(json.data());
+            break;
+        case JsonToken::ParsedType::Double:
+            write(json.asDouble());
+            break;
+        case JsonToken::ParsedType::Float:
+            write(json.asFloat());
+            break;
+        case JsonToken::ParsedType::UnsignedInt:
+            write(json.asUnsignedInt());
+            break;
+        case JsonToken::ParsedType::Int:
+            write(json.asInt());
+            break;
+        case JsonToken::ParsedType::UnsignedLong:
+            write(json.asUnsignedLong());
+            break;
+        case JsonToken::ParsedType::Long:
+            write(json.asLong());
+            break;
+        case JsonToken::ParsedType::Other:
+            switch(type) {
+                case JsonToken::Type::Null:
+                    write(json.asNull());
+                    break;
+                case JsonToken::Type::Bool:
+                    write(json.asBool());
+                    break;
+                case JsonToken::Type::String:
+                    write(json.asString());
+                    break;
+                /* LCOV_EXCL_START */
+                /* Numbers are never ParsedType::Other */
+                case JsonToken::Type::Number:
+                /* These are already handled above */
+                case JsonToken::Type::Array:
+                case JsonToken::Type::Object:
+                    CORRADE_INTERNAL_ASSERT_UNREACHABLE();
+                /* LCOV_EXCL_STOP */
+            }
+            break;
+    }
 
     return *this;
 }

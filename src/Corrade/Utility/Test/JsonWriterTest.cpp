@@ -26,7 +26,8 @@
 
 #include <cmath> /* NAN, INFINITY */
 
-#include "Corrade/Containers/ArrayView.h"
+#include "Corrade/Containers/Array.h"
+#include "Corrade/Containers/Optional.h"
 #include "Corrade/Containers/ScopeGuard.h"
 #include "Corrade/Containers/StridedArrayView.h"
 #include "Corrade/Containers/StridedBitArrayView.h"
@@ -36,6 +37,7 @@
 #include "Corrade/TestSuite/Compare/FileToString.h"
 #include "Corrade/TestSuite/Compare/String.h"
 #include "Corrade/Utility/Format.h"
+#include "Corrade/Utility/Json.h"
 #include "Corrade/Utility/JsonWriter.h"
 #include "Corrade/Utility/Path.h"
 
@@ -82,6 +84,9 @@ struct JsonWriterTest: TestSuite::Tester {
         void rawJsonInObjectKey();
         void rawJsonInObjectValue();
         void rawJsonInArray();
+        void rawJsonTokens();
+        void rawJsonParsedTokens();
+        void rawJsonTokenStringKey();
 
         void toStringFlags();
         void toFile();
@@ -486,6 +491,9 @@ JsonWriterTest::JsonWriterTest() {
               &JsonWriterTest::rawJsonInObjectKey,
               &JsonWriterTest::rawJsonInObjectValue,
               &JsonWriterTest::rawJsonInArray,
+              &JsonWriterTest::rawJsonTokens,
+              &JsonWriterTest::rawJsonParsedTokens,
+              &JsonWriterTest::rawJsonTokenStringKey,
 
               &JsonWriterTest::toStringFlags,
               &JsonWriterTest::toFile,
@@ -1007,6 +1015,94 @@ void JsonWriterTest::rawJsonInArray() {
     CORRADE_COMPARE(json.toString(), "[/* A comment */ 6776,0x3567]");
 }
 
+void JsonWriterTest::rawJsonTokens() {
+    /* The output should be exactly the same */
+    const char* json = R"([null,[],true,{},6.52,{"key":"value","\"escaped\"":"\"also\""}])";
+    Containers::Optional<Json> input = Json::fromString(json);
+    CORRADE_VERIFY(input);
+
+    JsonWriter output;
+    output.writeJson(input->root());
+    CORRADE_COMPARE(output.toString(), json);
+}
+
+void JsonWriterTest::rawJsonParsedTokens() {
+    /* Like rawJsonTokens(), but expanded to cover all possible parsed types */
+    Containers::Array<JsonTokenOffsetSize> offsetsSizes{InPlaceInit, {
+        {},     /* 0 */
+        {},     /* 1 */
+        {},     /* 2 */
+        {},     /* 3 */
+        {},     /* 4 */
+        {},     /* 5 */
+        {},     /* 6 */
+        {},     /* 7 */
+        {},     /* 8 */
+        {},     /* 9 */
+        {},     /* 10 */
+        {},     /* 11 */
+        {0, 5}, /* 12 */
+        {5, 7}, /* 13 */
+        {},     /* 14 */
+        {},     /* 15 */
+    }};
+
+    /*          1      6         */
+    Json input{"\"key\"\"value\"", {InPlaceInit, {
+        JsonTokenData{JsonToken::Type::Array, 15},   /* 0 */
+        JsonTokenData{nullptr},                     /* 1 */
+        JsonTokenData{JsonToken::Type::Array, 0},   /* 2 */
+        JsonTokenData{true},                        /* 3 */
+        JsonTokenData{JsonToken::Type::Object, 0},  /* 4 */
+        JsonTokenData{6.52f},                       /* 5 */
+        JsonTokenData{6.52, offsetsSizes[6]},       /* 6 */
+        JsonTokenData{652u},                        /* 7 */
+        JsonTokenData{-652},                        /* 8 */
+        JsonTokenData{652ull, offsetsSizes[9]},     /* 9 */
+        JsonTokenData{-652ll, offsetsSizes[10]},    /* 10 */
+        JsonTokenData{JsonToken::Type::Object, 4},  /* 11 */
+        JsonTokenData{JsonToken::Type::String, ~std::uint64_t{}, true}, /* 12 */
+        JsonTokenData{JsonToken::Type::String, ~std::uint64_t{}}, /* 13 */
+        JsonTokenData{JsonToken::Type::String, 0, true}, /* 14 */
+        JsonTokenData{JsonToken::Type::String, 1}, /* 15 */
+    }}, Utility::move(offsetsSizes), {InPlaceInit, {
+        "\"escaped\"",
+        "\"also\""
+    }}};
+
+    JsonWriter output;
+    output.writeJson(input.root());
+    CORRADE_COMPARE(output.toString(), R"([null,[],true,{},6.52,6.52,652,-652,652,-652,{"key":"value","\"escaped\"":"\"also\""}])");
+}
+
+void JsonWriterTest::rawJsonTokenStringKey() {
+    CORRADE_SKIP_IF_NO_ASSERT();
+
+    Containers::Optional<Json> unparsed = Json::fromString(R"({"key":"value"})");
+    CORRADE_VERIFY(unparsed);
+
+    Json parsed{"\"key\"\"value\"", {InPlaceInit, {
+        JsonTokenData{JsonToken::Type::Object, 2},
+        JsonTokenData{JsonToken::Type::String, ~std::uint64_t{}, true},
+        JsonTokenData{JsonToken::Type::String, ~std::uint64_t{}},
+    }}, {InPlaceInit, {{}, {0, 5}, {5, 7}}}, {}};
+
+    JsonWriter output;
+    output.beginArray();
+
+    /* These are fine */
+    output.writeJson(unparsed->tokens()[2]);
+    output.writeJson(parsed.tokens()[2]);
+
+    Containers::String out;
+    Error redirectError{&out};
+    output.writeJson(unparsed->tokens()[1]);
+    output.writeJson(parsed.tokens()[1]);
+    CORRADE_COMPARE(out,
+        "Utility::JsonWriter::writeJson(): expected a value token but got an object key\n"
+        "Utility::JsonWriter::writeJson(): expected a value token but got an object key\n");
+}
+
 void JsonWriterTest::toStringFlags() {
     JsonWriter json;
     Containers::StringView out = json
@@ -1127,6 +1223,10 @@ void JsonWriterTest::objectEndButArrayEndExpected() {
 void JsonWriterTest::valueButObjectKeyExpected() {
     CORRADE_SKIP_IF_NO_ASSERT();
 
+    Json tokens{{}, {InPlaceInit, {
+        JsonTokenData{false},
+    }}, {InPlaceInit, {{}}}, {}};
+
     JsonWriter json;
     json.beginObject();
 
@@ -1134,10 +1234,12 @@ void JsonWriterTest::valueButObjectKeyExpected() {
     Error redirectError{&out};
     json.write("hello")
         .writeArray({5})
-        .writeJson("false");
+        .writeJson("false")
+        .writeJson(tokens.root());
     CORRADE_COMPARE(out,
         "Utility::JsonWriter::write(): expected an object key or object end\n"
         "Utility::JsonWriter::writeArray(): expected an object key or object end\n"
+        "Utility::JsonWriter::writeJson(): expected an object key or object end\n"
         "Utility::JsonWriter::writeJson(): expected an object key or object end\n");
 }
 
@@ -1175,6 +1277,10 @@ void JsonWriterTest::objectKeyButDocumentEndExpected() {
 void JsonWriterTest::valueButDocumentEndExpected() {
     CORRADE_SKIP_IF_NO_ASSERT();
 
+    Json tokens{{}, {InPlaceInit, {
+        JsonTokenData{false},
+    }}, {InPlaceInit, {{}}}, {}};
+
     JsonWriter json;
     json.write("hi");
 
@@ -1182,15 +1288,21 @@ void JsonWriterTest::valueButDocumentEndExpected() {
     Error redirectError{&out};
     json.write("hello")
         .writeArray({5})
-        .writeJson("/* HI JSON CAN YOU COMMENT */");
+        .writeJson("/* HI JSON CAN YOU COMMENT */")
+        .writeJson(tokens.root());
     CORRADE_COMPARE(out,
         "Utility::JsonWriter::write(): expected document end\n"
         "Utility::JsonWriter::writeArray(): expected document end\n"
+        "Utility::JsonWriter::writeJson(): expected document end\n"
         "Utility::JsonWriter::writeJson(): expected document end\n");
 }
 
 void JsonWriterTest::disallowedInCompactArray() {
     CORRADE_SKIP_IF_NO_ASSERT();
+
+    Json tokens{{}, {InPlaceInit, {
+        JsonTokenData{false},
+    }}, {InPlaceInit, {{}}}, {}};
 
     JsonWriter json;
     json.beginCompactArray();
@@ -1202,16 +1314,18 @@ void JsonWriterTest::disallowedInCompactArray() {
         .beginArray()
         .beginCompactArray()
         .writeArray({5})
-        /* This could eventually get allowed if a compelling use case is found,
-           but the assumption is that JSON strings are inherently complex with
-           their own internal indentation etc., which would significantly break
-           the formatting here. */
-        .writeJson("/* HI JSON CAN YOU COMMENT */");
+        /* These two could eventually get allowed if a compelling use case is
+           found, but the assumption is that JSON strings are inherently
+           complex with their own internal indentation etc., which would
+           significantly break the formatting here. */
+        .writeJson("/* HI JSON CAN YOU COMMENT */")
+        .writeJson(tokens.root());
     CORRADE_COMPARE(out,
         "Utility::JsonWriter::beginObject(): expected a compact array value or array end\n"
         "Utility::JsonWriter::beginArray(): expected a compact array value or array end\n"
         "Utility::JsonWriter::beginCompactArray(): expected a compact array value or array end\n"
         "Utility::JsonWriter::writeArray(): expected a compact array value or array end\n"
+        "Utility::JsonWriter::writeJson(): expected a compact array value or array end\n"
         "Utility::JsonWriter::writeJson(): expected a compact array value or array end\n");
 }
 

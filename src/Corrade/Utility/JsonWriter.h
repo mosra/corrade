@@ -161,9 +161,9 @@ achieve the same compact formatting without passing the array as a whole.
 While the streaming nature of the writer doesn't allow to add new values to
 multiple places in the file, this can be achieved by populating multiple
 @ref JsonWriter instances and then combining their formatted output together
-using @ref writeJson(). The following snippet first creates standalone glTF
-node and mesh arrays and then combines them together to a complete glTF file,
-with each node having exactly one assigned mesh:
+using @ref writeJson(Containers::StringView). The following snippet first
+creates standalone glTF node and mesh arrays and then combines them together to
+a complete glTF file, with each node having exactly one assigned mesh:
 
 @snippet Utility.cpp JsonWriter-usage-combining-writers
 
@@ -173,6 +173,20 @@ surroundings in the final file. The @ref currentArraySize() index is used to
 know the ID of the currently added mesh instead of having to increment a
 counter by hand, and finally @ref isEmpty() is used to know whether there's any
 meshes at all, in which case the list is completely omitted in the final file.
+
+@section Utility-JsonWriter-tokens Writing raw JSON token data
+
+With the above-mentioned @ref writeJson(Containers::StringView) as well as
+@ref writeJsonKey(Containers::StringView) it's possible to write raw JSON token
+data such as string, number or object literals directly to the output without
+having to parse them first.
+
+Combined with the @ref Json class, which performs JSON tokenization and
+parsing, @ref writeJson(JsonToken) can then write contents of a JSON token and
+its children. This can be used for example to pretty-print a minified JSON file
+or to extract parts of a larger JSON file:
+
+@snippet Utility.cpp JsonWriter-tokens
 */
 class CORRADE_UTILITY_EXPORT JsonWriter {
     public:
@@ -765,6 +779,25 @@ class CORRADE_UTILITY_EXPORT JsonWriter {
          * @see @ref writeJson(Containers::StringView)
          */
         JsonWriter& writeJsonKey(Containers::StringView json);
+
+        /**
+         * @brief Write a JSON token contents
+         * @return Reference to self (for method chaining)
+         *
+         * Equivalent to iterating the @ref JsonToken contents and writing them
+         * one by one as appropriate. Expected to not be called after the
+         * top-level JSON value was closed and not when an object key is
+         * expected, the token is also expected to not be an object key.
+         *
+         * Tokens that are parsed are passed to @ref write() / @ref writeKey(),
+         * unparsed tokens have @ref JsonToken::data() passed to
+         * @ref writeJson() / @ref writeJsonKey(). Objects and arrays are
+         * always passed to @ref beginObject(), @ref endObject(),
+         * @ref beginArray() and @ref endArray() and the function recurses on
+         * their contents. In other words, even if they're not parsed, their
+         * contents are iterated and not written verbatim.
+         */
+        JsonWriter& writeJson(JsonToken json);
 
         /**
          * @brief Get the result as a string
