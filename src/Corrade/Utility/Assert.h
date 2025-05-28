@@ -2,7 +2,8 @@
 /* Include the user-provided header if desired. Do this before the header guard
    is defined so in case the user-provided header directly or transitively
    includes Assert.h as well, it's not skipped as a whole, causing the assert
-   macros to not be defined at all. */
+   macros to not be defined at all. See Test/AssertTestOverrides.h for a repro
+   case. */
 #include CORRADE_ASSERT_INCLUDE
 #endif
 #ifndef Corrade_Utility_Assert_h

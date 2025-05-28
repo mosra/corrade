@@ -1426,10 +1426,8 @@ class MYLIBRARY_EXPORT ExportedClass {
 }
 
 /* These are placed at the very end to not have the redefinitions mess with
-   assertion macros by accident */
+   assertion macros by accident, or the includes messing things up, etc. */
 #undef CORRADE_ASSERT_ABORT
-/* The header is included above already, doing it a second time should be a
-   no-op */
 /* [CORRADE_ASSERT_ABORT] */
 /* Define before including Assert.h, either directly or transitively */
 #define CORRADE_ASSERT_ABORT() abortWithBacktrace()
@@ -1442,8 +1440,6 @@ class MYLIBRARY_EXPORT ExportedClass {
 #define CORRADE_ASSERT_ABORT() std::abort()
 
 #undef CORRADE_ASSERT_MESSAGE_ABORT
-/* The header is included above already, doing it a second time should be a
-   no-op */
 /* [CORRADE_ASSERT_MESSAGE_ABORT] */
 /* Define before including Assert.h, either directly or transitively */
 #define CORRADE_ASSERT_MESSAGE_ABORT(...)                                   \

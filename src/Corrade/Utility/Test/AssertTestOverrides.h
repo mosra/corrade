@@ -35,14 +35,23 @@
    should be that every assertion is prefixed with "Here comes an assertion:",
    and a line saying "ABORTING." right before it aborts. */
 
+#define CORRADE_ASSERT_ABORT() abortLoudly()
+#define CORRADE_ASSERT_MESSAGE_ABORT(...)                                   \
+    Corrade::Utility::Error{Corrade::Utility::Error::defaultOutput()} << "Here comes an assertion:" << __VA_ARGS__; \
+    CORRADE_ASSERT_ABORT();
+
 [[noreturn]] inline void abortLoudly() {
     Corrade::Utility::Error{} << "ABORTING.";
     std::abort();
 }
 
-#define CORRADE_ASSERT_ABORT() abortLoudly()
-#define CORRADE_ASSERT_MESSAGE_ABORT(...)                                   \
-    Corrade::Utility::Error{Corrade::Utility::Error::defaultOutput()} << "Here comes an assertion:" << __VA_ARGS__; \
-    CORRADE_ASSERT_ABORT();
+/* Verify also that including Assert.h from within CORRADE_ASSERT_INCLUDE works
+   and the assertion macros are correctly defined here already and not only
+   outside of this header. */
+#include <Corrade/Utility/Assert.h>
+
+inline void thisAsserts() {
+    CORRADE_INTERNAL_ASSERT(false);
+}
 
 #endif
