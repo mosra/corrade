@@ -1431,11 +1431,12 @@ class MYLIBRARY_EXPORT ExportedClass {
 /* The header is included above already, doing it a second time should be a
    no-op */
 /* [CORRADE_ASSERT_ABORT] */
-[[noreturn]] void abortWithBacktrace();
-
+/* Define before including Assert.h, either directly or transitively */
 #define CORRADE_ASSERT_ABORT() abortWithBacktrace()
-
 #include <Corrade/Utility/Assert.h>
+
+/* Include all definitions required by the macro after */
+[[noreturn]] void abortWithBacktrace();
 /* [CORRADE_ASSERT_ABORT] */
 #undef CORRADE_ASSERT_ABORT
 #define CORRADE_ASSERT_ABORT() std::abort()
@@ -1444,8 +1445,7 @@ class MYLIBRARY_EXPORT ExportedClass {
 /* The header is included above already, doing it a second time should be a
    no-op */
 /* [CORRADE_ASSERT_MESSAGE_ABORT] */
-void logAndReportAssertion(const char* message);
-
+/* Define before including Assert.h, either directly or transitively */
 #define CORRADE_ASSERT_MESSAGE_ABORT(...)                                   \
     Corrade::Containers::String out;                                        \
     Corrade::Utility::Error{&out, Corrade::Utility::Error::Flag::NoNewlineAtTheEnd} \
@@ -1453,8 +1453,13 @@ void logAndReportAssertion(const char* message);
     logAndReportAssertion(out.data());                                      \
     Corrade::Utility::Error{Corrade::Utility::Error::defaultOutput()} << out; \
     CORRADE_ASSERT_ABORT();
-
 #include <Corrade/Utility/Assert.h>
+
+/* Include all definitions required by the macro after */
+#include <Corrade/Containers/String.h>
+#include <Corrade/Utility/Debug.h>
+
+void logAndReportAssertion(const char* message);
 /* [CORRADE_ASSERT_MESSAGE_ABORT] */
 #undef CORRADE_ASSERT_MESSAGE_ABORT
 #define CORRADE_ASSERT_MESSAGE_ABORT(...)                                   \
