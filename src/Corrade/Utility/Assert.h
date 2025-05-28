@@ -1,3 +1,10 @@
+#ifdef CORRADE_ASSERT_INCLUDE
+/* Include the user-provided header if desired. Do this before the header guard
+   is defined so in case the user-provided header directly or transitively
+   includes Assert.h as well, it's not skipped as a whole, causing the assert
+   macros to not be defined at all. */
+#include CORRADE_ASSERT_INCLUDE
+#endif
 #ifndef Corrade_Utility_Assert_h
 #define Corrade_Utility_Assert_h
 /*
@@ -56,10 +63,6 @@
 /* Utility::forward(), used only by CORRADE_INTERNAL_ASSERT_EXPRESSION */
 #if !defined(CORRADE_INTERNAL_ASSERT_EXPRESSION) && !defined(CORRADE_NO_ASSERT) && !(defined(CORRADE_STANDARD_ASSERT) && defined(NDEBUG))
 #include "Corrade/Utility/Move.h"
-#endif
-/* Include the user-provided header if desired */
-#ifdef CORRADE_ASSERT_INCLUDE
-#include CORRADE_ASSERT_INCLUDE
 #endif
 
 /* There's deliberately no namespace Corrade::Utility in order to avoid noise
