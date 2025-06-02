@@ -1496,7 +1496,7 @@ The returned instance has both @ref StringViewFlag::Global and
 @ref Containers-BasicStringView-usage for more information.
 @m_keywords{_s s}
 */
-constexpr StringView operator"" _s(const char* data, std::size_t size) {
+constexpr StringView operator""_s(const char* data, std::size_t size) {
     /* Using plain bit ops instead of EnumSet to speed up debug builds */
     return StringView{data, size, StringViewFlag(std::size_t(StringViewFlag::Global)|std::size_t(StringViewFlag::NullTerminated))};
 }
