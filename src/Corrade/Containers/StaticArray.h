@@ -994,8 +994,9 @@ template<std::size_t size_, class T> class StaticArray: Implementation::StaticAr
 @m_since_latest
 
 Convenience alternative to @cpp StaticArray<1, T> @ce. See @ref StaticArray for
-more information. Useful in case you want to take advantage of the @ref NoInit
-tag on an arbitrary type and @ref Optional doesn't suit the use case.
+more information. Useful in case you want to take advantage of the
+@relativeref{Corrade,NoInit} tag on an arbitrary type and @ref Optional doesn't
+suit the use case.
 @see @ref Array2, @ref Array3, @ref Array4, @ref ArrayView2, @ref ArrayView3,
     @ref ArrayView4
 */

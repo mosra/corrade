@@ -129,7 +129,7 @@ template<class F, class S, class T> class Triple {
          * otherwise. Because of the differing behavior for trivial types it's
          * better to explicitly use either the @ref Triple(ValueInitT) or the
          * @ref Triple(NoInitT) variant instead.
-         * @see @ref DefaultInit, @ref std::is_trivial
+         * @see @relativeref{Corrade,DefaultInit}, @ref std::is_trivial
          */
         #ifndef CORRADE_MSVC2015_COMPATIBILITY
         /* Not constexpr for this joke of a compiler because I don't explicitly
@@ -144,7 +144,7 @@ template<class F, class S, class T> class Triple {
          *
          * Trivial types are zero-initialized, default constructor called
          * otherwise. This is the same as the default constructor.
-         * @see @ref ValueInit, @ref Triple(DefaultInitT)
+         * @see @relativeref{Corrade,ValueInit}, @ref Triple(DefaultInitT)
          */
         constexpr explicit Triple(Corrade::ValueInitT) noexcept(std::is_nothrow_constructible<F>::value && std::is_nothrow_constructible<S>::value && std::is_nothrow_constructible<T>::value):
             /* Can't use {} here. See constructHelpers.h for details, test in
@@ -155,10 +155,10 @@ template<class F, class S, class T> class Triple {
          * @brief Construct a triple without initializing its contents
          *
          * Enabled only for trivial types and types that implement the
-         * @ref NoInit constructor. The contents are *not* initialized. Useful
-         * if you will be overwriting both members later anyway or if you need
-         * to initialize in a way that's not expressible via any other
-         * @ref Triple constructor.
+         * @relativeref{Corrade,NoInit} constructor. The contents are *not*
+         * initialized. Useful if you will be overwriting both members later
+         * anyway or if you need to initialize in a way that's not expressible
+         * via any other @ref Triple constructor.
          *
          * For trivial types is equivalent to @ref Triple(DefaultInitT).
          */

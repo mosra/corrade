@@ -70,9 +70,9 @@ just a parameter-less function or lambda:
 
 @section Containers-ScopeGuard-deferred Deferred guard creation
 
-Using the @ref NoCreate tag, it's possible to create an empty instance that's
-populated later by moving another object over it, for example to have a
-conditional guard:
+Using the @relativeref{Corrade,NoCreate} tag, it's possible to create an empty
+instance that's populated later by moving another object over it, for example
+to have a conditional guard:
 
 @snippet Containers.cpp ScopeGuard-deferred
 

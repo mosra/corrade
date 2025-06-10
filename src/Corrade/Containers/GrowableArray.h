@@ -1483,9 +1483,9 @@ template<template<class> class Allocator, class T> inline void arrayClear(Array<
 @brief Convert an array back to non-growable
 @m_since{2020,06}
 
-Allocates a @ref NoInit array that's exactly large enough to fit
-@ref Array::size() elements, move-constructs the elements there and frees the
-old memory using @ref Array::deleter(). If the array is not growable using
+Allocates a @relativeref{Corrade,NoInit} array that's exactly large enough to
+fit @ref Array::size() elements, move-constructs the elements there and frees
+the old memory using @ref Array::deleter(). If the array is not growable using
 given @p Allocator, it's assumed to be already as small as possible, and
 nothing is done.
 
@@ -1506,9 +1506,9 @@ template<class T, class Allocator = ArrayAllocator<T>> void arrayShrink(Array<T>
 @brief Convert an array back to non-growable using a default initialization
 @m_since_latest
 
-Allocates a @ref DefaultInit array that's exactly large enough to fit
-@ref Array::size() elements, move-assigns the elements there and frees the old
-memory using @ref Array::deleter(). If the array is not growable using
+Allocates a @relativeref{Corrade,DefaultInit} array that's exactly large enough
+to fit @ref Array::size() elements, move-assigns the elements there and frees
+the old memory using @ref Array::deleter(). If the array is not growable using
 given @p Allocator, it's assumed to be already as small as possible, and
 nothing is done.
 

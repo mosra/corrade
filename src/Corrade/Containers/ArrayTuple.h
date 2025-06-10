@@ -103,11 +103,12 @@ or a @ref BasicStringView "MutableStringView". See constructor overloads of the
 @section Containers-ArrayTuple-nontrivial Storing non-trivial types
 
 The usage isn't limited to just trivial types --- by default (or if you
-explicitly specify @ref ValueInit) it'll value-construct the items and will
-also correctly call destructors at the end. Moreover, each sub-array is padded
-to match alignment requirements of its type. You can also specify @ref NoInit,
-which will keep the contents uninitialized, allowing you to use a non-default
-constructor or skip zero-initialization of builtin types when not necessary:
+explicitly specify @relativeref{Corrade,ValueInit}) it'll value-construct the
+items and will also correctly call destructors at the end. Moreover, each
+sub-array is padded to match alignment requirements of its type. You can also
+specify @relativeref{Corrade,NoInit}, which will keep the contents
+uninitialized, allowing you to use a non-default constructor or skip
+zero-initialization of builtin types when not necessary:
 
 @snippet Containers.cpp ArrayTuple-usage-nontrivial
 
