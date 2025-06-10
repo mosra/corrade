@@ -751,10 +751,12 @@ void StaticArrayTest::constructDirectInitMoveOnly() {
 }
 
 void StaticArrayTest::constructImmovable() {
-    /* Can't use ValueInit because that apparently copy-constructs the array
-       elements (huh?) */
     const StaticArray<5, Immovable> a{Corrade::DefaultInit};
+    const StaticArray<5, Immovable> b{Corrade::ValueInit};
+    const StaticArray<5, Immovable> c;
     CORRADE_VERIFY(a);
+    CORRADE_VERIFY(b);
+    CORRADE_VERIFY(c);
 }
 
 void StaticArrayTest::constructNoImplicitConstructor() {

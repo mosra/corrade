@@ -93,28 +93,13 @@ template<std::size_t size_, class T> struct StaticArrayData<size_, T, false> {
 
     /* Compared to StaticArrayData<size_, T, true> a default constructor has to
        be called on the union members. If the default constructor is trivial,
-       the StaticArrayData<size_, T, true> base was picked instead. */
-    explicit StaticArrayData(Corrade::DefaultInitT)
-        /* GCC 5.3 is not able to initialize non-movable types inside
-           constructor initializer list. Reported here, fixed on 10.3:
-            https://gcc.gnu.org/bugzilla/show_bug.cgi?id=70395
+       the StaticArrayData<size_, T, true> base was picked instead.
 
-           In both cases, the () instead of {} works around a featurebug in C++
-           where new T{} doesn't work for an explicit defaulted constructor.
-           For details see constructHelpers.h and
-           StaticArrayTest::constructorExplicitInCopyInitialization(). */
-        #if !defined(CORRADE_TARGET_GCC) || defined(CORRADE_TARGET_CLANG) || __GNUC__*100 + __GNUC_MINOR__ >= 10003
-        : _data() {}
-        #else
-        {
-            for(T& i: _data) new(&i) T();
-        }
-        #endif
-
-    /* The () instead of {} works around a featurebug in C++ where new T{}
+       The () instead of {} works around a featurebug in C++ where new T{}
        doesn't work for an explicit defaulted constructor. Doesn't apply to
        StaticArrayData<size_, T, true>. For details see constructHelpers.h and
        StaticArrayTest::constructorExplicitInCopyInitialization(). */
+    explicit StaticArrayData(Corrade::DefaultInitT): _data() {}
     explicit StaticArrayData(Corrade::ValueInitT): _data() {}
 
     /* Same as in StaticArrayData<size_, T, true> */
