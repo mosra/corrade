@@ -368,8 +368,8 @@ class CORRADE_UTILITY_EXPORT Debug {
         /**
          * @brief Output a newline
          *
-         * Puts a newline (not surrounded by spaces) to the output. The
-         * following two lines are equivalent:
+         * Puts a newline (not surrounded by spaces) to the output and flushes
+         * it. The following two lines are equivalent:
          *
          * @snippet Utility.cpp Debug-newline
          *
@@ -382,9 +382,7 @@ class CORRADE_UTILITY_EXPORT Debug {
          *
          * @see @ref nospace
          */
-        static void newline(Debug& debug) {
-            debug << nospace << "\n" << nospace;
-        }
+        static void newline(Debug& debug);
 
         /**
          * @brief Output a space
@@ -612,8 +610,8 @@ class CORRADE_UTILITY_EXPORT Debug {
          * @brief Destructor
          *
          * Resets the output redirection back to the output of enclosing scope.
-         * If there was any output, adds newline at the end. Also resets output
-         * color modifier, if there was any.
+         * If there was any output, adds newline at the end and flushes the
+         * output. Also resets output color modifier, if there was any.
          * @see @ref resetColor()
          */
         ~Debug();

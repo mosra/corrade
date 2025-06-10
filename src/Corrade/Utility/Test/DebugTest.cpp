@@ -1221,14 +1221,19 @@ void DebugTest::stringOutputScopedFlush() {
         Debug{} << "hey!";
         CORRADE_COMPARE(out, "hihey!\n");
 
-        /* This one will get flushed only once the Debug instance is
+        /* Without a newline at the end but an explicit newline call it is
+           also */
+        Debug{Debug::Flag::NoNewlineAtTheEnd} << "hello?" << Debug::newline;
+        CORRADE_COMPARE(out, "hihey!\nhello?\n");
+
+        /* This one will get flushed only once the `redirectOutput` instance is
            destructed. Until then, the string storage is moved out to a
            growable array internally. */
         /** @todo clean up once the string is capable of growing */
         Debug{Debug::Flag::NoNewlineAtTheEnd} << "?!";
         CORRADE_COMPARE(out, "");
     }
-    CORRADE_COMPARE(out, "hihey!\n?!");
+    CORRADE_COMPARE(out, "hihey!\nhello?\n?!");
 }
 
 void DebugTest::stringOutputReuseGrowable() {
@@ -1285,8 +1290,8 @@ void DebugTest::stringOutputReuseModifiedUnsynced() {
         debug << "hey";
         CORRADE_COMPARE(out, "");
 
-        /* In this case, modifying the string would cause the modification to be
-        lost on next write */
+        /* In this case, modifying the string would cause the modification to
+           be lost on next write */
         out = "voila";
 
         debug << "hello";

@@ -339,6 +339,19 @@ class StringStream: public std::ostream, std::streambuf {
         std::size_t _initialSize;
 };
 
+void Debug::newline(Debug& debug) {
+    /* Use std::endl instead of just '\n' to force a flush, i.e. having the
+       same behavior as if a Debug instance would be used to print the line,
+       destructed (and flushing) at the end. This is essential for example in
+       case of a redirection to a String with NoNewlineAtTheEnd, where the
+       content would only be exposed to the String at Debug destruction, not
+       earlier. */
+    if(debug._output)
+        *debug._output << std::endl;
+    /* The next value shouldn't be preceded by a space */
+    debug << nospace;
+}
+
 enum class Debug::InternalFlag: unsigned char {
     OwnedStream = 1 << 0,
     ValueWritten = 1 << 1,
