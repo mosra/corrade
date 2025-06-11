@@ -1918,7 +1918,7 @@ template<class T, class Allocator, class ...Args> void arrayResize(Array<T>& arr
 }
 
 template<class T, class ...Args> inline void arrayResize(Array<T>& array, Corrade::DirectInitT, const std::size_t size, Args&&... args) {
-    arrayResize<T, ArrayAllocator<T>, Args...>(array, Corrade::DirectInit, size, Utility::forward<Args>(args)...);
+    arrayResize<T, ArrayAllocator<T>>(array, Corrade::DirectInit, size, Utility::forward<Args>(args)...);
 }
 
 namespace Implementation {
