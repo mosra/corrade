@@ -3271,6 +3271,13 @@ void GrowableArrayTest::explicitAllocatorParameter() {
     arrayRemoveUnordered<ArrayNewAllocator>(a, 15);
     arrayRemoveSuffix<ArrayNewAllocator>(a);
     CORRADE_VERIFY(arrayIsGrowable<ArrayNewAllocator>(a));
+    /* We're not using the malloc allocator, which means these will be a no-op */
+    arrayShrink<ArrayMallocAllocator>(a);
+    CORRADE_VERIFY(arrayIsGrowable<ArrayNewAllocator>(a));
+    arrayShrink<ArrayMallocAllocator>(a, Corrade::NoInit);
+    CORRADE_VERIFY(arrayIsGrowable<ArrayNewAllocator>(a));
+    arrayShrink<ArrayMallocAllocator>(a, Corrade::DefaultInit);
+    CORRADE_VERIFY(arrayIsGrowable<ArrayNewAllocator>(a));
     /* After this it will finally lose the growable status */
     arrayShrink<ArrayNewAllocator>(a);
     CORRADE_VERIFY(!arrayIsGrowable<ArrayNewAllocator>(a));

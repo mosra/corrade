@@ -1502,6 +1502,22 @@ on a @ref std::vector.
 */
 template<class T, class Allocator = ArrayAllocator<T>> void arrayShrink(Array<T>& array, Corrade::NoInitT = Corrade::NoInit);
 
+/* This crap tool can't distinguish between this and above overload, showing
+   just one with the docs melted together. More useless than showing nothing
+   at all, so hiding this one from it until it improves. */
+#ifndef DOXYGEN_GENERATING_OUTPUT
+/**
+@overload
+@m_since{2020,06}
+
+Convenience overload allowing to specify just the allocator template, with
+array type being inferred.
+*/
+template<template<class> class Allocator, class T> inline void arrayShrink(Array<T>& array, Corrade::NoInitT = Corrade::NoInit) {
+    arrayShrink<T, Allocator<T>>(array, Corrade::NoInit);
+}
+#endif
+
 /**
 @brief Convert an array back to non-growable using a default initialization
 @m_since_latest
@@ -1530,13 +1546,13 @@ template<class T, class Allocator = ArrayAllocator<T>> void arrayShrink(Array<T>
 #ifndef DOXYGEN_GENERATING_OUTPUT
 /**
 @overload
-@m_since{2020,06}
+@m_since_latest
 
 Convenience overload allowing to specify just the allocator template, with
 array type being inferred.
 */
-template<template<class> class Allocator, class T> inline void arrayShrink(Array<T>& array) {
-    arrayShrink<T, Allocator<T>>(array);
+template<template<class> class Allocator, class T> inline void arrayShrink(Array<T>& array, Corrade::DefaultInitT) {
+    arrayShrink<T, Allocator<T>>(array, Corrade::DefaultInit);
 }
 #endif
 
