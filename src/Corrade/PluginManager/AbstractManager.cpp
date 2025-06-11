@@ -178,7 +178,13 @@ Implementation::StaticPlugin*& windowsGlobalStaticPlugins() {
 #define globalStaticPlugins windowsGlobalStaticPlugins()
 #endif
 
-static_assert(std::is_standard_layout<Implementation::StaticPlugin>::value && std::is_trivial<Implementation::StaticPlugin>::value,
+static_assert(std::is_standard_layout<Implementation::StaticPlugin>::value &&
+    #ifdef CORRADE_NO_STD_IS_TRIVIALLY_TRAITS
+    std::has_trivial_default_constructor<Implementation::StaticPlugin>::value
+    #else
+    std::is_trivially_constructible<Implementation::StaticPlugin>::value
+    #endif
+,
     "static plugins shouldn't cause any global initialization / finalization to happen on their own");
 
 void AbstractManager::importStaticPlugin(int version, Implementation::StaticPlugin& plugin) {

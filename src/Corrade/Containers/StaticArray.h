@@ -290,7 +290,7 @@ template<std::size_t size_, class T> class StaticArray: Implementation::StaticAr
          * @see @relativeref{Corrade,DefaultInit},
          *      @ref StaticArray(DirectInitT, Args&&... args),
          *      @ref StaticArray(InPlaceInitT, Args&&... args),
-         *      @ref std::is_trivial
+         *      @ref std::is_trivially_constructible
          */
         constexpr explicit CORRADE_DEPRECATED("use StaticArray(ValueInitT) or StaticArray(NoInitT) instead") StaticArray(Corrade::DefaultInitT): Implementation::StaticArrayDataFor<size_, T>{Corrade::DefaultInit} {}
         #endif
@@ -307,7 +307,7 @@ template<std::size_t size_, class T> class StaticArray: Implementation::StaticAr
          *      @ref StaticArray(InPlaceInitT, Args&&... args),
          *      @ref StaticArray(InPlaceInitT, const T(&)[size]),
          *      @ref StaticArray(InPlaceInitT, T(&&)[size]),
-         *      @ref std::is_trivial
+         *      @ref std::is_trivially_constructible
          */
         constexpr explicit StaticArray(Corrade::ValueInitT): Implementation::StaticArrayDataFor<size_, T>{Corrade::ValueInit} {}
 
@@ -335,7 +335,7 @@ template<std::size_t size_, class T> class StaticArray: Implementation::StaticAr
          *      @ref StaticArray(InPlaceInitT, Args&&... args),
          *      @ref StaticArray(InPlaceInitT, const T(&)[size]),
          *      @ref StaticArray(InPlaceInitT, T(&&)[size]),
-         *      @ref std::is_trivial
+         *      @ref std::is_trivially_constructible
          */
         explicit StaticArray(Corrade::NoInitT): Implementation::StaticArrayDataFor<size_, T>{Corrade::NoInit} {}
 

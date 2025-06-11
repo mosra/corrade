@@ -59,17 +59,41 @@ namespace Implementation {
         }
     };
 
-    template<class T, typename std::enable_if<std::is_trivial<T>::value, int>::type = 0> T* noInitAllocate(std::size_t size) {
+    template<class T, typename std::enable_if<
+        #ifdef CORRADE_NO_STD_IS_TRIVIALLY_TRAITS
+        std::has_trivial_default_constructor<T>::value
+        #else
+        std::is_trivially_constructible<T>::value
+        #endif
+    , int>::type = 0> T* noInitAllocate(std::size_t size) {
         return new T[size];
     }
-    template<class T, typename std::enable_if<!std::is_trivial<T>::value, int>::type = 0> T* noInitAllocate(std::size_t size) {
+    template<class T, typename std::enable_if<!
+        #ifdef CORRADE_NO_STD_IS_TRIVIALLY_TRAITS
+        std::has_trivial_default_constructor<T>::value
+        #else
+        std::is_trivially_constructible<T>::value
+        #endif
+    , int>::type = 0> T* noInitAllocate(std::size_t size) {
         return reinterpret_cast<T*>(new char[size*sizeof(T)]);
     }
 
-    template<class T, typename std::enable_if<std::is_trivial<T>::value, int>::type = 0> auto noInitDeleter() -> void(*)(T*, std::size_t) {
+    template<class T, typename std::enable_if<
+        #ifdef CORRADE_NO_STD_IS_TRIVIALLY_TRAITS
+        std::has_trivial_default_constructor<T>::value
+        #else
+        std::is_trivially_constructible<T>::value
+        #endif
+    , int>::type = 0> auto noInitDeleter() -> void(*)(T*, std::size_t) {
         return nullptr; /* using the default deleter for T */
     }
-    template<class T, typename std::enable_if<!std::is_trivial<T>::value, int>::type = 0> auto noInitDeleter() -> void(*)(T*, std::size_t) {
+    template<class T, typename std::enable_if<!
+        #ifdef CORRADE_NO_STD_IS_TRIVIALLY_TRAITS
+        std::has_trivial_default_constructor<T>::value
+        #else
+        std::is_trivially_constructible<T>::value
+        #endif
+    , int>::type = 0> auto noInitDeleter() -> void(*)(T*, std::size_t) {
         return [](T* data, std::size_t size) {
             if(data) for(T *it = data, *end = data + size; it != end; ++it)
                 it->~T();
@@ -373,7 +397,8 @@ class Array {
          * @see @relativeref{Corrade,DefaultInit},
          *      @ref Array(DirectInitT, std::size_t, Args&&... args),
          *      @ref Array(InPlaceInitT, std::initializer_list<T>),
-         *      @ref array(std::initializer_list<T>), @ref std::is_trivial
+         *      @ref array(std::initializer_list<T>),
+         *      @ref std::is_trivially_constructible
          */
         explicit CORRADE_DEPRECATED("use Array(ValueInitT, std::size_t) or Array(NoInitT, std::size_t) instead") Array(Corrade::DefaultInitT, std::size_t size): _data{size ? new T[size] : nullptr}, _size{size}, _deleter{nullptr} {}
         #endif
@@ -389,7 +414,8 @@ class Array {
          *      @ref Array(NoInitT, std::size_t),
          *      @ref Array(DirectInitT, std::size_t, Args&&... args),
          *      @ref Array(InPlaceInitT, std::initializer_list<T>),
-         *      @ref array(std::initializer_list<T>), @ref std::is_trivial
+         *      @ref array(std::initializer_list<T>),
+         *      @ref std::is_trivially_constructible
          */
         /* The () instead of {} works around a featurebug in C++ where new T{}
            doesn't work for an explicit defaulted constructor. For details see
@@ -422,7 +448,7 @@ class Array {
          *      @ref Array(DirectInitT, std::size_t, Args&&... args),
          *      @ref Array(InPlaceInitT, std::initializer_list<T>),
          *      @ref array(std::initializer_list<T>), @ref deleter(),
-         *      @ref std::is_trivial
+         *      @ref std::is_trivially_constructible
          */
         explicit Array(Corrade::NoInitT, std::size_t size): _data{size ? Implementation::noInitAllocate<T>(size) : nullptr}, _size{size}, _deleter{Implementation::noInitDeleter<T>()} {}
 

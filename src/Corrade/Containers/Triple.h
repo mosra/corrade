@@ -133,7 +133,8 @@ template<class F, class S, class T> class Triple {
          *
          * Trivial types are not initialized, default constructor called
          * otherwise.
-         * @see @relativeref{Corrade,DefaultInit}, @ref std::is_trivial
+         * @see @relativeref{Corrade,DefaultInit},
+         *      @ref std::is_trivially_constructible
          */
         #ifndef CORRADE_MSVC2015_COMPATIBILITY
         /* Not constexpr for this joke of a compiler because I don't explicitly
@@ -149,7 +150,8 @@ template<class F, class S, class T> class Triple {
          *
          * Trivial types are zero-initialized, default constructor called
          * otherwise. This is the same as the default constructor.
-         * @see @relativeref{Corrade,ValueInit}, @ref Triple(NoInitT)
+         * @see @relativeref{Corrade,ValueInit}, @ref Triple(NoInitT),
+         *      @ref std::is_trivially_constructible
          */
         constexpr explicit Triple(Corrade::ValueInitT) noexcept(std::is_nothrow_constructible<F>::value && std::is_nothrow_constructible<S>::value && std::is_nothrow_constructible<T>::value):
             /* Can't use {} here. See constructHelpers.h for details, test in
@@ -167,18 +169,60 @@ template<class F, class S, class T> class Triple {
          *
          * For trivial types is equivalent to constructing the elements as
          * @cpp T element @ce (as opposed to @cpp T element{} @ce).
-         * @see @ref Triple(ValueInitT)
+         * @see @ref Triple(ValueInitT), @ref std::is_trivially_constructible
          */
         #ifdef DOXYGEN_GENERATING_OUTPUT
         explicit Triple(Corrade::NoInitT) noexcept(...);
         #else
-        template<class F_ = F, typename std::enable_if<std::is_standard_layout<F_>::value && std::is_trivial<F_>::value && std::is_standard_layout<S>::value && std::is_trivial<S>::value && std::is_standard_layout<T>::value && std::is_trivial<T>::value, int>::type = 0> explicit Triple(Corrade::NoInitT) noexcept {}
-        template<class F_ = F, typename std::enable_if<std::is_standard_layout<F_>::value && std::is_trivial<F_>::value && std::is_standard_layout<S>::value && std::is_trivial<S>::value && std::is_constructible<T, Corrade::NoInitT>::value, int>::type = 0> explicit Triple(Corrade::NoInitT) noexcept(std::is_nothrow_constructible<T, Corrade::NoInitT>::value): _third{Corrade::NoInit} {}
-        template<class F_ = F, typename std::enable_if<std::is_standard_layout<F_>::value && std::is_trivial<F_>::value && std::is_constructible<S, Corrade::NoInitT>::value && std::is_standard_layout<T>::value && std::is_trivial<T>::value, int>::type = 0> explicit Triple(Corrade::NoInitT) noexcept(std::is_nothrow_constructible<S, Corrade::NoInitT>::value): _second{Corrade::NoInit} {}
-        template<class F_ = F, typename std::enable_if<std::is_constructible<F_, Corrade::NoInitT>::value && std::is_standard_layout<S>::value && std::is_trivial<S>::value && std::is_standard_layout<T>::value && std::is_trivial<T>::value, int>::type = 0> explicit Triple(Corrade::NoInitT) noexcept(std::is_nothrow_constructible<F, Corrade::NoInitT>::value): _first{Corrade::NoInit} {}
-        template<class F_ = F, typename std::enable_if<std::is_standard_layout<F_>::value && std::is_trivial<F_>::value && std::is_constructible<S, Corrade::NoInitT>::value && std::is_constructible<T, Corrade::NoInitT>::value, int>::type = 0> explicit Triple(Corrade::NoInitT) noexcept(std::is_nothrow_constructible<S, Corrade::NoInitT>::value && std::is_nothrow_constructible<T, Corrade::NoInitT>::value): _second{Corrade::NoInit}, _third{Corrade::NoInit} {}
-        template<class F_ = F, typename std::enable_if<std::is_constructible<F_, Corrade::NoInitT>::value && std::is_standard_layout<S>::value && std::is_trivial<S>::value && std::is_constructible<T, Corrade::NoInitT>::value, int>::type = 0> explicit Triple(Corrade::NoInitT) noexcept(std::is_nothrow_constructible<F, Corrade::NoInitT>::value && std::is_nothrow_constructible<T, Corrade::NoInitT>::value): _first{Corrade::NoInit}, _third{Corrade::NoInit} {}
-        template<class F_ = F, typename std::enable_if<std::is_constructible<F_, Corrade::NoInitT>::value && std::is_constructible<S, Corrade::NoInitT>::value && std::is_standard_layout<T>::value && std::is_trivial<T>::value, int>::type = 0> explicit Triple(Corrade::NoInitT) noexcept(std::is_nothrow_constructible<F, Corrade::NoInitT>::value && std::is_nothrow_constructible<S, Corrade::NoInitT>::value): _first{Corrade::NoInit}, _second{Corrade::NoInit} {}
+        template<class F_ = F, typename std::enable_if<
+            #ifdef CORRADE_NO_STD_IS_TRIVIALLY_TRAITS
+            std::is_standard_layout<F_>::value && std::has_trivial_default_constructor<F_>::value && std::is_standard_layout<S>::value && std::has_trivial_default_constructor<S>::value && std::is_standard_layout<T>::value && std::has_trivial_default_constructor<T>::value
+            #else
+            std::is_standard_layout<F_>::value && std::is_trivially_constructible<F_>::value && std::is_standard_layout<S>::value && std::is_trivially_constructible<S>::value && std::is_standard_layout<T>::value && std::is_trivially_constructible<T>::value
+            #endif
+        , int>::type = 0> explicit Triple(Corrade::NoInitT) noexcept {}
+        template<class F_ = F, typename std::enable_if<
+            #ifdef CORRADE_NO_STD_IS_TRIVIALLY_TRAITS
+            std::is_standard_layout<F_>::value && std::has_trivial_default_constructor<F_>::value && std::is_standard_layout<S>::value && std::has_trivial_default_constructor<S>::value && std::is_constructible<T, Corrade::NoInitT>::value
+            #else
+            std::is_standard_layout<F_>::value && std::is_trivially_constructible<F_>::value && std::is_standard_layout<S>::value && std::is_trivially_constructible<S>::value && std::is_constructible<T, Corrade::NoInitT>::value
+            #endif
+        , int>::type = 0> explicit Triple(Corrade::NoInitT) noexcept(std::is_nothrow_constructible<T, Corrade::NoInitT>::value): _third{Corrade::NoInit} {}
+        template<class F_ = F, typename std::enable_if<
+            #ifdef CORRADE_NO_STD_IS_TRIVIALLY_TRAITS
+            std::is_standard_layout<F_>::value && std::has_trivial_default_constructor<F_>::value && std::is_constructible<S, Corrade::NoInitT>::value && std::is_standard_layout<T>::value && std::has_trivial_default_constructor<T>::value
+            #else
+            std::is_standard_layout<F_>::value && std::is_trivially_constructible<F_>::value && std::is_constructible<S, Corrade::NoInitT>::value && std::is_standard_layout<T>::value && std::is_trivially_constructible<T>::value
+            #endif
+        , int>::type = 0> explicit Triple(Corrade::NoInitT) noexcept(std::is_nothrow_constructible<S, Corrade::NoInitT>::value): _second{Corrade::NoInit} {}
+        template<class F_ = F, typename std::enable_if<
+            #ifdef CORRADE_NO_STD_IS_TRIVIALLY_TRAITS
+            std::is_constructible<F_, Corrade::NoInitT>::value && std::is_standard_layout<S>::value && std::has_trivial_default_constructor<S>::value && std::is_standard_layout<T>::value && std::has_trivial_default_constructor<T>::value
+            #else
+            std::is_constructible<F_, Corrade::NoInitT>::value && std::is_standard_layout<S>::value && std::is_trivially_constructible<S>::value && std::is_standard_layout<T>::value && std::is_trivially_constructible<T>::value
+            #endif
+        , int>::type = 0> explicit Triple(Corrade::NoInitT) noexcept(std::is_nothrow_constructible<F, Corrade::NoInitT>::value): _first{Corrade::NoInit} {}
+        template<class F_ = F, typename std::enable_if<
+            #ifdef CORRADE_NO_STD_IS_TRIVIALLY_TRAITS
+            std::is_standard_layout<F_>::value && std::has_trivial_default_constructor<F_>::value && std::is_constructible<S, Corrade::NoInitT>::value && std::is_constructible<T, Corrade::NoInitT>::value
+            #else
+            std::is_standard_layout<F_>::value && std::is_trivially_constructible<F_>::value && std::is_constructible<S, Corrade::NoInitT>::value && std::is_constructible<T, Corrade::NoInitT>::value
+            #endif
+        , int>::type = 0> explicit Triple(Corrade::NoInitT) noexcept(std::is_nothrow_constructible<S, Corrade::NoInitT>::value && std::is_nothrow_constructible<T, Corrade::NoInitT>::value): _second{Corrade::NoInit}, _third{Corrade::NoInit} {}
+        template<class F_ = F, typename std::enable_if<
+            #ifdef CORRADE_NO_STD_IS_TRIVIALLY_TRAITS
+            std::is_constructible<F_, Corrade::NoInitT>::value && std::is_standard_layout<S>::value && std::has_trivial_default_constructor<S>::value && std::is_constructible<T, Corrade::NoInitT>::value
+            #else
+            std::is_constructible<F_, Corrade::NoInitT>::value && std::is_standard_layout<S>::value && std::is_trivially_constructible<S>::value && std::is_constructible<T, Corrade::NoInitT>::value
+            #endif
+        , int>::type = 0> explicit Triple(Corrade::NoInitT) noexcept(std::is_nothrow_constructible<F, Corrade::NoInitT>::value && std::is_nothrow_constructible<T, Corrade::NoInitT>::value): _first{Corrade::NoInit}, _third{Corrade::NoInit} {}
+        template<class F_ = F, typename std::enable_if<
+            #ifdef CORRADE_NO_STD_IS_TRIVIALLY_TRAITS
+            std::is_constructible<F_, Corrade::NoInitT>::value && std::is_constructible<S, Corrade::NoInitT>::value && std::is_standard_layout<T>::value && std::has_trivial_default_constructor<T>::value
+            #else
+            std::is_constructible<F_, Corrade::NoInitT>::value && std::is_constructible<S, Corrade::NoInitT>::value && std::is_standard_layout<T>::value && std::is_trivially_constructible<T>::value
+            #endif
+        , int>::type = 0> explicit Triple(Corrade::NoInitT) noexcept(std::is_nothrow_constructible<F, Corrade::NoInitT>::value && std::is_nothrow_constructible<S, Corrade::NoInitT>::value): _first{Corrade::NoInit}, _second{Corrade::NoInit} {}
         template<class F_ = F, typename std::enable_if<std::is_constructible<F_, Corrade::NoInitT>::value && std::is_constructible<S, Corrade::NoInitT>::value && std::is_constructible<T, Corrade::NoInitT>::value, int>::type = 0> explicit Triple(Corrade::NoInitT) noexcept(std::is_nothrow_constructible<F, Corrade::NoInitT>::value && std::is_nothrow_constructible<S, Corrade::NoInitT>::value && std::is_nothrow_constructible<T, Corrade::NoInitT>::value): _first{Corrade::NoInit}, _second{Corrade::NoInit}, _third{Corrade::NoInit} {}
         #endif
 
