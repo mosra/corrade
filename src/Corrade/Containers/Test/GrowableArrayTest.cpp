@@ -1098,13 +1098,15 @@ void GrowableArrayTest::resizeDirectInit() {
     /* This doesn't have any special handling for trivial/non-trivial types, no
        need to test twice */
 
-    Array<int> a;
-    arrayResize(a, Corrade::DirectInit, 3, 754831);
+    Array<Movable> a;
+    /* Passing a Movable rvalue instead of just an int to verify it gets
+       correctly forwarded */
+    arrayResize(a, Corrade::DirectInit, 3, Movable{-31601});
     CORRADE_COMPARE(a.size(), 3);
-    CORRADE_COMPARE(a[0], 754831);
-    CORRADE_COMPARE(a[1], 754831);
-    CORRADE_COMPARE(a[2], 754831);
-    VERIFY_SANITIZED_PROPERLY(a, ArrayAllocator<int>);
+    CORRADE_COMPARE(int(a[0]), -31601);
+    CORRADE_COMPARE(int(a[1]), -31601);
+    CORRADE_COMPARE(int(a[2]), -31601);
+    VERIFY_SANITIZED_PROPERLY(a, ArrayAllocator<Movable>);
 }
 
 void GrowableArrayTest::resizeCopy() {
