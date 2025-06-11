@@ -1556,6 +1556,44 @@ template<template<class> class Allocator, class T> inline void arrayShrink(Array
 }
 #endif
 
+/**
+@brief Convert an array back to non-growable using a value initialization
+@m_since_latest
+
+Allocates a @relativeref{Corrade,ValueInit} array that's exactly large enough
+to fit @ref Array::size() elements, move-assigns the elements there and frees
+the old memory using @ref Array::deleter(). If the array is not growable using
+given @p Allocator, it's assumed to be already as small as possible, and
+nothing is done.
+
+Complexity is at most @f$ \mathcal{O}(n) @f$ in the size of the container,
+@f$ \mathcal{O}(1) @f$ if the array is already non-growable. No constraints on
+@p T from @p Allocator (or the default @ref ArrayAllocator) apply here but @p T
+is required to be default-constructible and nothrow move-assignable.
+
+Compared to @ref arrayShrink(Array<T>&, NoInitT), the resulting array instance
+always has a default (@cpp nullptr @ce) deleter. This is useful when it's not
+possible to use custom deleters, such as in plugin implementations.
+@see @ref arrayIsGrowable(), @ref Containers-Array-growable
+*/
+template<class T, class Allocator = ArrayAllocator<T>> void arrayShrink(Array<T>& array, Corrade::ValueInitT);
+
+/* This crap tool can't distinguish between this and above overload, showing
+   just one with the docs melted together. More useless than showing nothing
+   at all, so hiding this one from it until it improves. */
+#ifndef DOXYGEN_GENERATING_OUTPUT
+/**
+@overload
+@m_since_latest
+
+Convenience overload allowing to specify just the allocator template, with
+array type being inferred.
+*/
+template<template<class> class Allocator, class T> inline void arrayShrink(Array<T>& array, Corrade::ValueInitT) {
+    arrayShrink<T, Allocator<T>>(array, Corrade::ValueInit);
+}
+#endif
+
 /* Since 1.8.17, the original short-hand group closing doesn't work anymore.
    FFS. */
 /**
@@ -2416,6 +2454,26 @@ template<class T, class Allocator> void arrayShrink(Array<T>& array, Corrade::De
     /* Even if we don't need to shrink, reallocating to an usual array with
        common deleters to avoid surprises */
     Array<T> newArray{Corrade::DefaultInit, arrayGuts.size};
+    Implementation::arrayMoveAssign<T>(arrayGuts.data, newArray, arrayGuts.size);
+    array = Utility::move(newArray);
+
+    #ifdef _CORRADE_CONTAINERS_SANITIZER_ENABLED
+    /* Nothing to do (not annotating the arrays with default deleter) */
+    #endif
+}
+
+template<class T, class Allocator> void arrayShrink(Array<T>& array, Corrade::ValueInitT) {
+    /* Direct access to speed up debug builds */
+    auto& arrayGuts = reinterpret_cast<Implementation::ArrayGuts<T>&>(array);
+
+    /* If not using our growing allocator, assume the array size equals its
+       capacity and do nothing */
+    if(arrayGuts.deleter != Allocator::deleter)
+        return;
+
+    /* Even if we don't need to shrink, reallocating to an usual array with
+       common deleters to avoid surprises */
+    Array<T> newArray{Corrade::ValueInit, arrayGuts.size};
     Implementation::arrayMoveAssign<T>(arrayGuts.data, newArray, arrayGuts.size);
     array = Utility::move(newArray);
 
