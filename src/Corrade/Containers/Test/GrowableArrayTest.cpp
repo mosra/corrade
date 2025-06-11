@@ -1625,7 +1625,7 @@ void GrowableArrayTest::appendMove() {
         CORRADE_COMPARE(a.size(), 1);
         #ifndef CORRADE_TARGET_32BIT
         CORRADE_COMPARE(arrayCapacity(a), 2);
-            /** @todo expose Implementation::DefaultAllocationAlignment instead */
+        /** @todo expose Implementation::DefaultAllocationAlignment instead */
         #elif !defined(__STDCPP_DEFAULT_NEW_ALIGNMENT__) || __STDCPP_DEFAULT_NEW_ALIGNMENT__ == 8 || defined(CORRADE_TARGET_EMSCRIPTEN)
         CORRADE_COMPARE(arrayCapacity(a), 1);
         #else

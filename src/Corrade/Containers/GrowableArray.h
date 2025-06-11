@@ -1305,7 +1305,7 @@ template<template<class> class Allocator, class T> inline ArrayView<T>  arrayIns
 
 /**
 @brief Insert given count of uninitialized values into an array
-@return View on the newly appended items
+@return View on the newly inserted items
 @m_since_latest
 
 A lower-level variant of @ref arrayInsert(Array<T>&, std::size_t, typename std::common_type<ArrayView<const T>>::type)

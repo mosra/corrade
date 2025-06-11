@@ -288,7 +288,7 @@ namespace Corrade {
 -   A new convenience @ref Containers::Array::Array(ArrayView<T>, D) overload
     for constructing non-owned @ref Containers::Array instances from existing
     views
--   Added @ref Containers::arrayShrink(Array<T>&, DefaultInitT) overload for
+-   Added a @ref Containers::arrayShrink(Array<T>&, ValueInitT) overload for
     cases where it's not desired to have an @ref Containers::Array with a
     `NoInit` deleter
 -   Added @ref Containers::arrayResize(Array<T>&, std::size_t, const typename std::common_type<T>::type&)
@@ -877,7 +877,7 @@ namespace Corrade {
     @cpp Containers::NoInit @ce, @cpp Containers::NoCreate @ce,
     @cpp Containers::DirectInit @ce, @cpp Containers::InPlaceInit @ce and
     related tag types were moved to @ref Corrade/Tags.h and the root
-    @ref Corrade namespace, available  as @ref DefaultInit, @ref ValueInit,
+    @ref Corrade namespace, available as @ref DefaultInit, @ref ValueInit,
     @ref NoInit, @ref NoCreate, @ref DirectInit, @ref InPlaceInit and related
     tag types
 -   @ref PluginManager and @ref TestSuite APIs that switched from
