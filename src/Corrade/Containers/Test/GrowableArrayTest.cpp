@@ -115,9 +115,10 @@ struct GrowableArrayTest: TestSuite::Tester {
     template<class T> void insertFromGrowableNoRealloc();
     template<class T> void insertFromGrowableNoReallocNoInit();
 
-    /* InPlace tested in appendFrom*() already */
     void appendCopy();
     void insertCopy();
+    void appendInPlace();
+    void insertInPlace();
     void appendMove();
     void insertMove();
     void appendList();
@@ -442,6 +443,8 @@ GrowableArrayTest::GrowableArrayTest() {
 
               &GrowableArrayTest::appendCopy,
               &GrowableArrayTest::insertCopy,
+              &GrowableArrayTest::appendInPlace,
+              &GrowableArrayTest::insertInPlace,
               &GrowableArrayTest::appendMove,
               &GrowableArrayTest::insertMove,
               &GrowableArrayTest::appendList,
@@ -1616,6 +1619,58 @@ void GrowableArrayTest::insertCopy() {
     CORRADE_COMPARE(a[0], 2786541);
     CORRADE_COMPARE(&inserted, &a.back());
     VERIFY_SANITIZED_PROPERLY(a, ArrayAllocator<int>);
+}
+
+void GrowableArrayTest::appendInPlace() {
+    {
+        Array<Movable> a;
+        /* Passing a Movable and not just int to test that the rvalue gets
+           correctly forwarded and move constructor called */
+        Movable& appended = arrayAppend(a, Corrade::InPlaceInit, Movable{25141});
+        CORRADE_COMPARE(a.size(), 1);
+        #ifndef CORRADE_TARGET_32BIT
+        CORRADE_COMPARE(arrayCapacity(a), 2);
+        /** @todo expose Implementation::DefaultAllocationAlignment instead */
+        #elif !defined(__STDCPP_DEFAULT_NEW_ALIGNMENT__) || __STDCPP_DEFAULT_NEW_ALIGNMENT__ == 8 || defined(CORRADE_TARGET_EMSCRIPTEN)
+        CORRADE_COMPARE(arrayCapacity(a), 1);
+        #else
+        CORRADE_COMPARE(arrayCapacity(a), 3);
+        #endif
+        CORRADE_COMPARE(a[0].a, 25141);
+        CORRADE_COMPARE(&appended, &a.back());
+        VERIFY_SANITIZED_PROPERLY(a, ArrayAllocator<Movable>);
+    }
+
+    CORRADE_COMPARE(Movable::constructed, 2);
+    CORRADE_COMPARE(Movable::moved, 1);
+    CORRADE_COMPARE(Movable::assigned, 0);
+    CORRADE_COMPARE(Movable::destructed, 2);
+}
+
+void GrowableArrayTest::insertInPlace() {
+    {
+        Array<Movable> a;
+        /* Passing a Movable and not just int to test that the rvalue gets
+           correctly forwarded and move constructor called */
+        Movable& inserted = arrayInsert(a, 0, Corrade::InPlaceInit, Movable{25141});
+        CORRADE_COMPARE(a.size(), 1);
+        #ifndef CORRADE_TARGET_32BIT
+        CORRADE_COMPARE(arrayCapacity(a), 2);
+        /** @todo expose Implementation::DefaultAllocationAlignment instead */
+        #elif !defined(__STDCPP_DEFAULT_NEW_ALIGNMENT__) || __STDCPP_DEFAULT_NEW_ALIGNMENT__ == 8 || defined(CORRADE_TARGET_EMSCRIPTEN)
+        CORRADE_COMPARE(arrayCapacity(a), 1);
+        #else
+        CORRADE_COMPARE(arrayCapacity(a), 3);
+        #endif
+        CORRADE_COMPARE(a[0].a, 25141);
+        CORRADE_COMPARE(&inserted, &a.back());
+        VERIFY_SANITIZED_PROPERLY(a, ArrayAllocator<Movable>);
+    }
+
+    CORRADE_COMPARE(Movable::constructed, 2);
+    CORRADE_COMPARE(Movable::moved, 1);
+    CORRADE_COMPARE(Movable::assigned, 0);
+    CORRADE_COMPARE(Movable::destructed, 2);
 }
 
 void GrowableArrayTest::appendMove() {
