@@ -87,9 +87,6 @@ the @ref Array class:
     Useful when you'll be overwriting the contents anyway. Equivalent to
     @cpp new char[(size + 7)/8] @ce.
 
-Unlike an @ref Array, there's no @ref DefaultInitT constructor, as the same
-behavior is already provided by @ref BitArray(NoInitT, std::size_t).
-
 @snippet Containers.cpp BitArray-usage-initialization
 
 <b></b>

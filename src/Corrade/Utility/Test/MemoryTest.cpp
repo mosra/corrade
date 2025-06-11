@@ -39,10 +39,14 @@ struct MemoryTest: TestSuite::Tester {
 
     template<std::size_t alignment> void allocateAlignedTrivial();
     void allocateAlignedTrivialNoInit();
+    #ifdef CORRADE_BUILD_DEPRECATED
     void allocateAlignedTrivialDefaultInit();
+    #endif
     void allocateAlignedTrivialValueInit();
     void allocateAlignedNontrivialNoInit();
+    #ifdef CORRADE_BUILD_DEPRECATED
     void allocateAlignedNontrivialDefaultInit();
+    #endif
     void allocateAlignedNontrivialValueInit();
 
     void allocateZeroSizeTrivial();
@@ -50,7 +54,9 @@ struct MemoryTest: TestSuite::Tester {
 
     void allocateExplicitAlignment();
     void allocateExplicitAlignmentNoInit();
+    #ifdef CORRADE_BUILD_DEPRECATED
     void allocateExplicitAlignmentDefaultInit();
+    #endif
     void allocateExplicitAlignmentValueInit();
 
     void allocateNotMultipleOfAlignment();
@@ -76,11 +82,15 @@ MemoryTest::MemoryTest() {
     #endif
 
     addTests({&MemoryTest::allocateAlignedTrivialNoInit,
+              #ifdef CORRADE_BUILD_DEPRECATED
               &MemoryTest::allocateAlignedTrivialDefaultInit,
+              #endif
               &MemoryTest::allocateAlignedTrivialValueInit});
 
     addTests({&MemoryTest::allocateAlignedNontrivialNoInit,
+              #ifdef CORRADE_BUILD_DEPRECATED
               &MemoryTest::allocateAlignedNontrivialDefaultInit,
+              #endif
               &MemoryTest::allocateAlignedNontrivialValueInit},
         &MemoryTest::resetCounters, &MemoryTest::resetCounters);
 
@@ -92,7 +102,9 @@ MemoryTest::MemoryTest() {
     addRepeatedTests({
         &MemoryTest::allocateExplicitAlignment,
         &MemoryTest::allocateExplicitAlignmentNoInit,
+        #ifdef CORRADE_BUILD_DEPRECATED
         &MemoryTest::allocateExplicitAlignmentDefaultInit,
+        #endif
         &MemoryTest::allocateExplicitAlignmentValueInit}, 100);
 
     addTests({&MemoryTest::allocateNotMultipleOfAlignment});
@@ -135,14 +147,18 @@ void MemoryTest::allocateAlignedTrivialNoInit() {
         TestSuite::Compare::Divisible);
 }
 
+#ifdef CORRADE_BUILD_DEPRECATED
 void MemoryTest::allocateAlignedTrivialDefaultInit() {
+    CORRADE_IGNORE_DEPRECATED_PUSH
     Containers::Array<FourLongs> data = allocateAligned<FourLongs>(DefaultInit, 7);
+    CORRADE_IGNORE_DEPRECATED_POP
     CORRADE_VERIFY(data.data());
     CORRADE_COMPARE(data.size(), 7);
     CORRADE_COMPARE_AS(reinterpret_cast<std::uintptr_t>(data.data()), 32,
         TestSuite::Compare::Divisible);
     /* No way to verify that we *didn't* zero-initialize */
 }
+#endif
 
 void MemoryTest::allocateAlignedTrivialValueInit() {
     Containers::Array<FourLongs> data = allocateAligned<FourLongs>(ValueInit, 7);
@@ -188,9 +204,12 @@ void MemoryTest::allocateAlignedNontrivialNoInit() {
     CORRADE_COMPARE(Immovable::destructed, 7);
 }
 
+#ifdef CORRADE_BUILD_DEPRECATED
 void MemoryTest::allocateAlignedNontrivialDefaultInit() {
     {
+        CORRADE_IGNORE_DEPRECATED_PUSH
         Containers::Array<Immovable> data = allocateAligned<Immovable>(DefaultInit, 7);
+        CORRADE_IGNORE_DEPRECATED_POP
         CORRADE_VERIFY(data.data());
         CORRADE_COMPARE(data.size(), 7);
         CORRADE_COMPARE_AS(reinterpret_cast<std::uintptr_t>(data.data()), 32,
@@ -201,6 +220,7 @@ void MemoryTest::allocateAlignedNontrivialDefaultInit() {
     CORRADE_COMPARE(Immovable::constructed, 7);
     CORRADE_COMPARE(Immovable::destructed, 7);
 }
+#endif
 
 void MemoryTest::allocateAlignedNontrivialValueInit() {
     {
@@ -249,13 +269,17 @@ void MemoryTest::allocateExplicitAlignmentNoInit() {
         TestSuite::Compare::Divisible);
 }
 
+#ifdef CORRADE_BUILD_DEPRECATED
 void MemoryTest::allocateExplicitAlignmentDefaultInit() {
+    CORRADE_IGNORE_DEPRECATED_PUSH
     Containers::Array<char> data = allocateAligned<char, 32>(DefaultInit, (testCaseRepeatId() + 1)*32);
+    CORRADE_IGNORE_DEPRECATED_POP
     CORRADE_VERIFY(data.data());
     CORRADE_COMPARE(data.size(), (testCaseRepeatId() + 1)*32);
     CORRADE_COMPARE_AS(reinterpret_cast<std::uintptr_t>(data.data()), 32,
         TestSuite::Compare::Divisible);
 }
+#endif
 
 void MemoryTest::allocateExplicitAlignmentValueInit() {
     Containers::Array<char> data = allocateAligned<char, 32>(ValueInit, (testCaseRepeatId() + 1)*32);

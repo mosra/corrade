@@ -95,7 +95,9 @@ struct GrowableArrayTest: TestSuite::Tester {
     template<class T> void resizeFromGrowableNoRealloc();
 
     template<class T> void resizeNoInit();
+    #ifdef CORRADE_BUILD_DEPRECATED
     template<class T> void resizeDefaultInit();
+    #endif
     template<class T> void resizeValueInit();
     void resizeDirectInit();
     void resizeCopy();
@@ -166,16 +168,24 @@ struct GrowableArrayTest: TestSuite::Tester {
     void reallocFailed();
 
     template<class T> void shrinkNonGrowableEmptyNoInit();
+    #ifdef CORRADE_BUILD_DEPRECATED
     template<class T> void shrinkNonGrowableEmptyDefaultInit();
+    #endif
     template<class T> void shrinkNonGrowableEmptyValueInit();
     template<class T> void shrinkNonGrowableNoInit();
+    #ifdef CORRADE_BUILD_DEPRECATED
     template<class T> void shrinkNonGrowableDefaultInit();
+    #endif
     template<class T> void shrinkNonGrowableValueInit();
     template<class T> void shrinkGrowableEmptyNoInit();
+    #ifdef CORRADE_BUILD_DEPRECATED
     template<class T> void shrinkGrowableEmptyDefaultInit();
+    #endif
     template<class T> void shrinkGrowableEmptyValueInit();
     template<class T> void shrinkGrowableNoInit();
+    #ifdef CORRADE_BUILD_DEPRECATED
     template<class T> void shrinkGrowableDefaultInit();
+    #endif
     template<class T> void shrinkGrowableValueInit();
 
     template<class T> void move();
@@ -381,8 +391,10 @@ GrowableArrayTest::GrowableArrayTest() {
 
               &GrowableArrayTest::resizeNoInit<int>,
               &GrowableArrayTest::resizeNoInit<Movable>,
+              #ifdef CORRADE_BUILD_DEPRECATED
               &GrowableArrayTest::resizeDefaultInit<int>,
               &GrowableArrayTest::resizeDefaultInit<Movable>,
+              #endif
               &GrowableArrayTest::resizeValueInit<int>,
               &GrowableArrayTest::resizeValueInit<Movable>,
               &GrowableArrayTest::resizeDirectInit,
@@ -390,16 +402,20 @@ GrowableArrayTest::GrowableArrayTest() {
 
               &GrowableArrayTest::resizeFromNonGrowableToLess<int, Corrade::NoInitT>,
               &GrowableArrayTest::resizeFromNonGrowableToLess<Movable, Corrade::NoInitT>,
+              #ifdef CORRADE_BUILD_DEPRECATED
               &GrowableArrayTest::resizeFromNonGrowableToLess<int, Corrade::DefaultInitT>,
               &GrowableArrayTest::resizeFromNonGrowableToLess<Movable, Corrade::DefaultInitT>,
+              #endif
               &GrowableArrayTest::resizeFromNonGrowableToLess<int, Corrade::ValueInitT>,
               &GrowableArrayTest::resizeFromNonGrowableToLess<Movable, Corrade::ValueInitT>,
               &GrowableArrayTest::resizeFromNonGrowableToLess<int, Corrade::DirectInitT>,
               &GrowableArrayTest::resizeFromNonGrowableToLess<Movable, Corrade::DirectInitT>,
               &GrowableArrayTest::resizeFromGrowableToLess<int, Corrade::NoInitT>,
               &GrowableArrayTest::resizeFromGrowableToLess<Movable, Corrade::NoInitT>,
+              #ifdef CORRADE_BUILD_DEPRECATED
               &GrowableArrayTest::resizeFromGrowableToLess<int, Corrade::DefaultInitT>,
               &GrowableArrayTest::resizeFromGrowableToLess<Movable, Corrade::DefaultInitT>,
+              #endif
               &GrowableArrayTest::resizeFromGrowableToLess<int, Corrade::ValueInitT>,
               &GrowableArrayTest::resizeFromGrowableToLess<Movable, Corrade::ValueInitT>,
               &GrowableArrayTest::resizeFromGrowableToLess<int, Corrade::NoInitT>,
@@ -493,26 +509,34 @@ GrowableArrayTest::GrowableArrayTest() {
 
               &GrowableArrayTest::shrinkNonGrowableEmptyNoInit<int>,
               &GrowableArrayTest::shrinkNonGrowableEmptyNoInit<Movable>,
+              #ifdef CORRADE_BUILD_DEPRECATED
               &GrowableArrayTest::shrinkNonGrowableEmptyDefaultInit<int>,
               &GrowableArrayTest::shrinkNonGrowableEmptyDefaultInit<Movable>,
+              #endif
               &GrowableArrayTest::shrinkNonGrowableEmptyValueInit<int>,
               &GrowableArrayTest::shrinkNonGrowableEmptyValueInit<Movable>,
               &GrowableArrayTest::shrinkNonGrowableNoInit<int>,
               &GrowableArrayTest::shrinkNonGrowableNoInit<Movable>,
+              #ifdef CORRADE_BUILD_DEPRECATED
               &GrowableArrayTest::shrinkNonGrowableDefaultInit<int>,
               &GrowableArrayTest::shrinkNonGrowableDefaultInit<Movable>,
+              #endif
               &GrowableArrayTest::shrinkNonGrowableValueInit<int>,
               &GrowableArrayTest::shrinkNonGrowableValueInit<Movable>,
               &GrowableArrayTest::shrinkGrowableEmptyNoInit<int>,
               &GrowableArrayTest::shrinkGrowableEmptyNoInit<Movable>,
+              #ifdef CORRADE_BUILD_DEPRECATED
               &GrowableArrayTest::shrinkGrowableEmptyDefaultInit<int>,
               &GrowableArrayTest::shrinkGrowableEmptyDefaultInit<Movable>,
+              #endif
               &GrowableArrayTest::shrinkGrowableEmptyValueInit<int>,
               &GrowableArrayTest::shrinkGrowableEmptyValueInit<Movable>,
               &GrowableArrayTest::shrinkGrowableNoInit<int>,
               &GrowableArrayTest::shrinkGrowableNoInit<Movable>,
+              #ifdef CORRADE_BUILD_DEPRECATED
               &GrowableArrayTest::shrinkGrowableDefaultInit<int>,
               &GrowableArrayTest::shrinkGrowableDefaultInit<Movable>,
+              #endif
               &GrowableArrayTest::shrinkGrowableValueInit<int>,
               &GrowableArrayTest::shrinkGrowableValueInit<Movable>,
 
@@ -1035,11 +1059,14 @@ template<class T> void GrowableArrayTest::resizeNoInit() {
     /* Welp. The contents can be kinda anything, so */
 }
 
+#ifdef CORRADE_BUILD_DEPRECATED
 template<class T> void GrowableArrayTest::resizeDefaultInit() {
     setTestCaseTemplateName(TypeName<T>::name());
 
     Array<T> a;
+    CORRADE_IGNORE_DEPRECATED_PUSH
     arrayResize(a, Corrade::DefaultInit, 3);
+    CORRADE_IGNORE_DEPRECATED_POP
     CORRADE_COMPARE(a.size(), 3);
     VERIFY_SANITIZED_PROPERLY(a, ArrayAllocator<T>);
 
@@ -1050,6 +1077,7 @@ template<class T> void GrowableArrayTest::resizeDefaultInit() {
         CORRADE_COMPARE(int(a[2]), 0);
     }
 }
+#endif
 
 template<class T> void GrowableArrayTest::resizeValueInit() {
     setTestCaseTemplateName(TypeName<T>::name());
@@ -1093,9 +1121,11 @@ template<class> struct InitTagName;
 template<> struct InitTagName<Corrade::NoInitT> {
     static const char* name() { return "NoInit"; }
 };
+#ifdef CORRADE_BUILD_DEPRECATED
 template<> struct InitTagName<Corrade::DefaultInitT> {
     static const char* name() { return "DefaultInitT"; }
 };
+#endif
 template<> struct InitTagName<Corrade::ValueInitT> {
     static const char* name() { return "ValueInitT"; }
 };
@@ -1121,7 +1151,14 @@ template<class T, class Init> void GrowableArrayTest::resizeFromNonGrowableToLes
         }
         /* Not growable, no ASan annotation check */
 
+        #ifdef CORRADE_BUILD_DEPRECATED
+        /** @todo for the deprecated DefaultInit variant, remove when gone */
+        CORRADE_IGNORE_DEPRECATED_PUSH
+        #endif
         arrayResize(a, Init{typename Init::Init{}}, 2);
+        #ifdef CORRADE_BUILD_DEPRECATED
+        CORRADE_IGNORE_DEPRECATED_POP
+        #endif
         CORRADE_VERIFY(a != prev);
         CORRADE_VERIFY(arrayIsGrowable(a));
         CORRADE_COMPARE(a.size(), 2);
@@ -1159,7 +1196,14 @@ template<class T, class Init> void GrowableArrayTest::resizeFromGrowableToLess()
             CORRADE_COMPARE(Movable::destructed, 0);
         }
 
+        #ifdef CORRADE_BUILD_DEPRECATED
+        /** @todo for the deprecated DefaultInit variant, remove when gone */
+        CORRADE_IGNORE_DEPRECATED_PUSH
+        #endif
         arrayResize(a, Init{typename Init::Init{}}, 2);
+        #ifdef CORRADE_BUILD_DEPRECATED
+        CORRADE_IGNORE_DEPRECATED_POP
+        #endif
         CORRADE_VERIFY(a == prev);
         CORRADE_VERIFY(arrayIsGrowable(a));
         CORRADE_COMPARE(a.size(), 2);
@@ -2900,6 +2944,7 @@ template<class T> void GrowableArrayTest::shrinkNonGrowableEmptyNoInit() {
     }
 }
 
+#ifdef CORRADE_BUILD_DEPRECATED
 template<class T> void GrowableArrayTest::shrinkNonGrowableEmptyDefaultInit() {
     setTestCaseTemplateName(TypeName<T>::name());
 
@@ -2907,7 +2952,9 @@ template<class T> void GrowableArrayTest::shrinkNonGrowableEmptyDefaultInit() {
         Array<T> a;
 
         /* Should do no nuthin' */
+        CORRADE_IGNORE_DEPRECATED_PUSH
         arrayShrink(a, Corrade::DefaultInit);
+        CORRADE_IGNORE_DEPRECATED_POP
         CORRADE_VERIFY(!arrayIsGrowable(a));
         CORRADE_COMPARE(a.size(), 0);
         CORRADE_VERIFY(!a.data());
@@ -2921,6 +2968,7 @@ template<class T> void GrowableArrayTest::shrinkNonGrowableEmptyDefaultInit() {
         CORRADE_COMPARE(Movable::destructed, 0);
     }
 }
+#endif
 
 template<class T> void GrowableArrayTest::shrinkNonGrowableEmptyValueInit() {
     setTestCaseTemplateName(TypeName<T>::name());
@@ -2974,6 +3022,7 @@ template<class T> void GrowableArrayTest::shrinkNonGrowableNoInit() {
     }
 }
 
+#ifdef CORRADE_BUILD_DEPRECATED
 template<class T> void GrowableArrayTest::shrinkNonGrowableDefaultInit() {
     setTestCaseTemplateName(TypeName<T>::name());
 
@@ -2985,7 +3034,9 @@ template<class T> void GrowableArrayTest::shrinkNonGrowableDefaultInit() {
         a[2] = -1;
 
         /* Should do no nuthin' */
+        CORRADE_IGNORE_DEPRECATED_PUSH
         arrayShrink(a, Corrade::DefaultInit);
+        CORRADE_IGNORE_DEPRECATED_POP
         CORRADE_VERIFY(!arrayIsGrowable(a));
         CORRADE_COMPARE(a.size(), 3);
         CORRADE_VERIFY(a.data() == prev);
@@ -3003,6 +3054,7 @@ template<class T> void GrowableArrayTest::shrinkNonGrowableDefaultInit() {
         CORRADE_COMPARE(Movable::destructed, 3);
     }
 }
+#endif
 
 template<class T> void GrowableArrayTest::shrinkNonGrowableValueInit() {
     setTestCaseTemplateName(TypeName<T>::name());
@@ -3057,6 +3109,7 @@ template<class T> void GrowableArrayTest::shrinkGrowableEmptyNoInit() {
     }
 }
 
+#ifdef CORRADE_BUILD_DEPRECATED
 template<class T> void GrowableArrayTest::shrinkGrowableEmptyDefaultInit() {
     setTestCaseTemplateName(TypeName<T>::name());
 
@@ -3068,7 +3121,9 @@ template<class T> void GrowableArrayTest::shrinkGrowableEmptyDefaultInit() {
         CORRADE_VERIFY(a.isEmpty());
         CORRADE_VERIFY(arrayCapacity(a));
 
+        CORRADE_IGNORE_DEPRECATED_PUSH
         arrayShrink(a, Corrade::DefaultInit);
+        CORRADE_IGNORE_DEPRECATED_POP
     }
 
     /* Nothing extra should be done by the shrink */
@@ -3079,6 +3134,7 @@ template<class T> void GrowableArrayTest::shrinkGrowableEmptyDefaultInit() {
         CORRADE_COMPARE(Movable::destructed, 1);
     }
 }
+#endif
 
 template<class T> void GrowableArrayTest::shrinkGrowableEmptyValueInit() {
     setTestCaseTemplateName(TypeName<T>::name());
@@ -3135,6 +3191,7 @@ template<class T> void GrowableArrayTest::shrinkGrowableNoInit() {
     }
 }
 
+#ifdef CORRADE_BUILD_DEPRECATED
 template<class T> void GrowableArrayTest::shrinkGrowableDefaultInit() {
     setTestCaseTemplateName(TypeName<T>::name());
 
@@ -3147,7 +3204,9 @@ template<class T> void GrowableArrayTest::shrinkGrowableDefaultInit() {
         arrayAppend(a, Corrade::InPlaceInit, -1);
 
         /* Should convert to non-growable */
+        CORRADE_IGNORE_DEPRECATED_PUSH
         arrayShrink(a, Corrade::DefaultInit);
+        CORRADE_IGNORE_DEPRECATED_POP
         CORRADE_VERIFY(!arrayIsGrowable(a));
         CORRADE_COMPARE(a.size(), 3);
         CORRADE_COMPARE(arrayCapacity(a), 3);
@@ -3168,6 +3227,7 @@ template<class T> void GrowableArrayTest::shrinkGrowableDefaultInit() {
         CORRADE_COMPARE(Movable::destructed, 6);
     }
 }
+#endif
 
 template<class T> void GrowableArrayTest::shrinkGrowableValueInit() {
     setTestCaseTemplateName(TypeName<T>::name());
@@ -3322,7 +3382,11 @@ void GrowableArrayTest::explicitAllocatorParameter() {
     CORRADE_VERIFY(arrayIsGrowable<ArrayNewAllocator>(a));
     CORRADE_COMPARE(arrayCapacity<ArrayNewAllocator>(a), 10);
 
+    #ifdef CORRADE_BUILD_DEPRECATED /* (If this isn't called, it's fine) */
+    CORRADE_IGNORE_DEPRECATED_PUSH
     arrayResize<ArrayNewAllocator>(a, Corrade::DefaultInit, 1);
+    CORRADE_IGNORE_DEPRECATED_POP
+    #endif
     arrayResize<ArrayNewAllocator>(a, Corrade::ValueInit, 2);
     arrayResize<ArrayNewAllocator>(a, 3);
     arrayResize<ArrayNewAllocator>(a, Corrade::NoInit, 4);
@@ -3397,8 +3461,12 @@ void GrowableArrayTest::explicitAllocatorParameter() {
     CORRADE_VERIFY(arrayIsGrowable<ArrayNewAllocator>(a));
     arrayShrink<ArrayMallocAllocator>(a, Corrade::NoInit);
     CORRADE_VERIFY(arrayIsGrowable<ArrayNewAllocator>(a));
+    #ifdef CORRADE_BUILD_DEPRECATED /* (If this isn't called, it's fine) */
+    CORRADE_IGNORE_DEPRECATED_PUSH
     arrayShrink<ArrayMallocAllocator>(a, Corrade::DefaultInit);
+    CORRADE_IGNORE_DEPRECATED_POP
     CORRADE_VERIFY(arrayIsGrowable<ArrayNewAllocator>(a));
+    #endif
     arrayShrink<ArrayMallocAllocator>(a, Corrade::ValueInit);
     CORRADE_VERIFY(arrayIsGrowable<ArrayNewAllocator>(a));
     /* After this it will finally lose the growable status */

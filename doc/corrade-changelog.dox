@@ -745,6 +745,13 @@ namespace Corrade {
     @relativeref{Containers,Stride2D}, @relativeref{Containers,Stride3D} and
     @relativeref{Containers,Stride4D} aliases living directly in the
     @ref Containers namespace, as those are significantly shorter to type
+-   @ref DefaultInit initialization in @ref Containers::Array and growable
+    array APIs, @ref Containers::StaticArray, @ref Containers::Pair,
+    @ref Containers::Triple and @ref Utility::allocateAligned() is deprecated
+    decause C++'s default initialization keeps trivial types not initialized
+    and using it is unnecessarily error prone. Use either @ref ValueInit or
+    @ref NoInit instead to make the choice about content initialization
+    explicit.
 -   @cpp Utility::Directory::isSandboxed() @ce is deprecated in favor of
     @ref Utility::System::isSandboxed(), as that's the better place for this
     API to live in

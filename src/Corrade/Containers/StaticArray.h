@@ -52,6 +52,7 @@ template<std::size_t size_, class T> struct StaticArrayData<size_, T, true> {
     template<class U = T, typename std::enable_if<std::is_constructible<U, Corrade::NoInitT>::value, int>::type = 0> explicit StaticArrayData(Corrade::NoInitT): StaticArrayData{Corrade::NoInit, typename GenerateSequence<size_>::Type{}} {}
     template<std::size_t... sequence, class U = T, typename std::enable_if<std::is_constructible<U, Corrade::NoInitT>::value, int>::type = 0> explicit StaticArrayData(Corrade::NoInitT noInit, Sequence<sequence...>): _data{T{(&noInit)[0*sequence]}...} {}
 
+    #ifdef CORRADE_BUILD_DEPRECATED /* Used only by the deprecated constructor */
     /* Compared to StaticArrayData<size_, T, false> it does the right thing by
        default. MSVC 2015, 2019 and 2022 (but not 2017, _MSC_VER=191x)
        complains that the constexpr constructor doesn't initialize all members
@@ -65,6 +66,7 @@ template<std::size_t size_, class T> struct StaticArrayData<size_, T, true> {
     #else
     template<class U = T, typename std::enable_if<std::is_trivially_constructible<U>::value, int>::type = 0> explicit StaticArrayData(Corrade::DefaultInitT) {}
     template<class U = T, typename std::enable_if<!std::is_trivially_constructible<U>::value, int>::type = 0> constexpr explicit StaticArrayData(Corrade::DefaultInitT): _data{} {}
+    #endif
     #endif
 
     /* Compared to StaticArrayData<size_, T, false>, there's no way to trigger
@@ -99,7 +101,9 @@ template<std::size_t size_, class T> struct StaticArrayData<size_, T, false> {
        doesn't work for an explicit defaulted constructor. Doesn't apply to
        StaticArrayData<size_, T, true>. For details see constructHelpers.h and
        StaticArrayTest::constructorExplicitInCopyInitialization(). */
+    #ifdef CORRADE_BUILD_DEPRECATED /* Used only by the deprecated constructor */
     explicit StaticArrayData(Corrade::DefaultInitT): _data() {}
+    #endif
     explicit StaticArrayData(Corrade::ValueInitT): _data() {}
 
     /* Same as in StaticArrayData<size_, T, true> */
@@ -163,11 +167,6 @@ The array is by default *value-initialized*, which means that trivial types
 are zero-initialized and the default constructor is called on other types. It
 is possible to initialize the array in a different way using so-called *tags*:
 
--   @ref StaticArray(DefaultInitT) leaves trivial types uninitialized
-    and calls the default constructor elsewhere. In other words,
-    @cpp T array[size] @ce. Because of the differing behavior for trivial types
-    it's better to explicitly use either the @ref ValueInit or @ref NoInit
-    variants instead.
 -   @ref StaticArray(ValueInitT) is equivalent to the implicit parameterless
     constructor, zero-initializing trivial types and calling the default
     constructor elsewhere. Useful when you want to make the choice appear
@@ -190,7 +189,9 @@ is possible to initialize the array in a different way using so-called *tags*:
     types when you'll be overwriting the contents anyway, for non-trivial types
     this is the dangerous option and you need to call the constructor on all
     elements manually using placement new, @ref std::uninitialized_copy() or
-    similar --- see the constructor docs for an example.
+    similar --- see the constructor docs for an example. In other words,
+    @cpp char array[size*sizeof(T)] @ce for non-trivial types to circumvent
+    default construction and @cpp T array[size] @ce for trivial types.
 
 @snippet Containers.cpp StaticArray-usage-initialization
 
@@ -275,20 +276,24 @@ template<std::size_t size_, class T> class StaticArray: Implementation::StaticAr
         };
         typedef T Type;     /**< @brief Element type */
 
+        #ifdef CORRADE_BUILD_DEPRECATED
         /**
          * @brief Construct a default-initialized array
+         * @m_deprecated_since_latest Because C++'s default initialization
+         *      keeps trivial types not initialized, using it is unnecessarily
+         *      error prone. Use either @ref StaticArray(ValueInitT) or
+         *      @ref StaticArray(NoInitT) instead to make the choice about
+         *      content initialization explicit.
          *
          * Creates array of given size, the contents are default-initialized
-         * (i.e., trivial types are not initialized). Because of the differing
-         * behavior for trivial types it's better to explicitly use either the
-         * @ref StaticArray(ValueInitT) or the @ref StaticArray(NoInitT)
-         * variant instead.
+         * (i.e., trivial types are not initialized).
          * @see @relativeref{Corrade,DefaultInit},
          *      @ref StaticArray(DirectInitT, Args&&... args),
          *      @ref StaticArray(InPlaceInitT, Args&&... args),
          *      @ref std::is_trivial
          */
-        constexpr explicit StaticArray(Corrade::DefaultInitT): Implementation::StaticArrayDataFor<size_, T>{Corrade::DefaultInit} {}
+        constexpr explicit CORRADE_DEPRECATED("use StaticArray(ValueInitT) or StaticArray(NoInitT) instead") StaticArray(Corrade::DefaultInitT): Implementation::StaticArrayDataFor<size_, T>{Corrade::DefaultInit} {}
+        #endif
 
         /**
          * @brief Construct a value-initialized array
@@ -297,7 +302,6 @@ template<std::size_t size_, class T> class StaticArray: Implementation::StaticAr
          * (i.e., trivial types are zero-initialized, default constructor
          * called otherwise). This is the same as @ref StaticArray().
          * @see @relativeref{Corrade,ValueInit},
-         *      @ref StaticArray(DefaultInitT),
          *      @ref StaticArray(NoInitT),
          *      @ref StaticArray(DirectInitT, Args&&... args),
          *      @ref StaticArray(InPlaceInitT, Args&&... args),
@@ -315,11 +319,12 @@ template<std::size_t size_, class T> class StaticArray: Implementation::StaticAr
          * you need to call custom constructors in a way that's not expressible
          * via any other @ref StaticArray constructor.
          *
-         * For trivial types is equivalent to @ref StaticArray(DefaultInitT).
-         * For non-trivial types, the class will explicitly call the destructor
-         * on *all elements* --- which means that for non-trivial types you're
-         * expected to construct all elements using placement new (or for
-         * example @ref std::uninitialized_copy()) in order to avoid calling
+         * For trivial types is equivalent to @cpp T array[size] @ce (as
+         * opposed to @cpp T array[size]{} @ce). For non-trivial types, class
+         * destruction will explicitly call the destructor on *all elements*
+         * --- which means that for non-trivial types you're expected to
+         * construct all elements using placement new (or for example
+         * @ref std::uninitialized_copy()) in order to avoid calling
          * destructors on uninitialized memory:
          *
          * @snippet Containers.cpp StaticArray-NoInit
@@ -425,7 +430,7 @@ template<std::size_t size_, class T> class StaticArray: Implementation::StaticAr
          * @brief Construct a value-initialized array
          *
          * Alias to @ref StaticArray(ValueInitT).
-         * @see @ref StaticArray(DefaultInitT)
+         * @see @ref StaticArray(NoInitT)
          */
         constexpr /*implicit*/ StaticArray(): Implementation::StaticArrayDataFor<size_, T>{Corrade::ValueInit} {}
 

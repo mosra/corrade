@@ -104,7 +104,9 @@ namespace Test { namespace {
 struct TripleTest: TestSuite::Tester {
     explicit TripleTest();
 
+    #ifdef CORRADE_BUILD_DEPRECATED
     void constructDefaultInit();
+    #endif
     void constructValueInit();
     void constructNoInit();
     void constructCopyCopyCopy();
@@ -147,7 +149,10 @@ struct TripleTest: TestSuite::Tester {
 };
 
 TripleTest::TripleTest() {
-    addTests({&TripleTest::constructDefaultInit,
+    addTests({
+              #ifdef CORRADE_BUILD_DEPRECATED
+              &TripleTest::constructDefaultInit,
+              #endif
               &TripleTest::constructValueInit},
         &TripleTest::resetCounters, &TripleTest::resetCounters);
 
@@ -271,15 +276,20 @@ int Movable::constructed = 0;
 int Movable::destructed = 0;
 int Movable::moved = 0;
 
+#ifdef CORRADE_BUILD_DEPRECATED
 void TripleTest::constructDefaultInit() {
     {
+        CORRADE_IGNORE_DEPRECATED_PUSH
         Triple<float, int, bool> aTrivial{Corrade::DefaultInit};
+        CORRADE_IGNORE_DEPRECATED_POP
         /* Trivial types are uninitialized, nothing to verify here. Funnily
            enough, as the constructor is constexpr but the default
            initialization of trivial types itself isn't, the compiler doesn't
            even complain the variable is unused. */
 
+        CORRADE_IGNORE_DEPRECATED_PUSH
         Triple<Copyable, Copyable, Copyable> a{Corrade::DefaultInit};
+        CORRADE_IGNORE_DEPRECATED_POP
         CORRADE_COMPARE(a.first().a, 0);
         CORRADE_COMPARE(a.second().a, 0);
         CORRADE_COMPARE(a.third().a, 0);
@@ -298,12 +308,14 @@ void TripleTest::constructDefaultInit() {
     /* Can't test constexpr on trivial types because DefaultInit leaves them
        uninitialized */
     struct Foo { int a = 3; };
+    CORRADE_IGNORE_DEPRECATED_PUSH
     #ifndef CORRADE_MSVC2015_COMPATIBILITY
     /* Can't, because MSVC 2015 forces me to touch the members, which then
        wouldn't be a default initialization. */
     constexpr
     #endif
     Triple<Foo, Foo, Foo> b{Corrade::DefaultInit};
+    CORRADE_IGNORE_DEPRECATED_POP
     CORRADE_COMPARE(b.first().a, 3);
     CORRADE_COMPARE(b.second().a, 3);
 
@@ -315,6 +327,7 @@ void TripleTest::constructDefaultInit() {
     /* Implicit construction is not allowed */
     CORRADE_VERIFY(!std::is_convertible<Corrade::DefaultInitT, Triple<Copyable, Copyable, Copyable>>::value);
 }
+#endif
 
 void TripleTest::constructValueInit() {
     {

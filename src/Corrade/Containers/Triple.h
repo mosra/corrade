@@ -122,13 +122,17 @@ template<class F, class S, class T> class Triple {
         typedef S SecondType;   /**< @brief Second type */
         typedef T ThirdType;   /**< @brief Second type */
 
+        #ifdef CORRADE_BUILD_DEPRECATED
         /**
          * @brief Construct a default-initialized triple
+         * @m_deprecated_since_latest Because C++'s default initialization
+         *      keeps trivial types not initialized, using it is unnecessarily
+         *      error prone. Use either @ref Triple(ValueInitT) or
+         *      @ref Triple(NoInitT) instead to make the choice about content
+         *      initialization explicit.
          *
          * Trivial types are not initialized, default constructor called
-         * otherwise. Because of the differing behavior for trivial types it's
-         * better to explicitly use either the @ref Triple(ValueInitT) or the
-         * @ref Triple(NoInitT) variant instead.
+         * otherwise.
          * @see @relativeref{Corrade,DefaultInit}, @ref std::is_trivial
          */
         #ifndef CORRADE_MSVC2015_COMPATIBILITY
@@ -137,14 +141,15 @@ template<class F, class S, class T> class Triple {
            initialization if I did that. */
         constexpr
         #endif
-        explicit Triple(Corrade::DefaultInitT) noexcept(std::is_nothrow_constructible<F>::value && std::is_nothrow_constructible<S>::value && std::is_nothrow_constructible<T>::value) {}
+        explicit CORRADE_DEPRECATED("use Triple(ValueInitT) or Triple(NoInitT) instead") Triple(Corrade::DefaultInitT) noexcept(std::is_nothrow_constructible<F>::value && std::is_nothrow_constructible<S>::value && std::is_nothrow_constructible<T>::value) {}
+        #endif
 
         /**
          * @brief Construct a value-initialized triple
          *
          * Trivial types are zero-initialized, default constructor called
          * otherwise. This is the same as the default constructor.
-         * @see @relativeref{Corrade,ValueInit}, @ref Triple(DefaultInitT)
+         * @see @relativeref{Corrade,ValueInit}, @ref Triple(NoInitT)
          */
         constexpr explicit Triple(Corrade::ValueInitT) noexcept(std::is_nothrow_constructible<F>::value && std::is_nothrow_constructible<S>::value && std::is_nothrow_constructible<T>::value):
             /* Can't use {} here. See constructHelpers.h for details, test in
@@ -160,7 +165,9 @@ template<class F, class S, class T> class Triple {
          * anyway or if you need to initialize in a way that's not expressible
          * via any other @ref Triple constructor.
          *
-         * For trivial types is equivalent to @ref Triple(DefaultInitT).
+         * For trivial types is equivalent to constructing the elements as
+         * @cpp T element @ce (as opposed to @cpp T element{} @ce).
+         * @see @ref Triple(ValueInitT)
          */
         #ifdef DOXYGEN_GENERATING_OUTPUT
         explicit Triple(Corrade::NoInitT) noexcept(...);

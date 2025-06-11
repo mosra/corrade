@@ -75,8 +75,10 @@ struct ArrayTest: TestSuite::Tester {
     void constructEmpty();
     void construct();
     void constructZeroSize();
+    #ifdef CORRADE_BUILD_DEPRECATED
     void constructDefaultInit();
     void constructDefaultInitZeroSize();
+    #endif
     void constructValueInit();
     void constructValueInitZeroSize();
     void constructNoInitTrivial();
@@ -151,8 +153,10 @@ ArrayTest::ArrayTest() {
               &ArrayTest::constructEmpty,
               &ArrayTest::construct,
               &ArrayTest::constructZeroSize,
+              #ifdef CORRADE_BUILD_DEPRECATED
               &ArrayTest::constructDefaultInit,
               &ArrayTest::constructDefaultInitZeroSize,
+              #endif
               &ArrayTest::constructValueInit,
               &ArrayTest::constructValueInitZeroSize,
               &ArrayTest::constructNoInitTrivial,
@@ -261,7 +265,7 @@ void ArrayTest::constructDefault() {
        probably due to the workaround to avoid Array{0} being ambiguous between
        a std::size_t and a nullptr constructor */
     /** @todo drop this once the single-argument size constructor is
-        deprecated in favor of explicit DefaultInit / ValueInit */
+        deprecated in favor of explicit ValueInit / NoInit */
     #if defined(CORRADE_TARGET_GCC) && !defined(CORRADE_TARGET_CLANG) && __GNUC__ < 5
     const Array a2{nullptr};
     #else
@@ -315,8 +319,11 @@ void ArrayTest::constructFromExisting() {
     CORRADE_COMPARE(b.size(), 25);
 }
 
+#ifdef CORRADE_BUILD_DEPRECATED
 void ArrayTest::constructDefaultInit() {
+    CORRADE_IGNORE_DEPRECATED_PUSH
     const Array a{Corrade::DefaultInit, 5};
+    CORRADE_IGNORE_DEPRECATED_POP
     CORRADE_VERIFY(a);
     CORRADE_COMPARE(a.size(), 5);
 
@@ -324,10 +331,13 @@ void ArrayTest::constructDefaultInit() {
 }
 
 void ArrayTest::constructDefaultInitZeroSize() {
+    CORRADE_IGNORE_DEPRECATED_PUSH
     Array a{Corrade::DefaultInit, 0};
+    CORRADE_IGNORE_DEPRECATED_POP
     CORRADE_VERIFY(!a.data());
     CORRADE_COMPARE(a.size(), 0);
 }
+#endif
 
 void ArrayTest::constructValueInit() {
     const Array a{Corrade::ValueInit, 5};
@@ -375,7 +385,9 @@ void ArrayTest::constructNoInitNonTrivial() {
     CORRADE_VERIFY(a.deleter());
     CORRADE_COMPARE(Foo::constructorCallCount, 0);
 
-    const Containers::Array<Foo> b{Corrade::DefaultInit, 7};
+    /* Just to verify that the variable gets updated when calling a regular
+       constructor */
+    const Containers::Array<Foo> b{Corrade::ValueInit, 7};
     CORRADE_COMPARE(Foo::constructorCallCount, 7);
 }
 

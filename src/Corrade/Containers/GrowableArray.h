@@ -576,9 +576,14 @@ template<template<class T> class Allocator, class T> inline std::size_t arrayRes
 }
 #endif
 
+#ifdef CORRADE_BUILD_DEPRECATED
 /**
 @brief Resize an array to given size, default-initializing new elements
-@m_since{2020,06}
+@m_deprecated_since_latest Because C++'s default initialization keeps trivial
+    types not initialized, using it is unnecessarily error prone. Use either
+    @ref arrayResize(Array<T>&, ValueInitT, std::size_t) or
+    @ref arrayResize(Array<T>&, NoInitT, std::size_t) instead to make the
+    choice about content initialization explicit.
 
 If the array is growable and capacity is large enough, calls a destructor on
 elements that get cut off the end (if any, and if @p T is not trivially
@@ -601,7 +606,7 @@ default-constructible.
     @ref arrayResize(Array<T>&, DirectInitT, std::size_t, Args&&... args),
     @ref Containers-Array-growable
 */
-template<class T, class Allocator = ArrayAllocator<T>> void arrayResize(Array<T>& array, Corrade::DefaultInitT, std::size_t size);
+template<class T, class Allocator = ArrayAllocator<T>> CORRADE_DEPRECATED("use arrayResize(Array<T>, ValueInitT, std::size_t) or arrayResize(Array<T>, NoInitT, std::size_t) instead") void arrayResize(Array<T>& array, Corrade::DefaultInitT, std::size_t size);
 
 /* This crap tool can't distinguish between this and above overload, showing
    just one with the docs melted together. More useless than showing nothing
@@ -609,29 +614,43 @@ template<class T, class Allocator = ArrayAllocator<T>> void arrayResize(Array<T>
 #ifndef DOXYGEN_GENERATING_OUTPUT
 /**
 @overload
-@m_since{2020,06}
+@m_deprecated_since_latest Because C++'s default initialization keeps trivial
+    types not initialized, using it is unnecessarily error prone. Use either
+    @ref arrayResize(Array<T>&, ValueInitT, std::size_t) or
+    @ref arrayResize(Array<T>&, NoInitT, std::size_t) instead to make the
+    choice about content initialization explicit.
 
 Convenience overload allowing to specify just the allocator template, with
 array type being inferred.
 */
-template<template<class> class Allocator, class T> inline void arrayResize(Array<T>& array, Corrade::DefaultInitT, std::size_t size) {
+template<template<class> class Allocator, class T> inline CORRADE_DEPRECATED("use arrayResize(Array<T>, ValueInitT, std::size_t) or arrayResize(Array<T>, NoInitT, std::size_t) instead") void arrayResize(Array<T>& array, Corrade::DefaultInitT, std::size_t size) {
+    CORRADE_IGNORE_DEPRECATED_PUSH
     arrayResize<T, Allocator<T>>(array, Corrade::DefaultInit, size);
+    CORRADE_IGNORE_DEPRECATED_POP
 }
+#endif
 #endif
 
 /**
 @brief Resize an array to given size, value-initializing new elements
 @m_since{2020,06}
 
-Similar to @ref arrayResize(Array<T>&, DefaultInitT, std::size_t) except that
-the new elements at the end are not default-initialized, but value-initialized
-(i.e., trivial types zero-initialized and default constructor called
-otherwise).
+If the array is growable and capacity is large enough, calls a destructor on
+elements that get cut off the end (if any, and if @p T is not trivially
+destructible, in which case nothing is done) and returns. Otherwise, the memory
+is reallocated to desired @p size. After that, new elements at the end of the
+array are value-initialized (i.e., zero-initialized for trivial types and using
+placement new otherwise). Note that in case the array is non-growable of
+exactly the requested size, it's kept as such, without being reallocated to a
+growable version.
 
-On top of what the @p Allocator (or the default @ref ArrayAllocator) itself
-needs, @p T is required to be nothrow move-constructible and
+Complexity is at most @f$ \mathcal{O}(n) @f$ in the size of the new container,
+@f$ \mathcal{O}(1) @f$ if current container size is already exactly of given
+size. On top of what the @p Allocator (or the default @ref ArrayAllocator)
+itself needs, @p T is required to be nothrow move-constructible and
 default-constructible.
-@see @ref arrayResize(Array<T>&, std::size_t),
+@see @ref Array::size(), @ref arrayCapacity(), @ref arrayIsGrowable(),
+    @ref arrayRemoveSuffix(), @ref arrayResize(Array<T>&, std::size_t),
     @ref arrayResize(Array<T>&, std::size_t, const typename std::common_type<T>::type&),
     @ref arrayResize(Array<T>&, NoInitT, std::size_t),
     @ref arrayResize(Array<T>&, DirectInitT, std::size_t, Args&&... args),
@@ -665,7 +684,6 @@ This function is equivalent to calling @relativeref{std::vector,resize()} on
 a @ref std::vector.
 @m_keywords{resize()}
 @see @ref arrayResize(Array<T>&, std::size_t, const typename std::common_type<T>::type&),
-    @ref arrayResize(Array<T>&, DefaultInitT, std::size_t),
     @ref arrayResize(Array<T>&, NoInitT, std::size_t),
     @ref arrayResize(Array<T>&, DirectInitT, std::size_t, Args&&... args),
     @ref Containers-Array-growable
@@ -694,10 +712,10 @@ template<template<class> class Allocator, class T> inline void arrayResize(Array
 @brief Resize an array to given size, keeping new elements uninitialized
 @m_since{2020,06}
 
-Similar to @ref arrayResize(Array<T>&, DefaultInitT, std::size_t) except that
-the new elements at the end are not default-initialized, but left in an
-uninitialized state instead. I.e., placement-new is meant to be used on *all*
-newly added elements with a non-trivially-copyable @p T.
+Similar to @ref arrayResize(Array<T>&, ValueInitT, std::size_t) except that the
+new elements at the end are not value-initialized, but left in an uninitialized
+state instead. I.e., placement-new is meant to be used on *all* newly added
+elements with a non-trivially-copyable @p T.
 
 On top of what the @p Allocator (or the default @ref ArrayAllocator) itself
 needs, @p T is required to be nothrow move-constructible.
@@ -739,7 +757,6 @@ needs, @p T is required to be nothrow move-constructible and constructible from
 provided @p args.
 @see @ref arrayResize(Array<T>&, std::size_t),
     @ref arrayResize(Array<T>&, std::size_t, const typename std::common_type<T>::type&),
-    @ref arrayResize(Array<T>&, DefaultInitT, std::size_t),
     @ref arrayResize(Array<T>&, NoInitT, std::size_t),
     @ref Containers-Array-growable
 */
@@ -778,7 +795,6 @@ This function is equivalent to calling @relativeref{std::vector,resize()} on
 a @ref std::vector.
 @m_keywords{resize()}
 @see @ref arrayResize(Array<T>&, std::size_t),
-    @ref arrayResize(Array<T>&, DefaultInitT, std::size_t),
     @ref arrayResize(Array<T>&, ValueInitT, std::size_t),
     @ref arrayResize(Array<T>&, NoInitT, std::size_t),
     @ref Containers-Array-growable
@@ -1497,7 +1513,7 @@ on @p T from @p Allocator (or the default @ref ArrayAllocator) apply here but
 This function is equivalent to calling @relativeref{std::vector,shrink_to_fit()}
 on a @ref std::vector.
 @m_keywords{shrink_to_fit()}
-@see @ref arrayShrink(Array<T>&, DefaultInitT), @ref arrayIsGrowable(),
+@see @ref arrayShrink(Array<T>&, ValueInitT), @ref arrayIsGrowable(),
     @ref Containers-Array-growable
 */
 template<class T, class Allocator = ArrayAllocator<T>> void arrayShrink(Array<T>& array, Corrade::NoInitT = Corrade::NoInit);
@@ -1518,9 +1534,13 @@ template<template<class> class Allocator, class T> inline void arrayShrink(Array
 }
 #endif
 
+#ifdef CORRADE_BUILD_DEPRECATED
 /**
 @brief Convert an array back to non-growable using a default initialization
-@m_since_latest
+@m_deprecated_since_latest Because C++'s default initialization keeps trivial
+    types not initialized, the @ref Array::Array(DefaultInitT, std::size_t)
+    constructor is deprecated. Use @ref arrayShrink(Array<T>&, ValueInitT)
+    instead.
 
 Allocates a @relativeref{Corrade,DefaultInit} array that's exactly large enough
 to fit @ref Array::size() elements, move-assigns the elements there and frees
@@ -1538,7 +1558,7 @@ always has a default (@cpp nullptr @ce) deleter. This is useful when it's not
 possible to use custom deleters, such as in plugin implementations.
 @see @ref arrayIsGrowable(), @ref Containers-Array-growable
 */
-template<class T, class Allocator = ArrayAllocator<T>> void arrayShrink(Array<T>& array, Corrade::DefaultInitT);
+template<class T, class Allocator = ArrayAllocator<T>> CORRADE_DEPRECATED("use arrayShrink(Array<T>&, ValueInitT) instead") void arrayShrink(Array<T>& array, Corrade::DefaultInitT);
 
 /* This crap tool can't distinguish between this and above overload, showing
    just one with the docs melted together. More useless than showing nothing
@@ -1546,14 +1566,20 @@ template<class T, class Allocator = ArrayAllocator<T>> void arrayShrink(Array<T>
 #ifndef DOXYGEN_GENERATING_OUTPUT
 /**
 @overload
-@m_since_latest
+@m_deprecated_since_latest Because C++'s default initialization keeps trivial
+    types not initialized, the @ref Array::Array(DefaultInitT, std::size_t)
+    constructor is deprecated. Use @ref arrayShrink(Array<T>&, ValueInitT)
+    instead.
 
 Convenience overload allowing to specify just the allocator template, with
 array type being inferred.
 */
-template<template<class> class Allocator, class T> inline void arrayShrink(Array<T>& array, Corrade::DefaultInitT) {
+template<template<class> class Allocator, class T> inline CORRADE_DEPRECATED("use arrayShrink(Array<T>&, ValueInitT) instead") void arrayShrink(Array<T>& array, Corrade::DefaultInitT) {
+    CORRADE_IGNORE_DEPRECATED_PUSH
     arrayShrink<T, Allocator<T>>(array, Corrade::DefaultInit);
+    CORRADE_IGNORE_DEPRECATED_POP
 }
+#endif
 #endif
 
 /**
@@ -1867,11 +1893,13 @@ template<class T, class Allocator> void arrayResize(Array<T>& array, Corrade::No
     }
 }
 
+#ifdef CORRADE_BUILD_DEPRECATED
 template<class T, class Allocator> void arrayResize(Array<T>& array, Corrade::DefaultInitT, const std::size_t size) {
     const std::size_t prevSize = array.size();
     arrayResize<T, Allocator>(array, Corrade::NoInit, size);
     Implementation::arrayConstruct(Corrade::DefaultInit, array + prevSize, array.end());
 }
+#endif
 
 template<class T, class Allocator> void arrayResize(Array<T>& array, Corrade::ValueInitT, const std::size_t size) {
     const std::size_t prevSize = array.size();
@@ -2442,6 +2470,7 @@ template<class T, class Allocator> void arrayShrink(Array<T>& array, Corrade::No
     #endif
 }
 
+#ifdef CORRADE_BUILD_DEPRECATED
 template<class T, class Allocator> void arrayShrink(Array<T>& array, Corrade::DefaultInitT) {
     /* Direct access to speed up debug builds */
     auto& arrayGuts = reinterpret_cast<Implementation::ArrayGuts<T>&>(array);
@@ -2453,7 +2482,9 @@ template<class T, class Allocator> void arrayShrink(Array<T>& array, Corrade::De
 
     /* Even if we don't need to shrink, reallocating to an usual array with
        common deleters to avoid surprises */
+    CORRADE_IGNORE_DEPRECATED_PUSH
     Array<T> newArray{Corrade::DefaultInit, arrayGuts.size};
+    CORRADE_IGNORE_DEPRECATED_POP
     Implementation::arrayMoveAssign<T>(arrayGuts.data, newArray, arrayGuts.size);
     array = Utility::move(newArray);
 
@@ -2461,6 +2492,7 @@ template<class T, class Allocator> void arrayShrink(Array<T>& array, Corrade::De
     /* Nothing to do (not annotating the arrays with default deleter) */
     #endif
 }
+#endif
 
 template<class T, class Allocator> void arrayShrink(Array<T>& array, Corrade::ValueInitT) {
     /* Direct access to speed up debug builds */

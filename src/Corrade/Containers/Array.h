@@ -109,11 +109,6 @@ The array is by default *value-initialized*, which means that trivial types
 are zero-initialized and the default constructor is called on other types. It
 is possible to initialize the array in a different way using so-called *tags*:
 
--   @ref Array(DefaultInitT, std::size_t) leaves trivial types uninitialized
-    and calls the default constructor elsewhere. In other words,
-    @cpp new T[size] @ce. Because of the differing behavior for trivial types
-    it's better to explicitly use either the @ref ValueInit or @ref NoInit
-    variants instead.
 -   @ref Array(ValueInitT, std::size_t) is equivalent to the default case,
     zero-initializing trivial types and calling the default constructor
     elsewhere. Useful when you want to make the choice appear explicit. In
@@ -361,21 +356,27 @@ class Array {
         /*implicit*/ Array() noexcept: _data(nullptr), _size(0), _deleter{} {}
         #endif
 
+        #ifdef CORRADE_BUILD_DEPRECATED
         /**
          * @brief Construct a default-initialized array
+         * @m_deprecated_since_latest Because C++'s default initialization
+         *      keeps trivial types not initialized, using it is unnecessarily
+         *      error prone. Use either @ref Array(ValueInitT, std::size_t) or
+         *      @ref Array(NoInitT, std::size_t) instead to make the choice
+         *      about content initialization explicit. For trivial types, this
+         *      constructor behaves exactly the same as
+         *      @ref Array(NoInitT, std::size_t).
          *
          * Creates an array of given size, the contents are default-initialized
          * (i.e. trivial types are not initialized, default constructor called
-         * otherwise). If the size is zero, no allocation is done. Because of
-         * the differing behavior for trivial types it's better to explicitly
-         * use either the @ref Array(ValueInitT, std::size_t) or the
-         * @ref Array(NoInitT, std::size_t) variant instead.
+         * otherwise). If the size is zero, no allocation is done.
          * @see @relativeref{Corrade,DefaultInit},
          *      @ref Array(DirectInitT, std::size_t, Args&&... args),
          *      @ref Array(InPlaceInitT, std::initializer_list<T>),
          *      @ref array(std::initializer_list<T>), @ref std::is_trivial
          */
-        explicit Array(Corrade::DefaultInitT, std::size_t size): _data{size ? new T[size] : nullptr}, _size{size}, _deleter{nullptr} {}
+        explicit CORRADE_DEPRECATED("use Array(ValueInitT, std::size_t) or Array(NoInitT, std::size_t) instead") Array(Corrade::DefaultInitT, std::size_t size): _data{size ? new T[size] : nullptr}, _size{size}, _deleter{nullptr} {}
+        #endif
 
         /**
          * @brief Construct a value-initialized array
@@ -385,7 +386,6 @@ class Array {
          * otherwise). This is the same as @ref Array(std::size_t). If the size
          * is zero, no allocation is done.
          * @see @relativeref{Corrade,ValueInit},
-         *      @ref Array(DefaultInitT, std::size_t),
          *      @ref Array(NoInitT, std::size_t),
          *      @ref Array(DirectInitT, std::size_t, Args&&... args),
          *      @ref Array(InPlaceInitT, std::initializer_list<T>),
@@ -405,15 +405,15 @@ class Array {
          * constructors in a way that's not expressible via any other
          * @ref Array constructor.
          *
-         * For trivial types is equivalent to @ref Array(DefaultInitT, std::size_t),
-         * with @ref deleter() being the default (@cpp nullptr @ce) as well.
-         * For non-trivial types, the data are allocated as a @cpp char @ce
-         * array. Destruction is done using a custom deleter that explicitly
-         * calls the destructor on *all elements* and then deallocates the data
-         * as a @cpp char @ce array again --- which means that for non-trivial
-         * types you're expected to construct all elements using placement new
-         * (or for example @ref std::uninitialized_copy()) in order to avoid
-         * calling destructors on uninitialized memory:
+         * For trivial types is equivalent to @cpp new T[size] @ce (as opposed
+         * to @cpp new T[size]{} @ce), with @ref deleter() being the default
+         * (@cpp nullptr @ce). For non-trivial types, the data are allocated as
+         * a @cpp char @ce array and destruction is done using a custom deleter
+         * that explicitly calls the destructor on *all elements* and then
+         * deallocates the data as a @cpp char @ce array again --- which means
+         * that for non-trivial types you're expected to construct all elements
+         * using placement new (or for example @ref std::uninitialized_copy())
+         * in order to avoid calling destructors on uninitialized memory:
          *
          * @snippet Containers.cpp Array-NoInit
          *
@@ -433,7 +433,6 @@ class Array {
          * constructor and then initializes each element with placement new
          * using forwarded @p args.
          * @see @relativeref{Corrade,DirectInit},
-         *      @ref Array(DefaultInitT, std::size_t),
          *      @ref Array(ValueInitT, std::size_t),
          *      @ref Array(InPlaceInitT, std::initializer_list<T>),
          *      @ref array(std::initializer_list<T>)
@@ -455,7 +454,6 @@ class Array {
          * @ref Containers-Array-initializer-list "class documentation" for
          * more information.
          * @see @relativeref{Corrade,DirectInit},
-         *      @ref Array(DefaultInitT, std::size_t),
          *      @ref Array(ValueInitT, std::size_t),
          *      @ref Array(DirectInitT, std::size_t, Args&&... args)
          */
@@ -468,7 +466,7 @@ class Array {
          * @brief Construct a value-initialized array
          *
          * Alias to @ref Array(ValueInitT, std::size_t).
-         * @see @ref Array(DefaultInitT, std::size_t)
+         * @see @ref Array(NoInitT, std::size_t)
          */
         explicit Array(std::size_t size): Array{Corrade::ValueInit, size} {}
 

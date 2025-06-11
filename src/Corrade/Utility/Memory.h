@@ -102,10 +102,6 @@ achieved with the following tags, compared to @ref Containers::Array the
 initialization is performed separately from the allocation itself with either a
 loop or a call to @ref std::memset().
 
--   @ref allocateAligned(DefaultInitT, std::size_t) leaves trivial types
-    uninitialized and calls the default constructor elsewhere. Because of the
-    differing behavior for trivial types it's better to explicitly use either
-    the @ref ValueInit or @ref NoInit variants instead.
 -   @ref allocateAligned(ValueInitT, std::size_t) is equivalent to the default
     case, zero-initializing trivial types and calling the default constructor
     elsewhere. Useful when you want to make the choice appear explicit.
@@ -120,22 +116,25 @@ loop or a call to @ref std::memset().
 */
 template<class T, std::size_t alignment = alignof(T)> inline Containers::Array<T> allocateAligned(std::size_t size);
 
+#ifdef CORRADE_BUILD_DEPRECATED
 /**
 @brief Allocate aligned memory and default-initialize it
-@m_since_latest
+@m_deprecated_since_latest Because C++'s default initialization keeps trivial
+    types not initialized, using it is unnecessarily error prone. Use either
+    @ref allocateAligned(ValueInitT, std::size_t) or
+    @ref allocateAligned(NoInitT, std::size_t) instead to make the choice about
+    content initialization explicit.
 
 Compared to @ref allocateAligned(std::size_t), trivial types are not
-initialized and default constructor is called otherwise. Because of the
-differing behavior for trivial types it's better to explicitly use either the
-@ref allocateAligned(ValueInitT, std::size_t) or the
-@ref allocateAligned(NoInitT, std::size_t) variant instead.
+initialized and default constructor is called otherwise.
 
 Implemented via @ref allocateAligned(NoInitT, std::size_t) with a
 loop calling the constructors on the returned allocation in case of non-trivial
 types.
 @see @ref allocateAligned(ValueInitT, std::size_t), @ref Cpu
 */
-template<class T, std::size_t alignment = alignof(T)> Containers::Array<T> allocateAligned(DefaultInitT, std::size_t size);
+template<class T, std::size_t alignment = alignof(T)> CORRADE_DEPRECATED("use allocateAligned(ValueInitT, std::size_t) or allocateAligned(NoInitT, std::size_t) instead") Containers::Array<T> allocateAligned(DefaultInitT, std::size_t size);
+#endif
 
 /**
 @brief Allocate aligned memory and value-initialize it
@@ -145,7 +144,7 @@ Same as @ref allocateAligned(std::size_t), just more explicit. Implemented via
 @ref allocateAligned(NoInitT, std::size_t) with either a
 @ref std::memset() or a loop calling the constructors on the returned
 allocation.
-@see @ref allocateAligned(DefaultInitT, std::size_t), @ref Cpu
+@see @ref Cpu
 */
 template<class T, std::size_t alignment = alignof(T)> Containers::Array<T> allocateAligned(ValueInitT, std::size_t size);
 
@@ -154,18 +153,15 @@ template<class T, std::size_t alignment = alignof(T)> Containers::Array<T> alloc
 @m_since_latest
 
 Compared to @ref allocateAligned(std::size_t), the memory is left in an
-unitialized state. For trivial types is equivalent to
-@ref allocateAligned(DefaultInitT, std::size_t). For non-trivial
-types, destruction is always done using a custom deleter that explicitly calls
-the destructor on *all elements* --- which means that for non-trivial types
-you're expected to construct all elements using placement new (or for example
-@ref std::uninitialized_copy()) in order to avoid calling destructors on
-uninitialized memory:
+unitialized state. For non-trivial types, destruction is always done using a
+custom deleter that explicitly calls the destructor on *all elements* --- which
+means that for non-trivial types you're expected to construct all elements
+using placement new (or for example @ref std::uninitialized_copy()) in order to
+avoid calling destructors on uninitialized memory:
 
 @snippet Utility.cpp allocateAligned-NoInit
 
-@see @ref allocateAligned(DefaultInitT, std::size_t),
-    @ref allocateAligned(ValueInitT, std::size_t), @ref Cpu
+@see @ref allocateAligned(ValueInitT, std::size_t), @ref Cpu
 */
 template<class T, std::size_t alignment = alignof(T)> Containers::Array<T> allocateAligned(NoInitT, std::size_t size);
 
@@ -287,11 +283,13 @@ template<class T, std::size_t alignment> Containers::Array<T> allocateAligned(No
     #endif
 }
 
+#ifdef CORRADE_BUILD_DEPRECATED
 template<class T, std::size_t alignment> Containers::Array<T> allocateAligned(DefaultInitT, const std::size_t size) {
     Containers::Array<T> out = allocateAligned<T, alignment>(NoInit, size);
     Containers::Implementation::arrayConstruct(DefaultInit, out.begin(), out.end());
     return out;
 }
+#endif
 
 template<class T, std::size_t alignment> Containers::Array<T> allocateAligned(ValueInitT, const std::size_t size) {
     Containers::Array<T> out = allocateAligned<T, alignment>(NoInit, size);

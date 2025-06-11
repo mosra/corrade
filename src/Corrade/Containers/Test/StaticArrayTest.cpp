@@ -70,9 +70,11 @@ struct StaticArrayTest: TestSuite::Tester {
 
     void constructValueInit();
     template<class T> void constructValueInitTrivial();
+    #ifdef CORRADE_BUILD_DEPRECATED
     void constructDefaultInit();
     void constructDefaultInitTrivialConstructor();
     void constructDefaultInitDefaultConstructor();
+    #endif
     void constructNoInit();
     template<class T> void constructNoInitTrivial();
     void constructInPlaceInit();
@@ -145,11 +147,13 @@ StaticArrayTest::StaticArrayTest() {
         &StaticArrayTest::constructValueInitTrivial<int>,
         &StaticArrayTest::constructValueInitTrivial<NoInitConstructible>});
 
+    #ifdef CORRADE_BUILD_DEPRECATED
     addTests({&StaticArrayTest::constructDefaultInit},
         &StaticArrayTest::resetCounters, &StaticArrayTest::resetCounters);
 
     addTests({&StaticArrayTest::constructDefaultInitTrivialConstructor,
               &StaticArrayTest::constructDefaultInitDefaultConstructor});
+    #endif
 
     addTests({&StaticArrayTest::constructNoInit},
         &StaticArrayTest::resetCounters, &StaticArrayTest::resetCounters);
@@ -455,9 +459,12 @@ template<class T> void StaticArrayTest::constructValueInitTrivial() {
     CORRADE_VERIFY(!std::is_convertible<Corrade::ValueInitT, StaticArray<5, T>>::value);
 }
 
+#ifdef CORRADE_BUILD_DEPRECATED
 void StaticArrayTest::constructDefaultInit() {
     {
+        CORRADE_IGNORE_DEPRECATED_PUSH
         const StaticArray<5, Copyable> a{Corrade::DefaultInit};
+        CORRADE_IGNORE_DEPRECATED_POP
 
         /* Values should be default-constructed for non-trivial types */
         CORRADE_COMPARE(a[0].a, 0);
@@ -482,7 +489,9 @@ void StaticArrayTest::constructDefaultInit() {
 }
 
 void StaticArrayTest::constructDefaultInitTrivialConstructor() {
+    CORRADE_IGNORE_DEPRECATED_PUSH
     const StaticArray<5, int> a{Corrade::DefaultInit};
+    CORRADE_IGNORE_DEPRECATED_POP
 
     /* Values are random memory */
 
@@ -491,7 +500,9 @@ void StaticArrayTest::constructDefaultInitTrivialConstructor() {
 }
 
 void StaticArrayTest::constructDefaultInitDefaultConstructor() {
+    CORRADE_IGNORE_DEPRECATED_PUSH
     const StaticArray<5, NoInitConstructible> a{Corrade::DefaultInit};
+    CORRADE_IGNORE_DEPRECATED_POP
 
     /* Values are default-constructed */
     CORRADE_COMPARE(a[0], 0);
@@ -500,7 +511,9 @@ void StaticArrayTest::constructDefaultInitDefaultConstructor() {
     CORRADE_COMPARE(a[3], 0);
     CORRADE_COMPARE(a[4], 0);
 
+    CORRADE_IGNORE_DEPRECATED_PUSH
     constexpr StaticArray<5, NoInitConstructible> ca{Corrade::DefaultInit};
+    CORRADE_IGNORE_DEPRECATED_POP
     CORRADE_COMPARE(ca[0], 0);
     CORRADE_COMPARE(ca[1], 0);
     CORRADE_COMPARE(ca[2], 0);
@@ -510,6 +523,7 @@ void StaticArrayTest::constructDefaultInitDefaultConstructor() {
     /* Implicit construction is not allowed */
     CORRADE_VERIFY(!std::is_convertible<Corrade::DefaultInitT, StaticArray<5, NoInitConstructible>>::value);
 }
+#endif
 
 void StaticArrayTest::constructNoInit() {
     {
@@ -751,10 +765,16 @@ void StaticArrayTest::constructDirectInitMoveOnly() {
 }
 
 void StaticArrayTest::constructImmovable() {
-    const StaticArray<5, Immovable> a{Corrade::DefaultInit};
-    const StaticArray<5, Immovable> b{Corrade::ValueInit};
-    const StaticArray<5, Immovable> c;
+    #ifdef CORRADE_BUILD_DEPRECATED
+    CORRADE_IGNORE_DEPRECATED_PUSH
+    StaticArray<5, Immovable> a{Corrade::DefaultInit};
+    CORRADE_IGNORE_DEPRECATED_POP
+    #endif
+    StaticArray<5, Immovable> b{Corrade::ValueInit};
+    StaticArray<5, Immovable> c;
+    #ifdef CORRADE_BUILD_DEPRECATED
     CORRADE_VERIFY(a);
+    #endif
     CORRADE_VERIFY(b);
     CORRADE_VERIFY(c);
 }
@@ -1970,10 +1990,16 @@ void StaticArrayTest::constructorExplicitInCopyInitialization() {
     static_cast<void>(a);
 
     /* So this should too */
+    #ifdef CORRADE_BUILD_DEPRECATED
+    CORRADE_IGNORE_DEPRECATED_PUSH
     StaticArray<3, ContainingExplicitDefaultWithImplicitConstructor> b{Corrade::DefaultInit};
+    CORRADE_IGNORE_DEPRECATED_POP
+    #endif
     StaticArray<3, ContainingExplicitDefaultWithImplicitConstructor> c{Corrade::ValueInit};
     StaticArray<3, ContainingExplicitDefaultWithImplicitConstructor> d{Corrade::DirectInit};
+    #ifdef CORRADE_BUILD_DEPRECATED
     CORRADE_COMPARE(b.size(), 3);
+    #endif
     CORRADE_COMPARE(c.size(), 3);
     CORRADE_COMPARE(d.size(), 3);
 }

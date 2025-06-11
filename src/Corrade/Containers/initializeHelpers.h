@@ -50,6 +50,8 @@ enum: std::size_t {
         #endif
 };
 
+/** @todo remove once uses in GrowableArray.h and Utility/Memory.h are gone */
+#ifdef CORRADE_BUILD_DEPRECATED
 template<class T, typename std::enable_if<
     #ifdef CORRADE_NO_STD_IS_TRIVIALLY_TRAITS
     __has_trivial_constructor(T)
@@ -71,6 +73,7 @@ template<class T, typename std::enable_if<!
        types non-initialized */
     for(; begin < end; ++begin) new(begin) T;
 }
+#endif
 
 template<class T, typename std::enable_if<
     #ifdef CORRADE_NO_STD_IS_TRIVIALLY_TRAITS

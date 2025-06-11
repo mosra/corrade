@@ -122,13 +122,17 @@ template<class F, class S> class Pair {
         typedef F FirstType;    /**< @brief First type */
         typedef S SecondType;   /**< @brief Second type */
 
+        #ifdef CORRADE_BUILD_DEPRECATED
         /**
          * @brief Construct a default-initialized pair
+         * @m_deprecated_since_latest Because C++'s default initialization
+         *      keeps trivial types not initialized, using it is unnecessarily
+         *      error prone. Use either @ref Pair(ValueInitT) or
+         *      @ref Pair(NoInitT) instead to make the choice about content
+         *      initialization explicit.
          *
          * Trivial types are not initialized, default constructor called
-         * otherwise. Because of the differing behavior for trivial types it's
-         * better to explicitly use either the @ref Pair(ValueInitT) or the
-         * @ref Pair(NoInitT) variant instead.
+         * otherwise.
          * @see @relativeref{Corrade,DefaultInit}, @ref std::is_trivial
          */
         #ifndef CORRADE_MSVC2015_COMPATIBILITY
@@ -137,14 +141,15 @@ template<class F, class S> class Pair {
            initialization if I did that. */
         constexpr
         #endif
-        explicit Pair(Corrade::DefaultInitT) noexcept(std::is_nothrow_constructible<F>::value && std::is_nothrow_constructible<S>::value) {}
+        explicit CORRADE_DEPRECATED("use Pair(ValueInitT) or Pair(NoInitT) instead") Pair(Corrade::DefaultInitT) noexcept(std::is_nothrow_constructible<F>::value && std::is_nothrow_constructible<S>::value) {}
+        #endif
 
         /**
          * @brief Construct a value-initialized pair
          *
          * Trivial types are zero-initialized, default constructor called
          * otherwise. This is the same as the default constructor.
-         * @see @relativeref{Corrade,ValueInit}, @ref Pair(DefaultInitT)
+         * @see @relativeref{Corrade,ValueInit}, @ref Pair(NoInitT)
          */
         constexpr explicit Pair(Corrade::ValueInitT) noexcept(std::is_nothrow_constructible<F>::value && std::is_nothrow_constructible<S>::value):
             /* Can't use {} here. See constructHelpers.h for details, test in
@@ -160,7 +165,9 @@ template<class F, class S> class Pair {
          * anyway or if you need to initialize in a way that's not expressible
          * via any other @ref Pair constructor.
          *
-         * For trivial types is equivalent to @ref Pair(DefaultInitT).
+         * For trivial types is equivalent to constructing the elements as
+         * @cpp T element @ce (as opposed to @cpp T element{} @ce).
+         * @see @ref Pair(ValueInitT)
          */
         #ifdef DOXYGEN_GENERATING_OUTPUT
         explicit Pair(Corrade::NoInitT) noexcept(...);

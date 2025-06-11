@@ -101,7 +101,9 @@ namespace Test { namespace {
 struct PairTest: TestSuite::Tester {
     explicit PairTest();
 
+    #ifdef CORRADE_BUILD_DEPRECATED
     void constructDefaultInit();
+    #endif
     void constructValueInit();
     void constructNoInit();
     void constructCopyCopy();
@@ -136,7 +138,10 @@ struct PairTest: TestSuite::Tester {
 };
 
 PairTest::PairTest() {
-    addTests({&PairTest::constructDefaultInit,
+    addTests({
+              #ifdef CORRADE_BUILD_DEPRECATED
+              &PairTest::constructDefaultInit,
+              #endif
               &PairTest::constructValueInit},
         &PairTest::resetCounters, &PairTest::resetCounters);
 
@@ -252,15 +257,20 @@ int Movable::constructed = 0;
 int Movable::destructed = 0;
 int Movable::moved = 0;
 
+#ifdef CORRADE_BUILD_DEPRECATED
 void PairTest::constructDefaultInit() {
     {
+        CORRADE_IGNORE_DEPRECATED_PUSH
         Pair<float, int> aTrivial{Corrade::DefaultInit};
+        CORRADE_IGNORE_DEPRECATED_POP
         /* Trivial types are uninitialized, nothing to verify here. Funnily
            enough, as the constructor is constexpr but the default
            initialization of trivial types itself isn't, the compiler doesn't
            even complain the variable is unused. */
 
+        CORRADE_IGNORE_DEPRECATED_PUSH
         Pair<Copyable, Copyable> a{Corrade::DefaultInit};
+        CORRADE_IGNORE_DEPRECATED_POP
         CORRADE_COMPARE(a.first().a, 0);
         CORRADE_COMPARE(a.second().a, 0);
 
@@ -278,12 +288,14 @@ void PairTest::constructDefaultInit() {
     /* Can't test constexpr on trivial types because DefaultInit leaves them
        uninitialized */
     struct Foo { int a = 3; };
+    CORRADE_IGNORE_DEPRECATED_PUSH
     #ifndef CORRADE_MSVC2015_COMPATIBILITY
     /* Can't, because MSVC 2015 forces me to touch the members, which then
        wouldn't be a default initialization. */
     constexpr
     #endif
     Pair<Foo, Foo> b{Corrade::DefaultInit};
+    CORRADE_IGNORE_DEPRECATED_POP
     CORRADE_COMPARE(b.first().a, 3);
     CORRADE_COMPARE(b.second().a, 3);
 
@@ -294,6 +306,7 @@ void PairTest::constructDefaultInit() {
     /* Implicit construction is not allowed */
     CORRADE_VERIFY(!std::is_convertible<Corrade::DefaultInitT, Pair<Copyable, Copyable>>::value);
 }
+#endif
 
 void PairTest::constructValueInit() {
     {
