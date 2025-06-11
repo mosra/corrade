@@ -1057,7 +1057,7 @@ c[3] = 25;                          // c == {3, 18, -157, 25}
 /* [StaticArray-usage-initialization] */
 /* These two are equivalent */
 Containers::StaticArray<5, int> a1;
-Containers::StaticArray<5, int> a2{DefaultInit};
+Containers::StaticArray<5, int> a2{ValueInit};
 
 /* Array of 100 integers, uninitialized */
 Containers::StaticArray<100, int> b{NoInit};
