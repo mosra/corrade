@@ -654,6 +654,7 @@ default-constructible.
     @ref arrayResize(Array<T>&, std::size_t, const typename std::common_type<T>::type&),
     @ref arrayResize(Array<T>&, NoInitT, std::size_t),
     @ref arrayResize(Array<T>&, DirectInitT, std::size_t, Args&&... args),
+    @ref arrayAppend(Array<T>&, ValueInitT, std::size_t),
     @ref Containers-Array-growable
 */
 template<class T, class Allocator = ArrayAllocator<T>> void arrayResize(Array<T>& array, Corrade::ValueInitT, std::size_t size);
@@ -758,6 +759,7 @@ provided @p args.
 @see @ref arrayResize(Array<T>&, std::size_t),
     @ref arrayResize(Array<T>&, std::size_t, const typename std::common_type<T>::type&),
     @ref arrayResize(Array<T>&, NoInitT, std::size_t),
+    @ref arrayAppend(Array<T>&, DirectInitT, std::size_t, Args&&.... args),
     @ref Containers-Array-growable
 */
 template<class T, class ...Args> void arrayResize(Array<T>& array, Corrade::DirectInitT, std::size_t size, Args&&... args);
@@ -851,7 +853,9 @@ a @ref std::vector.
     @ref arrayAppend(Array<T>&, typename std::common_type<T>::type&&),
     @ref arrayAppend(Array<T>&, typename std::common_type<ArrayView<const T>>::type),
     @ref arrayAppend(Array<T>&, InPlaceInitT, Args&&... args),
+    @ref arrayAppend(Array<T>&, ValueInitT, std::size_t),
     @ref arrayAppend(Array<T>&, NoInitT, std::size_t),
+    @ref arrayAppend(Array<T>&, DirectInitT, std::size_t, Args&&... args),
     @ref arrayInsert(Array<T>&, std::size_t, const typename std::common_type<T>::type&),
     @ref Containers-Array-growable
 */
@@ -904,7 +908,9 @@ on a @ref std::vector.
 @m_keywords{emplace_back()}
 @see @ref arrayAppend(Array<T>&, typename std::common_type<T>::type&&),
     @ref arrayAppend(Array<T>&, typename std::common_type<ArrayView<const T>>::type),
+    @ref arrayAppend(Array<T>&, ValueInitT, std::size_t),
     @ref arrayAppend(Array<T>&, NoInitT, std::size_t),
+    @ref arrayAppend(Array<T>&, DirectInitT, std::size_t, Args&&... args),
     @ref arrayInsert(Array<T>&, std::size_t, InPlaceInitT, Args&&... args),
     @ref Containers-Array-growable
 */
@@ -949,7 +955,9 @@ Calls @ref arrayAppend(Array<T>&, InPlaceInitT, Args&&... args) with @p value.
 
 @see @ref arrayAppend(Array<T>&, const typename std::common_type<T>::type&),
     @ref arrayAppend(Array<T>&, typename std::common_type<ArrayView<const T>>::type),
+    @ref arrayAppend(Array<T>&, ValueInitT, std::size_t),
     @ref arrayAppend(Array<T>&, NoInitT, std::size_t),
+    @ref arrayAppend(Array<T>&, DirectInitT, std::size_t, Args&&... args),
     @ref arrayInsert(Array<T>&, std::size_t, typename std::common_type<T>::type&&),
     @ref Containers-Array-growable
 */
@@ -993,7 +1001,9 @@ itself. In particular, if the @p array needs to be reallocated in order to fit
 the new items, the @p values to append are then copied from the new location.
 @see @ref arrayAppend(Array<T>&, typename std::common_type<T>::type&&),
     @ref arrayAppend(Array<T>&, InPlaceInitT, Args&&... args),
+    @ref arrayAppend(Array<T>&, ValueInitT, std::size_t),
     @ref arrayAppend(Array<T>&, NoInitT, std::size_t),
+    @ref arrayAppend(Array<T>&, DirectInitT, std::size_t, Args&&... args),
     @ref arrayInsert(Array<T>&, std::size_t, typename std::common_type<ArrayView<const T>>::type),
     @ref Containers-Array-growable
 */
@@ -1040,19 +1050,59 @@ template<template<class> class Allocator, class T> inline ArrayView<T>  arrayApp
 #endif
 
 /**
+@brief Append given count of value-initialized values to an array
+@return View on the newly appended items
+@m_since_latest
+
+A variant of @ref arrayAppend(Array<T>&, typename std::common_type<ArrayView<const T>>::type)
+where the new values are value-initialized (i.e., trivial types
+zero-initialized and default constructor called otherwise), instead of being
+copied from a pre-existing location.
+
+On top of what the @p Allocator (or the default @ref ArrayAllocator) itself
+needs, @p T is required to be nothrow move-constructible and
+default-constructible.
+@see @ref arrayAppend(Array<T>&, NoInitT, std::size_t),
+    @ref arrayAppend(Array<T>&, DirectInitT, std::size_t, Args&&... args),
+    @ref arrayAppend(Array<T>&, const typename std::common_type<T>::type&),
+    @ref arrayAppend(Array<T>&, typename std::common_type<T>::type&&),
+    @ref arrayAppend(Array<T>&, InPlaceInitT, Args&&... args),
+    @ref arrayInsert(Array<T>&, std::size_t, ValueInitT, std::size_t),
+    @ref arrayResize(Array<T>&, ValueInitT, std::size_t),
+    @ref Containers-Array-growable
+*/
+template<class T, class Allocator = ArrayAllocator<T>> ArrayView<T> arrayAppend(Array<T>& array, Corrade::ValueInitT, std::size_t count);
+
+/* This crap tool can't distinguish between this and above overload, showing
+   just one with the docs melted together. More useless than showing nothing
+   at all, so hiding this one from it until it improves. */
+#ifndef DOXYGEN_GENERATING_OUTPUT
+/**
+@overload
+@m_since_latest
+
+Convenience overload allowing to specify just the allocator template, with
+array type being inferred.
+*/
+template<template<class> class Allocator, class T> inline ArrayView<T> arrayAppend(Array<T>& array, Corrade::ValueInitT, std::size_t count) {
+    return arrayAppend<T, Allocator<T>>(array, Corrade::ValueInit, count);
+}
+#endif
+
+/**
 @brief Append given count of uninitialized values to an array
 @return View on the newly appended items
 @m_since{2020,06}
 
-A lower-level variant of @ref arrayAppend(Array<T>&, typename std::common_type<ArrayView<const T>>::type)
-where the new values are meant to be initialized in-place after, instead of
-being copied from a pre-existing location. The new values are always
-uninitialized --- i.e., placement-new is meant to be used on *all* inserted
-elements with a non-trivially-copyable @p T.
+A variant of @ref arrayAppend(Array<T>&, ValueInitT, std::size_t) where the new
+values are left uninitialized --- i.e., placement-new is meant to be used on
+* *all* appended elements with a non-trivially-copyable @p T.
 
 On top of what the @p Allocator (or the default @ref ArrayAllocator) itself
 needs, @p T is required to be nothrow move-constructible.
-@see @ref arrayAppend(Array<T>&, const typename std::common_type<T>::type&),
+@see @ref arrayAppend(Array<T>&, ValueInitT, std::size_t),
+    @ref arrayAppend(Array<T>&, DirectInitT, std::size_t, Args&&... args),
+    @ref arrayAppend(Array<T>&, const typename std::common_type<T>::type&),
     @ref arrayAppend(Array<T>&, typename std::common_type<T>::type&&),
     @ref arrayAppend(Array<T>&, InPlaceInitT, Args&&... args),
     @ref arrayInsert(Array<T>&, std::size_t, NoInitT, std::size_t),
@@ -1074,6 +1124,49 @@ array type being inferred.
 */
 template<template<class> class Allocator, class T> inline ArrayView<T> arrayAppend(Array<T>& array, Corrade::NoInitT, std::size_t count) {
     return arrayAppend<T, Allocator<T>>(array, Corrade::NoInit, count);
+}
+#endif
+
+/**
+@brief Append given count of values to an array, constructing each using provided arguments
+@return View on the newly appended items
+@m_since_latest
+
+Similar to @ref arrayAppend(Array<T>&, ValueInitT, std::size_t) except that
+the elements are constructed using placement-new with provided @p args.
+
+On top of what the @p Allocator (or the default @ref ArrayAllocator) itself
+needs, @p T is required to be nothrow move-constructible and constructible from
+provided @p args.
+@see @ref arrayAppend(Array<T>&, ValueInitT, std::size_t),
+    @ref arrayAppend(Array<T>&, NoInitT, std::size_t),
+    @ref arrayAppend(Array<T>&, const typename std::common_type<T>::type&),
+    @ref arrayAppend(Array<T>&, typename std::common_type<T>::type&&),
+    @ref arrayAppend(Array<T>&, InPlaceInitT, Args&&... args),
+    @ref arrayInsert(Array<T>&, std::size_t, DirectInitT, std::size_t, Args&&... args),
+    @ref Containers-Array-growable
+*/
+template<class T, class ...Args> ArrayView<T> arrayAppend(Array<T>& array, Corrade::DirectInitT, std::size_t count, Args&&... args);
+
+/**
+@overload
+@m_since_latest
+*/
+template<class T, class Allocator, class ...Args> ArrayView<T> arrayAppend(Array<T>& array, Corrade::DirectInitT, std::size_t count, Args&&... args);
+
+/* This crap tool can't distinguish between this and above overload, showing
+   just one with the docs melted together. More useless than showing nothing
+   at all, so hiding this one from it until it improves. */
+#ifndef DOXYGEN_GENERATING_OUTPUT
+/**
+@overload
+@m_since_latest
+
+Convenience overload allowing to specify just the allocator template, with
+array type being inferred.
+*/
+template<template<class> class Allocator, class T, class ...Args> inline ArrayView<T> arrayAppend(Array<T>& array, Corrade::DirectInitT, std::size_t count, Args&&... args) {
+    return arrayAppend<T, Allocator<T>>(array, Corrade::DirectInit, count, Utility::forward<Args>(args)...);
 }
 #endif
 
@@ -1109,7 +1202,9 @@ a @ref std::vector.
     @ref arrayInsert(Array<T>&, std::size_t, typename std::common_type<T>::type&&),
     @ref arrayInsert(Array<T>&, std::size_t, typename std::common_type<ArrayView<const T>>::type),
     @ref arrayInsert(Array<T>&, std::size_t, InPlaceInitT, Args&&... args),
+    @ref arrayInsert(Array<T>&, std::size_t, ValueInitT, std::size_t),
     @ref arrayInsert(Array<T>&, std::size_t, NoInitT, std::size_t),
+    @ref arrayInsert(Array<T>&, std::size_t, DirectInitT, std::size_t, Args&&... args),
     @ref arrayAppend(Array<T>&, const typename std::common_type<T>::type&),
     @ref Containers-Array-growable
 */
@@ -1162,7 +1257,9 @@ on a @ref std::vector.
 @m_keywords{emplace()}
 @see @ref arrayInsert(Array<T>&, std::size_t, typename std::common_type<T>::type&&),
     @ref arrayInsert(Array<T>&, std::size_t, typename std::common_type<ArrayView<const T>>::type),
+    @ref arrayInsert(Array<T>&, std::size_t, ValueInitT, std::size_t),
     @ref arrayInsert(Array<T>&, std::size_t, NoInitT, std::size_t),
+    @ref arrayInsert(Array<T>&, std::size_t, DirectInitT, std::size_t, Args&&... args),
     @ref arrayAppend(Array<T>&, InPlaceInitT, Args&&... args),
     @ref Containers-Array-growable
 */
@@ -1208,7 +1305,9 @@ with @p value.
 
 @see @ref arrayInsert(Array<T>&, std::size_t, const typename std::common_type<T>::type&),
     @ref arrayInsert(Array<T>&, std::size_t, typename std::common_type<ArrayView<const T>>::type),
+    @ref arrayInsert(Array<T>&, std::size_t, ValueInitT, std::size_t),
     @ref arrayInsert(Array<T>&, std::size_t, NoInitT, std::size_t),
+    @ref arrayInsert(Array<T>&, std::size_t, DirectInitT, std::size_t, Args&&... args),
     @ref arrayAppend(Array<T>&, typename std::common_type<T>::type&&),
     @ref Containers-Array-growable
 */
@@ -1257,7 +1356,9 @@ case the caller has to handle that on its own, such as by splitting the
 insertion in two.
 @see @ref arrayInsert(Array<T>&, std::size_t, typename std::common_type<T>::type&&),
     @ref arrayInsert(Array<T>&, std::size_t, InPlaceInitT, Args&&... args),
+    @ref arrayInsert(Array<T>&, std::size_t, ValueInitT, std::size_t),
     @ref arrayInsert(Array<T>&, std::size_t, NoInitT, std::size_t),
+    @ref arrayInsert(Array<T>&, std::size_t, DirectInitT, std::size_t, Args&&... args),
     @ref arrayAppend(Array<T>&, typename std::common_type<ArrayView<const T>>::type),
     @ref Containers-Array-growable
 */
@@ -1304,13 +1405,53 @@ template<template<class> class Allocator, class T> inline ArrayView<T>  arrayIns
 #endif
 
 /**
+@brief Insert given count of value-initialized values into an array
+@return View on the newly inserted items
+@m_since_latest
+
+A variant of @ref arrayInsert(Array<T>&, std::size_t, typename std::common_type<ArrayView<const T>>::type)
+where the new values are value-initialized (i.e., trivial types
+zero-initialized and default constructor called otherwise), instead of being
+copied from a pre-existing location.
+
+Amortized complexity is @f$ \mathcal{O}(m + n) @f$, where @f$ m @f$ is the
+number of items being inserted and @f$ n @f$ is the existing array size. On top
+of what the @p Allocator (or the default @ref ArrayAllocator) itself needs,
+@p T is required to be nothrow move-constructible, nothrow move-assignable and
+default-constructible.
+@see @ref arrayInsert(Array<T>&, std::size_t, const typename std::common_type<T>::type&),
+    @ref arrayInsert(Array<T>&, std::size_t, typename std::common_type<T>::type&&),
+    @ref arrayInsert(Array<T>&, std::size_t, InPlaceInitT, Args&&... args),
+    @ref arrayInsert(Array<T>&, std::size_t, NoInitT, std::size_t),
+    @ref arrayInsert(Array<T>&, std::size_t, DirectInitT, std::size_t, Args&&... args),
+    @ref arrayAppend(Array<T>&, ValueInitT, std::size_t),
+    @ref Containers-Array-growable
+*/
+template<class T, class Allocator = ArrayAllocator<T>> ArrayView<T> arrayInsert(Array<T>& array, std::size_t index, Corrade::ValueInitT, std::size_t count);
+
+/* This crap tool can't distinguish between this and above overload, showing
+   just one with the docs melted together. More useless than showing nothing
+   at all, so hiding this one from it until it improves. */
+#ifndef DOXYGEN_GENERATING_OUTPUT
+/**
+@overload
+@m_since_latest
+
+Convenience overload allowing to specify just the allocator template, with
+array type being inferred.
+*/
+template<template<class> class Allocator, class T> inline ArrayView<T> arrayInsert(Array<T>& array, std::size_t index, Corrade::ValueInitT, std::size_t count) {
+    return arrayInsert<T, Allocator<T>>(array, index, Corrade::ValueInit, count);
+}
+#endif
+
+/**
 @brief Insert given count of uninitialized values into an array
 @return View on the newly inserted items
 @m_since_latest
 
-A lower-level variant of @ref arrayInsert(Array<T>&, std::size_t, typename std::common_type<ArrayView<const T>>::type)
-where the new values are meant to be initialized in-place after, instead of
-being copied from a pre-existing location. Independently of whether the array
+A variant of @ref arrayInsert(Array<T>&, std::size_t, ValueInitT, std::size_t)
+where the new values are left uninitialized. Independently of whether the array
 was reallocated to fit the new items or the items were just shifted around
 because the capacity was large enough, the new values are always uninitialized
 --- i.e., placement-new is meant to be used on *all* inserted elements with a
@@ -1323,6 +1464,8 @@ move-assignable.
 @see @ref arrayInsert(Array<T>&, std::size_t, const typename std::common_type<T>::type&),
     @ref arrayInsert(Array<T>&, std::size_t, typename std::common_type<T>::type&&),
     @ref arrayInsert(Array<T>&, std::size_t, InPlaceInitT, Args&&... args),
+    @ref arrayInsert(Array<T>&, std::size_t, ValueInitT, std::size_t),
+    @ref arrayInsert(Array<T>&, std::size_t, DirectInitT, std::size_t, Args&&... args),
     @ref arrayAppend(Array<T>&, NoInitT, std::size_t),
     @ref Containers-Array-growable
 */
@@ -1341,6 +1484,50 @@ array type being inferred.
 */
 template<template<class> class Allocator, class T> inline ArrayView<T> arrayInsert(Array<T>& array, std::size_t index, Corrade::NoInitT, std::size_t count) {
     return arrayInsert<T, Allocator<T>>(array, index, Corrade::NoInit, count);
+}
+#endif
+
+/**
+@brief Insert given count of values into an array, constructing each using provided arguments
+@return View on the newly inserted items
+@m_since_latest
+
+Similar to @ref arrayInsert(Array<T>&, std::size_t, ValueInitT, std::size_t)
+except that the elements are constructed using placement-new with provided
+@p args.
+
+On top of what the @p Allocator (or the default @ref ArrayAllocator)
+itself needs, @p T is required to be nothrow move-constructible, nothrow
+move-assignable and constructible from provided @p args.
+@see @ref arrayInsert(Array<T>&, std::size_t, const typename std::common_type<T>::type&),
+    @ref arrayInsert(Array<T>&, std::size_t, typename std::common_type<T>::type&&),
+    @ref arrayInsert(Array<T>&, std::size_t, InPlaceInitT, Args&&... args),
+    @ref arrayInsert(Array<T>&, std::size_t, ValueInitT, std::size_t),
+    @ref arrayInsert(Array<T>&, std::size_t, NoInitT, std::size_t),
+    @ref arrayAppend(Array<T>&, DirectInitT, std::size_t, Args&&... args),
+    @ref Containers-Array-growable
+*/
+template<class T, class ...Args> ArrayView<T> arrayInsert(Array<T>& array, std::size_t index, Corrade::DirectInitT, std::size_t count, Args&&... args);
+
+/**
+@overload
+@m_since_latest
+*/
+template<class T, class Allocator, class ...Args> ArrayView<T> arrayInsert(Array<T>& array, std::size_t index, Corrade::DirectInitT, std::size_t count, Args&&... args);
+
+/* This crap tool can't distinguish between this and above overload, showing
+   just one with the docs melted together. More useless than showing nothing
+   at all, so hiding this one from it until it improves. */
+#ifndef DOXYGEN_GENERATING_OUTPUT
+/**
+@overload
+@m_since_latest
+
+Convenience overload allowing to specify just the allocator template, with
+array type being inferred.
+*/
+template<template<class> class Allocator, class T, class ...Args> inline ArrayView<T> arrayInsert(Array<T>& array, std::size_t index, Corrade::DirectInitT, std::size_t count, Args&&... args) {
+    return arrayInsert<T, Allocator<T>>(array, index, Corrade::DirectInit, count, Utility::forward<Args>(args)...);
 }
 #endif
 
@@ -2046,6 +2233,27 @@ template<class T, class Allocator> ArrayView<T> arrayAppend(Array<T>& array, Cor
     return {it, count};
 }
 
+template<class T, class Allocator> ArrayView<T> arrayAppend(Array<T>& array, Corrade::ValueInitT, const std::size_t count) {
+    const ArrayView<T> out = arrayAppend<T, Allocator>(array, Corrade::NoInit, count);
+    Implementation::arrayConstruct(Corrade::ValueInit, out.begin(), out.end());
+    return out;
+}
+
+template<class T, class Allocator, class ...Args> ArrayView<T> arrayAppend(Array<T>& array, Corrade::DirectInitT, const std::size_t count, Args&&... args) {
+    const ArrayView<T> out = arrayAppend<T, Allocator>(array, Corrade::NoInit, count);
+
+    /* In-place construct the new elements. No helper function for this as
+       there's no way we could memcpy such a thing. */
+    for(T* it = out.begin(); it < out.end(); ++it)
+        Implementation::construct(*it, Utility::forward<Args>(args)...);
+
+    return out;
+}
+
+template<class T, class ...Args> ArrayView<T> arrayAppend(Array<T>& array, Corrade::DirectInitT, const std::size_t count, Args&&... args) {
+    return arrayAppend<T, ArrayAllocator<T>>(array, Corrade::DirectInit, count, Utility::forward<Args>(args)...);
+}
+
 namespace Implementation {
 
 template<class T, typename std::enable_if<
@@ -2259,6 +2467,27 @@ template<class T, class Allocator, class ...Args> T& arrayInsert(Array<T>& array
 template<class T, class Allocator> ArrayView<T> arrayInsert(Array<T>& array, const std::size_t index, Corrade::NoInitT, const std::size_t count) {
     T* const it = Implementation::arrayGrowAtBy<T, Allocator>(array, index, count);
     return {it, count};
+}
+
+template<class T, class Allocator> ArrayView<T> arrayInsert(Array<T>& array, const std::size_t index, Corrade::ValueInitT, const std::size_t count) {
+    const ArrayView<T> out = arrayInsert<T, Allocator>(array, index, Corrade::NoInit, count);
+    Implementation::arrayConstruct(Corrade::ValueInit, out.begin(), out.end());
+    return out;
+}
+
+template<class T, class Allocator, class ...Args> ArrayView<T> arrayInsert(Array<T>& array, const std::size_t index, Corrade::DirectInitT, const std::size_t count, Args&&... args) {
+    const ArrayView<T> out = arrayInsert<T, Allocator>(array, index, Corrade::NoInit, count);
+
+    /* In-place construct the new elements. No helper function for this as
+       there's no way we could memcpy such a thing. */
+    for(T* it = out.begin(); it < out.end(); ++it)
+        Implementation::construct(*it, Utility::forward<Args>(args)...);
+
+    return out;
+}
+
+template<class T, class ...Args> ArrayView<T> arrayInsert(Array<T>& array, const std::size_t index, Corrade::DirectInitT, const std::size_t count, Args&&... args) {
+    return arrayInsert<T, ArrayAllocator<T>>(array, index, Corrade::DirectInit, count, Utility::forward<Args>(args)...);
 }
 
 namespace Implementation {
