@@ -1667,6 +1667,9 @@ void GrowableArrayTest::insertMove() {
 }
 
 void GrowableArrayTest::appendList() {
+    /* This isn't templated on an allocator because copy-initializing from
+       Movable wouldn't be possible */
+
     Array<int> a;
     Containers::ArrayView<int> appended = arrayAppend(a, {17, -22, 65, 2786541});
     CORRADE_COMPARE(a.size(), 4);
@@ -1681,6 +1684,9 @@ void GrowableArrayTest::appendList() {
 }
 
 void GrowableArrayTest::insertList() {
+    /* This isn't templated on an allocator because copy-initializing from
+       Movable wouldn't be possible */
+
     Array<int> a;
     Containers::ArrayView<int> inserted = arrayInsert(a, 0, {17, -22, 65, 2786541});
     CORRADE_COMPARE(a.size(), 4);
@@ -1719,47 +1725,130 @@ void GrowableArrayTest::insertListEmpty() {
 }
 
 void GrowableArrayTest::appendCountNoInit() {
-    Array<int> a;
-    Containers::ArrayView<int> appended = arrayAppend(a, Corrade::NoInit, 4);
-    CORRADE_COMPARE(a.size(), 4);
-    CORRADE_COMPARE(arrayCapacity(a), 4); /** @todo use growing here too */
-    CORRADE_COMPARE(appended.data(), a.data());
-    CORRADE_COMPARE(appended.size(), 4);
-    VERIFY_SANITIZED_PROPERLY(a, ArrayAllocator<int>);
+    /* This doesn't have any special handling for trivial/non-trivial types, no
+       need to test twice. However want to verify that the elements indeed
+       don't get constructed, so using a Movable. */
+
+    {
+        Array<Movable> a;
+        arrayReserve(a, 2);
+        arrayAppend(a, Movable{17});
+        arrayAppend(a, Movable{-22});
+        Containers::ArrayView<Movable> appended = arrayAppend(a, Corrade::NoInit, 4);
+        CORRADE_COMPARE(a.size(), 6);
+        CORRADE_COMPARE(arrayCapacity(a), 6); /** @todo use growing here too */
+        CORRADE_COMPARE(int(a[0]), 17);
+        CORRADE_COMPARE(int(a[1]), -22);
+        CORRADE_COMPARE(appended.data(), a.data() + 2);
+        CORRADE_COMPARE(appended.size(), 4);
+        VERIFY_SANITIZED_PROPERLY(a, ArrayAllocator<Movable>);
+
+        /* Construction, move-construction and then (move-)reallocation of the
+           two items should be happening, nothing else */
+        CORRADE_COMPARE(Movable::constructed, 6);
+        CORRADE_COMPARE(Movable::moved, 4);
+        CORRADE_COMPARE(Movable::assigned, 0);
+        CORRADE_COMPARE(Movable::destructed, 4);
+
+        /* Call the constructors so the destructor doesn't randomly blow up
+           thinking double destruction was happening */
+        for(Movable& i: appended)
+            new(&i) Movable{};
+    }
+
+    CORRADE_COMPARE(Movable::constructed, 6 + 4);
+    CORRADE_COMPARE(Movable::moved, 4);
+    CORRADE_COMPARE(Movable::assigned, 0);
+    CORRADE_COMPARE(Movable::destructed, 4 + 2 + 4);
 }
 
 void GrowableArrayTest::insertCountNoInit() {
-    Array<int> a;
-    Containers::ArrayView<int> inserted = arrayInsert(a, 0, Corrade::NoInit, 4);
-    CORRADE_COMPARE(a.size(), 4);
-    CORRADE_COMPARE(arrayCapacity(a), 4); /** @todo use growing here too */
-    CORRADE_COMPARE(inserted.data(), a.data());
-    CORRADE_COMPARE(inserted.size(), 4);
-    VERIFY_SANITIZED_PROPERLY(a, ArrayAllocator<int>);
+    /* This doesn't have any special handling for trivial/non-trivial types, no
+       need to test twice. However want to verify that the elements indeed
+       don't get constructed, so using a Movable. */
+
+    {
+        Array<Movable> a;
+        arrayReserve(a, 2);
+        arrayAppend(a, Movable{17});
+        arrayAppend(a, Movable{-22});
+        Containers::ArrayView<Movable> inserted = arrayInsert(a, 1, Corrade::NoInit, 4);
+        CORRADE_COMPARE(a.size(), 6);
+        CORRADE_COMPARE(arrayCapacity(a), 6); /** @todo use growing here too */
+        CORRADE_COMPARE(int(a[0]), 17);
+        CORRADE_COMPARE(int(a[5]), -22);
+        CORRADE_COMPARE(inserted.data(), a.data() + 1);
+        CORRADE_COMPARE(inserted.size(), 4);
+        VERIFY_SANITIZED_PROPERLY(a, ArrayAllocator<Movable>);
+
+        /* Construction, move-construction, (move-)reallocation of the two
+           items and then another move of the last item for insert should be
+           happening, nothing else */
+        CORRADE_COMPARE(Movable::constructed, 7);
+        CORRADE_COMPARE(Movable::moved, 5);
+        CORRADE_COMPARE(Movable::assigned, 0);
+        CORRADE_COMPARE(Movable::destructed, 5);
+
+        /* Call the constructors so the destructor doesn't randomly blow up
+           thinking double destruction was happening */
+        for(Movable& i: inserted)
+            new(&i) Movable{};
+    }
+
+    CORRADE_COMPARE(Movable::constructed, 7 + 4);
+    CORRADE_COMPARE(Movable::moved, 5);
+    CORRADE_COMPARE(Movable::assigned, 0);
+    CORRADE_COMPARE(Movable::destructed, 5 + 2 + 4);
 }
 
 void GrowableArrayTest::appendCountNoInitEmpty() {
-    Array<int> a{3};
-    int* prev = a.data();
-    Containers::ArrayView<int> appended = arrayAppend(a, Corrade::NoInit, 0);
+    /* This doesn't have any special handling for trivial/non-trivial types, no
+       need to test twice. However want to verify that the elements indeed
+       don't get constructed, so using a Movable. */
 
-    /* Should be a no-op, not reallocating the (non-growable) array */
-    CORRADE_COMPARE(a.size(), 3);
-    CORRADE_COMPARE(a.data(), prev);
-    CORRADE_COMPARE(appended.data(), a.end());
-    CORRADE_COMPARE(appended.size(), 0);
+    {
+        Array<Movable> a{3};
+        Movable* prev = a.data();
+        Containers::ArrayView<Movable> appended = arrayAppend(a, Corrade::NoInit, 0);
+
+        /* Should be a no-op, not reallocating the (non-growable) array */
+        CORRADE_COMPARE(a.size(), 3);
+        CORRADE_COMPARE(a.data(), prev);
+        CORRADE_COMPARE(appended.data(), a.end());
+        CORRADE_COMPARE(appended.size(), 0);
+    }
+
+    /* No construction or anything else should be happening apart from the
+       initial creation */
+    CORRADE_COMPARE(Movable::constructed, 3);
+    CORRADE_COMPARE(Movable::moved, 0);
+    CORRADE_COMPARE(Movable::assigned, 0);
+    CORRADE_COMPARE(Movable::destructed, 3);
 }
 
 void GrowableArrayTest::insertCountNoInitEmpty() {
-    Array<int> a{3};
-    int* prev = a.data();
-    Containers::ArrayView<int> inserted = arrayInsert(a, 1, Corrade::NoInit, 0);
+    /* This doesn't have any special handling for trivial/non-trivial types, no
+       need to test twice. However want to verify that the elements indeed
+       don't get constructed, so using a Movable. */
 
-    /* Should be a no-op, not reallocating the (non-growable) array */
-    CORRADE_COMPARE(a.size(), 3);
-    CORRADE_COMPARE(a.data(), prev);
-    CORRADE_COMPARE(inserted.data(), &a[1]);
-    CORRADE_COMPARE(inserted.size(), 0);
+    {
+        Array<Movable> a{3};
+        Movable* prev = a.data();
+        Containers::ArrayView<Movable> inserted = arrayInsert(a, 1, Corrade::NoInit, 0);
+
+        /* Should be a no-op, not reallocating the (non-growable) array */
+        CORRADE_COMPARE(a.size(), 3);
+        CORRADE_COMPARE(a.data(), prev);
+        CORRADE_COMPARE(inserted.data(), &a[1]);
+        CORRADE_COMPARE(inserted.size(), 0);
+    }
+
+    /* No construction or anything else should be happening apart from the
+       initial creation */
+    CORRADE_COMPARE(Movable::constructed, 3);
+    CORRADE_COMPARE(Movable::moved, 0);
+    CORRADE_COMPARE(Movable::assigned, 0);
+    CORRADE_COMPARE(Movable::destructed, 3);
 }
 
 struct VerboseMovable {
@@ -3443,12 +3532,12 @@ void GrowableArrayTest::explicitAllocatorParameter() {
         view[1] = 15;
         CORRADE_COMPARE(a[21], 14);
     } {
-        Containers::ArrayView<int> view = arrayInsert<ArrayNewAllocator>(a, 0, Corrade::NoInit, 2);
+        Containers::ArrayView<int> view = arrayInsert<ArrayNewAllocator>(a, 4, Corrade::NoInit, 2);
         CORRADE_VERIFY(arrayIsGrowable<ArrayNewAllocator>(a));
         CORRADE_COMPARE(view.size(), 2);
-        view[0] = 14;
-        view[1] = 15;
-        CORRADE_COMPARE(a[23], 14);
+        view[0] = 16;
+        view[1] = 17;
+        CORRADE_COMPARE(a[5], 17);
     }
     CORRADE_COMPARE(a.size(), 25);
 
