@@ -98,6 +98,8 @@ struct DebugTest: TestSuite::Tester {
 
     void scopedOutput();
 
+    void move();
+
     void stringOutput();
     void stringOutputNonEmpty();
     void stringOutputNonEmptySmall();
@@ -106,6 +108,7 @@ struct DebugTest: TestSuite::Tester {
     void stringOutputReuseCleared();
     void stringOutputReuseModified();
     void stringOutputReuseModifiedUnsynced();
+    void stringOutputMove();
 
     void debugColor();
     void debugFlag();
@@ -182,6 +185,8 @@ DebugTest::DebugTest() {
 
         &DebugTest::scopedOutput,
 
+        &DebugTest::move,
+
         &DebugTest::stringOutput,
         &DebugTest::stringOutputNonEmpty,
         &DebugTest::stringOutputNonEmptySmall,
@@ -190,6 +195,7 @@ DebugTest::DebugTest() {
         &DebugTest::stringOutputReuseCleared,
         &DebugTest::stringOutputReuseModified,
         &DebugTest::stringOutputReuseModifiedUnsynced,
+        &DebugTest::stringOutputMove,
 
         &DebugTest::debugColor,
         &DebugTest::debugFlag,
@@ -764,6 +770,13 @@ void DebugTest::colorsScoped() {
 
             Debug{&out} << "This should be cyan again.";
 
+            {
+                Debug a{&out};
+                a << Debug::color(Debug::Color::Yellow) << "This is yellow,";
+                Debug b = Utility::move(a);
+                b << "and the move-constructed instance should still correctly reset to cyan.";
+            }
+
             Debug{&out, Debug::Flag::DisableColors} << "Disabling colors shouldn't affect outer scope, so also cyan.";
         } {
             Debug d{&out, Debug::Flag::NoNewlineAtTheEnd};
@@ -814,6 +827,7 @@ void DebugTest::colorsScoped() {
         "\033[0;36mThis should be cyan.\n"
         "This also,\033[0;1;34m this bold blue,\033[0;36m this again cyan and \033[0;7;32mthis inverted green.\033[0;36m\n"
         "This should be cyan again.\n"
+        "\033[0;33mThis is yellow, and the move-constructed instance should still correctly reset to cyan.\033[0;36m\n"
         "Disabling colors shouldn't affect outer scope, so also cyan.\n"
         "\033[0m"
 
@@ -1162,6 +1176,26 @@ void DebugTest::scopedOutput() {
     CORRADE_COMPARE(error2.str(), "smells\n");
 }
 
+void DebugTest::move() {
+    std::stringstream out;
+    {
+        Debug a{&out, Debug::Flag::Hex};
+        a << "hello," << Debug::space;
+        CORRADE_COMPARE(out.str(), "hello, ");
+        CORRADE_COMPARE(a.flags(), Debug::Flag::Hex);
+        CORRADE_COMPARE(a.immediateFlags(), Debug::Flag::Hex|Debug::Flag::NoSpace);
+
+        /* This should correctly transfer all intermediate state and make the
+           other one empty so it doesn't print a second newline at the end
+           etc. */
+        Debug b = Utility::move(a);
+        CORRADE_COMPARE(b.flags(), Debug::Flag::Hex);
+        CORRADE_COMPARE(b.immediateFlags(), Debug::Flag::Hex|Debug::Flag::NoSpace);
+        b << 0xfeed;
+    }
+    CORRADE_COMPARE(out.str(), "hello, 0xfeed\n");
+}
+
 void DebugTest::stringOutput() {
     Containers::String debug, warning, error;
 
@@ -1299,6 +1333,26 @@ void DebugTest::stringOutputReuseModifiedUnsynced() {
     CORRADE_COMPARE(out, "hey hello");
 }
 
+void DebugTest::stringOutputMove() {
+    /* Like move() but with a String output. The internal stream is owned, so
+       it should transfer the ownership, resulting in exactly one deletion --
+       not two, and not leaking it either. */
+
+    Containers::String out;
+    {
+        Debug a{&out, Debug::Flag::Hex};
+        a << "hello," << Debug::space;
+        CORRADE_COMPARE(a.flags(), Debug::Flag::Hex);
+        CORRADE_COMPARE(a.immediateFlags(), Debug::Flag::Hex|Debug::Flag::NoSpace);
+
+        Debug b = Utility::move(a);
+        CORRADE_COMPARE(b.flags(), Debug::Flag::Hex);
+        CORRADE_COMPARE(b.immediateFlags(), Debug::Flag::Hex|Debug::Flag::NoSpace);
+        b << 0xfeed;
+    }
+    CORRADE_COMPARE(out, "hello, 0xfeed\n");
+}
+
 void DebugTest::debugColor() {
     std::ostringstream out;
 
@@ -1366,7 +1420,8 @@ void DebugTest::sourceLocation() {
 
         !Debug{} << "hello"; line = __LINE__;
 
-        !Debug{} << "and this is from another line";
+        /* Verify that the source location gets preserved on move as well */
+        Debug{Utility::move(!Debug{})} << "and this is from another line, a move-constructed instance even";
 
         !Debug{};
 
@@ -1391,13 +1446,13 @@ void DebugTest::sourceLocation() {
     #endif
     CORRADE_COMPARE(out.str(), Utility::formatString(
         __FILE__ ":{}: hello\n"
-        __FILE__ ":{}: and this is from another line\n"
+        __FILE__ ":{}: and this is from another line, a move-constructed instance even\n"
         __FILE__ ":{}\n"
-        "this no longer\n", line, line + 2, line + 4));
+        "this no longer\n", line, line + 3, line + 5));
     #else
     CORRADE_COMPARE(out.str(),
         "hello\n"
-        "and this is from another line\n"
+        "and this is from another line, a move-constructed instance even\n"
         "this no longer\n");
     CORRADE_SKIP("Source location builtins not available.");
     #endif

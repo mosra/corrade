@@ -604,7 +604,7 @@ class CORRADE_UTILITY_EXPORT Debug {
         Debug(const Debug&) = delete;
 
         /** @brief Move constructor */
-        Debug(Debug&&) = default;
+        Debug(Debug&& other) noexcept;
 
         /**
          * @brief Destructor
@@ -1042,7 +1042,7 @@ class CORRADE_UTILITY_EXPORT Warning: public Debug {
         Warning(const Warning&) = delete;
 
         /** @brief Move constructor */
-        Warning(Warning&&) = default;
+        Warning(Warning&&) noexcept = default;
 
         /**
          * @brief Destructor
@@ -1150,7 +1150,7 @@ class CORRADE_UTILITY_EXPORT Error: public Debug {
         Error(const Error&) = delete;
 
         /** @brief Move constructor */
-        Error(Error&&) = default;
+        Error(Error&&) noexcept = default;
 
         /**
          * @brief Destructor

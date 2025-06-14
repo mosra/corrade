@@ -670,6 +670,28 @@ void Debug::cleanupOnDestruction() {
         delete _output;
 }
 
+Debug::Debug(Debug&& other) noexcept: _output{other._output}, _flags{other._flags}, _immediateFlags{other._immediateFlags}, _internalFlags{other._internalFlags},
+    #if defined(CORRADE_TARGET_WINDOWS) && !defined(CORRADE_UTILITY_USE_ANSI_COLORS)
+    _previousColorAttributes{other._previousColorAttributes},
+    #else
+    _previousColor{other._previousColor},
+    #endif
+    #ifdef CORRADE_SOURCE_LOCATION_BUILTINS_SUPPORTED
+    _sourceLocationLine{other._sourceLocationLine},
+    _sourceLocationFile{other._sourceLocationFile},
+    #endif
+    _previousGlobalOutput{other._previousGlobalOutput}
+{
+    /* The moved-out instance should do no reset or cleanup on destruction,
+       it's all taken over by the new instance. These two take care of not
+       printing anything to the output on destruction and not attempting to
+       delete the stream if it was owned (i.e., a StringStream). */
+    other._output = nullptr;
+    other._internalFlags = {};
+    /** @todo cleanupOnDestruction() still unconditionally resets
+        debugGlobals.output, what to do with that? */
+}
+
 Debug::~Debug() {
     cleanupOnDestruction();
 }
