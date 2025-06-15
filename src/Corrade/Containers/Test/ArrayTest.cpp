@@ -85,6 +85,7 @@ struct ArrayTest: TestSuite::Tester {
     void constructNoInitTrivialZeroSize();
     void constructNoInitNonTrivial();
     void constructNoInitNonTrivialZeroSize();
+    void constructNoInitNoDefaultConstructor();
     void constructDirectInit();
     void constructDirectInitZeroSize();
     void constructDirectInitMoveOnly();
@@ -163,6 +164,7 @@ ArrayTest::ArrayTest() {
               &ArrayTest::constructNoInitTrivialZeroSize,
               &ArrayTest::constructNoInitNonTrivial,
               &ArrayTest::constructNoInitNonTrivialZeroSize,
+              &ArrayTest::constructNoInitNoDefaultConstructor,
               &ArrayTest::constructDirectInit,
               &ArrayTest::constructDirectInitZeroSize});
 
@@ -395,6 +397,29 @@ void ArrayTest::constructNoInitNonTrivialZeroSize() {
     Containers::Array<Foo> a{Corrade::NoInit, 0};
     CORRADE_VERIFY(!a.data());
     CORRADE_COMPARE(a.size(), 0);
+}
+
+/* A variant of these is used in StaticArrayTest, PairTest and TripleTest */
+struct NoDefaultConstructor {
+    /*implicit*/ NoDefaultConstructor(int a): a{a} {}
+    int a;
+};
+template<class T> struct Wrapped {
+    /* This works only if T is default-constructible */
+    /*implicit*/ Wrapped(): a{} {}
+    T a;
+};
+
+void ArrayTest::constructNoInitNoDefaultConstructor() {
+    /* In libstdc++ before version 8 std::is_trivially_constructible<T> doesn't
+       work with (template) types where the default constructor isn't usable,
+       failing compilation instead of producing std::false_type; in version 4.8
+       this trait isn't available at all. std::is_trivial is used instead,
+       verify that it compiles correctly everywhere. */
+
+    Containers::Array<Wrapped<NoDefaultConstructor>> a{Corrade::NoInit, 4};
+    CORRADE_VERIFY(a.data());
+    CORRADE_COMPARE(a.size(), 4);
 }
 
 void ArrayTest::constructDirectInit() {

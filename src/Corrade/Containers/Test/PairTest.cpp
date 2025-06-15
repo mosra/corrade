@@ -106,6 +106,7 @@ struct PairTest: TestSuite::Tester {
     #endif
     void constructValueInit();
     void constructNoInit();
+    void constructNoInitNoDefaultConstructor();
     void constructCopyCopy();
     void constructCopyCopyMake();
     void constructCopyMove();
@@ -145,7 +146,8 @@ PairTest::PairTest() {
               &PairTest::constructValueInit},
         &PairTest::resetCounters, &PairTest::resetCounters);
 
-    addTests({&PairTest::constructNoInit});
+    addTests({&PairTest::constructNoInit,
+              &PairTest::constructNoInitNoDefaultConstructor});
 
     addTests({&PairTest::constructCopyCopy,
               &PairTest::constructCopyCopyMake,
@@ -411,6 +413,34 @@ void PairTest::constructNoInit() {
     CORRADE_VERIFY(!std::is_convertible<Corrade::NoInitT, Pair<int, Copyable>>::value);
     CORRADE_VERIFY(!std::is_convertible<Corrade::NoInitT, Pair<Copyable, int>>::value);
     CORRADE_VERIFY(!std::is_convertible<Corrade::NoInitT, Pair<Copyable, Copyable>>::value);
+}
+
+/* A variant of these is used in ArrayTest, StaticArrayTest and TripleTest */
+struct NoDefaultConstructor {
+    /*implicit*/ NoDefaultConstructor(int a): a{a} {}
+    /*implicit*/ NoDefaultConstructor(Corrade::NoInitT) {}
+    int a;
+};
+template<class T> struct Wrapped {
+    /* This works only if T is default-constructible */
+    /*implicit*/ Wrapped(): a{} {}
+    /*implicit*/ Wrapped(Corrade::NoInitT): a{Corrade::NoInit} {}
+    T a;
+};
+
+void PairTest::constructNoInitNoDefaultConstructor() {
+    /* In libstdc++ before version 8 std::is_trivially_constructible<T> doesn't
+       work with (template) types where the default constructor isn't usable,
+       failing compilation instead of producing std::false_type; in version 4.8
+       this trait isn't available at all. std::is_trivial is used instead,
+       verify that it compiles correctly everywhere. */
+
+    Pair<int, Wrapped<NoDefaultConstructor>> a{Corrade::NoInit};
+    Pair<Wrapped<NoDefaultConstructor>, int> b{Corrade::NoInit};
+    Pair<Wrapped<NoDefaultConstructor>, Wrapped<NoDefaultConstructor>> c{Corrade::NoInit};
+
+    /* No way to test anything here */
+    CORRADE_VERIFY(true);
 }
 
 void PairTest::constructCopyCopy() {

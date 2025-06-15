@@ -109,6 +109,7 @@ struct TripleTest: TestSuite::Tester {
     #endif
     void constructValueInit();
     void constructNoInit();
+    void constructNoInitNoDefaultConstructor();
     void constructCopyCopyCopy();
     void constructCopyCopyCopyMake();
     void constructCopyCopyMove();
@@ -156,7 +157,8 @@ TripleTest::TripleTest() {
               &TripleTest::constructValueInit},
         &TripleTest::resetCounters, &TripleTest::resetCounters);
 
-    addTests({&TripleTest::constructNoInit});
+    addTests({&TripleTest::constructNoInit,
+              &TripleTest::constructNoInitNoDefaultConstructor});
 
     addTests({&TripleTest::constructCopyCopyCopy,
               &TripleTest::constructCopyCopyCopyMake,
@@ -485,6 +487,38 @@ void TripleTest::constructNoInit() {
     CORRADE_VERIFY(!std::is_convertible<Corrade::NoInitT, Triple<Copyable, int, Copyable>>::value);
     CORRADE_VERIFY(!std::is_convertible<Corrade::NoInitT, Triple<Copyable, Copyable, int>>::value);
     CORRADE_VERIFY(!std::is_convertible<Corrade::NoInitT, Triple<Copyable, Copyable, Copyable>>::value);
+}
+
+/* A variant of these is used in ArrayTest, StaticArrayTest and PairTest */
+struct NoDefaultConstructor {
+    /*implicit*/ NoDefaultConstructor(int a): a{a} {}
+    /*implicit*/ NoDefaultConstructor(Corrade::NoInitT) {}
+    int a;
+};
+template<class T> struct Wrapped {
+    /* This works only if T is default-constructible */
+    /*implicit*/ Wrapped(): a{} {}
+    /*implicit*/ Wrapped(Corrade::NoInitT): a{Corrade::NoInit} {}
+    T a;
+};
+
+void TripleTest::constructNoInitNoDefaultConstructor() {
+    /* In libstdc++ before version 8 std::is_trivially_constructible<T> doesn't
+       work with (template) types where the default constructor isn't usable,
+       failing compilation instead of producing std::false_type; in version 4.8
+       this trait isn't available at all. std::is_trivial is used instead,
+       verify that it compiles correctly everywhere. */
+
+    Triple<int, int, Wrapped<NoDefaultConstructor>> a{Corrade::NoInit};
+    Triple<int, Wrapped<NoDefaultConstructor>, int> b{Corrade::NoInit};
+    Triple<Wrapped<NoDefaultConstructor>, int, int> c{Corrade::NoInit};
+    Triple<int, Wrapped<NoDefaultConstructor>, Wrapped<NoDefaultConstructor>> d{Corrade::NoInit};
+    Triple<Wrapped<NoDefaultConstructor>, int, Wrapped<NoDefaultConstructor>> e{Corrade::NoInit};
+    Triple<Wrapped<NoDefaultConstructor>, Wrapped<NoDefaultConstructor>, int> f{Corrade::NoInit};
+    Triple<Wrapped<NoDefaultConstructor>, Wrapped<NoDefaultConstructor>, Wrapped<NoDefaultConstructor>> g{Corrade::NoInit};
+
+    /* No way to test anything here */
+    CORRADE_VERIFY(true);
 }
 
 void TripleTest::constructCopyCopyCopy() {

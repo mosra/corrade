@@ -77,6 +77,7 @@ struct StaticArrayTest: TestSuite::Tester {
     #endif
     void constructNoInit();
     template<class T> void constructNoInitTrivial();
+    void constructNoInitNoDefaultConstructor();
     void constructInPlaceInit();
     template<class T> void constructInPlaceInitTrivial();
     void constructInPlaceInitOneArgument();
@@ -160,7 +161,8 @@ StaticArrayTest::StaticArrayTest() {
 
     addTests<StaticArrayTest>({
         &StaticArrayTest::constructNoInitTrivial<int>,
-        &StaticArrayTest::constructNoInitTrivial<NoInitConstructible>});
+        &StaticArrayTest::constructNoInitTrivial<NoInitConstructible>,
+        &StaticArrayTest::constructNoInitNoDefaultConstructor});
 
     addTests({&StaticArrayTest::constructInPlaceInit},
         &StaticArrayTest::resetCounters, &StaticArrayTest::resetCounters);
@@ -568,6 +570,29 @@ template<class T> void StaticArrayTest::constructNoInitTrivial() {
 
     /* Implicit construction is not allowed */
     CORRADE_VERIFY(!std::is_convertible<Corrade::NoInitT, StaticArray<5, T>>::value);
+}
+
+/* A variant of these is used in ArrayTest, PairTest and TripleTest */
+struct NoDefaultConstructor {
+    /*implicit*/ NoDefaultConstructor(int a): a{a} {}
+    int a;
+};
+template<class T> struct Wrapped {
+    /* This works only if T is default-constructible */
+    /*implicit*/ Wrapped(): a{} {}
+    T a;
+};
+
+void StaticArrayTest::constructNoInitNoDefaultConstructor() {
+    /* In libstdc++ before version 8 std::is_trivially_constructible<T> doesn't
+       work with (template) types where the default constructor isn't usable,
+       failing compilation instead of producing std::false_type; in version 4.8
+       this trait isn't available at all. std::is_trivial is used instead,
+       verify that it compiles correctly everywhere. */
+
+    StaticArray<3, Wrapped<NoDefaultConstructor>> a{Corrade::NoInit};
+    CORRADE_VERIFY(a.data());
+    CORRADE_COMPARE(a.size(), 3);
 }
 
 void StaticArrayTest::constructInPlaceInit() {
