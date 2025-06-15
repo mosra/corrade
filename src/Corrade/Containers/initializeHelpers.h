@@ -53,6 +53,11 @@ enum: std::size_t {
 /** @todo remove once uses in GrowableArray.h and Utility/Memory.h are gone */
 #ifdef CORRADE_BUILD_DEPRECATED
 template<class T, typename std::enable_if<
+    /* Unlike with Array, where is_trivial is used instead of
+       is_trivially_constructible to work around issues on libstdc++ before
+       version 8, here such a case wouldn't compile anyway because it'd pick
+       the below overload which *needs* the default constructor to work anyway,
+       so it's less of a problem */
     #ifdef CORRADE_NO_STD_IS_TRIVIALLY_TRAITS
     __has_trivial_constructor(T)
     #else
@@ -63,6 +68,10 @@ template<class T, typename std::enable_if<
 }
 
 template<class T, typename std::enable_if<!
+    /* Unlike with Array, where is_trivial is used instead of
+       is_trivially_constructible to work around issues on libstdc++ before
+       version 8, here such a case wouldn't compile anyway because it *needs*
+       the default constructor to work anyway, so it's less of a problem */
     #ifdef CORRADE_NO_STD_IS_TRIVIALLY_TRAITS
     __has_trivial_constructor(T)
     #else
@@ -76,6 +85,11 @@ template<class T, typename std::enable_if<!
 #endif
 
 template<class T, typename std::enable_if<
+    /* Unlike with Array, where is_trivial is used instead of
+       is_trivially_constructible to work around issues on libstdc++ before
+       version 8, here such a case wouldn't compile anyway because it'd pick
+       the below overload which *needs* the default constructor to work anyway,
+       so it's less of a problem */
     #ifdef CORRADE_NO_STD_IS_TRIVIALLY_TRAITS
     __has_trivial_constructor(T)
     #else
@@ -86,6 +100,10 @@ template<class T, typename std::enable_if<
 }
 
 template<class T, typename std::enable_if<!
+    /* Unlike with Array, where is_trivial is used instead of
+       is_trivially_constructible to work around issues on libstdc++ before
+       version 8, here such a case wouldn't compile anyway because it *needs*
+       the default constructor to work anyway, so it's less of a problem */
     #ifdef CORRADE_NO_STD_IS_TRIVIALLY_TRAITS
     __has_trivial_constructor(T)
     #else

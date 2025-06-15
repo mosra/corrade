@@ -518,6 +518,10 @@ class CORRADE_UTILITY_EXPORT ArrayTuple::Item {
         /* Common code shared by ArrayView, StridedArrayView, BitArrayView and
            StringView variants */
         template<class T, typename std::enable_if<!
+            /* Unlike with Array, where is_trivial is used instead of
+               is_trivially_constructible to work around issues on libstdc++
+               before version 8, here such a case wouldn't compile anyway due
+               to the static_assert below so it's less of a problem */
             #ifdef CORRADE_NO_STD_IS_TRIVIALLY_TRAITS
             std::has_trivial_default_constructor<T>::value
             #else
@@ -541,6 +545,11 @@ class CORRADE_UTILITY_EXPORT ArrayTuple::Item {
            See the constructTriviallyConstructibleNonTriviallyDestructible()
            test case for details. */
         template<class T, typename std::enable_if<
+            /* Unlike with Array, where is_trivial is used instead of
+               is_trivially_constructible to work around issues on libstdc++
+               before version 8, here such a case wouldn't compile anyway
+               because it'd pick the above overload and fail on the
+               static_assert so it's less of a problem */
             #ifdef CORRADE_NO_STD_IS_TRIVIALLY_TRAITS
             std::has_trivial_default_constructor<T>::value
             #else

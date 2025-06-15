@@ -60,8 +60,14 @@ namespace Implementation {
     };
 
     template<class T, typename std::enable_if<
-        #ifdef CORRADE_NO_STD_IS_TRIVIALLY_TRAITS
-        std::has_trivial_default_constructor<T>::value
+        /* std::is_trivially_constructible fails for (template) types where
+           default constructor isn't usable in libstdc++ before version 8, OTOH
+           std::is_trivial is deprecated in C++26 so can't use that one either.
+           Furthermore, libstdc++ before 6.1 doesn't have _GLIBCXX_RELEASE, so
+           there comparison will ealuate to 0 < 8 and pass as well. Repro case
+           in ArrayTest::constructNoInitNoDefaultConstructor(). */
+        #if defined(CORRADE_TARGET_LIBSTDCXX) && _GLIBCXX_RELEASE < 8
+        std::is_trivial<T>::value
         #else
         std::is_trivially_constructible<T>::value
         #endif
@@ -69,8 +75,8 @@ namespace Implementation {
         return new T[size];
     }
     template<class T, typename std::enable_if<!
-        #ifdef CORRADE_NO_STD_IS_TRIVIALLY_TRAITS
-        std::has_trivial_default_constructor<T>::value
+        #if defined(CORRADE_TARGET_LIBSTDCXX) && _GLIBCXX_RELEASE < 8
+        std::is_trivial<T>::value
         #else
         std::is_trivially_constructible<T>::value
         #endif
@@ -79,8 +85,8 @@ namespace Implementation {
     }
 
     template<class T, typename std::enable_if<
-        #ifdef CORRADE_NO_STD_IS_TRIVIALLY_TRAITS
-        std::has_trivial_default_constructor<T>::value
+        #if defined(CORRADE_TARGET_LIBSTDCXX) && _GLIBCXX_RELEASE < 8
+        std::is_trivial<T>::value
         #else
         std::is_trivially_constructible<T>::value
         #endif
@@ -88,8 +94,8 @@ namespace Implementation {
         return nullptr; /* using the default deleter for T */
     }
     template<class T, typename std::enable_if<!
-        #ifdef CORRADE_NO_STD_IS_TRIVIALLY_TRAITS
-        std::has_trivial_default_constructor<T>::value
+        #if defined(CORRADE_TARGET_LIBSTDCXX) && _GLIBCXX_RELEASE < 8
+        std::is_trivial<T>::value
         #else
         std::is_trivially_constructible<T>::value
         #endif

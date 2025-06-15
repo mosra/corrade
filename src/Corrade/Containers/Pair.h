@@ -175,22 +175,29 @@ template<class F, class S> class Pair {
         explicit Pair(Corrade::NoInitT) noexcept(...);
         #else
         template<class F_ = F, typename std::enable_if<
-            #ifdef CORRADE_NO_STD_IS_TRIVIALLY_TRAITS
-            std::is_standard_layout<F_>::value && std::has_trivial_default_constructor<F_>::value && std::is_standard_layout<S>::value && std::has_trivial_default_constructor<S>::value
+            /* std::is_trivially_constructible fails for (template) types where
+               default constructor isn't usable in libstdc++ before version 8,
+               OTOH std::is_trivial is deprecated in C++26 so can't use that
+               one either. Furthermore, libstdc++ before 6.1 doesn't have
+               _GLIBCXX_RELEASE, so there comparison will ealuate to 0 < 8 and
+               pass as well. Repro case in
+               PairTest::constructNoInitNoDefaultConstructor(). */
+            #if defined(CORRADE_TARGET_LIBSTDCXX) && _GLIBCXX_RELEASE < 8
+            std::is_standard_layout<F_>::value && std::is_trivial<F_>::value && std::is_standard_layout<S>::value && std::is_trivial<S>::value
             #else
             std::is_standard_layout<F_>::value && std::is_trivially_constructible<F_>::value && std::is_standard_layout<S>::value && std::is_trivially_constructible<S>::value
             #endif
         , int>::type = 0> explicit Pair(Corrade::NoInitT) noexcept {}
         template<class F_ = F, typename std::enable_if<
-            #ifdef CORRADE_NO_STD_IS_TRIVIALLY_TRAITS
-            std::is_standard_layout<F_>::value && std::has_trivial_default_constructor<F_>::value && std::is_constructible<S, Corrade::NoInitT>::value
+            #if defined(CORRADE_TARGET_LIBSTDCXX) && _GLIBCXX_RELEASE < 8
+            std::is_standard_layout<F_>::value && std::is_trivial<F_>::value && std::is_constructible<S, Corrade::NoInitT>::value
             #else
             std::is_standard_layout<F_>::value && std::is_trivially_constructible<F_>::value && std::is_constructible<S, Corrade::NoInitT>::value
             #endif
         , int>::type = 0> explicit Pair(Corrade::NoInitT) noexcept(std::is_nothrow_constructible<S, Corrade::NoInitT>::value): _second{Corrade::NoInit} {}
         template<class F_ = F, typename std::enable_if<
-            #ifdef CORRADE_NO_STD_IS_TRIVIALLY_TRAITS
-            std::is_constructible<F_, Corrade::NoInitT>::value && std::is_standard_layout<S>::value && std::has_trivial_default_constructor<S>::value
+            #if defined(CORRADE_TARGET_LIBSTDCXX) && _GLIBCXX_RELEASE < 8
+            std::is_constructible<F_, Corrade::NoInitT>::value && std::is_standard_layout<S>::value && std::is_trivial<S>::value
             #else
             std::is_constructible<F_, Corrade::NoInitT>::value && std::is_standard_layout<S>::value && std::is_trivially_constructible<S>::value
             #endif
