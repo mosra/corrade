@@ -668,10 +668,10 @@ class CORRADE_TESTSUITE_EXPORT Tester {
                  * without having the tester complaining about them.
                  *
                  * Views that have both @ref Containers::StringViewFlag::Global
-                 * and @ref Containers::StringViewFlag::NullTerminated set
-                 * (such as coming from a @ref Containers::StringView literal)
-                 * will be used without having to make an owned string copy
-                 * internally.
+                 * and @relativeref{Containers::StringViewFlag,NullTerminated}
+                 * set (such as coming from a @ref Containers::StringView
+                 * literal) will be used without having to make an owned string
+                 * copy internally.
                  * @see @ref arguments()
                  */
                 TesterConfiguration& setSkippedArgumentPrefixes(std::initializer_list<Containers::StringView> prefixes);
@@ -696,10 +696,10 @@ class CORRADE_TESTSUITE_EXPORT Tester {
                  * exist, no check is done.
                  *
                  * A view that has both @ref Containers::StringViewFlag::Global
-                 * and @ref Containers::StringViewFlag::NullTerminated set
-                 * (such as coming from a @ref Containers::StringView literal)
-                 * will be used without having to make an owned string copy
-                 * internally.
+                 * and @relativeref{Containers::StringViewFlag,NullTerminated}
+                 * set (such as coming from a @ref Containers::StringView
+                 * literal) will be used without having to make an owned string
+                 * copy internally.
                  * @partialsupport Available only on Linux.
                  */
                 TesterConfiguration& setCpuScalingGovernorFile(Containers::StringView filename);
@@ -1258,9 +1258,9 @@ class CORRADE_TESTSUITE_EXPORT Tester {
          * fully-qualified class name.
          *
          * A view that has both @ref Containers::StringViewFlag::Global and
-         * @ref Containers::StringViewFlag::NullTerminated set (such as coming
-         * from a @ref Containers::StringView literal) will be used without
-         * having to make an owned string copy internally.
+         * @relativeref{Containers::StringViewFlag,NullTerminated} set (such as
+         * coming from a @ref Containers::StringView literal) will be used
+         * without having to make an owned string copy internally.
          * @see @ref setTestCaseName(), @ref setTestCaseTemplateName(),
          *      @ref setTestCaseDescription()
          */
@@ -1283,9 +1283,9 @@ class CORRADE_TESTSUITE_EXPORT Tester {
          * @snippet TestSuite.cpp Tester-setTestCaseName
          *
          * A view that has both @ref Containers::StringViewFlag::Global and
-         * @ref Containers::StringViewFlag::NullTerminated set (such as coming
-         * from a @ref Containers::StringView literal) will be used without
-         * having to make an owned string copy internally.
+         * @relativeref{Containers::StringViewFlag,NullTerminated} set (such as
+         * coming from a @ref Containers::StringView literal) will be used
+         * without having to make an owned string copy internally.
          * @see @ref setTestCaseTemplateName(), @ref setTestName(),
          *      @ref setTestCaseDescription(), @ref CORRADE_FUNCTION
          */
@@ -1310,9 +1310,9 @@ class CORRADE_TESTSUITE_EXPORT Tester {
          * @snippet TestSuite.cpp Tester-setTestCaseTemplateName
          *
          * A view that has both @ref Containers::StringViewFlag::Global and
-         * @ref Containers::StringViewFlag::NullTerminated set (such as coming
-         * from a @ref Containers::StringView literal) will be used without
-         * having to make an owned string copy internally.
+         * @relativeref{Containers::StringViewFlag,NullTerminated} set (such as
+         * coming from a @ref Containers::StringView literal) will be used
+         * without having to make an owned string copy internally.
          * @see @ref setTestCaseName(), @ref setTestName(),
          *      @ref setTestCaseDescription(), @ref CORRADE_FUNCTION
          */
@@ -1356,9 +1356,9 @@ class CORRADE_TESTSUITE_EXPORT Tester {
          * example.
          *
          * A view that has both @ref Containers::StringViewFlag::Global and
-         * @ref Containers::StringViewFlag::NullTerminated set (such as coming
-         * from a @ref Containers::StringView literal) will be used without
-         * having to make an owned string copy internally.
+         * @relativeref{Containers::StringViewFlag,NullTerminated} set (such as
+         * coming from a @ref Containers::StringView literal) will be used
+         * without having to make an owned string copy internally.
          * @see @ref setTestName(), @ref setTestCaseName(),
          *      @ref setTestCaseTemplateName()
          */
@@ -1391,9 +1391,9 @@ class CORRADE_TESTSUITE_EXPORT Tester {
          * provides the name for the unit measured, for example @cpp "wall time" @ce.
          *
          * A view that has both @ref Containers::StringViewFlag::Global and
-         * @ref Containers::StringViewFlag::NullTerminated set (such as coming
-         * from a @ref Containers::StringView literal) will be used without
-         * having to make an owned string copy internally.
+         * @relativeref{Containers::StringViewFlag,NullTerminated} set (such as
+         * coming from a @ref Containers::StringView literal) will be used
+         * without having to make an owned string copy internally.
          */
         void setBenchmarkName(Containers::StringView name);
         /* So people aren't forced to include StringView if they don't want */

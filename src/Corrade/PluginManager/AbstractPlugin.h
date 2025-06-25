@@ -403,6 +403,7 @@ Produces a list of search paths in this order:
     next to the executable.
 
 You're encouraged to pass @p hardcodedPath and @p relativePath as
+@ref Containers::StringViewFlag::NullTerminated
 @ref Containers::StringViewFlag::Global views (i.e., string view literals) ---
 the values in points 1 and 5 will then be non-owning references to them,
 avoiding copies.

@@ -233,8 +233,8 @@ class CORRADE_PLUGINMANAGER_EXPORT AbstractManager {
          *
          * Only plugins with the same plugin interface string can be used
          * in this plugin manager. The returned view is always both
-         * @ref Containers::StringViewFlag::NullTerminated and
-         * @ref Containers::StringViewFlag::Global.
+         * @ref Containers::StringViewFlag::Global and
+         * @relativeref{Containers::StringViewFlag,NullTerminated}.
          */
         Containers::StringView pluginInterface() const;
 
@@ -267,8 +267,9 @@ class CORRADE_PLUGINMANAGER_EXPORT AbstractManager {
          * first. On Windows the path is instead first converted to UTF-16
          * using @ref Utility::Unicode::widen() and then passed to system APIs.
          *
-         * If @p directory is @ref Containers::StringViewFlag::Global, no
-         * internal copy of the string is made.
+         * If @p directory is both @ref Containers::StringViewFlag::Global and
+         * @relativeref{Containers::StringViewFlag,NullTerminated}, no internal
+         * copy of the string is made.
          * @see @ref AbstractPlugin::pluginSearchPaths(),
          *      @ref implicitPluginSearchPaths()
          * @partialsupport Not available on platforms without
@@ -301,7 +302,8 @@ class CORRADE_PLUGINMANAGER_EXPORT AbstractManager {
          * this preference gets reset and you may need to call this function
          * again.
          *
-         * If @p alias is @ref Containers::StringViewFlag::Global, no internal
+         * If @p alias is both @ref Containers::StringViewFlag::Global and
+         * @relativeref{Containers::StringViewFlag,NullTerminated}, no internal
          * copy of the string is made.
          */
         void setPreferredPlugins(Containers::StringView alias, const Containers::StringIterable& plugins);
@@ -382,9 +384,6 @@ class CORRADE_PLUGINMANAGER_EXPORT AbstractManager {
          * platform-specific format. On Windows the path is first converted to
          * UTF-16 using @ref Utility::Unicode::widen() and then passed to
          * system APIs.
-         *
-         * An internal copy of @p plugin is made if it's not
-         * @ref Containers::StringViewFlag::Global.
          * @see @ref unload(), @ref loadState(), @ref Manager::instantiate(),
          *      @ref Manager::loadAndInstantiate()
          * @partialsupport On platforms without
