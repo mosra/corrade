@@ -97,6 +97,8 @@ struct FormatTest: TestSuite::Tester {
     void numberedPrecisionBase();
     void mixed();
 
+    void numberedFormattersMixedPrecision();
+
     void toBuffer();
     void toBufferNullTerminatorFromSnprintfAtTheEnd();
     void array();
@@ -171,6 +173,8 @@ FormatTest::FormatTest() {
               &FormatTest::numberedPrecision,
               &FormatTest::numberedPrecisionBase,
               &FormatTest::mixed,
+
+              &FormatTest::numberedFormattersMixedPrecision,
 
               &FormatTest::toBuffer,
               &FormatTest::toBufferNullTerminatorFromSnprintfAtTheEnd,
@@ -690,6 +694,17 @@ void FormatTest::numberedPrecisionBase() {
 void FormatTest::mixed() {
     CORRADE_COMPARE(format("this {1} {} {0}, {}", "wrong", "is", "certainly"),
         "this is certainly wrong, is");
+}
+
+void FormatTest::numberedFormattersMixedPrecision() {
+    /* Verify that the precision used for a formatter doesn't get reused for
+       all following occurences of it, even if they don't specify a
+       precision. In particular, if the size would be cached, could either
+       cause the subsequent numbers to have a wrong count of zeros. Or the
+       string could be longer than expected with garbage at the end because the
+       previous formatter for {0} is four chars longer than the last. */
+    CORRADE_COMPARE(format("{0:.2}x{1:.6}x{0:.5}x{1:.3}x{1}x{0}?", 7, 3),
+        "07x000003x00007x003x3x7?");
 }
 
 void FormatTest::toBuffer() {
