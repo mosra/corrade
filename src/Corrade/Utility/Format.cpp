@@ -419,12 +419,15 @@ std::size_t formatFormatters(const Containers::MutableStringView& buffer, const 
         }
         bufferOffset += data.size();
     }, [&buffer, &bufferOffset](BufferFormatter& formatter, int precision, FormatType type) {
+        /* If we have a buffer, write to it */
         if(buffer.data()) {
             formatter.size = formatter(buffer.exceptPrefix(bufferOffset), precision, type);
             CORRADE_ASSERT(bufferOffset + formatter.size <= buffer.size(),
                 "Utility::formatInto(): buffer too small, expected at least" << bufferOffset + formatter.size << "but got" << buffer.size(), );
-        } else if(formatter.size == ~std::size_t{})
-            formatter.size = formatter(nullptr, precision, type);
+        /* If not, we want to know the size. The size cannot be cached because
+           a single formatter can be reused multiple times with different
+           options for precision or padding. */
+        } else formatter.size = formatter(nullptr, precision, type);
         bufferOffset += formatter.size;
     }, format, Containers::arrayView(formatters, formatterCount));
     return bufferOffset;
