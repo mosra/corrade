@@ -712,7 +712,9 @@ JsonWriter& JsonWriter::writeJsonKey(const Containers::StringView json) {
 }
 
 JsonWriter& JsonWriter::writeJson(const JsonToken json) {
+    #ifndef CORRADE_NO_ASSERT
     State& state = *_state;
+    #endif
     /* Object key is *not* expected for consistency with the StringView
        overload. There's also no writeJsonKey() for JsonToken, because it's
        so far unclear whether such a token should be processed including its

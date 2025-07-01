@@ -1280,8 +1280,7 @@ bool Json::parseStringInternal(const char* const errorPrefix, JsonTokenData& tok
 }
 
 bool Json::parseLiterals(const JsonToken token) {
-    State& state = *_state;
-    CORRADE_ASSERT(token._json == &state,
+    CORRADE_ASSERT(token._json == &*_state,
         "Utility::Json::parseLiterals(): token not owned by the instance", {});
 
     for(std::size_t i = token._token, max = token._token + 1 + token.childCount(); i != max; ++i) {
@@ -2457,8 +2456,7 @@ Containers::StringView JsonToken::asStringInternal() const {
 }
 
 Containers::StringView JsonToken::asString() const {
-    const JsonTokenData& data = _json->tokens[_token];
-    CORRADE_ASSERT((data._dataTypeNan & TypeLargeMask & ~(TypeLargeStringIsEscaped|TypeLargeStringIsKey)) == (TypeLargeString|TypeSmallLargeIsParsed),
+    CORRADE_ASSERT((_json->tokens[_token]._dataTypeNan & TypeLargeMask & ~(TypeLargeStringIsEscaped|TypeLargeStringIsKey)) == (TypeLargeString|TypeSmallLargeIsParsed),
         "Utility::JsonToken::asString(): token is" << (isParsed() ? "a parsed" : "an unparsed") << type(), {});
     return asStringInternal();
 }
