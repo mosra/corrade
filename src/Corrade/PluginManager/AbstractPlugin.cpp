@@ -68,15 +68,14 @@ void AbstractPlugin::finalize() {}
 
 AbstractPlugin::AbstractPlugin(): _state{InPlaceInit} {}
 
-AbstractPlugin::AbstractPlugin(AbstractManager& manager, const Containers::StringView& plugin): _state{InPlaceInit} {
+AbstractPlugin::AbstractPlugin(AbstractManager& manager): _state{InPlaceInit} {
     _state->manager = &manager;
+}
+
+AbstractPlugin::AbstractPlugin(AbstractManager& manager, const Containers::StringView& plugin): AbstractPlugin{manager} {
     _state->plugin = Containers::String::nullTerminatedGlobalView(plugin);
     manager.registerInstance(plugin, *this, _state->metadata);
     _state->configuration = _state->metadata->configuration();
-}
-
-AbstractPlugin::AbstractPlugin(AbstractManager& manager): _state{InPlaceInit} {
-    _state->manager = &manager;
 }
 
 AbstractPlugin::AbstractPlugin(AbstractPlugin&& other) noexcept: _state{Utility::move(other._state)} {
