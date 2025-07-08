@@ -302,6 +302,16 @@ commands:
         name: Collect code coverage
         # Keep in sync with PKBUILD-coverage and appveyor-desktop{,-mingw}.bat,
         # please
+        #
+        # TODO: On Mac, and likely on ARM64 with newer GCC, empty lines
+        # containing just } or any amount of closing braces are reported as
+        # uncovered, likely due to some incompatiblity / lcov bugs. Excluding
+        # them could be done with `--omit-lines "^\\s*[})]+;?$"`, but such an
+        # option is only since lcov 1.17, and the Mac build has only 1.16 right
+        # now, ARM64 only 1.14. OTOH it's also possible that by just updating
+        # lcov this problem goes away and the regex wouldn't be needed.
+        #
+        # Similar exclusion is done for the MinGW build which uses grcov.
         command: |
           lcov << parameters.extra >> --directory . --capture --output-file coverage.info > /dev/null
           lcov << parameters.extra >> --extract coverage.info "*/src/Corrade/*" --output-file coverage.info > /dev/null
