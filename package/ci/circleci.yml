@@ -293,16 +293,20 @@ commands:
         file: << parameters.file >>
 
   lcov:
+    parameters:
+      extra:
+        type: string
+        default: ""
     steps:
     - run:
         name: Collect code coverage
         # Keep in sync with PKBUILD-coverage and appveyor-desktop{,-mingw}.bat,
         # please
         command: |
-          lcov $LCOV_EXTRA_OPTS --directory . --capture --output-file coverage.info > /dev/null
-          lcov $LCOV_EXTRA_OPTS --extract coverage.info "*/src/Corrade/*" --output-file coverage.info > /dev/null
-          lcov $LCOV_EXTRA_OPTS --remove coverage.info "*/Test/*" --output-file coverage.info > /dev/null
-          lcov $LCOV_EXTRA_OPTS --remove coverage.info "*/build/src/Corrade/*" --output-file coverage.info > /dev/null
+          lcov << parameters.extra >> --directory . --capture --output-file coverage.info > /dev/null
+          lcov << parameters.extra >> --extract coverage.info "*/src/Corrade/*" --output-file coverage.info > /dev/null
+          lcov << parameters.extra >> --remove coverage.info "*/Test/*" --output-file coverage.info > /dev/null
+          lcov << parameters.extra >> --remove coverage.info "*/build/src/Corrade/*" --output-file coverage.info > /dev/null
     - upload-codecov:
         file: coverage.info
 
@@ -311,7 +315,6 @@ jobs:
     executor: ubuntu-18_04
     environment:
       CMAKE_CXX_FLAGS: --coverage
-      LCOV_EXTRA_OPTS: --gcov-tool /usr/bin/gcov-4.8
       CONFIGURATION: Debug
     steps:
     # libidn11 needed by CMake. Install also Git so we verify that Git version
@@ -328,7 +331,8 @@ jobs:
     - make-expected-linux-dirs
     - build:
         script: unix-desktop.sh
-    - lcov
+    - lcov:
+        extra: --gcov-tool /usr/bin/gcov-4.8
 
   linux-arm64:
     executor: arm64
@@ -353,7 +357,6 @@ jobs:
       # https://stackoverflow.com/questions/53648244/specifying-the-string-value-yes-in-a-yaml-property
       BUILD_STATIC: "ON"
       CMAKE_CXX_FLAGS: --coverage
-      LCOV_EXTRA_OPTS: --gcov-tool /usr/bin/gcov-4.8
       CONFIGURATION: Debug
     steps:
     # libidn11 needed by CMake
@@ -369,7 +372,8 @@ jobs:
     - make-expected-linux-dirs
     - build:
         script: unix-desktop.sh
-    - lcov
+    - lcov:
+        extra: --gcov-tool /usr/bin/gcov-4.8
 
   linux-nondeprecated:
     executor: ubuntu-18_04
