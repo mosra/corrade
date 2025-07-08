@@ -652,7 +652,7 @@ namespace Corrade { namespace Utility { namespace Implementation {
     #else
     template<class T> T assertExpression(T&& value, const char* message) {
         if(!value) {
-            CORRADE_ASSERT_MESSAGE_ABORT(message)
+            CORRADE_ASSERT_MESSAGE_ABORT(message) /* LCOV_EXCL_LINE */
         }
 
         return Corrade::Utility::forward<T>(value);
