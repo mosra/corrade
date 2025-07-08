@@ -60,6 +60,7 @@ environment:
     APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2019
     APPVEYOR_JOB_NAME: windows-msvc2019-clang
     CONFIGURATION: Debug
+  # This one collects code coverage using Clang's --coverage and grcov
   - TARGET: desktop
     COMPILER: msvc-clang
     ANSI_COLORS: ON
@@ -110,6 +111,7 @@ environment:
     APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2022
     APPVEYOR_JOB_NAME: windows-conforming-msvc2022
     CONFIGURATION: Debug
+  # This one collects code coverage using GCC's --coverage and grcov
   - TARGET: desktop
     COMPILER: mingw
     APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2017
