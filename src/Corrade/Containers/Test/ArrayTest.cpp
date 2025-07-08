@@ -401,7 +401,9 @@ void ArrayTest::constructNoInitNonTrivialZeroSize() {
 
 /* A variant of these is used in StaticArrayTest, PairTest and TripleTest */
 struct NoDefaultConstructor {
-    /*implicit*/ NoDefaultConstructor(int a): a{a} {}
+    /* Clang complains this one is unused. Well, yes, it's here to make the
+       struct non-default-constructible. */
+    CORRADE_UNUSED /*implicit*/ NoDefaultConstructor(int a): a{a} {}
     int a;
 };
 template<class T> struct Wrapped {

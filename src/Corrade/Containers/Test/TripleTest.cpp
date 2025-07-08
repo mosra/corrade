@@ -491,7 +491,9 @@ void TripleTest::constructNoInit() {
 
 /* A variant of these is used in ArrayTest, StaticArrayTest and PairTest */
 struct NoDefaultConstructor {
-    /*implicit*/ NoDefaultConstructor(int a): a{a} {}
+    /* Clang complains this one is unused. Well, yes, it's here to make the
+       struct non-default-constructible. */
+    CORRADE_UNUSED /*implicit*/ NoDefaultConstructor(int a): a{a} {}
     /*implicit*/ NoDefaultConstructor(Corrade::NoInitT) {}
     int a;
 };
