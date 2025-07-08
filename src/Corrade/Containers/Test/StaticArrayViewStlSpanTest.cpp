@@ -337,7 +337,7 @@ void StaticArrayViewStlSpanTest::convertFromSpanSizedDerived() {
     #if !__has_include(<span>)
     CORRADE_SKIP("The <span> header is not available on this platform.");
     #else
-    Derived data[]{{42.0f}, {13.3f}, {-25.0f}};
+    Derived data[]{{{42.0f}}, {{13.3f}}, {{-25.0f}}};
     std::span<Derived, 3> a = data;
 
     StaticArrayView<3, Base> b = a;
@@ -358,7 +358,7 @@ void StaticArrayViewStlSpanTest::convertConstFromSpanSizedDerived() {
     #if !__has_include(<span>)
     CORRADE_SKIP("The <span> header is not available on this platform.");
     #else
-    Derived data[]{{42.0f}, {13.3f}, {-25.0f}};
+    Derived data[]{{{42.0f}}, {{13.3f}}, {{-25.0f}}};
     std::span<Derived, 3> a = data;
 
     StaticArrayView<3, const Base> b = a;

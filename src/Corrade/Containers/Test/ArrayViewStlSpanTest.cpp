@@ -265,7 +265,7 @@ void ArrayViewStlSpanTest::convertFromSpanDerived() {
     #if !__has_include(<span>)
     CORRADE_SKIP("The <span> header is not available on this platform.");
     #else
-    Derived data[]{{42.0f}, {13.3f}, {-25.0f}};
+    Derived data[]{{{42.0f}}, {{13.3f}}, {{-25.0f}}};
     std::span<Derived> a = data;
 
     ArrayView<Base> b = a;
@@ -287,7 +287,7 @@ void ArrayViewStlSpanTest::convertConstFromSpanDerived() {
     #if !__has_include(<span>)
     CORRADE_SKIP("The <span> header is not available on this platform.");
     #else
-    Derived data[]{{42.0f}, {13.3f}, {-25.0f}};
+    Derived data[]{{{42.0f}}, {{13.3f}}, {{-25.0f}}};
     std::span<Derived> a = data;
 
     ArrayView<const Base> b = a;
@@ -511,7 +511,7 @@ void ArrayViewStlSpanTest::convertFromSpanSizedDerived() {
     #if !__has_include(<span>)
     CORRADE_SKIP("The <span> header is not available on this platform.");
     #else
-    Derived data[]{{42.0f}, {13.3f}, {-25.0f}};
+    Derived data[]{{{42.0f}}, {{13.3f}}, {{-25.0f}}};
     std::span<Derived, 3> a = data;
 
     ArrayView<Base> b = a;
@@ -533,7 +533,7 @@ void ArrayViewStlSpanTest::convertConstFromSpanSizedDerived() {
     #if !__has_include(<span>)
     CORRADE_SKIP("The <span> header is not available on this platform.");
     #else
-    Derived data[]{{42.0f}, {13.3f}, {-25.0f}};
+    Derived data[]{{{42.0f}}, {{13.3f}}, {{-25.0f}}};
     std::span<Derived, 3> a = data;
 
     ArrayView<const Base> b = a;
