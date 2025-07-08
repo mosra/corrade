@@ -105,7 +105,7 @@ AbstractPlugin::~AbstractPlugin() {
 bool AbstractPlugin::canBeDeleted() { return false; }
 
 Containers::StringView AbstractPlugin::plugin() const {
-    CORRADE_ASSERT(_state, "PluginManager::AbstractPlugin::plugin(): can't be called on a moved-out plugin", _state->plugin);
+    CORRADE_ASSERT(_state, "PluginManager::AbstractPlugin::plugin(): can't be called on a moved-out plugin", {});
     return _state->plugin;
 }
 

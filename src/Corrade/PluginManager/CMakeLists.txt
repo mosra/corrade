@@ -34,10 +34,10 @@ if(NOT CORRADE_PLUGINMANAGER_NO_DYNAMIC_PLUGIN_SUPPORT)
 endif()
 
 set(CorradePluginManager_SRCS
-    AbstractPlugin.cpp
     PluginMetadata.cpp)
 
 set(CorradePluginManager_GracefulAssert_SRCS
+    AbstractPlugin.cpp
     AbstractManager.cpp)
 
 set(CorradePluginManager_HEADERS

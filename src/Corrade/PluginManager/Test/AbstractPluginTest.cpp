@@ -25,11 +25,13 @@
 */
 
 #include "Corrade/Containers/StringIterable.h"
+#include "Corrade/PluginManager/AbstractManagingPlugin.h"
 #include "Corrade/PluginManager/Manager.hpp"
 #include "Corrade/PluginManager/PluginMetadata.h"
 #include "Corrade/TestSuite/Tester.h"
 #include "Corrade/TestSuite/Compare/Container.h"
 #include "Corrade/TestSuite/Compare/Numeric.h"
+#include "Corrade/TestSuite/Compare/String.h"
 #include "Corrade/Utility/ConfigurationGroup.h"
 #include "Corrade/Utility/DebugStl.h" /** @todo remove once Configuration is std::string-free */
 
@@ -44,8 +46,15 @@ namespace Corrade { namespace PluginManager { namespace Test { namespace {
 struct AbstractPluginTest: TestSuite::Tester {
     explicit AbstractPluginTest();
 
+    void construct();
+    void constructManager();
+    void constructManaging();
+
     void constructCopy();
     void constructMove();
+
+    void accessMovedOut();
+    void accessMovedOutManaging();
 
     #ifndef CORRADE_PLUGINMANAGER_NO_DYNAMIC_PLUGIN_SUPPORT
     void implicitPluginSearchPaths();
@@ -58,8 +67,15 @@ struct AbstractPluginTest: TestSuite::Tester {
 using namespace Containers::Literals;
 
 AbstractPluginTest::AbstractPluginTest() {
-    addTests({&AbstractPluginTest::constructCopy,
+    addTests({&AbstractPluginTest::construct,
+              &AbstractPluginTest::constructManager,
+              &AbstractPluginTest::constructManaging,
+
+              &AbstractPluginTest::constructCopy,
               &AbstractPluginTest::constructMove,
+
+              &AbstractPluginTest::accessMovedOut,
+              &AbstractPluginTest::accessMovedOutManaging,
 
               #ifndef CORRADE_PLUGINMANAGER_NO_DYNAMIC_PLUGIN_SUPPORT
               &AbstractPluginTest::implicitPluginSearchPaths,
@@ -70,6 +86,49 @@ AbstractPluginTest::AbstractPluginTest() {
               });
 
     importPlugin();
+}
+
+void AbstractPluginTest::construct() {
+    PluginManager::Manager<AbstractAnimal> manager;
+
+    /* The configuration isn't present if constructed directly */
+    Canary a;
+    const Canary& ca = a;
+    CORRADE_COMPARE(a.configuration().value("name"), "");
+    CORRADE_COMPARE(ca.configuration().value("name"), "");
+}
+
+void AbstractPluginTest::constructManager() {
+    PluginManager::Manager<AbstractAnimal> manager;
+
+    CORRADE_COMPARE(manager.loadState("Canary"), LoadState::Static);
+    Containers::Pointer<AbstractAnimal> a = manager.instantiate("Canary");
+    const AbstractAnimal& ca = *a;
+    CORRADE_COMPARE(a->configuration().value("name"), "Achoo");
+    CORRADE_COMPARE(ca.configuration().value("name"), "Achoo");
+}
+
+void AbstractPluginTest::constructManaging() {
+    /* Plugins derived from AbstractManagingPlugin have (protected) access to
+       the manager as well */
+
+    struct Managing: AbstractManagingPlugin<Managing> {
+        using AbstractManagingPlugin::AbstractManagingPlugin;
+        using AbstractManagingPlugin::manager;
+    };
+
+    PluginManager::Manager<Managing> manager{"nonexistent"};
+
+    Managing a;
+    Managing b{manager};
+    CORRADE_COMPARE(a.manager(), nullptr);
+    CORRADE_COMPARE(b.manager(), &manager);
+
+    /* Const overload */
+    const Managing& ca = a;
+    const Managing& cb = b;
+    CORRADE_COMPARE(ca.manager(), nullptr);
+    CORRADE_COMPARE(cb.manager(), &manager);
 }
 
 void AbstractPluginTest::constructCopy() {
@@ -84,7 +143,8 @@ void AbstractPluginTest::constructMove() {
 
     PluginManager::Manager<AbstractAnimal> manager;
 
-    /* Without plugin manager -- shouldn't crash or do any other weird stuff */
+    /* Created without a plugin manager -- shouldn't crash or do any other
+       weird stuff */
     {
         Canary a;
         CORRADE_VERIFY(!a.metadata());
@@ -92,8 +152,8 @@ void AbstractPluginTest::constructMove() {
         CORRADE_VERIFY(!b.metadata());
     }
 
-    /* With plugin manager -- should properly reregister and not fail during
-       destruction */
+    /* Created *by* a plugin manager -- should properly reregister and not fail
+       during destruction */
     CORRADE_COMPARE(manager.loadState("Canary"), LoadState::Static);
     {
         auto a = Containers::pointerCast<Canary>(manager.instantiate("Canary"));
@@ -109,6 +169,70 @@ void AbstractPluginTest::constructMove() {
         CORRADE_COMPARE(b.metadata()->name(), "Canary");
         CORRADE_COMPARE(b.configuration().value("name"), "Achoo");
     }
+
+    /* Only (nothrow) move construction is allowed */
+    CORRADE_VERIFY(std::is_nothrow_move_constructible<Canary>::value);
+}
+
+void AbstractPluginTest::accessMovedOut() {
+    CORRADE_SKIP_IF_NO_ASSERT();
+
+    Canary a;
+    const Canary& ca = a;
+    Canary b{Utility::move(a)};
+
+    Containers::String out;
+    Error redirectError{&out};
+    a.plugin();
+    a.metadata();
+    a.configuration();
+    ca.configuration();
+    /* The assert has to return *something* so it dereferences null _state,
+       resulting in another (debug-only) assert in Containers::Pointer */
+    #ifdef CORRADE_IS_DEBUG_BUILD
+    CORRADE_COMPARE_AS(out,
+        "PluginManager::AbstractPlugin::plugin(): can't be called on a moved-out plugin\n"
+        "PluginManager::AbstractPlugin::metadata(): can't be called on a moved-out plugin\n"
+        "PluginManager::AbstractPlugin::configuration(): can't be called on a moved-out plugin\n"
+        "Containers::Pointer: the pointer is null\n"
+        "PluginManager::AbstractPlugin::configuration(): can't be called on a moved-out plugin\n"
+        "Containers::Pointer: the pointer is null\n",
+        TestSuite::Compare::String);
+    #else
+    CORRADE_COMPARE_AS(out,
+        "PluginManager::AbstractPlugin::plugin(): can't be called on a moved-out plugin\n"
+        "PluginManager::AbstractPlugin::metadata(): can't be called on a moved-out plugin\n"
+        "PluginManager::AbstractPlugin::configuration(): can't be called on a moved-out plugin\n"
+        "PluginManager::AbstractPlugin::configuration(): can't be called on a moved-out plugin\n",
+        TestSuite::Compare::String);
+    #endif
+}
+
+void AbstractPluginTest::accessMovedOutManaging() {
+    CORRADE_SKIP_IF_NO_ASSERT();
+
+    /* Plugins derived from AbstractManagingPlugin have (protected) access to
+       the manager as well */
+
+    struct Managing: AbstractManagingPlugin<Managing> {
+        using AbstractManagingPlugin::AbstractManagingPlugin;
+        using AbstractManagingPlugin::manager;
+    };
+
+    PluginManager::Manager<Managing> manager{"nonexistent"};
+
+    Managing a;
+    const Managing& ca = a;
+    Managing b{Utility::move(a)};
+
+    Containers::String out;
+    Error redirectError{&out};
+    a.manager();
+    ca.manager();
+    CORRADE_COMPARE_AS(out,
+        "PluginManager::AbstractManagingPlugin::manager(): can't be called on a moved-out plugin\n"
+        "PluginManager::AbstractManagingPlugin::manager(): can't be called on a moved-out plugin\n",
+        TestSuite::Compare::String);
 }
 
 #ifndef CORRADE_PLUGINMANAGER_NO_DYNAMIC_PLUGIN_SUPPORT
