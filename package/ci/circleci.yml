@@ -26,27 +26,15 @@ executors:
     macos:
       xcode: 13.4.1
     resource_class: macos.m1.medium.gen1
-  emscripten1:
-    docker:
-    # 1.39.0 is the oldest on Docker. Anything before 1.39.2 is useless as emar
-    # randomly asserts: https://github.com/emscripten-core/emscripten/pull/9742
-    # Then, anything before 1.39.6 is useless as well because emar has a
-    # filesystem race and randomly complains that a file doesn't exist:
-    # https://github.com/mosra/magnum/issues/413,
-    # https://github.com/emscripten-core/emscripten/pull/10161
-    - image: emscripten/emsdk:1.39.6-upstream
   emscripten2:
     docker:
-    # While 1.39.6 supports some WIP variant of SIMD, the finalized support is
-    # only since 2.0.18, and then the first non-broken emsdk is 2.0.25. But
-    # emsdk ships with Node.js 14, and only Node.js 15+ supports intrinsics
-    # that Emscripten 2.0.18 can produce, so we have to install our own in
-    # order to actually test the SIMD code. Node.js upgrade in emsdk itself is
-    # tracked in https://github.com/emscripten-core/emsdk/issues/1064, as of
-    # October 2024 it's still open but emsdk 3.1.36+ contains Node 15, 3.1.42+
-    # Node 16 and 3.1.61+ Node 18.
+    # 2.0.16 is the oldest on Docker that isn't based on Debian Buster which
+    # started 404ing as of 2025-07-13. However, as usual, it doesn't work:
+    #  error: symbol '__indirect_function_table' is not a function table`
+    # So bumping the min version right to 2.0.26 that was used previously as
+    # the "higher" version, as explained below.
     #
-    # HOWEVER, 2.0.25 has something fishy that causes Utility::allocateAligned()
+    # 2.0.25 has something fishy that causes Utility::allocateAligned()
     # to return pointers that aren't actually aligned. That's fixed with
     # 2.0.26, which is what is used here. 2.0.26+ then has a problem in the
     # file embedder, where zero-size files are reported as having 3 bytes. The
@@ -62,6 +50,11 @@ executors:
     # XFAIL for all test cases involving empty files. YAY! TOOLCHAIN FROM HELL!
     #  https://github.com/emscripten-core/emscripten/pull/16050
     - image: emscripten/emsdk:2.0.26
+  emscripten3:
+    docker:
+    # Then, the first working "3" version is used to test this era. The current
+    # 4.x version is tested only locally.
+    - image: emscripten/emsdk:3.0.0
   python-3_6:
     docker:
     - image: python:3.6.12
@@ -482,7 +475,7 @@ jobs:
     - lcov
 
   emscripten1:
-    executor: emscripten1
+    executor: emscripten2
     steps:
     - install-base-linux
     - cap-ninja-jobs
@@ -493,7 +486,7 @@ jobs:
         script: emscripten.sh
 
   emscripten2:
-    executor: emscripten2
+    executor: emscripten3
     environment:
       # emsdk forces the PATH to prefer its own nodejs, so explicitly force
       # /usr/bin/node to be used by CMake
