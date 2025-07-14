@@ -34,6 +34,15 @@ executors:
     # So bumping the min version right to 2.0.26 that was used previously as
     # the "higher" version, as explained below.
     #
+    # Finalized support for WASM SIMD is since 2.0.18, and then the first
+    # non-broken emsdk is 2.0.25. But emsdk ships with Node.js 14, and only
+    # Node.js 15+ supports intrinsics that Emscripten 2.0.18 can produce, so we
+    # have to install our own in order to actually test the SIMD code. Node.js
+    # upgrade in emsdk itself is tracked in
+    # https://github.com/emscripten-core/emsdk/issues/1064, as of October 2024
+    # it's still open but emsdk 3.1.36+ contains Node 15, 3.1.42+ Node 16 and
+    # 3.1.61+ Node 18.
+    #
     # 2.0.25 has something fishy that causes Utility::allocateAligned()
     # to return pointers that aren't actually aligned. That's fixed with
     # 2.0.26, which is what is used here. 2.0.26+ then has a problem in the
@@ -476,8 +485,12 @@ jobs:
 
   emscripten1:
     executor: emscripten2
+    # Deliberately *not* setting NODEJS_EXECUTABLE here to verify that the
+    # build correctly skips WASM SIMD tests for Node.js 14. WASM SIMD is then
+    # tested in the job below.
     steps:
     - install-base-linux
+    # With a Debug build, 38 is causing OOMs. Release was fine with that.
     - cap-ninja-jobs
     - run:
         name: Query CMake version
@@ -488,14 +501,14 @@ jobs:
   emscripten2:
     executor: emscripten3
     environment:
-      # emsdk forces the PATH to prefer its own nodejs, so explicitly force
-      # /usr/bin/node to be used by CMake
+      # Use Node.js 15 to be able to verify WASM SIMD codepaths. emsdk forces
+      # the PATH to prefer its own nodejs, so explicitly force /usr/bin/node to
+      # be used by CMake.
       EXTRA_OPTS: >
         -DNODEJS_EXECUTABLE=/usr/bin/node
     steps:
     - install-base-linux:
         extra: curl
-    # With a Debug build, 38 is causing OOMs. Release was fine with that.
     - cap-ninja-jobs
     - install-nodejs
     - run:
