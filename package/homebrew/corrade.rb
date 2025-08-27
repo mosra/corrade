@@ -1,5 +1,5 @@
 class Corrade < Formula
-  desc "C++11/C++14 multiplatform utility library"
+  desc "C++11 multiplatform utility library"
   homepage "https://magnum.graphics/corrade/"
   # git describe origin/master, except the `v` prefix
   version "2020.06-2002-gf37591439"
