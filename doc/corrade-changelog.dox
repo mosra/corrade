@@ -756,7 +756,7 @@ namespace Corrade {
 -   @ref DefaultInit initialization in @ref Containers::Array and growable
     array APIs, @ref Containers::StaticArray, @ref Containers::Pair,
     @ref Containers::Triple and @ref Utility::allocateAligned() is deprecated
-    decause C++'s default initialization keeps trivial types not initialized
+    because C++'s default initialization keeps trivial types not initialized
     and using it is unnecessarily error prone. Use either @ref ValueInit or
     @ref NoInit instead to make the choice about content initialization
     explicit.
