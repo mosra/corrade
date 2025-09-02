@@ -445,6 +445,11 @@ Windows the directory is equivalent to @cb{.bat} %USERPROFILE%/Documents @ce
 or similar. On other systems or if the directory can't be found, prints a
 message to @ref Error and returns @ref Containers::NullOpt.
 
+Note that, depending on platform, the function may return a location that
+doesn't actually exist without indicating a failure, such as when
+@cb{.sh} ${HOME} @ce points to a location on a volume that isn't currently
+mounted.
+
 Returned value is encoded in UTF-8, on Windows it's first converted from a
 UTF-16 representation using @ref Unicode::narrow().
 @note For consistency is the path returned with forward slashes on all
@@ -465,6 +470,13 @@ On Unix (except for macOS), the configuration dir is
 configuration dir is @cb{.sh} ${HOME}/Library/Application Support/name @ce. On
 other systems or if the directory can't be found, prints a message to
 @ref Error and returns @ref Containers::NullOpt.
+
+The function *doesn't* create the configuration directory if it doesn't exist,
+so in case given @p name is used for the first time, you may need to call
+@ref Path::make() on the returned path. Also note that, depending on platform,
+the function may return a location under a path that doesn't actually exist
+without indicating a failure, such as when @cb{.sh} ${XDG_CONFIG_HOME} @ce
+points to a location on a volume that isn't currently mounted.
 
 Returned value is encoded in UTF-8, on Windows it's first converted from a
 UTF-16 representation using @ref Unicode::narrow().
