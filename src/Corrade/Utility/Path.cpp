@@ -588,6 +588,12 @@ Containers::Optional<Containers::String> executableLocation() {
     ssize_t size;
     while((size = readlink(self, path, path.size())) == ssize_t(path.size()))
         arrayResize(path, NoInit, path.size()*2);
+    if(size == -1) {
+        Error err;
+        err << "Utility::Path::executableLocation(): can't read" << self << Debug::nospace << ":";
+        Utility::Implementation::printErrnoErrorString(err, errno);
+        return {};
+    }
 
     /* readlink() doesn't put the null terminator into the array, do it
        ourselves. The above loop guarantees that path.size() is always larger

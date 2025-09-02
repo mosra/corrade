@@ -397,8 +397,9 @@ CORRADE_UTILITY_EXPORT Containers::Optional<Containers::String> libraryLocation(
 @m_since_latest
 
 Returns location of the executable on Linux, Windows, non-sandboxed and
-sandboxed macOS and iOS. On other systems or if the directory can't be found,
-prints a message to @ref Error and returns @ref Containers::NullOpt.
+sandboxed macOS and iOS. On other systems on on Linux if `/proc/self/exe` is
+Inaccessible, prints a message to @ref Error and returns
+@ref Containers::NullOpt.
 
 Returned value is encoded in UTF-8, on Windows it's first converted from a
 UTF-16 representation using @ref Unicode::narrow().

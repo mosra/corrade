@@ -1758,6 +1758,8 @@ void PathTest::executableLocation() {
 }
 
 void PathTest::executableLocationInvalid() {
+    /** @todo on Linux it fails if /proc/self/exe is inacessible, which might
+        happen with some overly-restrictive VMs, how to test that? */
     CORRADE_SKIP("Not sure how to test this.");
 }
 
