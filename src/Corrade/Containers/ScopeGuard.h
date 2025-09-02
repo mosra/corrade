@@ -213,7 +213,15 @@ inline ScopeGuard& ScopeGuard::operator=(ScopeGuard&& other) noexcept {
 template<class T, class U> ScopeGuard::ScopeGuard(T handle, U(*deleter)(T)): _deleter{reinterpret_cast<void(*)()>(deleter)}, _handle{reinterpret_cast<void*>(handle)} {
     static_assert(sizeof(T) <= sizeof(void*), "handle too big to store");
     _deleterWrapper = [](void(**deleter)(), void** handle) {
+        /* One more case of the C4312 warning explained above */
+        #ifdef CORRADE_TARGET_MSVC
+        #pragma warning(push)
+        #pragma warning(disable: 4312)
+        #endif
         (*reinterpret_cast<U(**)(T)>(deleter))(*reinterpret_cast<T*>(handle));
+        #ifdef CORRADE_TARGET_MSVC
+        #pragma warning(pop)
+        #endif
     };
 }
 
