@@ -315,8 +315,8 @@ struct BufferFormatter {
     /*implicit*/ constexpr BufferFormatter(): _fn{}, _value{} {}
 
     template<class T> explicit BufferFormatter(const T& value): _value{&value} {
-        _fn = [](const Containers::MutableStringView& buffer, const void* value, int precision, FormatType type) {
-            return Formatter<typename std::decay<T>::type>::format(buffer, *static_cast<const T*>(value), precision, type);
+        _fn = [](const Containers::MutableStringView& buffer, const void* val, int precision, FormatType type) {
+            return Formatter<typename std::decay<T>::type>::format(buffer, *static_cast<const T*>(val), precision, type);
         };
     }
 
@@ -337,8 +337,8 @@ struct FileFormatter {
     /*implicit*/ constexpr FileFormatter(): _fn{}, _value{} {}
 
     template<class T> explicit FileFormatter(const T& value): _value{&value} {
-        _fn = [](std::FILE* file, const void* value, int precision, FormatType type) {
-            Formatter<typename std::decay<T>::type>::format(file, *static_cast<const T*>(value), precision, type);
+        _fn = [](std::FILE* file, const void* val, int precision, FormatType type) {
+            Formatter<typename std::decay<T>::type>::format(file, *static_cast<const T*>(val), precision, type);
         };
     }
 
