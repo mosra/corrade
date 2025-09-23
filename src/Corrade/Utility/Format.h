@@ -314,7 +314,10 @@ struct BufferFormatter {
     /* Needed for a sentinel value (C arrays can't have zero size) */
     /*implicit*/ constexpr BufferFormatter(): _fn{}, _value{} {}
 
-    template<class T> explicit BufferFormatter(const T& value): _value{&value} {
+    /* Clang 19's -Wshadow-uncaptured-local warns if `value` is used for both
+       the outer and inner argument, using `value_` instead. Clang 20 doesn't
+       seem to warn anymore. */
+    template<class T> explicit BufferFormatter(const T& value_): _value{&value_} {
         _fn = [](const Containers::MutableStringView& buffer, const void* value, int precision, FormatType type) {
             return Formatter<typename std::decay<T>::type>::format(buffer, *static_cast<const T*>(value), precision, type);
         };
@@ -336,7 +339,10 @@ struct FileFormatter {
     /* Needed for a sentinel value (C arrays can't have zero size) */
     /*implicit*/ constexpr FileFormatter(): _fn{}, _value{} {}
 
-    template<class T> explicit FileFormatter(const T& value): _value{&value} {
+    /* Clang 19's -Wshadow-uncaptured-local warns if `value` is used for both
+       the outer and inner argument, using `value_` instead. Clang 20 doesn't
+       seem to warn anymore. */
+    template<class T> explicit FileFormatter(const T& value_): _value{&value_} {
         _fn = [](std::FILE* file, const void* value, int precision, FormatType type) {
             Formatter<typename std::decay<T>::type>::format(file, *static_cast<const T*>(value), precision, type);
         };
