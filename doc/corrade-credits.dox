@@ -96,6 +96,8 @@ Is the below list missing your name or something's wrong?
     improvements to the Emscripten CMake toolchain
 -   **[\@Amphaal](https://github.com/Amphaal)** --- MinGW/Clang and
     crosscompilation fixes
+-   **Andy Maloney** ([\@asmaloney](https://github.com/asmaloney)) --- Clang
+    warning fixes
 -   **[\@biosek](https://github.com/biosek)** --- MinGW compilation fixes
 -   **Burak Canik** ([\@fauder](https://github.com/fauder)) --- MSVC warning
     fixes
