@@ -436,7 +436,7 @@ the process. Example usage:
 
 Equivalently to @ref arrayCast(), the size of the new array is calculated as
 @cpp view.size()*sizeof(T)/sizeof(U) @ce. Expects that both types are
-trivially copyable and [standard layout](http://en.cppreference.com/w/cpp/concept/StandardLayoutType)
+trivially copyable and [standard layout](https://en.cppreference.com/w/cpp/named_req/StandardLayoutType.html)
 and the total byte size doesn't change.
 */
 template<class U, class T> Array<U> arrayAllocatorCast(Array<T>&& array);

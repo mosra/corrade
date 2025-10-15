@@ -38,9 +38,9 @@ Nothing is worse than rule that hurts productivity instead of improving it.
 You can also take inspiration from other thoroughly written coding style
 guidelines of large projects:
 
--   LLVM: http://llvm.org/docs/CodingStandards.html
--   Qt: http://qt-project.org/wiki/Qt_Coding_Style
--   Chromium: http://dev.chromium.org/developers/coding-style/cpp-dos-and-donts
+-   LLVM: https://llvm.org/docs/CodingStandards.html
+-   Qt: https://wiki.qt.io/Qt_Coding_Style
+-   Chromium: https://chromium.googlesource.com/chromium/src/+/HEAD/styleguide/c++/c++-dos-and-donts.md
 
 In general, the main aim of this style is:
 
@@ -968,7 +968,7 @@ and in most cases only for internal use.
 
 @subsection corrade-coding-style-documentation-commands Special documentation commands
 
-All @c \@m_* commands from the [m.css theme](http://mcss.mosra.cz/doxygen/#theme-specific-commands)
+All @c \@m_* commands from the [m.css theme](https://mcss.mosra.cz/doxygen/#theme-specific-commands)
 are available.
 
 @subsubsection corrade-coding-style-documentation-commands-code Code

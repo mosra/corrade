@@ -261,9 +261,9 @@ CORRADE_UTILITY_CPU_MAYBE_UNUSED CORRADE_ENABLE(POPCNT,BMI1) typename std::decay
 }
 #endif
 
-/* http://graphics.stanford.edu/~seander/bithacks.html#CountBitsSetParallel and
-   https://en.wikipedia.org/wiki/Hamming_weight#Efficient_implementation for a
-   64-bit version. */
+/* https://graphics.stanford.edu/~seander/bithacks.html#CountBitsSetParallel
+   and https://en.wikipedia.org/wiki/Hamming_weight#Efficient_implementation
+   for a 64-bit version. */
 CORRADE_ALWAYS_INLINE std::uint64_t popcount(Cpu::ScalarT, std::uint64_t v) {
     /* On Emscripten this *does* expand to a WASM i64.popcnt instruction with
        -O3 (https://godbolt.org/z/4dhsKjq5e), but to play safe I'll just use

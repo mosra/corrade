@@ -470,7 +470,7 @@ inline void BitArray::reset(std::size_t i) {
 inline void BitArray::set(std::size_t i, bool value) {
     CORRADE_DEBUG_ASSERT(i < (_sizeOffset >> 3),
         "Containers::BitArray::set(): index" << i << "out of range for" << (_sizeOffset >> 3) << "bits", );
-    /* http://graphics.stanford.edu/~seander/bithacks.html#ConditionalSetOrClearBitsWithoutBranching */
+    /* https://graphics.stanford.edu/~seander/bithacks.html#ConditionalSetOrClearBitsWithoutBranching */
     char& byte = _data[((_sizeOffset & 0x07) + i) >> 3];
     byte ^= (-char(value) ^ byte) & (1 << ((_sizeOffset + i) & 0x07));
 }

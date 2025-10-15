@@ -416,7 +416,7 @@ a high-level overview.
 
 @subsection corrade-changelog-2018-02-documentation Documentation
 
--   New documentation theme powered by [m.css](http://mcss.mosra.cz) and
+-   New documentation theme powered by [m.css](https://mcss.mosra.cz) and
     related massive updates of *everything*
 -   Various updates and clarifications to the @ref corrade-coding-style page
 -   All example code is put into public domain (or UNLICENSE) to free you from

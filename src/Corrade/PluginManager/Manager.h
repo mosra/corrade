@@ -120,12 +120,12 @@ original manager using @ref registerExternalManager().
 
 It's possible to have more than one instance of the same manager as well as
 loading and instantiating the same plugin in more than one manager at the same
-time. For static plugins there's no reason this could work, for dynamic both
-the Unix @m_class{m-doc-external} [dlopen()](http://man7.org/linux/man-pages/man3/dlopen.3.html)
+time. For static plugins there's no reason this couldn't work, for dynamic both
+the Unix @m_class{m-doc-external} [dlopen()](https://man.archlinux.org/man/dlopen.3)
 and Windows @m_class{m-doc-external} [LoadLibrary()](https://docs.microsoft.com/en-us/windows/win32/api/libloaderapi/nf-libloaderapi-loadlibraryw)
 load the library only once and maintain reference count to ensure it's unloaded
-only after it's not needed anymore. The only way you may run into problem is by
-loading the same plugin binary twice under different filenames, causing the
+only after it's not needed anymore. The only way you may run into problems is
+by loading the same plugin binary twice under different filenames, causing the
 loader to have symbol conflicts, violating ODR.
 
 @section PluginManager-Manager-template-definitions Custom plugin interfaces and template definitions

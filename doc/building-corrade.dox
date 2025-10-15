@@ -718,7 +718,7 @@ information.
 
 @subsection building-corrade-doc Building documentation
 
-The documentation is generated using [Doxygen](http://doxygen.org) with the
+The documentation is generated using [Doxygen](https://doxygen.org) with the
 [m.css Doxygen theme](https://mcss.mosra.cz/documentation/doxygen/) and
 additionally uses **LaTeX** for math formulas. Use `doc/conf.py` for a local
 build, the `doc/conf-public.py` is meant for the publicly available
@@ -854,9 +854,9 @@ to make it available to depending projects.
 
 @subsection building-corrade-cross-emscripten Cross-compiling for Emscripten
 
-You will need [Emscripten](http://kripken.github.io/emscripten-site/) installed
-and configured. The toolchains require CMake 3.7 or newer to properly set
-compiler and linker flags.
+You will need [Emscripten](https://emscripten.org) installed and configured.
+The toolchains require CMake 3.7 or newer to properly set compiler and linker
+flags.
 
 There are two toolchain files. The `generic/Emscripten.cmake` is for the
 classical (asm.js) build, the `generic/Emscripten-wasm.cmake` is for a

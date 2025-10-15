@@ -534,7 +534,7 @@ template<class T> template<class U, typename std::enable_if<!std::is_const<U>::v
 template<class T> template<class U, typename std::enable_if<!std::is_const<U>::value, int>::type> inline void BasicBitArrayView<T>::set(std::size_t i, bool value) const {
     CORRADE_DEBUG_ASSERT(i < (_sizeOffset >> 3),
         "Containers::BitArrayView::set(): index" << i << "out of range for" << (_sizeOffset >> 3) << "bits", );
-    /* http://graphics.stanford.edu/~seander/bithacks.html#ConditionalSetOrClearBitsWithoutBranching */
+    /* https://graphics.stanford.edu/~seander/bithacks.html#ConditionalSetOrClearBitsWithoutBranching */
     char& byte = static_cast<T*>(_data)[((_sizeOffset & 0x07) + i) >> 3];
     byte ^= (-char(value) ^ byte) & (1 << ((_sizeOffset + i) & 0x07));
 }

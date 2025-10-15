@@ -556,7 +556,7 @@ are supported.
 
 @note Keep in mind that older versions of ADB and Android do not correctly
     propagate the exit code to caller, which may result in your test failures
-    being silently ignored. See [Android Issue 3254](http://web.archive.org/web/20160806094132/https://code.google.com/p/android/issues/detail?id=3254)
+    being silently ignored. See [Android Issue 3254](https://web.archive.org/web/20160806094132/https://code.google.com/p/android/issues/detail?id=3254)
     for possible workarounds. The @ref corrade-cmake-add-test "corrade_add_test()"
     CMake macro also works around this issue.
 

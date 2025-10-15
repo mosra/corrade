@@ -191,7 +191,7 @@ template<class T> class LinkedList {
 @tparam Derived Dervied object type, i.e. type you want returned from @ref previous() and @ref next().
 @tparam List    List object type, i.e. type you want returned from @ref list().
 
-This class is usually subclassed using [CRTP](http://en.wikipedia.org/wiki/Curiously_Recurring_Template_Pattern),
+This class is usually subclassed using [CRTP](https://en.wikipedia.org/wiki/Curiously_recurring_template_pattern),
 e.g.:
 
 @snippet Containers.cpp LinkedListItem-usage

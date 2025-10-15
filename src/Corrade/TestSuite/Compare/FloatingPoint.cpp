@@ -32,7 +32,7 @@
 
 namespace Corrade { namespace TestSuite { namespace Implementation {
 
-/* Adapted from http://floating-point-gui.de/errors/comparison/ */
+/* Adapted from https://floating-point-gui.de/errors/comparison/ */
 template<class T> ComparisonStatusFlags FloatComparator<T>::operator()(T actual, T expected) {
     /* Shortcut for binary equality, infinites and NaN */
     if(actual == expected || (actual != actual && expected != expected))

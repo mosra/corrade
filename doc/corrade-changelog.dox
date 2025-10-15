@@ -1964,7 +1964,7 @@ Released 2018-10-23, tagged as
 @subsubsection corrade-changelog-2018-10-changes-testsuite TestSuite library
 
 -   Adapted Emscripten test runner markup for consistency with the
-    [m.css](http://mcss.mosra.cz) theme used in [Magnum](https://magnum.graphics)
+    [m.css](https://mcss.mosra.cz) theme used in [Magnum](https://magnum.graphics)
 -   It's now possible to have non-copyable and non-moveable
     @ref TestSuite::Comparator specializations
 

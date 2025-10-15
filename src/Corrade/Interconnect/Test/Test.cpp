@@ -115,7 +115,7 @@ class TemplatedPostman: public Interconnect::Emitter {
            working, thus we need to do some otherwise useless work to
            differentiate them. Ugly as hell but better than disabling the
            optimization globally. Details:
-           http://blogs.msdn.com/b/oldnewthing/archive/2005/03/22/400373.aspx */
+           https://web.archive.org/web/20150703232520/http://blogs.msdn.com/b/oldnewthing/archive/2005/03/22/400373.aspx */
         int _functionHash;
         #endif
 };

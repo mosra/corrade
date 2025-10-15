@@ -123,8 +123,8 @@ not strictly required to follow them to the point.
         support)
 13. Mention the library in `doc/corrade-changelog.dox`
 14. Build documentation:
-    -   run [dox2html5.py](http://mcss.mosra.cz/doxygen/) on `Doxyfile-mcss`
-        and verify there are no new warnings
+    -   run [doxygen.py](https://mcss.mosra.cz/documentation/doxygen/) on
+        `doc/conf.py` and verify there are no new warnings
     -   eyeball the namespace and directory docs, fix suspicious things, look
         also in the building and cmake docs
 15. Build a coverage build (`package/archlinux/PKGBUILD-coverage`), or abuse
@@ -251,8 +251,8 @@ in inverse.
     @ref corrade-coding-style for more information.
 6.  Mention the new functionality in `doc/corrade-changelog.dox`
 7.  Build documentation:
-    -   run [dox2html5.py](http://mcss.mosra.cz/doxygen/) on `Doxyfile-mcss`
-        and verify there are no new warnings
+    -   run [doxygen.py](https://mcss.mosra.cz/documentation/doxygen/) on
+        `doc/conf.py` and verify there are no new warnings
     -   eyeball the relevant docs and fix suspicious things
 8.  Build a coverage build (`package/archlinux/PKGBUILD-coverage`), or abuse
     the CI for that later
@@ -272,8 +272,8 @@ in inverse --- but usually @ref corrade-developers-deprecation "deprecate first"
 4.  Mention the new functionality in `doc/changelog.dox` (and similar files in
     other repos)
 5.  Build documentation:
-    -   run [dox2html5.py](http://mcss.mosra.cz/doxygen/) on `Doxyfile-mcss`
-        and verify there are no new warnings
+    -   run [doxygen.py](https://mcss.mosra.cz/documentation/doxygen/) on
+        `doc/conf.py` and verify there are no new warnings
     -   eyeball the relevant docs and fix suspicious things
 6.  Build a coverage build (`package/archlinux/PKGBUILD-coverage`), or abuse
     the CI for that later
@@ -298,8 +298,8 @@ in inverse --- but usually @ref corrade-developers-deprecation "deprecate first"
 6.  Mention the new page in `doc/changelog.dox` (and similar files in other
     repos)
 7.  Build documentation:
-    -   run [dox2html5.py](http://mcss.mosra.cz/doxygen/) on `Doxyfile-mcss`
-        and verify there are no new warnings
+    -   run [doxygen.py](https://mcss.mosra.cz/documentation/doxygen/) on
+        `doc/conf.py` and verify there are no new warnings
     -   eyeball the relevant docs and fix suspicious things
 8.  Push to `master`
 
@@ -339,8 +339,8 @@ in inverse --- but usually @ref corrade-developers-deprecation "deprecate first"
 8.  Mention the deprecated API in the deprecation section of
     `doc/corrade-changelog.dox`
 9.  Build documentation:
-    -   run [dox2html5.py](http://mcss.mosra.cz/doxygen/) on `Doxyfile-mcss`
-        and verify there are no new warnings
+    -   run [doxygen.py](https://mcss.mosra.cz/documentation/doxygen/) on
+        `doc/conf.py` and verify there are no new warnings
     -   eyeball the relevant docs and fix suspicious things
 10.  Push to a temporary branch (e.g., `next`)
 11. Iterate until the CIs are green
@@ -360,9 +360,9 @@ in inverse --- but usually @ref corrade-developers-deprecation "deprecate first"
 3.  Mention the removed API in the compatibility section of `doc/changelog.dox`
     (or similar files in other repos)
 4.  Build documentation:
-    -   run [dox2html5.py](http://mcss.mosra.cz/doxygen/) on `Doxyfile-mcss`
-        and verify there are no new warnings --- sometimes it happens that a
-        deprecated API is still being referenced
+    -   run [doxygen.py](https://mcss.mosra.cz/documentation/doxygen/) on
+        `doc/conf.py` and verify there are no new warnings --- sometimes it
+        happens that a deprecated API is still being referenced
 5.  Push to a temporary branch (e.g., `next`)
 6.  Iterate until the CIs are green
 7.  Merge to `master`
@@ -601,8 +601,8 @@ inverse.
 1.  (Optionally) remove `build/doc-public` to get rid of stale files
 2.  Verify there are no untracked files, modifications or branches different
     than `master` checked out that could mess up the docs
-3.  Run [dox2html5.py](http://mcss.mosra.cz/doxygen/) on `Doxyfile-public`,
-    look for suspicious warnings
+3.  Run [doxygen.py](https://mcss.mosra.cz/documentation/doxygen/) on
+    `doc/conf-public.py`, look for suspicious warnings
 4.  Upload contents of `build/doc-public/html/` to `doc/corrade-new/` and remove
     `doc/corrade-old/` if any
 5.  Once the upload is finished, rename `doc/corrade/` to `doc/corrade-old/`
@@ -621,8 +621,8 @@ inverse.
 5.  Add the contributor to `CREDITS.md`, if not already there
 6.  Update `doc/corrade-changelog.dox`, if not already done
 7.  Build documentation:
-    -   run [dox2html5.py](http://mcss.mosra.cz/doxygen/) on `Doxyfile-mcss`
-        and verify there are no new warnings
+    -   run [doxygen.py](https://mcss.mosra.cz/documentation/doxygen/) on
+        `doc/conf.py` and verify there are no new warnings
     -   eyeball the relevant docs and fix suspicious things
 8.  Push to a temporary branch (e.g., `next`)
 9.  Iterate until the CIs are green

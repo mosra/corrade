@@ -114,7 +114,7 @@ Compared to @ref std::unique_ptr, this class does proper @cpp const @ce
 propagation as would be expected from any other owning container like
 @ref Array or @ref String --- i.e., it's only possible to mutate the owned data
 if the instance is not @cpp const @ce. There's no STL functionality with such
-behavior except for the proposed @m_class{m-doc-external} [std::indirect_value](http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2020/p1950r1.html).
+behavior except for the proposed @m_class{m-doc-external} [std::indirect_value](https://www.open-std.org/jtc1/sc22/wg21/docs/papers/2020/p1950r1.html).
 
 Unlike @ref std::unique_ptr, this class does not provide custom deleters,
 doesn't work with arrays and doesn't have a @cpp constexpr @ce API. On the

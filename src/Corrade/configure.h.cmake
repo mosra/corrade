@@ -60,7 +60,7 @@
 
 /* First two is GCC/Clang for 32/64 bit, second two is MSVC 32/64bit. MSVC
    doesn't have AArch64 support in the compiler yet, though there are some
-   signs of it in headers (http://stackoverflow.com/a/37251625/6108877). */
+   signs of it in headers (https://stackoverflow.com/a/37251625). */
 #elif defined(__arm__) || defined(__aarch64__) || defined(_M_ARM) || defined(_M_ARM64)
 #define CORRADE_TARGET_ARM
 

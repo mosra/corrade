@@ -460,7 +460,7 @@ function(corrade_add_test test_name)
         if(CORRADE_TARGET_IOS)
             # The EFFECTIVE_PLATFORM_NAME variable is not expanded when using
             # TARGET_* generator expressions on iOS, we need to hardcode it
-            # manually. See http://public.kitware.com/pipermail/cmake/2016-March/063049.html
+            # manually. See https://cmake.org/pipermail/cmake/2016-March/063049.html
             # In case we redirect the runtime output directory, use that (and
             # assume there's no TARGET_* generator expression). This will of
             # course break when someone sets the LIBRARY_OUTPUT_DIRECTORY

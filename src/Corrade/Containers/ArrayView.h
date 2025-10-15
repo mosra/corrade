@@ -1025,7 +1025,7 @@ template<class T, class U = decltype(Implementation::ErasedArrayViewConverter<ty
 @brief Reinterpret-cast an array view
 
 Size of the new array is calculated as @cpp view.size()*sizeof(T)/sizeof(U) @ce.
-Expects that both types are [standard layout](http://en.cppreference.com/w/cpp/concept/StandardLayoutType)
+Expects that both types are [standard layout](https://en.cppreference.com/w/cpp/named_req/StandardLayoutType.html)
 and the total byte size doesn't change. Example usage:
 
 @snippet Containers.cpp arrayCast
@@ -1046,7 +1046,7 @@ template<class U, class T> ArrayView<U> arrayCast(ArrayView<T> view) {
 @m_since{2020,06}
 
 Size of the new array is calculated as @cpp view.size()/sizeof(U) @ce.
-Expects that the target type is [standard layout](http://en.cppreference.com/w/cpp/concept/StandardLayoutType)
+Expects that the target type is [standard layout](https://en.cppreference.com/w/cpp/named_req/StandardLayoutType.html)
 and the total byte size doesn't change.
 */
 template<class U> ArrayView<U> arrayCast(ArrayView<const void> view) {
@@ -1625,7 +1625,7 @@ template<class T, class U = decltype(Implementation::ErasedStaticArrayViewConver
 @brief Reinterpret-cast a static array view
 
 Size of the new array is calculated as @cpp view.size()*sizeof(T)/sizeof(U) @ce.
-Expects that both types are [standard layout](http://en.cppreference.com/w/cpp/concept/StandardLayoutType)
+Expects that both types are [standard layout](https://en.cppreference.com/w/cpp/named_req/StandardLayoutType.html)
 and the total byte size doesn't change. Example usage:
 
 @snippet Containers.cpp arrayCast-StaticArrayView

@@ -1141,7 +1141,7 @@ template<unsigned dimensions, class T> template<class U, typename std::enable_if
        this particular case we're saving back to a signed value so no crazy
        overflow like with `data + i*stride` should happen? */
     const std::ptrdiff_t offsetInBits = (_sizeOffset._data[0] & 0x07) + std::ptrdiff_t(i)*_stride._data[0];
-    /* http://graphics.stanford.edu/~seander/bithacks.html#ConditionalSetOrClearBitsWithoutBranching */
+    /* https://graphics.stanford.edu/~seander/bithacks.html#ConditionalSetOrClearBitsWithoutBranching */
     char& byte = static_cast<T*>(_data)[offsetInBits >> 3];
     byte ^= (-char(value) ^ byte) & (1 << (offsetInBits & 0x07));
 }
@@ -1157,7 +1157,7 @@ template<unsigned dimensions, class T> template<class U, typename std::enable_if
         offsetInBits += std::ptrdiff_t(i._data[j])*_stride._data[j];
     }
 
-    /* http://graphics.stanford.edu/~seander/bithacks.html#ConditionalSetOrClearBitsWithoutBranching */
+    /* https://graphics.stanford.edu/~seander/bithacks.html#ConditionalSetOrClearBitsWithoutBranching */
     char& byte = static_cast<T*>(_data)[offsetInBits >> 3];
     byte ^= (-char(value) ^ byte) & (1 << (offsetInBits & 0x07));
 }

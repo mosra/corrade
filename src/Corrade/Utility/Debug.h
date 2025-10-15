@@ -1252,7 +1252,7 @@ class CORRADE_UTILITY_EXPORT Fatal: public Error {
          * Exits the application with exit code specified in constructor.
          */
         #ifndef CORRADE_MSVC2015_COMPATIBILITY
-        /* http://stackoverflow.com/questions/38378693/did-visual-studio-2015-update-3-break-constructor-attributes */
+        /* https://stackoverflow.com/questions/38378693/did-visual-studio-2015-update-3-break-constructor-attributes */
         [[noreturn]]
         #endif
         ~Fatal();

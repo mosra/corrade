@@ -1808,7 +1808,7 @@ template<class T, class U = decltype(stridedArrayView(Implementation::ErasedArra
 @tparam U Type to cast to
 
 Size of the new array is the same as original. Expects that both types are
-[standard layout](http://en.cppreference.com/w/cpp/concept/StandardLayoutType)
+[standard layout](https://en.cppreference.com/w/cpp/named_req/StandardLayoutType.html)
 and @cpp sizeof(U) @ce is not larger than any @ref StridedArrayView::stride() "stride()"
 of the original array. Works with negative and zero strides as well, however
 note that no type compatibility checks can be done for zero strides, so be
@@ -1836,7 +1836,7 @@ template<class U, unsigned dimensions, class T> StridedArrayView<dimensions, U> 
 @m_since{2020,06}
 
 Size of the new array is the same as original. Expects that the target type is
-[standard layout](http://en.cppreference.com/w/cpp/concept/StandardLayoutType)
+[standard layout](https://en.cppreference.com/w/cpp/named_req/StandardLayoutType.html)
 and @cpp sizeof(U) @ce is not larger than any @ref StridedArrayView::stride() "stride()"
 of the original array. Works with negative and zero strides as well, however
 note that no type compatibility checks can be done for zero strides, so be
@@ -1969,10 +1969,11 @@ being divisible by the size of @p U. The resulting last dimension has a size
 that's a ratio of @p T and @p U sizes and stride equivalent to @p U, being
 again contiguous.
 
-Expects that both types are [standard layout](http://en.cppreference.com/w/cpp/concept/StandardLayoutType) and @cpp sizeof(U) @ce is not larger than any
-@ref StridedArrayView::stride() "stride()" of the original array. Works with
-negative and zero strides as well, however note that no type compatibility
-checks can be done for zero strides, so be extra careful in that case.
+Expects that both types are [standard layout](https://en.cppreference.com/w/cpp/named_req/StandardLayoutType.html)
+and @cpp sizeof(U) @ce is not larger than any @ref StridedArrayView::stride() "stride()"
+of the original array. Works with negative and zero strides as well, however
+note that no type compatibility checks can be done for zero strides, so be
+extra careful in that case.
 @see @ref StridedArrayView::isContiguous()
 @todo deprecate the dimension changing functionality in favor of new
     arrayCastFlatten<dimensions, T>() / arrayCastInflate<dimensions, T>() APIs
@@ -2005,7 +2006,7 @@ Inflates the last dimension into the new type @p U, its element count being
 always be one more than @p dimensions. For flattening the view (inverse of this
 operation) you need to cast to a concrete type first.
 
-Expects that the target type is [standard layout](http://en.cppreference.com/w/cpp/concept/StandardLayoutType)
+Expects that the target type is [standard layout](https://en.cppreference.com/w/cpp/named_req/StandardLayoutType.html)
 and @cpp sizeof(U) @ce is not larger than any
 @ref StridedArrayView::stride() "stride()" of the original array. Works with
 negative and zero strides as well, however note that no type compatibility

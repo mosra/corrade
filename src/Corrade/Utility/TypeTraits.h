@@ -66,7 +66,7 @@ namespace Implementation {
        printing precision has one digit are more than the epsilon. Used by
        Debug, format(), TestSuite and kept in sync with Magnum's TypeTraits. */
     template<class> struct FloatPrecision;
-    /* The default. Source: http://en.cppreference.com/w/cpp/io/ios_base/precision,
+    /* The default. Source: https://en.cppreference.com/w/cpp/io/ios_base/precision,
        Wikipedia says 6-digit number can be converted back and forth without
        loss: https://en.wikipedia.org/wiki/Single-precision_floating-point_format */
     template<> struct FloatPrecision<float> {

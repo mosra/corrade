@@ -51,7 +51,7 @@ namespace Implementation {
 /**
 @brief MurmurHash 2
 
-Based on algorithm copyright Austin Appleby, http://code.google.com/p/smhasher/ .
+Based on algorithm copyright Austin Appleby, https://github.com/aappleby/smhasher .
 The digest is 32bit or 64bit, depending on @cpp sizeof(std::size_t) @ce and
 thus usable for hashing in e.g. @ref std::unordered_map.
 

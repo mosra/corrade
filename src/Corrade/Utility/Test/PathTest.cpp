@@ -2070,7 +2070,7 @@ void PathTest::listIterateRangeFor() {
     /* It should not happen that the original Optional somehow gets out of
        scope before we get to iterating the array contained in it. This is a
        yet-unsolved problem in C++ with std::optional and other STL containers:
-       http://josuttis.com/download/std/D2012R0_fix_rangebasedfor_201029.pdf
+       https://josuttis.com/download/std/D2012R0_fix_rangebasedfor_201029.pdf
 
        However, in this case, and unlike with std::make, the operator*()
        returns a T instead of T&&, and the reference lifetime extension takes

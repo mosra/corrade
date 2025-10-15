@@ -674,7 +674,7 @@ LoadState AbstractManager::loadInternal(Implementation::Plugin& plugin, Containe
     #pragma GCC diagnostic ignored "-Wcast-function-type"
     #endif
     #ifdef CORRADE_TARGET_GCC
-    __extension__ /* http://web.archive.org/web/20160826013457/http://www.mr-edd.co.uk/blog/supressing_gcc_warnings */
+    __extension__ /* https://web.archive.org/web/20160826013457/http://www.mr-edd.co.uk/blog/supressing_gcc_warnings */
     #endif
     int (*version)() = reinterpret_cast<int(*)()>(
         #ifndef CORRADE_TARGET_WINDOWS

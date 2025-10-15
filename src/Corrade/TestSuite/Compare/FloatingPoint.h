@@ -50,7 +50,7 @@ namespace Implementation {
 /**
 @brief Fuzzy-compare for float values
 
-Uses comparison algorithm from http://floating-point-gui.de/errors/comparison/
+Uses comparison algorithm from https://floating-point-gui.de/errors/comparison/
 with epsilon equal to @cpp 1.0e-5f @ce (which is one digit less than how
 @ref Utility::Debug or @ref Utility::format() prints them). Unlike the standard
 floating-point comparison, comparing two NaN values gives a @cpp true @ce
@@ -62,7 +62,7 @@ template<> class Comparator<float>: public Implementation::FloatComparator<float
 /**
 @brief Fuzzy-compare for double values
 
-Uses comparison algorithm from http://floating-point-gui.de/errors/comparison/
+Uses comparison algorithm from https://floating-point-gui.de/errors/comparison/
 with epsilon equal to @cpp 1.0e-14 @ce (which is one digit less than how
 @ref Utility::Debug or @ref Utility::format() prints them). Unlike the standard
 floating-point comparison, comparing two NaN values gives a @cpp true @ce
@@ -74,7 +74,7 @@ template<> class Comparator<double>: public Implementation::FloatComparator<doub
 /**
 @brief Fuzzy-compare for long double values
 
-Uses comparison algorithm from http://floating-point-gui.de/errors/comparison/
+Uses comparison algorithm from https://floating-point-gui.de/errors/comparison/
 with epsilon equal to @cpp 1.0e-17l @ce on platforms with 80-bit
 @cpp long double @ce and @cpp 1.0e-14 @ce on platforms
 @ref CORRADE_LONG_DOUBLE_SAME_AS_DOUBLE "where it is 64-bit". This is always

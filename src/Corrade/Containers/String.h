@@ -1469,7 +1469,7 @@ class CORRADE_UTILITY_EXPORT String {
            of the deleter pointer, but function pointers apparently can have
            odd addresses on some platforms as well:
 
-            http://lists.llvm.org/pipermail/llvm-dev/2018-March/121953.html
+            https://lists.llvm.org/pipermail/llvm-dev/2018-March/121953.html
 
            The above approach is consistent with StringView, which is the
            preferrable solution after all. */
