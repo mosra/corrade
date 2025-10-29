@@ -1045,6 +1045,10 @@ void StaticArrayTest::constructArrayMove() {
        above as well and fail even in the case where nothing needs to be
        moved. */
     CORRADE_SKIP("MSVC 2015 and 2017 isn't able to move arrays.");
+    #elif defined(CORRADE_TARGET_GCC) && __GNUC__ >= 10 && __GNUC__ < 12
+    /* https://gcc.gnu.org/bugzilla/show_bug.cgi?id=104996, unfortunately
+       there doesn't seem to be any clear workaround */
+    CORRADE_SKIP("GCC 11 and 12 isn't able to move arrays due to a regression.");
     #else
     struct MovableInt {
         Movable a;

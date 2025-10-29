@@ -110,7 +110,9 @@ template<std::size_t size_, class T> struct StaticArrayData<size_, T, false> {
     template<class ...Args> explicit StaticArrayData(Corrade::InPlaceInitT, Args&&... args): _data{Utility::forward<Args>(args)...} {}
     template<std::size_t ...sequence> explicit StaticArrayData(Corrade::InPlaceInitT, Implementation::Sequence<sequence...>, const T(&data)[sizeof...(sequence)]): _data{data[sequence]...} {}
     /* See StaticArrayTest::constructArrayMove() for details why it has to be
-       disabled */
+       disabled. Additionally, GCC 10 and 11 fail to pick the && overload due
+       to https://gcc.gnu.org/bugzilla/show_bug.cgi?id=104996, which was fixed
+       in GCC 12. GCC 9 works. The test is thus skipped on those versions. */
     #ifndef CORRADE_MSVC2017_COMPATIBILITY
     template<std::size_t ...sequence> explicit StaticArrayData(Corrade::InPlaceInitT, Implementation::Sequence<sequence...>, T(&&data)[sizeof...(sequence)]): _data{Utility::move(data[sequence])...} {}
     #endif

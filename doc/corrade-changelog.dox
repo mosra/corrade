@@ -607,7 +607,9 @@ namespace Corrade {
     bundled for cross-compiling (see [mosra/magnum#656](https://github.com/mosra/magnum/issues/656))
 -   The Linux ThreadSanitizer CI build was updated to work with ASLR again
     (see [mosra/corrade#191](https://github.com/mosra/corrade/pull/191))
--   Fixed a shadowing warning on Clang 19 ([mosra/corrade#204](https://github.com/mosra/corrade/pull/204))
+-   Fixed a shadowing warning on Clang 19 (see [mosra/corrade#204](https://github.com/mosra/corrade/pull/204))
+-   Skipping a test that fails to compile due to GCC 11 and 12 regression (see
+    [mosra/corrade#205](https://github.com/mosra/corrade/issues/205))
 
 @subsection corrade-changelog-latest-bugfixes Bug fixes
 
