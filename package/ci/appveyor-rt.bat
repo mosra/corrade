@@ -25,7 +25,6 @@ rem Crosscompile. No tests because they take ages to build, each executable is
 rem a msix file, and they can't be reasonably run either. F this platform.
 mkdir build-rt && cd build-rt || exit /b
 cmake .. ^
-    -DCMAKE_BUILD_TYPE=Release ^
     -DCMAKE_SYSTEM_NAME=WindowsStore ^
     -DCMAKE_SYSTEM_VERSION=10.0 ^
     -DCORRADE_BUILD_STATIC=ON ^
