@@ -966,6 +966,7 @@ Containers::Optional<Containers::Array<Containers::String>> list(const Container
     #else
     Error{} << "Utility::Path::list(): not implemented on this platform";
     static_cast<void>(path);
+    static_cast<void>(flags);
     return {};
     #endif
 }
@@ -1089,6 +1090,7 @@ Containers::Optional<std::int64_t> lastModification(const Containers::StringView
         ;
     #else
     Error{} << "Utility::Path::lastModification(): not implemented on this platform";
+    static_cast<void>(filename);
     return {};
     #endif
 }
