@@ -350,6 +350,8 @@ String::String(String&& other) noexcept {
 }
 
 String& String::operator=(const String& other) {
+    if(other == *this) return *this;
+
     destruct();
     copyConstruct(other);
     return *this;
