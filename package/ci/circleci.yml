@@ -20,11 +20,11 @@ executors:
   ubuntu-20_04:
     machine:
       image: ubuntu-2004:2024.11.1
-  # Images below 14.0.1 (and all x86 variants) are removed as of Nov 7, 2025
-  xcode-14_0:
+  # As of November 7, 2025, M4 is the default, and the oldest version there is
+  # 14.3.1.
+  xcode-14_3:
     macos:
-      xcode: 14.0.1
-    resource_class: macos.m1.medium.gen1
+      xcode: 14.3.1
   emscripten2:
     docker:
     # 2.0.16 is the oldest on Docker that isn't based on Debian Buster which
@@ -459,7 +459,7 @@ jobs:
         script: unix-desktop.sh
 
   macos:
-    executor: xcode-14_0
+    executor: xcode-14_3
     environment:
       CMAKE_CXX_FLAGS: --coverage
       CONFIGURATION: Debug
@@ -470,7 +470,7 @@ jobs:
     - lcov
 
   macos-static:
-    executor: xcode-14_0
+    executor: xcode-14_3
     environment:
       # STUPID yml interprets unquoted ON as a boolean
       BUILD_STATIC: "ON"
@@ -531,7 +531,7 @@ jobs:
         script: android-x86.sh
 
   ios:
-    executor: xcode-14_0
+    executor: xcode-14_3
     environment:
       # Yep, xcodebuild is beyond stupid and just DOESN'T build in parallel by
       # default. The default medium resource class has 4 CPUs and Ninja uses
