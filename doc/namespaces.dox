@@ -84,6 +84,7 @@ Corrade type            | STL equivalent
 @ref BitArray           | @ref std::vector "std::vector<bool>"
 @ref Array with custom deleters | @ref std::unique_ptr "std::unique_ptr<T[]>" (no size info)
 @ref Array with @ref Utility::allocateAligned() "overaligned memory" | @ref std::valarray
+@ref Array with custom allocators | @m_class{m-doc-external} [std::inplace_vector](https://en.cppreference.com/w/cpp/container/inplace_vector.html) @m_class{m-label m-flat m-danger} **C++26**
 @ref ArrayView          | @ref std::span @m_class{m-label m-flat m-warning} **C++20**
 @ref BasicBitArrayView "BitArrayView", \n @ref BasicBitArrayView "MutableBitArrayView" | *no equivalent*
 @ref EnumSet, \n @ref BigEnumSet | @ref std::bitset (no strong typing)
