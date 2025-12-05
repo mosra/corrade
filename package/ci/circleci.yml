@@ -467,7 +467,10 @@ jobs:
     - install-base-macos
     - build:
         script: unix-desktop.sh
-    - lcov
+    # The 14.3 image seems to have the new lcov, which is very picky and throws
+    # errors about a ton of little things, 14.0.1 and older didn't
+    - lcov:
+        extra: --ignore-errors inconsistent
 
   macos-static:
     executor: xcode-14_3
@@ -480,7 +483,10 @@ jobs:
     - install-base-macos
     - build:
         script: unix-desktop.sh
-    - lcov
+    # The 14.3 image seems to have the new lcov, which is very picky and throws
+    # errors about a ton of little things, 14.0.1 and older didn't
+    - lcov:
+        extra: --ignore-errors inconsistent
 
   emscripten1:
     executor: emscripten2
