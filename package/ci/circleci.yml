@@ -317,7 +317,6 @@ commands:
           lcov << parameters.extra >> --directory . --capture --output-file coverage.info > /dev/null
           lcov << parameters.extra >> --extract coverage.info "*/src/Corrade/*" --output-file coverage.info > /dev/null
           lcov << parameters.extra >> --remove coverage.info "*/Test/*" --output-file coverage.info > /dev/null
-          lcov << parameters.extra >> --remove coverage.info "*/build/src/Corrade/*" --output-file coverage.info > /dev/null
     - upload-codecov:
         file: coverage.info
 
