@@ -256,6 +256,11 @@ struct Copyable {
         ++constructed;
         ++copied;
     }
+    /* With the guaranteed copy/move elision in C++17 this one might be unused
+       as well */
+    #ifdef CORRADE_TARGET_CXX17
+    CORRADE_UNUSED
+    #endif
     Copyable(Copyable&& other) noexcept: a{other.a} {
         ++constructed;
         ++moved;

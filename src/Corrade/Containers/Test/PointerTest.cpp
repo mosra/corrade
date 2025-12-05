@@ -33,6 +33,11 @@ namespace {
 struct IntPtr {
     explicit IntPtr(int* a): a{a} {}
     IntPtr(const IntPtr&) = delete;
+    /* With the guaranteed copy/move elision in C++17 this one might be unused
+       as well */
+    #ifdef CORRADE_TARGET_CXX17
+    CORRADE_UNUSED
+    #endif
     IntPtr(IntPtr&& other): a{other.a} {
         other.a = nullptr;
     }
