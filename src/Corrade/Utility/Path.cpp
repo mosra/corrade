@@ -239,6 +239,8 @@ Containers::String join(Containers::StringView path, const Containers::StringVie
            should work as expected too. The Windows detection is a call to JS,
            so to minimize the overhead check for the drive letter first and for
            Windows second. */
+        /** @todo might also want to check for Unicode characters in drive name
+            https://www.ryanliptak.com/blog/windows-drive-letters-are-not-limited-to-a-z/ */
         || (filename.size() > 2 && filename[1] == ':' && filename[2] == '/'
             #ifdef CORRADE_TARGET_EMSCRIPTEN
             && corradeUtilityIsNodeOnWindows()
