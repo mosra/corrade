@@ -1134,8 +1134,9 @@ void PathTest::isDirectorySymlink() {
 
     CORRADE_VERIFY(Path::exists(Path::join(_testDirSymlink, "dir-symlink")));
     {
-        #if !defined(CORRADE_TARGET_UNIX) && !defined(CORRADE_TARGET_EMSCRIPTEN)
-        /* See PathTest::sizeSymlink() for details */
+        #ifndef CORRADE_TARGET_UNIX
+        /* See PathTest::sizeSymlink() for details. Can happen on Windows but
+           also on Emscripten when running under node.js on Windows. */
         CORRADE_EXPECT_FAIL_IF(Path::size(Path::join(_testDirSymlink, "file-symlink")) != 11,
             "Symlinks not preserved in the source tree, can't test.");
         #endif
@@ -2281,8 +2282,9 @@ void PathTest::listSkipDirectoriesSymlinks() {
         CORRADE_EXPECT_FAIL_IF(!std::getenv("SIMULATOR_UDID"),
             "CTest is not able to run XCTest executables properly in the simulator.");
         #endif
-        #if !defined(CORRADE_TARGET_UNIX) && !defined(CORRADE_TARGET_EMSCRIPTEN)
-        /* See PathTest::sizeSymlink() for details */
+        #ifndef CORRADE_TARGET_UNIX
+        /* See PathTest::sizeSymlink() for details. Can happen on Windows but
+           also on Emscripten when running under node.js on Windows. */
         CORRADE_EXPECT_FAIL_IF(Path::size(Path::join(_testDirSymlink, "file-symlink")) != 11,
             "Symlinks not preserved in the source tree, can't test.");
         #endif
@@ -2316,8 +2318,9 @@ void PathTest::listSkipFilesSymlinks() {
         CORRADE_EXPECT_FAIL_IF(!std::getenv("SIMULATOR_UDID"),
             "CTest is not able to run XCTest executables properly in the simulator.");
         #endif
-        #if !defined(CORRADE_TARGET_UNIX) && !defined(CORRADE_TARGET_EMSCRIPTEN)
-        /* See PathTest::sizeSymlink() for details */
+        #ifndef CORRADE_TARGET_UNIX
+        /* See PathTest::sizeSymlink() for details. Can happen on Windows but
+           also on Emscripten when running under node.js on Windows. */
         CORRADE_EXPECT_FAIL_IF(Path::size(Path::join(_testDirSymlink, "file-symlink")) != 11,
             "Symlinks not preserved in the source tree, can't test.");
         #endif
