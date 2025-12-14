@@ -1125,13 +1125,21 @@ void PathTest::makeExistsAsAFile() {
     CORRADE_VERIFY(!Path::make(file));
     /* It should fail also if some parent part of the path is a file */
     CORRADE_VERIFY(!Path::make(Path::join(file, "sub/dir")));
+    /* Emscripten before 3.1.53 says "Permission denied" (2) instead of "Not a
+       directory" (54), for some reason. Fixed in an absolutely unrelated PR at
+       https://github.com/emscripten-core/emscripten/pull/21136. */
     #ifdef CORRADE_TARGET_EMSCRIPTEN
-    /* Emscripten says "Permission denied" instead of "Not a directory", for
-       some reason */
+    #if __EMSCRIPTEN_major__*10000 + __EMSCRIPTEN_minor__*100 + __EMSCRIPTEN_tiny__ >= 30153
+    CORRADE_COMPARE_AS(out, format(
+        "Utility::Path::make(): {0} exists but is not a directory\n"
+        "Utility::Path::make(): can't create {0}/sub: error 54 (",
+        file), TestSuite::Compare::StringHasPrefix);
+    #else
     CORRADE_COMPARE_AS(out, format(
         "Utility::Path::make(): {0} exists but is not a directory\n"
         "Utility::Path::make(): can't create {0}/sub: error 2 (",
         file), TestSuite::Compare::StringHasPrefix);
+    #endif
     #elif defined(CORRADE_TARGET_WINDOWS)
     /* Windows APIs fill GetLastError() instead of errno, leading to a
        different code */
