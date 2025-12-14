@@ -98,6 +98,15 @@ mergeInto(LibraryManager.library, {
                 return process.stderr['isTTY'];
         }
         return false;
+    },
+
+    /* Used by Path::join() to apply Windows-specific rules for drive letters
+       and such, and by fromNativeSeparators() / toNativeSeparators() for
+       conversion between forward and backward slashes on Windows. Only returns
+       true when running through Node.js (i.e., a command-line app), not from a
+       browser. */
+    corradeUtilityIsNodeOnWindows: function() {
+        return typeof process !== 'undefined' && process.platform == 'win32';
     }
 });
 

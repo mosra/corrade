@@ -133,13 +133,29 @@
 #include <emscripten/version.h>
 #endif
 
+#ifdef CORRADE_TARGET_EMSCRIPTEN
+/* Implemented in Utility.js.in, used in fromNativeSeparators(),
+   toNativeSeparators() and join() */
+extern "C" {
+    bool corradeUtilityIsNodeOnWindows();
+}
+#endif
+
 namespace Corrade { namespace Utility { namespace Path {
 
 using namespace Containers::Literals;
 
-#ifdef CORRADE_TARGET_WINDOWS
+#if defined(CORRADE_TARGET_WINDOWS) || defined(CORRADE_TARGET_EMSCRIPTEN)
 Containers::String fromNativeSeparators(Containers::String path) {
-    return String::replaceAll(Utility::move(path), '\\', '/');
+    return
+        #ifdef CORRADE_TARGET_EMSCRIPTEN
+        corradeUtilityIsNodeOnWindows() ?
+        #endif
+        String::replaceAll(Utility::move(path), '\\', '/')
+        #ifdef CORRADE_TARGET_EMSCRIPTEN
+        : Utility::move(path)
+        #endif
+        ;
 }
 #else
 Containers::StringView fromNativeSeparators(const Containers::StringView path) {
@@ -147,9 +163,17 @@ Containers::StringView fromNativeSeparators(const Containers::StringView path) {
 }
 #endif
 
-#ifdef CORRADE_TARGET_WINDOWS
+#if defined(CORRADE_TARGET_WINDOWS) || defined(CORRADE_TARGET_EMSCRIPTEN)
 Containers::String toNativeSeparators(Containers::String path) {
-    return String::replaceAll(Utility::move(path), '/', '\\');
+    return
+        #ifdef CORRADE_TARGET_EMSCRIPTEN
+        corradeUtilityIsNodeOnWindows() ?
+        #endif
+        String::replaceAll(Utility::move(path), '/', '\\')
+        #ifdef CORRADE_TARGET_EMSCRIPTEN
+        : Utility::move(path)
+        #endif
+        ;
 }
 #else
 Containers::StringView toNativeSeparators(const Containers::StringView path) {
@@ -209,9 +233,17 @@ Containers::String join(Containers::StringView path, const Containers::StringVie
         /* Absolute filename */
         filename.hasPrefix('/')
 
-        #ifdef CORRADE_TARGET_WINDOWS
-        /* Absolute filename on Windows */
-        || (filename.size() > 2 && filename[1] == ':' && filename[2] == '/')
+        #if defined(CORRADE_TARGET_WINDOWS) || defined(CORRADE_TARGET_EMSCRIPTEN)
+        /* Absolute filename on Windows. Emscripten pretends to be Unix but we
+           can be running through node.js on Windows, and there path joining
+           should work as expected too. The Windows detection is a call to JS,
+           so to minimize the overhead check for the drive letter first and for
+           Windows second. */
+        || (filename.size() > 2 && filename[1] == ':' && filename[2] == '/'
+            #ifdef CORRADE_TARGET_EMSCRIPTEN
+            && corradeUtilityIsNodeOnWindows()
+            #endif
+        )
         #endif
     )
         return filename;

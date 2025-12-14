@@ -72,15 +72,17 @@ class MapDeleter;
 @brief Convert path from native separators
 @m_since_latest
 
-On Windows converts backward slashes to forward slashes, on all other platforms
-returns the input argument untouched.
+On Windows (and on @ref CORRADE_TARGET_EMSCRIPTEN "Emscripten" if running under
+Node.js on Windows) converts backward slashes to forward slashes, on all other
+platforms returns the input argument untouched.
 
-On Windows the argument and return type is @ref Containers::String and the
-operation is performed in-place if @p path is owned, transferring the data
-ownership to the returned instance. Makes a owned copy first if not. On other
-platforms it's a @ref Containers::StringView that simply gets passed through.
+On Windows and Emscripten the argument and return type is
+@ref Containers::String and the operation is performed in-place if @p path is
+owned, transferring the data ownership to the returned instance. Makes a owned
+copy first if not. On other platforms it's a @ref Containers::StringView that
+simply gets passed through.
 */
-#if defined(CORRADE_TARGET_WINDOWS) || defined(DOXYGEN_GENERATING_OUTPUT)
+#if defined(CORRADE_TARGET_WINDOWS) || defined(CORRADE_TARGET_EMSCRIPTEN) || defined(DOXYGEN_GENERATING_OUTPUT)
 CORRADE_UTILITY_EXPORT Containers::String fromNativeSeparators(Containers::String path);
 #else
 CORRADE_UTILITY_EXPORT Containers::StringView fromNativeSeparators(Containers::StringView path);
@@ -90,15 +92,17 @@ CORRADE_UTILITY_EXPORT Containers::StringView fromNativeSeparators(Containers::S
 @brief Convert path to native separators
 @m_since_latest
 
-On Windows converts forward slashes to backward slashes, on all other platforms
-returns the input argument untouched.
+On Windows (and on @ref CORRADE_TARGET_EMSCRIPTEN "Emscripten" if running under
+Node.js on Windows) converts forward slashes to backward slashes, on all other
+platforms returns the input argument untouched.
 
-On Windows the argument and return type is @ref Containers::String and the
-operation is performed in-place if @p path is owned, transferring the data
-ownership to the returned instance. Makes a owned copy first if not. On other
-platforms it's a @ref Containers::StringView that simply gets passed through.
+On Windows and Emscripten the argument and return type is
+@ref Containers::String and the operation is performed in-place if @p path is
+owned, transferring the data ownership to the returned instance. Makes a owned
+copy first if not. On other platforms it's a @ref Containers::StringView that
+simply gets passed through.
 */
-#if defined(CORRADE_TARGET_WINDOWS) || defined(DOXYGEN_GENERATING_OUTPUT)
+#if defined(CORRADE_TARGET_WINDOWS) || defined(CORRADE_TARGET_EMSCRIPTEN) || defined(DOXYGEN_GENERATING_OUTPUT)
 CORRADE_UTILITY_EXPORT Containers::String toNativeSeparators(Containers::String path);
 #else
 CORRADE_UTILITY_EXPORT Containers::StringView toNativeSeparators(Containers::StringView path);
@@ -177,10 +181,11 @@ CORRADE_UTILITY_EXPORT Containers::Pair<Containers::StringView, Containers::Stri
 @brief Join path and filename
 @m_since_latest
 
-If the @p path is empty or the @p filename is absolute (with a leading slash or
-a drive letter on Windows), returns @p filename. Otherwise joins them together
-with a forward slash, unless present in @p path already. Behavior is equivalent
-to @m_class{m-doc-external} [os.path.split()](https://docs.python.org/3/library/os.path.html#os.path.split).
+If the @p path is empty or the @p filename is absolute (with a leading slash, or
+a drive letter on Windows or on @ref CORRADE_TARGET_EMSCRIPTEN "Emscripten" if
+running under Node.js on Windows), returns @p filename. Otherwise joins them
+together with a forward slash, unless present in @p path already. Behavior is
+equivalent to @m_class{m-doc-external} [os.path.split()](https://docs.python.org/3/library/os.path.html#os.path.split).
 For example:
 
 -   @cpp {"path/to", "file"} @ce results in @cpp "path/to/file" @ce

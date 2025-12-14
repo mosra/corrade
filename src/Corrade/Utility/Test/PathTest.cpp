@@ -83,14 +83,13 @@ struct PathTest: TestSuite::Tester {
     void splitExtensionFlags();
 
     void join();
-    #ifdef CORRADE_TARGET_WINDOWS
     void joinWindows();
-    #endif
     void joinMultiple();
     void joinMultipleAbsolute();
     void joinMultipleOneEmpty();
     void joinMultipleJustOne();
     void joinMultipleNone();
+    void joinBenchmark();
 
     void exists();
     void existsNoPermission();
@@ -334,6 +333,16 @@ const struct {
         Containers::StringViewFlag::Global},
 };
 
+const struct {
+    const char* name;
+    const char* filename;
+} JoinBenchmarkData[]{
+    {"regular filename",
+        "path/to/thing"},
+    {"Windows drive letter",
+        "C:/some/paths"},
+};
+
 #if defined(CORRADE_TARGET_UNIX) || (defined(CORRADE_TARGET_WINDOWS) && !defined(CORRADE_TARGET_WINDOWS_RT))
 Containers::Optional<Containers::Array<const char, Path::MapDeleter>> writeWhileMappedMap(Containers::StringView filename, std::size_t) {
     Containers::Optional<Containers::Array<char, Path::MapDeleter>> mapped = Path::map(filename);
@@ -480,16 +489,17 @@ PathTest::PathTest() {
               &PathTest::splitExtensionFlags,
 
               &PathTest::join,
-              #ifdef CORRADE_TARGET_WINDOWS
               &PathTest::joinWindows,
-              #endif
               &PathTest::joinMultiple,
               &PathTest::joinMultipleAbsolute,
               &PathTest::joinMultipleOneEmpty,
               &PathTest::joinMultipleJustOne,
-              &PathTest::joinMultipleNone,
+              &PathTest::joinMultipleNone});
 
-              &PathTest::exists,
+    addInstancedBenchmarks({&PathTest::joinBenchmark},
+        1000, Containers::arraySize(JoinBenchmarkData));
+
+    addTests({&PathTest::exists,
               &PathTest::existsNoPermission,
               &PathTest::existsNonNullTerminated,
               &PathTest::existsUtf8,
@@ -700,13 +710,56 @@ PathTest::PathTest() {
         Path::remove(Path::join(_writeTestDir, "copyBenchmarkSource.dat"));
 }
 
-void PathTest::fromNativeSeparators() {
-    Containers::String nativeSeparators = Path::fromNativeSeparators("put\\ that/somewhere\\ else");
-    #ifdef CORRADE_TARGET_WINDOWS
-    CORRADE_COMPARE(nativeSeparators, "put/ that/somewhere/ else");
-    #else
-    CORRADE_COMPARE(nativeSeparators, "put\\ that/somewhere\\ else");
+namespace {
+
+#ifdef CORRADE_TARGET_EMSCRIPTEN
+/* Like corradeUtilityIsNodeOnWindows() in Utility.js.in but implemented inline
+   to hopefully prevent a case where the check would be broken and either
+   reporting false on Windows or true elsewhere */
+bool isNodeOnWindows() {
+    #pragma GCC diagnostic push
+    /* The damn thing moved the warning to another group in some version. Not
+       sure if it happened in Clang 10 already, but -Wc++20-extensions is new
+       in Clang 10, so just ignore both. HOWEVER, Emscripten often uses a
+       prerelease Clang, so if it reports version 10, it's likely version 9. So
+       check for versions _above_ 10 instead. */
+    #pragma GCC diagnostic ignored "-Wgnu-zero-variadic-macro-arguments"
+    #if __clang_major__ > 10
+    #pragma GCC diagnostic ignored "-Wc++20-extensions"
     #endif
+    return EM_ASM_INT({
+        return typeof process !== 'undefined' && process.platform == 'win32';
+    });
+    #pragma GCC diagnostic pop
+}
+#endif
+
+}
+
+void PathTest::fromNativeSeparators() {
+    #ifdef CORRADE_TARGET_EMSCRIPTEN
+    bool isWindows = isNodeOnWindows();
+    if(isWindows)
+        CORRADE_INFO("Running through node.js on Windows");
+    #endif
+
+    Containers::String nativeSeparators = Path::fromNativeSeparators("put\\ that/somewhere\\ else");
+
+    const char* expected =
+        #ifdef CORRADE_TARGET_EMSCRIPTEN
+        isWindows ?
+        #endif
+            #if defined(CORRADE_TARGET_WINDOWS) || defined(CORRADE_TARGET_EMSCRIPTEN)
+            "put/ that/somewhere/ else"
+            #endif
+            #ifdef CORRADE_TARGET_EMSCRIPTEN
+            :
+            #endif
+            #if !defined(CORRADE_TARGET_WINDOWS) || defined(CORRADE_TARGET_EMSCRIPTEN)
+            "put\\ that/somewhere\\ else"
+            #endif
+        ;
+    CORRADE_COMPARE(nativeSeparators, expected);
 }
 
 void PathTest::fromNativeSeparatorsRvalue() {
@@ -716,27 +769,58 @@ void PathTest::fromNativeSeparatorsRvalue() {
     const void* inputData = input.data();
     CORRADE_VERIFY(!input.isSmall());
 
-    /* On Windows it's passing through a String instance, elsewhere it's a
-       StringView (and by using String we'd get a copy) */
-    #ifdef CORRADE_TARGET_WINDOWS
+    /* On Windows and Emscripten it's passing through a String instance,
+       elsewhere it's a StringView (and by using String we'd get a copy) */
+    #if defined(CORRADE_TARGET_WINDOWS) || defined(CORRADE_TARGET_EMSCRIPTEN)
     Containers::String nativeSeparators = Path::fromNativeSeparators(Utility::move(input));
-    CORRADE_COMPARE(nativeSeparators, "foo/bar/");
     #else
     Containers::StringView nativeSeparators = Path::fromNativeSeparators(input);
-    CORRADE_COMPARE(nativeSeparators, "foo\\bar/");
     #endif
+
+    const char* expected =
+        #ifdef CORRADE_TARGET_EMSCRIPTEN
+        isNodeOnWindows() ?
+        #endif
+            #if defined(CORRADE_TARGET_WINDOWS) || defined(CORRADE_TARGET_EMSCRIPTEN)
+            "foo/bar/"
+            #endif
+            #ifdef CORRADE_TARGET_EMSCRIPTEN
+            :
+            #endif
+            #if !defined(CORRADE_TARGET_WINDOWS) || defined(CORRADE_TARGET_EMSCRIPTEN)
+            "foo\\bar/"
+            #endif
+        ;
+    CORRADE_COMPARE(nativeSeparators, expected);
 
     /* It should pass the data through if possible */
     CORRADE_COMPARE(nativeSeparators.data(), inputData);
 }
 
 void PathTest::toNativeSeparators() {
-    Containers::String nativeSeparators = Path::toNativeSeparators("this\\is a weird/system\\right");
-    #ifdef CORRADE_TARGET_WINDOWS
-    CORRADE_COMPARE(nativeSeparators, "this\\is a weird\\system\\right");
-    #else
-    CORRADE_COMPARE(nativeSeparators, "this\\is a weird/system\\right");
+    #ifdef CORRADE_TARGET_EMSCRIPTEN
+    bool isWindows = isNodeOnWindows();
+    if(isWindows)
+        CORRADE_INFO("Running through node.js on Windows");
     #endif
+
+    Containers::String nativeSeparators = Path::toNativeSeparators("this\\is a weird/system\\right");
+
+    const char* expected =
+        #ifdef CORRADE_TARGET_EMSCRIPTEN
+        isWindows ?
+        #endif
+            #if defined(CORRADE_TARGET_WINDOWS) || defined(CORRADE_TARGET_EMSCRIPTEN)
+            "this\\is a weird\\system\\right"
+            #endif
+            #ifdef CORRADE_TARGET_EMSCRIPTEN
+            :
+            #endif
+            #if !defined(CORRADE_TARGET_WINDOWS) || defined(CORRADE_TARGET_EMSCRIPTEN)
+            "this\\is a weird/system\\right"
+            #endif
+        ;
+    CORRADE_COMPARE(nativeSeparators, expected);
 }
 
 void PathTest::toNativeSeparatorsRvalue() {
@@ -748,13 +832,28 @@ void PathTest::toNativeSeparatorsRvalue() {
 
     /* On Windows it's passing through a String instance, elsewhere it's a
        StringView (and by using String we'd get a copy) */
-    #ifdef CORRADE_TARGET_WINDOWS
+    #if defined(CORRADE_TARGET_WINDOWS) || defined(CORRADE_TARGET_EMSCRIPTEN)
     Containers::String nativeSeparators = Path::toNativeSeparators(Utility::move(input));
-    CORRADE_COMPARE(nativeSeparators, "foo\\bar\\");
     #else
     Containers::StringView nativeSeparators = Path::toNativeSeparators(input);
-    CORRADE_COMPARE(nativeSeparators, "foo\\bar/");
     #endif
+
+    const char* expected =
+        #ifdef CORRADE_TARGET_EMSCRIPTEN
+        isNodeOnWindows() ?
+        #endif
+            #if defined(CORRADE_TARGET_WINDOWS) || defined(CORRADE_TARGET_EMSCRIPTEN)
+            "foo\\bar\\"
+            #endif
+            #ifdef CORRADE_TARGET_EMSCRIPTEN
+            :
+            #endif
+            #if !defined(CORRADE_TARGET_WINDOWS) || defined(CORRADE_TARGET_EMSCRIPTEN)
+            "foo\\bar/"
+            #endif
+        ;
+    CORRADE_COMPARE(nativeSeparators, expected);
+
     /* It should pass the data through if possible */
     CORRADE_COMPARE(nativeSeparators.data(), inputData);
 }
@@ -883,12 +982,34 @@ void PathTest::join() {
     CORRADE_COMPARE(Path::join("/foo/bar", "file.txt"), "/foo/bar/file.txt");
 }
 
-#ifdef CORRADE_TARGET_WINDOWS
 void PathTest::joinWindows() {
-    /* Drive letter */
-    CORRADE_COMPARE(Path::join("/foo/bar", "X:/path/file.txt"), "X:/path/file.txt");
+    /* Enabled also on non-Windows platforms to make sure the drive letter
+       detection isn't done by accident elsewhere */
+
+    #ifdef CORRADE_TARGET_EMSCRIPTEN
+    bool isWindows = isNodeOnWindows();
+    if(isWindows)
+        CORRADE_INFO("Running through node.js on Windows");
+    #endif
+
+    /* Drive letter. Verify also that the Windows-specific rules are *not*
+       applied if not running on Windows. */
+    const char* expected =
+        #ifdef CORRADE_TARGET_EMSCRIPTEN
+        isWindows ?
+        #endif
+            #if defined(CORRADE_TARGET_WINDOWS) || defined(CORRADE_TARGET_EMSCRIPTEN)
+            "X:/path/file.txt"
+            #endif
+            #ifdef CORRADE_TARGET_EMSCRIPTEN
+            :
+            #endif
+            #if !defined(CORRADE_TARGET_WINDOWS) || defined(CORRADE_TARGET_EMSCRIPTEN)
+            "/foo/bar/X:/path/file.txt"
+            #endif
+        ;
+    CORRADE_COMPARE(Path::join("/foo/bar", "X:/path/file.txt"), expected);
 }
-#endif
 
 void PathTest::joinMultiple() {
     CORRADE_COMPARE(Path::join({"foo", "bar", "file.txt"}), "foo/bar/file.txt");
@@ -908,6 +1029,22 @@ void PathTest::joinMultipleJustOne() {
 
 void PathTest::joinMultipleNone() {
     CORRADE_COMPARE(Path::join({}), "");
+}
+
+void PathTest::joinBenchmark() {
+    auto&& data = JoinBenchmarkData[testCaseInstanceId()];
+    setTestCaseDescription(data.name);
+
+    /* On Emscripten there's a runtime call into JS to check for the platform
+       being Windows, but to avoid overhead in all calls to join() it's done
+       only if the filename starts with a drive letter. The benchmark compares
+       a regular filename and the overhead of a path starting with a drive
+       letter. On all other platforms there should be no difference. */
+
+    Containers::String path = "/some/directory";
+
+    CORRADE_BENCHMARK(1000)
+        path = Path::join(path, data.filename);
 }
 
 void PathTest::exists() {
