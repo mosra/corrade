@@ -52,6 +52,7 @@ DeprecationMacrosTest::DeprecationMacrosTest() {
 /* Declarations on their own shouldn't produce any compiler diagnostics */
 CORRADE_DEPRECATED("use Variable instead") constexpr int DeprecatedVariable = 3;
 CORRADE_DEPRECATED("use function() instead") int deprecatedFunction() { return 1; }
+typedef CORRADE_DEPRECATED("use int instead") int DeprecatedTypedef;
 struct CORRADE_DEPRECATED("use Struct instead") DeprecatedStruct { enum: int { Value = 1 }; int value = 1; };
 struct Struct { enum: int { Value = 1 }; int value = 1; };
 using DeprecatedAlias CORRADE_DEPRECATED_ALIAS("use Struct instead") = Struct;
@@ -79,6 +80,9 @@ void DeprecationMacrosTest::deprecated() {
     CORRADE_COMPARE(DeprecatedVariable, 3);
 
     CORRADE_VERIFY(deprecatedFunction()); /* Warning on MSVC, GCC, Clang */
+
+    DeprecatedTypedef a = 5; /* Warning on MSVC, GCC, Clang */
+    CORRADE_COMPARE(a, 5);
 
     DeprecatedStruct s; /* Warning on MSVC, GCC, Clang */
     CORRADE_VERIFY(s.value); /* This too warns on MSVC */
