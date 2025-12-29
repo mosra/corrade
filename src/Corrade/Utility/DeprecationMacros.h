@@ -53,8 +53,8 @@ and @ref CORRADE_DEPRECATED_ENUM() instead. See @ref CORRADE_DEPRECATED_FILE()
 for file-level deprecation and @ref CORRADE_DEPRECATED_MACRO() for deprecating
 macros.
 
-Note that on MSVC and GCC this doesn't warn when using nested names of
-deprecated classes or typedefs, only when the type is instantiated --- i.e.,
+Note that on MSVC and GCC 9 and older this doesn't warn when using nested names
+of deprecated classes or typedefs, only when the type is instantiated --- i.e.,
 @cpp DeprecatedStruct a; @ce will warn, but @cpp DeprecatedStruct::Value @ce
 will not.
 */
@@ -76,11 +76,10 @@ MSVC 2017+):
 
 @snippet Utility.cpp CORRADE_DEPRECATED_ALIAS
 
-Note that on MSVC and GCC this doesn't warn when using nested names of
-deprecated aliases, only when the type is instantiated --- i.e.,
+Note that on MSVC and GCC 9 and older this doesn't warn when using nested names
+of deprecated aliases, only when the type is instantiated --- i.e.,
 @cpp DeprecatedAlias a; @ce will warn, but @cpp DeprecatedAlias::Value @ce
 will not.
-
 @see @ref CORRADE_DEPRECATED(), @ref CORRADE_DEPRECATED_NAMESPACE(),
     @ref CORRADE_DEPRECATED_ENUM(), @ref CORRADE_DEPRECATED_FILE(),
     @ref CORRADE_DEPRECATED_MACRO()
@@ -136,12 +135,12 @@ Marked enum or enum value will emit deprecation warning on supported compilers
 
 @snippet Utility.cpp CORRADE_DEPRECATED_ENUM
 
-Note that on MSVC and GCC this doesn't warn when using values of deprecated
-enums, only when the enum is instantiated --- i.e., @cpp DeprecatedEnum e; @ce
-will warn, but @cpp DeprecatedEnum::Value @ce will not. Moreover, on MSVC this
-doesn't warn when a enum value marked as deprecated is used. MSVC 2015 supports
-the annotation, but ignores it for both enums and enum values.
-
+Note that on MSVC and GCC 9 and older this doesn't warn when using values of
+deprecated enums, only when the enum is instantiated --- i.e.,
+@cpp DeprecatedEnum e; @ce will warn, but @cpp DeprecatedEnum::Value @ce will
+not. Moreover, on MSVC this doesn't warn when an enum value marked as
+deprecated is used. MSVC 2015 supports the annotation, but ignores it for both
+enums and enum values.
 @see @ref CORRADE_DEPRECATED(), @ref CORRADE_DEPRECATED_ALIAS(),
     @ref CORRADE_DEPRECATED_NAMESPACE(), @ref CORRADE_DEPRECATED_FILE(),
     @ref CORRADE_DEPRECATED_MACRO()

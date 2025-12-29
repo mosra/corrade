@@ -82,8 +82,8 @@ void DeprecationMacrosTest::deprecated() {
 
     DeprecatedStruct s; /* Warning on MSVC, GCC, Clang */
     CORRADE_VERIFY(s.value); /* This too warns on MSVC */
-    /* Doesn't fire a warning on MSVC or GCC, only instantiating the struct
-       above does. Works on Clang. */
+    /* Doesn't fire a warning on MSVC or GCC 9 and older, only instantiating
+       the struct above does. Works on Clang. */
     CORRADE_VERIFY(DeprecatedStruct::Value);
 }
 #ifndef ENABLE_DEPRECATION_WARNINGS
@@ -96,8 +96,8 @@ CORRADE_IGNORE_DEPRECATED_PUSH
 void DeprecationMacrosTest::deprecatedAlias() {
     DeprecatedAlias a; /* Warning on MSVC 2017 (2015 unsupported), GCC, Clang */
     CORRADE_VERIFY(a.value);
-    /* Doesn't fire a warning on MSVC or GCC, only instantiating the struct
-       above does. Works on Clang. */
+    /* Doesn't fire a warning on MSVC or GCC 9 and older, only instantiating
+       the struct above does. Works on Clang. */
     CORRADE_VERIFY(DeprecatedAlias::Value);
 }
 #ifndef ENABLE_ALIAS_DEPRECATION_WARNINGS
@@ -110,8 +110,8 @@ CORRADE_IGNORE_DEPRECATED_PUSH
 void DeprecationMacrosTest::deprecatedEnum() {
     DeprecatedEnum e{}; /* Warning on MSVC 2017 (2015 ignores it), GCC, Clang */
     CORRADE_VERIFY(!int(e));
-    /* Doesn't fire a warning on MSVC or GCC, only instantiating the enum above
-       does. Works on Clang. */
+    /* Doesn't fire a warning on MSVC or GCC 9 and older, only instantiating
+       the enum above does. Works on Clang and GCC 10+. */
     CORRADE_VERIFY(int(DeprecatedEnum::Value));
 
     /* Doesn't fire a warning on MSVC. Works on GCC and Clang. */
