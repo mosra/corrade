@@ -1029,6 +1029,12 @@ namespace Corrade {
     @ref Corrade/Containers/StringStl.h is included for implicit conversions
     from/to a @ref std::string, but there's no implicit conversion for
     @ref std::wstring or @ref std::u32string.
+-   On MinGW the @ref main "Corrade::Main" library is now split into two
+    different static libraries, one for console apps and one for windows apps,
+    in order to use the corrrect entrypoint in both cases. This change should
+    be transparent when using CMake, although you likely need to update your
+    copy of `FindCorrade.cmake`. For changes required with custom buildsystems
+    see the @ref main-non-cmake "corresponding documentation section".
 
 @subsection corrade-changelog-latest-documentation Documentation
 

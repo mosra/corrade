@@ -118,30 +118,121 @@ endif()
 
 if(CORRADE_WITH_MAIN)
     if(CORRADE_TARGET_WINDOWS)
-        add_library(CorradeMain STATIC CorradeMain.cpp)
-        target_include_directories(CorradeMain PUBLIC
-            ${PROJECT_SOURCE_DIR}/src
-            ${PROJECT_BINARY_DIR}/src)
-        set_property(TARGET CorradeMain PROPERTY
-            INTERFACE_CORRADE_CXX_STANDARD 11) # TODO: interface, really?
-        set_property(TARGET CorradeMain APPEND PROPERTY
-            COMPATIBLE_INTERFACE_NUMBER_MAX CORRADE_CXX_STANDARD)
-        set_target_properties(CorradeMain PROPERTIES DEBUG_POSTFIX "-d")
+        # On MSVC and clang-cl it's simple. We have a single CorradeMain
+        # library that defines both wmain() and wWinMain(), and the linker
+        # picks up one of the two based on whether the WIN32_EXECUTABLE
+        # property is set.
         if(NOT MINGW)
+            add_library(CorradeMain STATIC CorradeMain.cpp)
+            target_include_directories(CorradeMain PUBLIC
+                ${PROJECT_SOURCE_DIR}/src
+                ${PROJECT_BINARY_DIR}/src)
+            set_property(TARGET CorradeMain PROPERTY
+                INTERFACE_CORRADE_CXX_STANDARD 11) # TODO: interface, really?
+            set_property(TARGET CorradeMain APPEND PROPERTY
+                COMPATIBLE_INTERFACE_NUMBER_MAX CORRADE_CXX_STANDARD)
+            set_target_properties(CorradeMain PROPERTIES DEBUG_POSTFIX "-d")
             # Abusing INTERFACE_LINK_LIBRARIES because INTERFACE_LINK_OPTIONS
             # is only since 3.13. They treat things with `-` in front as linker
             # flags and fortunately I can use `-ENTRY` instead of `/ENTRY`.
             # https://gitlab.kitware.com/cmake/cmake/issues/16543
             set_property(TARGET CorradeMain APPEND PROPERTY
                 INTERFACE_LINK_LIBRARIES "-ENTRY:$<$<NOT:$<BOOL:$<TARGET_PROPERTY:WIN32_EXECUTABLE>>>:wmainCRTStartup>$<$<BOOL:$<TARGET_PROPERTY:WIN32_EXECUTABLE>>:wWinMainCRTStartup>")
+            install(TARGETS CorradeMain
+                RUNTIME DESTINATION ${CORRADE_BINARY_INSTALL_DIR}
+                LIBRARY DESTINATION ${CORRADE_LIBRARY_INSTALL_DIR}
+                ARCHIVE DESTINATION ${CORRADE_LIBRARY_INSTALL_DIR})
+
+        # On MinGW it's horrible trash, actually. The MinGW runtime implements
+        # support for the wWinMain() entrypoint by calling it from their own
+        # wmain() stub. Which means, if I pass it a library that defines both
+        # wmain() and wWinMain(), my wmain() entrypoint replaces theirs, which
+        # means there's nothing left to call wWinMain() anymore.
+        #
+        # That all would be fine if wmain() and wWinMain() did the same thing
+        # inside CorradeMain, but they don't --  in particular wmain() disables
+        # GUI assertion dialogs, sets up console encoding to UTF-8 and enables
+        # ANSI colors, which is *only* desirable for command-line tools, not
+        # GUI apps.
+        #
+        # The only way to not have the wmain() from CorradeMain override the
+        # wWinMain() from MinGW CRT is to not define it at all. Which means
+        # we can't have just one CorradeMain library, we need two, one with
+        # only wmain() defined, for console apps, and one with only wWinMain()
+        # defined, for GUI apps, and select one or the other based on the
+        # WIN32_EXECUTABLE property. But it doesn't end there, there's still an
+        # issue with link order ...
         else()
+            add_library(CorradeMainConsole STATIC CorradeMain.cpp)
+            add_library(CorradeMainWindows STATIC CorradeMain.cpp)
+            # These defines remove either wWinMain() or wmain(), respectively.
+            # Defined as an inverse condition so the sane variant for MSVC and
+            # clang-cl above doesn't need to pass any define at all.
+            target_compile_definitions(CorradeMainConsole PRIVATE
+                CORRADE_MINGW_BUILD_MAIN_CONSOLE_ONLY)
+            target_compile_definitions(CorradeMainWindows PRIVATE
+                CORRADE_MINGW_BUILD_MAIN_WINDOWS_ONLY)
+            target_include_directories(CorradeMainConsole PUBLIC
+                ${PROJECT_SOURCE_DIR}/src
+                ${PROJECT_BINARY_DIR}/src)
+            target_include_directories(CorradeMainWindows PUBLIC
+                ${PROJECT_SOURCE_DIR}/src
+                ${PROJECT_BINARY_DIR}/src)
+            set_property(TARGET CorradeMainConsole CorradeMainWindows PROPERTY
+                INTERFACE_CORRADE_CXX_STANDARD 11) # TODO: interface, really?
+            set_property(TARGET CorradeMainConsole CorradeMainWindows APPEND PROPERTY
+                COMPATIBLE_INTERFACE_NUMBER_MAX CORRADE_CXX_STANDARD)
+            set_property(TARGET CorradeMainConsole CorradeMainWindows PROPERTY
+                DEBUG_POSTFIX "-d")
+
+            install(TARGETS CorradeMainConsole CorradeMainWindows
+                RUNTIME DESTINATION ${CORRADE_BINARY_INSTALL_DIR}
+                LIBRARY DESTINATION ${CORRADE_LIBRARY_INSTALL_DIR}
+                ARCHIVE DESTINATION ${CORRADE_LIBRARY_INSTALL_DIR})
+
+            # ... here we make CorradeMain an interface library that links to
+            # either CorradeMainConsole or CorradeMainWindows, and additionally
+            # passes -municode so wmain() / wWinMain() is used instead of main()
+            # / WinMain(). It's again abusing INTERFACE_LINK_LIBRARIES to pass
+            # -municode because INTERFACE_LINK_OPTIONS is only since 3.13 and
+            # CMake treats libraries with `-` in front as linker flags.
+            #  https://gitlab.kitware.com/cmake/cmake/issues/16543
+            #
+            # HOWEVER, the problem is that the MinGW CRT, libmingw32.a, which
+            # defines the wmain() function that calls into wWinMain(), is
+            # linked *implicitly* and *last*, i.e. after CorradeMainWindows.a.
+            # Which means the wWinMain() from CorradeMainWindows.a is thrown
+            # away as unused, only to have the linker subsequently fail because
+            # libmingw32.a doesn't have any wWinMain() to link to anymore. Thus
+            # the order has to be reversed.
+            #
+            # Having gone to such great lengths I could possibly also rename
+            # wWinMain() to wmain() inside CorradeMainWindows and have it used
+            # instead of the variant from the runtime, but -- apart from
+            # command line parsing -- it seems to also toggle the console so
+            # including it is probably a good idea:
+            #  https://github.com/mingw-w64/mingw-w64/blob/8d02d610f707b5f6af74653c6ebb0cdfa4df9212/mingw-w64-crt/crt/crtexewin.c#L53-L60
+            #
+            # The only properly reliable way to define library link order would
+            # be to have libmingw32.a as a CMake target, and make libmingw32.a
+            # *depend on* CorradeMainWindows.a. Which, even if it worked, is
+            # clearly stupid. The second best way would be to pass -lmingw32
+            # via INTERFACE_LINK_OPTIONS, but that's a CMake 3.13+ feature, and
+            # is still only a "hopeful" way because nothing guarantews that the
+            # link options are passed first -- it only currently happens that
+            # they are.
+            #
+            # What's done here is that instead of making CorradeMainWindows
+            # depend on -lmingw32 or vice versa, CorradeMain is an INTERFACE
+            # library that links to both -lmingw32 and CorradeMainWindows, in
+            # this order. That should work for as long as nothing else
+            # explicitly links to either -lmingw32 or CorradeMainWindows. (In
+            # case that assumption ever breaks, this has to be switched to use
+            # INTERFACE_LINK_OPTIONS instead.)
+            add_library(CorradeMain INTERFACE)
             set_property(TARGET CorradeMain APPEND PROPERTY
-                INTERFACE_LINK_LIBRARIES "-municode")
+                INTERFACE_LINK_LIBRARIES "-municode;$<$<NOT:$<BOOL:$<TARGET_PROPERTY:WIN32_EXECUTABLE>>>:CorradeMainConsole>$<$<BOOL:$<TARGET_PROPERTY:WIN32_EXECUTABLE>>:-lmingw32;CorradeMainWindows>")
         endif()
-        install(TARGETS CorradeMain
-            RUNTIME DESTINATION ${CORRADE_BINARY_INSTALL_DIR}
-            LIBRARY DESTINATION ${CORRADE_LIBRARY_INSTALL_DIR}
-            ARCHIVE DESTINATION ${CORRADE_LIBRARY_INSTALL_DIR})
 
     # On sane system it's just a dummy interface target
     else()

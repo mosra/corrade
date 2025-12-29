@@ -147,10 +147,21 @@ to it for console apps and `/ENTRY:wWinMainCRTStartup` for GUI apps.
 
 @m_class{m-block m-warning}
 
-@par Entry point specification with MinGW
-    Unfortunately, the `/ENTRY` option is not recognized by MinGW and there you
-    need to pass `-municode` instead, regardless of whether the app is console
-    or GUI.
+@par Usage with MinGW and without CMake
+    Due to how MinGW runtime internals work, the Corrade Main library has to be
+    split into `CorradeMainConsole` for console apps and `CorradeMainWindows`
+    for GUI apps. Then, instead of the `/ENTRY` option you need to pass
+    `-municode` along with either `-mconsole` for console apps or `-mwindows`
+    for GUI apps. If neither `-mconsole` nor `-mwindows` is specified, the
+    default is console apps.
+@par
+    Additionally, when linking to `CorradeMainWindows` along with
+    `-municode -mwindows` specified, you may run into linker erros about
+    @cpp wWinMain() @ce, which is because the MinGW runtime is linked
+    implicitly after all other libraries, at which point the @cpp wWinMain() @ce
+    symbol from the Main library is already thrown away as unused. To fix this,
+    explicitly pass `-lmingw32` *before* linking to `CorradeMainWindows` in
+    order to satisfy the linker dependency order.
 
 */
 

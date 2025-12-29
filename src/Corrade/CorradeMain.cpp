@@ -90,6 +90,9 @@ Containers::Array<char*> convertWideArgv(std::size_t argc, wchar_t** wargv, Cont
    entrypoint. */
 int main(int, char**);
 
+/* This symbol isn't compiled when building CorradeMainConsole under MinGW. See
+   src/Corrade/CMakeLists.txt for a lengthy explanation. */
+#ifndef CORRADE_MINGW_BUILD_MAIN_CONSOLE_ONLY
 /* extern "C" needed for MinGW -- https://sourceforge.net/p/mingw-w64/wiki2/Unicode%20apps/ */
 extern "C" int WINAPI wWinMain(HINSTANCE, HINSTANCE, PWSTR, int);
 extern "C" int WINAPI wWinMain(HINSTANCE, HINSTANCE, PWSTR, int) {
@@ -108,7 +111,11 @@ extern "C" int WINAPI wWinMain(HINSTANCE, HINSTANCE, PWSTR, int) {
     #pragma GCC diagnostic pop
     #endif
 }
+#endif
 
+/* This symbol isn't compiled when building CorradeMainWindows under MinGW. See
+   src/Corrade/CMakeLists.txt for a lengthy explanation. */
+#ifndef CORRADE_MINGW_BUILD_MAIN_WINDOWS_ONLY
 extern "C" int wmain(int, wchar_t**);
 extern "C" int wmain(int argc, wchar_t** wargv) {
     /* Set output to UTF-8 */
@@ -152,6 +159,7 @@ extern "C" int wmain(int argc, wchar_t** wargv) {
     #pragma GCC diagnostic pop
     #endif
 }
+#endif
 #else
 #error this file is needed only on Windows
 #endif
