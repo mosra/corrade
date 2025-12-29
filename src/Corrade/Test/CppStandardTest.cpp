@@ -38,13 +38,13 @@ struct CppStandardTest: TestSuite::Tester {
 
 CppStandardTest::CppStandardTest() {
     #ifdef COMPILING_AS_CPP11
-    setTestName("Cpp11StandardTest");
+    setTestName("Corrade::Test::Cpp11StandardTest");
     #elif defined(COMPILING_AS_CPP14)
-    setTestName(TEST_NAME);
+    setTestName("Corrade::Test::" TEST_NAME);
     #elif defined(COMPILING_AS_CPP17)
-    setTestName("Cpp17StandardTest");
+    setTestName("Corrade::Test::Cpp17StandardTest");
     #elif defined(COMPILING_AS_CPP2A)
-    setTestName("Cpp2aStandardTest");
+    setTestName("Corrade::Test::Cpp2aStandardTest");
     #else
     #error no standard version macro passed from buildsystem
     #endif
