@@ -46,6 +46,10 @@ MainTest::MainTest(): TestSuite::Tester{TesterConfiguration{}.setSkippedArgument
     addTests({&MainTest::utf8output,
               &MainTest::colors,
               &MainTest::arguments});
+
+    #ifdef TEST_WIN32_EXECUTABLE
+    setTestName("Corrade::Test::WindowsMainTest");
+    #endif
 }
 
 void MainTest::utf8output() {

@@ -28,8 +28,21 @@
 # property that would have to be set on each target separately.
 set(CMAKE_FOLDER "Corrade/Test")
 
+# This verifies that the main() / wmain() entrypoint works as intended
 corrade_add_test(MainTest MainTest.cpp
     ARGUMENTS --arg-utf hýždě --arg-another šňůra)
+# This verifies that the wWinMain() entrypoint works as intended. It likely
+# won't produce any console output but should at least exit with a zero return
+# code.
+if(CORRADE_TARGET_WINDOWS)
+    corrade_add_test(WindowsMainTest MainTest.cpp
+        ARGUMENTS --arg-utf hýždě --arg-another šňůra)
+    # This is currently just to display a different test class name when
+    # executed, to differentiate the two in the output
+    target_compile_definitions(WindowsMainTest PRIVATE TEST_WIN32_EXECUTABLE)
+    set_target_properties(WindowsMainTest PROPERTIES WIN32_EXECUTABLE ON)
+endif()
+
 # Prefixed with project name to avoid conflicts with TagsTest in Magnum
 corrade_add_test(CorradeTagsTest TagsTest.cpp)
 
