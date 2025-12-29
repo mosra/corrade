@@ -94,6 +94,7 @@ if(CORRADE_WITH_UTILITY)
         DebugAssert.h
         DebugStl.h
         DebugStlStringView.h
+        DeprecationMacros.h
         Endianness.h
         EndiannessBatch.h
         Format.h

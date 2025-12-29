@@ -42,7 +42,7 @@
 #include "Corrade/Utility/visibility.h"
 
 #ifdef CORRADE_BUILD_DEPRECATED
-#include "Corrade/Utility/Macros.h"
+#include "Corrade/Utility/DeprecationMacros.h"
 #endif
 
 namespace Corrade { namespace Utility {

@@ -39,7 +39,7 @@
 #ifdef CORRADE_BUILD_DEPRECATED
 #include <utility> /* std::pair */
 
-#include "Corrade/Utility/Macros.h"
+#include "Corrade/Utility/DeprecationMacros.h"
 #include "Corrade/Utility/Path.h"
 #include "Corrade/Utility/StlForwardString.h"
 #include "Corrade/Utility/StlForwardVector.h"

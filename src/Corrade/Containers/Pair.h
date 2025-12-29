@@ -39,6 +39,10 @@
 #include "Corrade/Utility/Macros.h" /* CORRADE_CONSTEXPR14 */
 #include "Corrade/Utility/Move.h"
 
+#ifdef CORRADE_BUILD_DEPRECATED
+#include "Corrade/Utility/DeprecationMacros.h"
+#endif
+
 /** @file
  * @brief Class @ref Corrade::Containers::Pair
  * @m_since_latest

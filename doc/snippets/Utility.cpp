@@ -43,6 +43,7 @@
 #include "Corrade/Utility/Assert.h"
 #include "Corrade/Utility/Configuration.h"
 #include "Corrade/Utility/DebugStl.h"
+#include "Corrade/Utility/DeprecationMacros.h"
 #include "Corrade/Utility/Endianness.h"
 #if defined(CORRADE_TARGET_UNIX) || (defined(CORRADE_TARGET_WINDOWS) && !defined(CORRADE_TARGET_WINDOWS_RT)) || defined(CORRADE_TARGET_EMSCRIPTEN)
 #include "Corrade/Utility/FileWatcher.h"

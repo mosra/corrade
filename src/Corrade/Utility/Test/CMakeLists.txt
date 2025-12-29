@@ -277,6 +277,7 @@ target_include_directories(UtilityConfigurationTest PRIVATE ${CMAKE_CURRENT_BINA
 corrade_add_test(UtilityConfigurationValueTest ConfigurationValueTest.cpp)
 
 corrade_add_test(UtilityDebugTest DebugTest.cpp)
+corrade_add_test(UtilityDeprecationMacrosTest DeprecationMacrosTest.cpp)
 corrade_add_test(UtilityMacrosTest MacrosTest.cpp)
 if(NOT CORRADE_TARGET_EMSCRIPTEN)
     set(THREADS_PREFER_PTHREAD_FLAG TRUE)
