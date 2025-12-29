@@ -179,6 +179,7 @@ the annotation, but ignores it for both enums and enum values.
    altogether */
 #if (defined(CORRADE_TARGET_CLANG) || (defined(CORRADE_TARGET_GCC) && __GNUC__ >= 6)) && !defined(Q_MOC_RUN)
 #define CORRADE_DEPRECATED_ENUM(message) __attribute((deprecated(message)))
+/* Enabled even for MSVC 2015 because it silently ignores it (lol) */
 #elif defined(CORRADE_TARGET_MSVC) && !defined(Q_MOC_RUN)
 #define CORRADE_DEPRECATED_ENUM(message) [[deprecated(message)]]
 #else
