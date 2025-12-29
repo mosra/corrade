@@ -79,7 +79,16 @@ Containers::Array<char*> convertWideArgv(std::size_t argc, wchar_t** wargv, Cont
 
 }
 
-extern "C" int main(int, char**);
+/* This used to be extern "C" like the others below but as of GCC 15 and Clang
+   20 it produces a -Wpedantic / -Wmain warning:
+    https://gcc.gnu.org/cgit/gcc/commit/?id=292fc21a8d7aa2f16e61ac941e22ada6ddd85500
+    https://github.com/llvm/llvm-project/issues/101512
+   Because on the other side (and in CORRADE_TEST_MAIN() and
+   MAGNUM_APPLICATION_MAIN()) the definitions are without extern "C" and it
+   always worked well that way, I assume it was redundant, and the compiler
+   forces it to have a C linkage, even if wmain / wWinMain is the actually used
+   entrypoint. */
+int main(int, char**);
 
 /* extern "C" needed for MinGW -- https://sourceforge.net/p/mingw-w64/wiki2/Unicode%20apps/ */
 extern "C" int WINAPI wWinMain(HINSTANCE, HINSTANCE, PWSTR, int);
