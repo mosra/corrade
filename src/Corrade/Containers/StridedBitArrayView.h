@@ -422,6 +422,19 @@ template<unsigned dimensions, class T> class BasicStridedBitArrayView {
         void set(std::size_t i) const;
 
         /**
+         * @brief Use @ref set(std::size_t, bool) const to set a single bit to a concrete value
+         *
+         * Deleted to avoid accidental use of @ref set(std::size_t) const with
+         * a @cpp bool @ce. Unlike with @ref BasicBitArrayView "BitArrayView",
+         * there's currently no way to set or reset all bits.
+         */
+        #ifdef DOXYGEN_GENERATING_OUTPUT
+        void set(bool) const = delete;
+        #else
+        template<class U, class V = T, typename std::enable_if<std::is_same<U, bool>::value && !std::is_const<V>::value && dimensions == 1, int>::type = 0> void set(U) const = delete;
+        #endif
+
+        /**
          * @brief Set a bit at given position
          *
          * Expects that @p i is less than @ref size(). Enabled only on a
@@ -448,6 +461,20 @@ template<unsigned dimensions, class T> class BasicStridedBitArrayView {
         template<class U = T, typename std::enable_if<!std::is_const<U>::value && dimensions == 1, int>::type = 0>
         #endif
         void reset(std::size_t i) const;
+
+        /**
+         * @brief Use @ref set(std::size_t, bool) const to set a single bit to a concrete value
+         *
+         * Deleted to avoid accidental use of @ref reset(std::size_t) const
+         * with a @cpp bool @ce. Unlike with
+         * @ref BasicBitArrayView "BitArrayView", there's currently no way to
+         * set or reset all bits.
+         */
+        #ifdef DOXYGEN_GENERATING_OUTPUT
+        void reset(bool) const = delete;
+        #else
+        template<class U, class V = T, typename std::enable_if<std::is_same<U, bool>::value && !std::is_const<V>::value && dimensions == 1, int>::type = 0> void reset(U) const = delete;
+        #endif
 
         /**
          * @brief Reset a bit at given position

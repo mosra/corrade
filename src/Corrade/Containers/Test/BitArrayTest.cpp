@@ -473,6 +473,12 @@ void BitArrayTest::accessMutableSet() {
     b.set(data.bit, true);
     CORRADE_COMPARE(valueA[0], data.expectedSet);
     CORRADE_COMPARE(valueB[0], data.expectedSet);
+
+    /* These should not compile, use setAll() / resetAll() instead */
+    #if 0
+    a.set(true);
+    b.set(false);
+    #endif
 }
 
 void BitArrayTest::accessMutableReset() {
@@ -491,6 +497,12 @@ void BitArrayTest::accessMutableReset() {
     b.set(data.bit, false);
     CORRADE_COMPARE(valueA[0], data.expectedReset);
     CORRADE_COMPARE(valueB[0], data.expectedReset);
+
+    /* These should not compile, use setAll() / resetAll() instead */
+    #if 0
+    a.reset(true);
+    b.reset(false);
+    #endif
 }
 
 void BitArrayTest::accessMutableSetAll() {

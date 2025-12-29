@@ -1379,6 +1379,12 @@ void StridedBitArrayViewTest::accessMutableSet() {
     b.set(data.bit, true);
     CORRADE_COMPARE(valueA[1], data.expectedSet);
     CORRADE_COMPARE(valueB[1], data.expectedSet);
+
+    /* These should not compile, use setAll() / resetAll() instead */
+    #if 0
+    a.set(true);
+    b.set(false);
+    #endif
 }
 
 void StridedBitArrayViewTest::accessMutableReset() {
@@ -1396,6 +1402,12 @@ void StridedBitArrayViewTest::accessMutableReset() {
     b.set(data.bit, false);
     CORRADE_COMPARE(valueA[1], data.expectedReset);
     CORRADE_COMPARE(valueB[1], data.expectedReset);
+
+    /* These should not compile, use setAll() / resetAll() instead */
+    #if 0
+    a.reset(true);
+    b.reset(false);
+    #endif
 }
 
 void StridedBitArrayViewTest::accessZeroStride() {

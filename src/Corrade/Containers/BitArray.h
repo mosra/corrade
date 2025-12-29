@@ -302,6 +302,18 @@ class CORRADE_UTILITY_EXPORT BitArray {
         inline void set(std::size_t i);
 
         /**
+         * @brief Use @ref setAll(bool) to set all bits or @ref set(std::size_t, bool) to set a single bit to a concrete value
+         *
+         * Deleted to avoid accidental use of @ref set(std::size_t) with a
+         * @cpp bool @ce.
+         */
+        #ifdef DOXYGEN_GENERATING_OUTPUT
+        void set(bool) = delete;
+        #else
+        template<class U, typename std::enable_if<std::is_same<U, bool>::value, int>::type = 0> void set(U) = delete;
+        #endif
+
+        /**
          * @brief Set all bits
          *
          * You can set just a range of bits by making a @ref slice() first.
@@ -317,6 +329,18 @@ class CORRADE_UTILITY_EXPORT BitArray {
          */
         /* MinGW complains loudly if the declaration doesn't also have inline */
         inline void reset(std::size_t i);
+
+        /**
+         * @brief Use @ref setAll(bool) to set all bits or @ref set(std::size_t, bool) to set a single bit to a concrete value
+         *
+         * Deleted to avoid accidental use of @ref reset(std::size_t) with a
+         * @cpp bool @ce.
+         */
+        #ifdef DOXYGEN_GENERATING_OUTPUT
+        void reset(bool) = delete;
+        #else
+        template<class U, typename std::enable_if<std::is_same<U, bool>::value, int>::type = 0> void reset(U) = delete;
+        #endif
 
         /**
          * @brief Reset all bits
