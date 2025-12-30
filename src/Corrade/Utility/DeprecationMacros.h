@@ -43,15 +43,16 @@
 @brief Deprecation mark
 
 Marked function, class or typedef will emit deprecation warning on supported
-compilers (GCC, Clang, MSVC):
+compilers:
 
 @snippet Utility.cpp CORRADE_DEPRECATED
 
-Might not work for template aliases, namespaces and enum values on all
-compilers, use @ref CORRADE_DEPRECATED_ALIAS(), @ref CORRADE_DEPRECATED_NAMESPACE()
-and @ref CORRADE_DEPRECATED_ENUM() instead. See @ref CORRADE_DEPRECATED_FILE()
-for file-level deprecation and @ref CORRADE_DEPRECATED_MACRO() for deprecating
-macros.
+Defined as a compiler-specific annotation if compiling on GCC, Clang or MSVC,
+empty otherwise. May not work for template aliases, namespaces and enum values
+on all compilers, use @ref CORRADE_DEPRECATED_ALIAS(),
+@ref CORRADE_DEPRECATED_NAMESPACE() and @ref CORRADE_DEPRECATED_ENUM() instead.
+See @ref CORRADE_DEPRECATED_FILE() for file-level deprecation and
+@ref CORRADE_DEPRECATED_MACRO() for deprecating macros.
 
 Note that on MSVC and GCC 9 and older this doesn't warn when using nested names
 of deprecated classes or typedefs, only when the type is instantiated --- i.e.,
@@ -59,6 +60,13 @@ of deprecated classes or typedefs, only when the type is instantiated --- i.e.,
 will not.
 */
 #if !defined(CORRADE_DEPRECATED) || defined(DOXYGEN_GENERATING_OUTPUT)
+/** @todo With CORRADE_TARGET_CXX14 it could be [[deprecated(message)]] as well
+    but it breaks existing usage for typedefs -- while __attribute() can be
+    placed both before and after the `typedef` keyword, [[]] can be placed only
+    before. Once a post-2020.06 release is made and most ancient deprecated
+    typedefs are gone (so the change doesn't affect too many places), switch
+    the usage to be before the typedef and make it a standard attribute on
+    non-deprecated builds. */
 #if defined(CORRADE_TARGET_GCC) || defined(CORRADE_TARGET_CLANG)
 #define CORRADE_DEPRECATED(message) __attribute((deprecated(message)))
 #elif defined(CORRADE_TARGET_MSVC)
@@ -71,10 +79,13 @@ will not.
 /** @hideinitializer
 @brief Alias deprecation mark
 
-Marked alias will emit deprecation warning on supported compilers (GCC, Clang,
-MSVC 2017+):
+Marked alias will emit deprecation warning on supported compilers:
 
 @snippet Utility.cpp CORRADE_DEPRECATED_ALIAS
+
+Defined as the @cpp [[deprecated(message)]] @ce attribute if compiling as C++14
+or newer, with a compiler-specific variant if compiling as C++11 on GCC, Clang
+or MSVC 2017+, empty otherwise.
 
 Note that on MSVC and GCC 9 and older this doesn't warn when using nested names
 of deprecated aliases, only when the type is instantiated --- i.e.,
@@ -85,10 +96,10 @@ will not.
     @ref CORRADE_DEPRECATED_MACRO()
 */
 #if !defined(CORRADE_DEPRECATED_ALIAS) || defined(DOXYGEN_GENERATING_OUTPUT)
-#if defined(CORRADE_TARGET_GCC) || defined(CORRADE_TARGET_CLANG)
-#define CORRADE_DEPRECATED_ALIAS(message) __attribute((deprecated(message)))
-#elif defined(CORRADE_TARGET_MSVC) && _MSC_VER >= 1910
+#if defined(CORRADE_TARGET_CXX14) || (defined(CORRADE_TARGET_MSVC) && _MSC_VER >= 1910)
 #define CORRADE_DEPRECATED_ALIAS(message) [[deprecated(message)]]
+#elif defined(CORRADE_TARGET_GCC) || defined(CORRADE_TARGET_CLANG)
+#define CORRADE_DEPRECATED_ALIAS(message) __attribute((deprecated(message)))
 #else
 #define CORRADE_DEPRECATED_ALIAS(message)
 #endif
@@ -97,19 +108,23 @@ will not.
 /** @hideinitializer
 @brief Namespace deprecation mark
 
-Marked enum or enum value will emit deprecation warning on supported compilers
-(C++17 feature, MSVC and Clang, GCC 10+):
+Marked enum or enum value will emit deprecation warning on supported compilers:
 
 @snippet Utility.cpp CORRADE_DEPRECATED_NAMESPACE
 
-Note that this doesn't work on namespace aliases (i.e., marking
-@cpp namespace Bar = Foo; @ce with this macro will result in a compile error.
+Defined as the @cpp [[deprecated(message)]] @ce attribute if compiling as C++17
+or newer, with a compiler-specific variant if compiling as C++14 or older on
+GCC 10+, Clang or MSVC, empty otherwise. Note that this doesn't work on
+namespace aliases --- i.e., marking @cpp namespace Bar = Foo; @ce with this
+macro will result in a compile error.
 @see @ref CORRADE_DEPRECATED(), @ref CORRADE_DEPRECATED_ALIAS(),
     @ref CORRADE_DEPRECATED_ENUM(), @ref CORRADE_DEPRECATED_FILE(),
     @ref CORRADE_DEPRECATED_MACRO()
 */
 #if !defined(CORRADE_DEPRECATED_NAMESPACE) || defined(DOXYGEN_GENERATING_OUTPUT)
-#if defined(CORRADE_TARGET_CLANG)
+#if defined(CORRADE_TARGET_CXX17) || defined(CORRADE_TARGET_MSVC) || (defined(CORRADE_TARGET_GCC) && __GNUC__ >= 10)
+#define CORRADE_DEPRECATED_NAMESPACE(message) [[deprecated(message)]]
+#elif defined(CORRADE_TARGET_CLANG)
 /* Clang < 6.0 warns that this is a C++14 extension, Clang 6.0+ warns that
    namespace attributes are a C++17 extension and deprecated attribute is a
    C++14 extension. Clang < 6.0 doesn't know -Wc++17-extensions, so can't
@@ -120,8 +135,6 @@ Note that this doesn't work on namespace aliases (i.e., marking
 #else
 #define CORRADE_DEPRECATED_NAMESPACE(message) _Pragma("GCC diagnostic push") _Pragma("GCC diagnostic ignored \"-Wc++14-extensions\"") _Pragma("GCC diagnostic ignored \"-Wc++17-extensions\"") [[deprecated(message)]] _Pragma("GCC diagnostic pop")
 #endif
-#elif defined(CORRADE_TARGET_MSVC) || (defined(CORRADE_TARGET_GCC) && __GNUC__ >= 10)
-#define CORRADE_DEPRECATED_NAMESPACE(message) [[deprecated(message)]]
 #else
 #define CORRADE_DEPRECATED_NAMESPACE(message)
 #endif
@@ -130,10 +143,13 @@ Note that this doesn't work on namespace aliases (i.e., marking
 /** @hideinitializer
 @brief Enum deprecation mark
 
-Marked enum or enum value will emit deprecation warning on supported compilers
-(C++17 feature, MSVC 2017+, Clang and GCC 6+):
+Marked enum or enum value will emit deprecation warning on supported compilers:
 
 @snippet Utility.cpp CORRADE_DEPRECATED_ENUM
+
+Defines as the @cpp [[deprecated(message)]] @ce attribute if compiling as C++17
+or newer, with a compiler-specific variant if compiling as C++14 or older on
+GCC 6+, Clang or MSVC, empty otherwise.
 
 Note that on MSVC and GCC 9 and older this doesn't warn when using values of
 deprecated enums, only when the enum is instantiated --- i.e.,
@@ -146,15 +162,15 @@ enums and enum values.
     @ref CORRADE_DEPRECATED_MACRO()
 */
 #if !defined(CORRADE_DEPRECATED_ENUM) || defined(DOXYGEN_GENERATING_OUTPUT)
-/* Qt's Meta Object Compiler doesn't recognize enum value attributes in older
-   Qt. Not sure what version was it fixed in as the bugreports don't tell
+/* Enabled even for MSVC 2015 because it silently ignores it (lol). Qt's Meta
+   Object Compiler doesn't recognize enum value attributes in older Qt. Not
+   sure what version was it fixed in as the bugreports don't tell
    (https://bugreports.qt.io/browse/QTBUG-78820) so disabling it for MOC
    altogether */
-#if (defined(CORRADE_TARGET_CLANG) || (defined(CORRADE_TARGET_GCC) && __GNUC__ >= 6)) && !defined(Q_MOC_RUN)
-#define CORRADE_DEPRECATED_ENUM(message) __attribute((deprecated(message)))
-/* Enabled even for MSVC 2015 because it silently ignores it (lol) */
-#elif defined(CORRADE_TARGET_MSVC) && !defined(Q_MOC_RUN)
+#if defined(CORRADE_TARGET_CXX17) || (defined(CORRADE_TARGET_MSVC) && !defined(Q_MOC_RUN))
 #define CORRADE_DEPRECATED_ENUM(message) [[deprecated(message)]]
+#elif (defined(CORRADE_TARGET_CLANG) || (defined(CORRADE_TARGET_GCC) && __GNUC__ >= 6)) && !defined(Q_MOC_RUN)
+#define CORRADE_DEPRECATED_ENUM(message) __attribute((deprecated(message)))
 #else
 #define CORRADE_DEPRECATED_ENUM(message)
 #endif
@@ -164,21 +180,24 @@ enums and enum values.
 @brief File deprecation mark
 
 Putting this in a file will emit deprecation warning when given file is
-included or compiled (GCC, Clang, MSVC):
+included or compiled on supported compilers:
 
 @code{.cpp}
 CORRADE_DEPRECATED_FILE("use Bar.h instead") // yes, no semicolon at the end
 @endcode
 
-On Clang the message is prepended with *this file is deprecated*, which is not
-possible on GCC. Note that the warning is suppressed in case given
-directory is included as system (`-isystem` on GCC and Clang).
+On Clang the message is prepended with *this file is deprecated*, on GCC that's
+not possible so only the message alone is printed. Note that the warning is
+suppressed in case given directory is included as system (`-isystem` on GCC and
+Clang).
 
 On MSVC the message is prepended with *warning: &lt;file&gt; is deprecated*.
 The message just appears in the log output without any association to a
-particular file, so the file is included in the message. Due to MSVC
+particular file, so the filename is included in the message. Due to MSVC
 limitations, the message doesn't contribute to the warning log or warning count
 in any way.
+
+On compilers other than GCC, Clang and MSVC the macro does nothing.
 @see @ref CORRADE_DEPRECATED(), @ref CORRADE_DEPRECATED_ALIAS(),
     @ref CORRADE_DEPRECATED_NAMESPACE(), @ref CORRADE_DEPRECATED_ENUM(),
     @ref CORRADE_DEPRECATED_MACRO()
@@ -199,21 +218,23 @@ in any way.
 @brief Macro deprecation mark
 
 Putting this in a macro definition will emit deprecation warning when given
-macro is used (GCC, Clang, MSVC):
+macro is used on supported compilers:
 
 @code{.cpp}
 #define MAKE_FOO(args) \
     CORRADE_DEPRECATED_MACRO(MAKE_FOO(),"use MAKE_BAR() instead") MAKE_BAR(args)
 @endcode
 
-On Clang and MSVC the message is prepended with *this macro is deprecated*,
-which is not possible on GCC.
+On Clang and MSVC the message is prepended with *this macro is deprecated*, on
+GCC that's not possible so only the message alone is printed.
 
 On MSVC the message is prepended with *&lt;file&gt; warning: &lt;macro&gt; is deprecated*,
 where the macro name is taken from the first argument. The message just appears
 in the log output without any association to a particular file, so the file is
 included in the message. Due to MSVC limitations, the message doesn't
 contribute to the warning log or warning count in any way.
+
+On compilers other than GCC, Clang and MSVC the macro does nothing.
 @see @ref CORRADE_DEPRECATED(), @ref CORRADE_DEPRECATED_ALIAS(),
     @ref CORRADE_DEPRECATED_NAMESPACE(), @ref CORRADE_DEPRECATED_ENUM(),
     @ref CORRADE_DEPRECATED_FILE()
@@ -233,9 +254,9 @@ contribute to the warning log or warning count in any way.
 /** @hideinitializer
 @brief Begin code section with deprecation warnings ignored
 
-Suppresses compiler warnings when using a deprecated API (GCC, Clang, MSVC).
-Useful when testing or writing APIs that depend on deprecated functionality.
-In order to avoid warning suppressions to leak, for every
+Suppresses compiler warnings when using a deprecated API on supported
+compilers. Useful when testing or writing APIs that depend on deprecated
+functionality. In order to avoid warning suppressions to leak, for every
 @ref CORRADE_IGNORE_DEPRECATED_PUSH there has to be a corresponding
 @ref CORRADE_IGNORE_DEPRECATED_POP. Example usage:
 
@@ -243,9 +264,9 @@ In order to avoid warning suppressions to leak, for every
 
 In particular, warnings from @ref CORRADE_DEPRECATED(),
 @ref CORRADE_DEPRECATED_ALIAS(), @ref CORRADE_DEPRECATED_NAMESPACE() and
-@ref CORRADE_DEPRECATED_ENUM() are suppressed. The
-@ref CORRADE_DEPRECATED_FILE() and @ref CORRADE_DEPRECATED_MACRO() warnings are
-suppressed only on Clang.
+@ref CORRADE_DEPRECATED_ENUM() are suppressed on GCC, Clang and MSVC. The
+@ref CORRADE_DEPRECATED_FILE() and @ref CORRADE_DEPRECATED_MACRO() warnings can
+be suppressed only on Clang. On other compilers the macro does nothing.
 */
 #ifndef CORRADE_IGNORE_DEPRECATED_PUSH
 #ifdef CORRADE_TARGET_CLANG

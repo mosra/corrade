@@ -278,6 +278,8 @@ corrade_add_test(UtilityConfigurationValueTest ConfigurationValueTest.cpp)
 
 corrade_add_test(UtilityDebugTest DebugTest.cpp)
 corrade_add_test(UtilityDeprecationMacrosTest DeprecationMacrosTest.cpp)
+set_target_properties(UtilityDeprecationMacrosTest PROPERTIES
+    COMPILE_DEFINITIONS COMPILING_AS_CPP11)
 corrade_add_test(UtilityMacrosTest MacrosTest.cpp)
 if(NOT CORRADE_TARGET_EMSCRIPTEN)
     set(THREADS_PREFER_PTHREAD_FLAG TRUE)
@@ -295,8 +297,12 @@ if(NOT CMAKE_CXX_FLAGS MATCHES "-std=")
        (CMAKE_CXX_COMPILER_ID STREQUAL "Clang" AND NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS "3.4") OR
        (CMAKE_CXX_COMPILER_ID STREQUAL "AppleClang" AND NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS "6.0.1") OR
        (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC" AND NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS "19.10"))
+        corrade_add_test(UtilityDeprecationMacrosCpp14Test DeprecationMacrosTest.cpp)
+        set_target_properties(UtilityDeprecationMacrosCpp14Test PROPERTIES
+            COMPILE_DEFINITIONS COMPILING_AS_CPP14)
         corrade_add_test(UtilityMacrosCpp14Test MacrosCpp14Test.cpp)
         set_target_properties(
+            UtilityDeprecationMacrosCpp14Test
             UtilityMacrosCpp14Test
             PROPERTIES CORRADE_CXX_STANDARD 14)
    endif()
@@ -307,10 +313,14 @@ if(NOT CMAKE_CXX_FLAGS MATCHES "-std=")
        (CMAKE_CXX_COMPILER_ID STREQUAL "AppleClang" AND NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS "9.3") OR
        (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC" AND NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS "19.10"))
         corrade_add_test(UtilityDebugStlCpp17Test DebugStlCpp17Test.cpp)
+        corrade_add_test(UtilityDeprecationMacrosCpp17Test DeprecationMacrosTest.cpp)
+        set_target_properties(UtilityDeprecationMacrosCpp17Test PROPERTIES
+            COMPILE_DEFINITIONS COMPILING_AS_CPP17)
         corrade_add_test(UtilityFormatStlStringViewTest FormatStlStringViewTest.cpp)
         corrade_add_test(UtilityMacrosCpp17Test MacrosCpp17Test.cpp)
         set_target_properties(
             UtilityDebugStlCpp17Test
+            UtilityDeprecationMacrosCpp17Test
             UtilityFormatStlStringViewTest
             UtilityMacrosCpp17Test
             PROPERTIES CORRADE_CXX_STANDARD 17)

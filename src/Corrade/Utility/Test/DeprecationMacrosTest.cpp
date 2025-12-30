@@ -36,17 +36,40 @@ struct DeprecationMacrosTest: TestSuite::Tester {
     void deprecatedAlias();
     void deprecatedEnum();
     void deprecatedNamespace();
+    /* These don't have an implementation that depends on the standard being
+       used, and they warn always, so include them only in the baseline test */
+    #ifdef COMPILING_AS_CPP11
     void deprecatedMacro();
     void deprecatedFile();
+    #endif
 };
 
 DeprecationMacrosTest::DeprecationMacrosTest() {
+    #ifdef COMPILING_AS_CPP14
+    setTestName("Corrade::Utility::Test::DeprecationMacrosCpp14Test");
+    #ifndef CORRADE_TARGET_CXX14
+    #error C++14 not enabled
+    #endif
+
+    #elif defined(COMPILING_AS_CPP17)
+    #ifndef CORRADE_TARGET_CXX17
+    #error C++17 not enabled
+    #endif
+    setTestName("Corrade::Utility::Test::DeprecationMacrosCpp17Test");
+
+    #elif !defined(COMPILING_AS_CPP11)
+    #error no standard version macro passed from buildsystem
+    #endif
+
     addTests({&DeprecationMacrosTest::deprecated,
               &DeprecationMacrosTest::deprecatedAlias,
               &DeprecationMacrosTest::deprecatedEnum,
               &DeprecationMacrosTest::deprecatedNamespace,
+              #ifdef COMPILING_AS_CPP11
               &DeprecationMacrosTest::deprecatedMacro,
-              &DeprecationMacrosTest::deprecatedFile});
+              &DeprecationMacrosTest::deprecatedFile
+              #endif
+              });
 }
 
 /* Declarations on their own shouldn't produce any compiler diagnostics */
@@ -71,8 +94,10 @@ namespace CORRADE_DEPRECATED_NAMESPACE("use Namespace instead") DeprecatedNamesp
 // #define ENABLE_ALIAS_DEPRECATION_WARNINGS
 // #define ENABLE_ENUM_DEPRECATION_WARNINGS
 // #define ENABLE_NAMESPACE_DEPRECATION_WARNINGS
+#ifdef COMPILING_AS_CPP11
 // #define ENABLE_MACRO_DEPRECATION_WARNINGS
 // #define ENABLE_FILE_DEPRECATION_WARNINGS
+#endif
 
 #ifndef ENABLE_DEPRECATION_WARNINGS
 CORRADE_IGNORE_DEPRECATED_PUSH
@@ -141,6 +166,7 @@ void DeprecationMacrosTest::deprecatedNamespace() {
 CORRADE_IGNORE_DEPRECATED_POP
 #endif
 
+#ifdef COMPILING_AS_CPP11
 #ifndef ENABLE_MACRO_DEPRECATION_WARNINGS
 CORRADE_IGNORE_DEPRECATED_PUSH
 #endif
@@ -169,6 +195,7 @@ void DeprecationMacrosTest::deprecatedFile() {
 }
 #ifndef ENABLE_FILE_DEPRECATION_WARNINGS
 CORRADE_IGNORE_DEPRECATED_POP
+#endif
 #endif
 
 }}}}
