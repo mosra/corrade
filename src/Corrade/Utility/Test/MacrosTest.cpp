@@ -43,6 +43,7 @@ struct MacrosTest: TestSuite::Tester {
     void defer();
 
     void unused();
+    void nodiscard();
     void fallthrough();
     void constexpr14();
     void constexpr20();
@@ -61,6 +62,7 @@ MacrosTest::MacrosTest() {
     addTests({&MacrosTest::defer,
 
               &MacrosTest::unused,
+              &MacrosTest::nodiscard,
               &MacrosTest::fallthrough,
               &MacrosTest::constexpr14,
               &MacrosTest::constexpr20,
@@ -104,6 +106,21 @@ struct Four {
 void MacrosTest::unused() {
     CORRADE_COMPARE(three(6), 3);
     CORRADE_COMPARE(Four{}.a, 4);
+}
+
+CORRADE_NODISCARD int nodiscardReturn(int a) { return a + 1; }
+
+void MacrosTest::nodiscard() {
+    /* See also MacrosCpp17Test::nodiscard() which tests the C++17
+       implementation */
+
+    int a = 2;
+    #if 1 /* Set to 0 to produce a warning */
+    a +=
+    #endif
+    nodiscardReturn(3);
+
+    CORRADE_COMPARE_AS(a, 2, TestSuite::Compare::GreaterOrEqual);
 }
 
 CORRADE_CONSTEXPR14 int sumInAStupidWay(int number) {

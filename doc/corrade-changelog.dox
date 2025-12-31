@@ -261,6 +261,8 @@ namespace Corrade {
     @ref CORRADE_NOOP()
 -   New @ref CORRADE_CONSTEXPR20 macro, a variant of @ref CORRADE_CONSTEXPR14
     for C++20
+-   New @ref CORRADE_NODISCARD macro, providing @cpp [[nodiscard]] @ce
+    functionality on C++11 and C++14 as well
 -   New @ref Corrade/Utility/StlForwardTupleSizeElement.h header for
     forward-declaring @m_class{m-doc-external} [std::tuple_size](https://en.cppreference.com/w/cpp/utility/tuple_size)
     and @m_class{m-doc-external} [std::tuple_element](https://en.cppreference.com/w/cpp/utility/tuple_element)

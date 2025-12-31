@@ -1373,6 +1373,10 @@ int foo(int a, CORRADE_UNUSED int b) {
 }
 /* [CORRADE_UNUSED] */
 
+/* [CORRADE_NODISCARD] */
+CORRADE_NODISCARD std::FILE* openFile(Containers::StringView filename);
+/* [CORRADE_NODISCARD] */
+
 /* [CORRADE_ALWAYS_INLINE] */
 CORRADE_ALWAYS_INLINE int addOne(int a);
 /* [CORRADE_ALWAYS_INLINE] */

@@ -25,6 +25,7 @@
 */
 
 #include "Corrade/TestSuite/Tester.h"
+#include "Corrade/TestSuite/Compare/Numeric.h"
 #include "Corrade/Utility/Macros.h"
 
 namespace Corrade { namespace Utility { namespace Test { namespace {
@@ -32,13 +33,30 @@ namespace Corrade { namespace Utility { namespace Test { namespace {
 struct MacrosCpp17Test: TestSuite::Tester {
     explicit MacrosCpp17Test();
 
+    void nodiscard();
     void constexpr20();
     void fallthrough();
 };
 
 MacrosCpp17Test::MacrosCpp17Test() {
-    addTests({&MacrosCpp17Test::constexpr20,
+    addTests({&MacrosCpp17Test::nodiscard,
+              &MacrosCpp17Test::constexpr20,
               &MacrosCpp17Test::fallthrough});
+}
+
+CORRADE_NODISCARD int nodiscardReturn(int a) { return a + 1; }
+
+void MacrosCpp17Test::nodiscard() {
+    /* CORRADE_NODISCARD has different implementation with C++17, other than
+       that the test case is equivalent to MacrosTest::nodiscard() */
+
+    int a = 2;
+    #if 1 /* Set to 0 to produce a warning */
+    a +=
+    #endif
+    nodiscardReturn(3);
+
+    CORRADE_COMPARE_AS(a, 2, TestSuite::Compare::GreaterOrEqual);
 }
 
 struct ConstexprNoInit {

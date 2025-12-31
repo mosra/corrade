@@ -27,7 +27,7 @@
 */
 
 /** @file
- * @brief Macro @ref CORRADE_UNUSED, @ref CORRADE_FALLTHROUGH, @ref CORRADE_THREAD_LOCAL, @ref CORRADE_CONSTEXPR14, @ref CORRADE_CONSTEXPR20, @ref CORRADE_ALWAYS_INLINE, @ref CORRADE_NEVER_INLINE, @ref CORRADE_ASSUME(), @ref CORRADE_LIKELY(), @ref CORRADE_UNLIKELY(), @ref CORRADE_FUNCTION, @ref CORRADE_LINE_STRING, @ref CORRADE_PASSTHROUGH(), @ref CORRADE_NOOP(), @ref CORRADE_AUTOMATIC_INITIALIZER(), @ref CORRADE_AUTOMATIC_FINALIZER()
+ * @brief Macro @ref CORRADE_UNUSED, @ref CORRADE_NODISCARD, @ref CORRADE_FALLTHROUGH, @ref CORRADE_THREAD_LOCAL, @ref CORRADE_CONSTEXPR14, @ref CORRADE_CONSTEXPR20, @ref CORRADE_ALWAYS_INLINE, @ref CORRADE_NEVER_INLINE, @ref CORRADE_ASSUME(), @ref CORRADE_LIKELY(), @ref CORRADE_UNLIKELY(), @ref CORRADE_FUNCTION, @ref CORRADE_LINE_STRING, @ref CORRADE_PASSTHROUGH(), @ref CORRADE_NOOP(), @ref CORRADE_AUTOMATIC_INITIALIZER(), @ref CORRADE_AUTOMATIC_FINALIZER()
  */
 
 #include "Corrade/configure.h"
@@ -108,6 +108,38 @@ feature when compiling as C++11 or C++14.
 /* Needs to have non-empty contents to avoid acme.py removing the #define if
    #pragma ACME disable is used */
 #define CORRADE_UNUSED /*unused*/
+#endif
+#endif
+
+/** @hideinitializer
+@brief Return value shouldn't be discarded
+@m_since_latest
+
+Putting this before return type of a function will cause a compiler warning if
+the function is called without using the returned value.
+
+@snippet Utility.cpp CORRADE_NODISCARD
+
+Defined as the @cpp [[nodiscard]] @ce attribute if compiling as C++17 or newer,
+with a compiler-specific variant on Clang, MSVC and GCC, empty otherwise.
+
+Note that on MSVC the fallback [`_Check_return_` attribute](https://learn.microsoft.com/en-us/cpp/code-quality/annotating-function-behavior)
+requires building with `/analyze`, otherwise no diagnostics is issued if the
+return value is unused.
+*/
+#ifndef CORRADE_NODISCARD
+#ifdef CORRADE_TARGET_CXX17
+#define CORRADE_NODISCARD [[nodiscard]]
+/* The following works on clang-cl (which doesn't advertise itself as GCC) as
+   well */
+#elif defined(CORRADE_TARGET_GCC) || defined(CORRADE_TARGET_CLANG)
+#define CORRADE_NODISCARD __attribute__((warn_unused_result))
+#elif defined(CORRADE_TARGET_MSVC)
+#define CORRADE_NODISCARD _Check_return_
+#else
+/* Needs to have non-empty contents to avoid acme.py removing the #define if
+   #pragma ACME disable is used */
+#define CORRADE_NODISCARD /*unused*/
 #endif
 #endif
 
