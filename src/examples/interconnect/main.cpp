@@ -4,7 +4,7 @@
     Original authors — credit is appreciated but not required:
 
         2007, 2008, 2009, 2010, 2011, 2012, 2013, 2014, 2015, 2016,
-        2017, 2018, 2019, 2020, 2021, 2022, 2023, 2024, 2025
+        2017, 2018, 2019, 2020, 2021, 2022, 2023, 2024, 2025, 2026
             — Vladimír Vondruš <mosra@centrum.cz>
 
     This is free and unencumbered software released into the public domain.
