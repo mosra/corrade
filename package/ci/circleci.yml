@@ -539,9 +539,9 @@ jobs:
     executor: xcode-14_3
     environment:
       # Yep, xcodebuild is beyond stupid and just DOESN'T build in parallel by
-      # default. The default medium resource class has 4 CPUs and Ninja uses
-      # -j6, so do the same for xcodebuild.
-      XCODE_JOBS: 6
+      # default. The default M4 medium resource class has 6 CPUs and Ninja uses
+      # -j8, so do the same for xcodebuild.
+      XCODE_JOBS: 8
     steps:
     - install-base-macos:
         extra: xcbeautify
