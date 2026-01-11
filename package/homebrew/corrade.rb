@@ -4,7 +4,7 @@ class Corrade < Formula
   # git describe origin/master, except the `v` prefix
   version "2020.06-2002-gf37591439"
   # Clone instead of getting an archive to have tags for version.h generation
-  url "https://github.com/mosra/corrade.git", revision: "f37591439"
+  url "https://github.com/mosra/corrade.git", revision: version.to_str().rpartition('g')[2]
   head "https://github.com/mosra/corrade.git"
 
   depends_on "cmake" => :build
