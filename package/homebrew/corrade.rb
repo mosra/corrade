@@ -2,7 +2,7 @@ class Corrade < Formula
   desc "C++11 multiplatform utility library"
   homepage "https://magnum.graphics/corrade/"
   # git describe origin/master, except the `v` prefix
-  version "2020.06-2002-gf37591439"
+  version "2020.06-2045-g98e2a94b5"
   # Clone instead of getting an archive to have tags for version.h generation
   url "https://github.com/mosra/corrade.git", revision: version.to_str().rpartition('g')[2]
   head "https://github.com/mosra/corrade.git"
