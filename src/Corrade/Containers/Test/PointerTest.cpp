@@ -95,6 +95,7 @@ struct PointerTest: TestSuite::Tester {
     void constructInPlaceMakeAmbiguous();
     void constructDerivedTriviallyDestructible();
     void constructDerivedVirtualDestructor();
+    void constructConvertibleButNotDerived();
     void constructIncomplete();
 
     void constructZeroNullPointerAmbiguity();
@@ -139,6 +140,7 @@ PointerTest::PointerTest() {
     addTests({&PointerTest::constructInPlaceMakeAmbiguous,
               &PointerTest::constructDerivedTriviallyDestructible,
               &PointerTest::constructDerivedVirtualDestructor,
+              &PointerTest::constructConvertibleButNotDerived,
               &PointerTest::constructIncomplete,
 
               &PointerTest::constructZeroNullPointerAmbiguity,
@@ -443,6 +445,51 @@ void PointerTest::constructDerivedVirtualDestructor() {
     CORRADE_VERIFY(!std::is_constructible<Pointer<Derived>, Base*>::value);
     CORRADE_VERIFY(std::is_constructible<Pointer<Base>, Pointer<Derived>>::value);
     CORRADE_VERIFY(!std::is_constructible<Pointer<Derived>, Pointer<Base>>::value);
+}
+
+void PointerTest::constructConvertibleButNotDerived() {
+    /* The base-from-derived constructor cannot use std::is_base_of<T, U>
+       because it requires T to be defined, which is sometimes a problem with
+       generic code such as the following.
+
+        template<class T> void foo(Containers::Pointer<T>&& derived) {
+            Containers::Pointer<Base> base{Utility::move(derived)};
+            ...
+        }
+
+       Instead, std::is_convertible<U*, T*> is used, which doesn't have this
+       requirement, and the only difference compared to std::is_base_of<T, U>
+       seems to be that it doesn't work for private inheritance (which is fine,
+       as the Pointer wouldn't work with that either). This test verifies that
+       code where U is convertible to T but isn't derived from T correctly
+       fails to compile (i.e., causing a "no matching constructor" error, not
+       some subsequent failure inside the constructor). */
+
+    struct Base {
+        int a;
+        explicit Base(int a): a{a} {}
+        virtual ~Base() = default;
+    };
+
+    struct Derived: Base {};
+
+    struct Unrelated {
+        operator Base&() { return base; }
+        Base base{3};
+    };
+
+    CORRADE_VERIFY(std::is_constructible<Containers::Pointer<Base>, Containers::Pointer<Derived>&&>::value);
+    /* With std::is_convertible<U&, T&> this would pass (although the commented
+       out code below would still fail to compile), which is incorrect */
+    CORRADE_VERIFY(!std::is_constructible<Containers::Pointer<Base>, Containers::Pointer<Unrelated>&&>::value);
+
+    Containers::Pointer<Unrelated> a{Corrade::InPlaceInit};
+    Containers::Pointer<Base> b;
+    CORRADE_COMPARE(a->base.a, 3);
+
+    /* This shouldn't compile */
+    // b = Utility::move(a);
+    CORRADE_VERIFY(!b);
 }
 
 void PointerTest::constructIncomplete() {

@@ -233,7 +233,10 @@ template<class T> class Pointer {
          */
         template<class U
             #ifndef DOXYGEN_GENERATING_OUTPUT
-            , typename std::enable_if<std::is_base_of<T, U>::value, int>::type = 0
+            /* Not using std::is_base_of<T, U> as it requires T to be defined,
+               which breaks certain generic code. For more information see the
+               PointerTest::constructConvertibleButNotDerived() case. */
+            , typename std::enable_if<std::is_convertible<U*, T*>::value, int>::type = 0
             #endif
         > /*implicit*/ Pointer(Pointer<U>&& other) noexcept: _pointer{other.release()} {
             static_assert(std::is_trivially_destructible<U>::value || std::has_virtual_destructor<T>::value, "the derived type should be trivially destructible or the base type should have a virtual destructor");
