@@ -1374,7 +1374,8 @@ int foo(int a, CORRADE_UNUSED int b) {
 /* [CORRADE_UNUSED] */
 
 /* [CORRADE_NODISCARD] */
-CORRADE_NODISCARD std::FILE* openFile(Containers::StringView filename);
+CORRADE_NODISCARD("file needs closing after") std::FILE*
+    openFile(Containers::StringView name);
 /* [CORRADE_NODISCARD] */
 
 /* [CORRADE_ALWAYS_INLINE] */

@@ -44,11 +44,12 @@ MacrosCpp17Test::MacrosCpp17Test() {
               &MacrosCpp17Test::fallthrough});
 }
 
-CORRADE_NODISCARD int nodiscardReturn(int a) { return a + 1; }
+CORRADE_NODISCARD("this message will not be printed until C++20") int nodiscardReturn(int a) { return a + 1; }
 
 void MacrosCpp17Test::nodiscard() {
-    /* CORRADE_NODISCARD has different implementation with C++17, other than
-       that the test case is equivalent to MacrosTest::nodiscard() */
+    /* CORRADE_NODISCARD has different implementation with C++17 (and then with
+       C++20), other than that the test case is equivalent to
+       MacrosTest::nodiscard() */
 
     int a = 2;
     #if 1 /* Set to 0 to produce a warning */

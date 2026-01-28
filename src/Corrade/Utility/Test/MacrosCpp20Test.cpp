@@ -33,13 +33,31 @@ namespace Corrade { namespace Utility { namespace Test { namespace {
 struct MacrosCpp20Test: TestSuite::Tester {
     explicit MacrosCpp20Test();
 
+    void nodiscard();
     void constexpr20();
     void likelyUnlikely();
 };
 
 MacrosCpp20Test::MacrosCpp20Test() {
-    addTests({&MacrosCpp20Test::constexpr20,
+    addTests({&MacrosCpp20Test::nodiscard,
+              &MacrosCpp20Test::constexpr20,
               &MacrosCpp20Test::likelyUnlikely});
+}
+
+CORRADE_NODISCARD("don't discard me!") int nodiscardReturn(int a) { return a + 1; }
+
+void MacrosCpp20Test::nodiscard() {
+    /* CORRADE_NODISCARD has different implementation with C++17 and C++20,
+       other than that the test case is equivalent to
+       MacrosTest::nodiscard() */
+
+    int a = 2;
+    #if 1 /* Set to 0 to produce a warning */
+    a +=
+    #endif
+    nodiscardReturn(3);
+
+    CORRADE_COMPARE_AS(a, 2, TestSuite::Compare::GreaterOrEqual);
 }
 
 struct ConstexprNoInit {

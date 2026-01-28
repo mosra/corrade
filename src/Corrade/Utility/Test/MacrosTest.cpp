@@ -108,11 +108,11 @@ void MacrosTest::unused() {
     CORRADE_COMPARE(Four{}.a, 4);
 }
 
-CORRADE_NODISCARD int nodiscardReturn(int a) { return a + 1; }
+CORRADE_NODISCARD("this message won't be printed until C++20") int nodiscardReturn(int a) { return a + 1; }
 
 void MacrosTest::nodiscard() {
-    /* See also MacrosCpp17Test::nodiscard() which tests the C++17
-       implementation */
+    /* See also MacrosCpp{17,20}Test::nodiscard() which tests the C++17 and
+       C++20 implementation */
 
     int a = 2;
     #if 1 /* Set to 0 to produce a warning */
