@@ -188,9 +188,7 @@ template<unsigned dimensions, class T> class StridedDimensions {
         explicit StridedDimensions(Corrade::NoInitT) noexcept {}
 
         /** @brief Constructor */
-        template<class ...Args> constexpr /*implicit*/ StridedDimensions(T first, Args... next) noexcept: _data{T(first), T(next)...} {
-            static_assert(sizeof...(Args) + 1 == dimensions, "wrong value count");
-        }
+        template<class ...Args, typename std::enable_if<sizeof...(Args) + 1 == dimensions, int>::type = 0> constexpr /*implicit*/ StridedDimensions(T first, Args... next) noexcept: _data{T(first), T(next)...} {}
 
         /** @brief Construct from an array */
         constexpr /*implicit*/ StridedDimensions(const T(&values)[dimensions]) noexcept: StridedDimensions{values, typename Implementation::GenerateSequence<dimensions>::Type{}} {}

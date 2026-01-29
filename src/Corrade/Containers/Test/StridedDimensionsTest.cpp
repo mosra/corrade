@@ -67,6 +67,7 @@ struct StridedDimensionsTest: TestSuite::Tester {
     void construct3D();
     void constructNoInit();
     void constructCopy();
+    void constructDimensionOverloads();
 
     void convertScalar();
     void convertScalar3D();
@@ -86,6 +87,7 @@ StridedDimensionsTest::StridedDimensionsTest() {
               &StridedDimensionsTest::construct3D,
               &StridedDimensionsTest::constructNoInit,
               &StridedDimensionsTest::constructCopy,
+              &StridedDimensionsTest::constructDimensionOverloads,
 
               &StridedDimensionsTest::convertScalar,
               &StridedDimensionsTest::convertScalar3D,
@@ -213,6 +215,30 @@ void StridedDimensionsTest::constructCopy() {
     #endif
     CORRADE_VERIFY(std::is_nothrow_copy_constructible<Size3D>::value);
     CORRADE_VERIFY(std::is_nothrow_copy_assignable<Size3D>::value);
+}
+
+std::size_t product(const Size1D& size) {
+    return size;
+}
+std::size_t product(const Size2D& size) {
+    return size[0]*size[1];
+}
+std::size_t product(const Size3D& size) {
+    return size[0]*size[1]*size[2];
+}
+std::size_t product(const Size4D& size) {
+    return size[0]*size[1]*size[2]*size[3];
+}
+
+void StridedDimensionsTest::constructDimensionOverloads() {
+    /* It should be possible to construct those with just {} and not have them
+       ambiguous between each other, similarly as is possible with Magnum's
+       Vector2/3/4 */
+    CORRADE_COMPARE(product(5), 5);
+    CORRADE_COMPARE(product({5}), 5);
+    CORRADE_COMPARE(product({5, 2}), 10);
+    CORRADE_COMPARE(product({5, 3, 2}), 30);
+    CORRADE_COMPARE(product({5, 3, 4, 2}), 120);
 }
 
 void StridedDimensionsTest::convertScalar() {
