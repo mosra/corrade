@@ -402,8 +402,8 @@ class Array {
          * otherwise). If the size is zero, no allocation is done.
          * @see @relativeref{Corrade,DefaultInit},
          *      @ref Array(DirectInitT, std::size_t, Args&&... args),
-         *      @ref Array(InPlaceInitT, std::initializer_list<T>),
-         *      @ref array(std::initializer_list<T>),
+         *      @ref Array(InPlaceInitT, ArrayView<const T>),
+         *      @ref array(ArrayView<const T>),
          *      @ref std::is_trivially_constructible
          */
         explicit CORRADE_DEPRECATED("use Array(ValueInitT, std::size_t) or Array(NoInitT, std::size_t) instead") Array(Corrade::DefaultInitT, std::size_t size): _data{size ? new T[size] : nullptr}, _size{size}, _deleter{nullptr} {}
@@ -419,8 +419,8 @@ class Array {
          * @see @relativeref{Corrade,ValueInit},
          *      @ref Array(NoInitT, std::size_t),
          *      @ref Array(DirectInitT, std::size_t, Args&&... args),
-         *      @ref Array(InPlaceInitT, std::initializer_list<T>),
-         *      @ref array(std::initializer_list<T>),
+         *      @ref Array(InPlaceInitT, ArrayView<const T>),
+         *      @ref array(ArrayView<const T>),
          *      @ref std::is_trivially_constructible
          */
         /* The () instead of {} works around a featurebug in C++ where new T{}
@@ -452,8 +452,8 @@ class Array {
          * @see @relativeref{Corrade,NoInit},
          *      @ref Array(ValueInitT, std::size_t),
          *      @ref Array(DirectInitT, std::size_t, Args&&... args),
-         *      @ref Array(InPlaceInitT, std::initializer_list<T>),
-         *      @ref array(std::initializer_list<T>), @ref deleter(),
+         *      @ref Array(InPlaceInitT, ArrayView<const T>),
+         *      @ref array(ArrayView<const T>), @ref deleter(),
          *      @ref std::is_trivially_constructible
          */
         explicit Array(Corrade::NoInitT, std::size_t size): _data{size ? Implementation::noInitAllocate<T>(size) : nullptr}, _size{size}, _deleter{Implementation::noInitDeleter<T>()} {}
@@ -466,8 +466,8 @@ class Array {
          * using forwarded @p args.
          * @see @relativeref{Corrade,DirectInit},
          *      @ref Array(ValueInitT, std::size_t),
-         *      @ref Array(InPlaceInitT, std::initializer_list<T>),
-         *      @ref array(std::initializer_list<T>)
+         *      @ref Array(InPlaceInitT, ArrayView<const T>),
+         *      @ref array(ArrayView<const T>)
          */
         template<class ...Args> explicit Array(Corrade::DirectInitT, std::size_t size, Args&&... args);
 
@@ -490,7 +490,6 @@ class Array {
          *      @ref Array(DirectInitT, std::size_t, Args&&... args)
          */
         /*implicit*/ Array(Corrade::InPlaceInitT, ArrayView<const T> list);
-
         /** @overload */
         /*implicit*/ Array(Corrade::InPlaceInitT, std::initializer_list<T> list);
 
@@ -498,7 +497,9 @@ class Array {
          * @brief Construct a value-initialized array
          *
          * Alias to @ref Array(ValueInitT, std::size_t).
-         * @see @ref Array(NoInitT, std::size_t)
+         * @see @ref Array(NoInitT, std::size_t),
+         *      @ref Array(DirectInitT, std::size_t, Args&&... args),
+         *      @ref Array(InPlaceInitT, ArrayView<const T>)
          */
         explicit Array(std::size_t size): Array{Corrade::ValueInit, size} {}
 
