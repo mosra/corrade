@@ -156,7 +156,7 @@ class FunctionData {
 
             /* Member functions */
             struct {
-                char data[Implementation::FunctionPointerSize*sizeof(std::size_t)];
+                std::size_t data[Implementation::FunctionPointerSize];
                 void* instance;
             } member;
 
