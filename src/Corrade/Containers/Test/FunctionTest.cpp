@@ -1018,7 +1018,11 @@ void FunctionTest::constructStatelessFunctor() {
     } sum;
 
     Function<int(int, int)> a = sum;
-    Function<int(int, int)> b{NoAllocateInit, sum};
+    /* It should be possible to implicitly construct with the tag as well, as
+       {NoAllocateInit, []() {...}} is a common use case to prevent accidental
+       allocation and forcing the user to specify the whole type would be
+       silly. */
+    Function<int(int, int)> b = {NoAllocateInit, sum};
     CORRADE_VERIFY(a);
     CORRADE_VERIFY(b);
     CORRADE_VERIFY(!a.isAllocated());
@@ -1059,7 +1063,11 @@ void FunctionTest::constructStatefulTrivialSmallFunctor() {
     CORRADE_VERIFY(std::is_trivially_destructible<Accumulator>::value);
 
     Function<int(int)> a = accumulator;
-    Function<int(int)> b{NoAllocateInit, accumulator};
+    /* It should be possible to implicitly construct with the tag as well, as
+       {NoAllocateInit, []() {...}} is a common use case to prevent accidental
+       allocation and forcing the user to specify the whole type would be
+       silly. */
+    Function<int(int)> b = {NoAllocateInit, accumulator};
     CORRADE_VERIFY(a);
     CORRADE_VERIFY(b);
     CORRADE_VERIFY(!a.isAllocated());
@@ -1091,7 +1099,11 @@ void FunctionTest::constructStatefulTrivialSmallLambda() {
     CORRADE_VERIFY(std::is_trivially_destructible<decltype(accumulator)>::value);
 
     Function<int(int)> a = accumulator;
-    Function<int(int)> b{
+    /* It should be possible to implicitly construct with the tag as well, as
+       {NoAllocateInit, []() {...}} is a common use case to prevent accidental
+       allocation and forcing the user to specify the whole type would be
+       silly. */
+    Function<int(int)> b = {
         /* All lambdas are non-trivially-copyable on MSVC 2015 and 2017, so
            this would fail to compile there */
         #ifndef CORRADE_MSVC2017_COMPATIBILITY
@@ -1446,9 +1458,9 @@ void FunctionTest::constructTrivialFunctorOverload() {
     } sumOrMultiply;
 
     Function<int(int, int)> a1 = sumOrMultiply;
-    Function<int(int, int)> a2{NoAllocateInit, sumOrMultiply};
+    Function<int(int, int)> a2 = {NoAllocateInit, sumOrMultiply};
     Function<float(float, float)> b1 = sumOrMultiply;
-    Function<float(float, float)> b2{NoAllocateInit, sumOrMultiply};
+    Function<float(float, float)> b2 = {NoAllocateInit, sumOrMultiply};
     CORRADE_VERIFY(!a1.isAllocated());
     CORRADE_VERIFY(!a2.isAllocated());
     CORRADE_VERIFY(!b1.isAllocated());
@@ -1506,13 +1518,13 @@ void FunctionTest::constructTrivialFunctorRvalueOverload() {
     } sumConstLvalue;
 
     Function<int(int, int)> a1 = sum;
-    Function<int(int, int)> a2{NoAllocateInit, sum};
+    Function<int(int, int)> a2 = {NoAllocateInit, sum};
     Function<int(int, int)> b1 = sumLvalue;
-    Function<int(int, int)> b2{NoAllocateInit, sumLvalue};
+    Function<int(int, int)> b2 = {NoAllocateInit, sumLvalue};
     Function<int(int, int)> c1 = sumConst;
-    Function<int(int, int)> c2{NoAllocateInit, sumConst};
+    Function<int(int, int)> c2 = {NoAllocateInit, sumConst};
     Function<int(int, int)> d1 = sumConstLvalue;
-    Function<int(int, int)> d2{NoAllocateInit, sumConstLvalue};
+    Function<int(int, int)> d2 = {NoAllocateInit, sumConstLvalue};
     CORRADE_VERIFY(!a1.isAllocated());
     CORRADE_VERIFY(!a2.isAllocated());
     CORRADE_VERIFY(!b1.isAllocated());
@@ -1897,7 +1909,7 @@ void FunctionTest::rvalueArgumentTrivialFunctor() {
     } acquirer;
 
     Function<int(Immovable&&, int)> a = acquirer;
-    Function<int(Immovable&&, int)> b{NoAllocateInit, acquirer};
+    Function<int(Immovable&&, int)> b = {NoAllocateInit, acquirer};
     CORRADE_VERIFY(!a.isAllocated());
     CORRADE_VERIFY(!b.isAllocated());
 
@@ -1981,7 +1993,7 @@ void FunctionTest::rvalueResultTrivialFunctor() {
     } releaser;
 
     Function<Immovable&&(Immovable&&, int)> a = releaser;
-    Function<Immovable&&(Immovable&&, int)> b{NoAllocateInit, releaser};
+    Function<Immovable&&(Immovable&&, int)> b = {NoAllocateInit, releaser};
     CORRADE_VERIFY(!a.isAllocated());
     CORRADE_VERIFY(!b.isAllocated());
 
@@ -2083,7 +2095,7 @@ void FunctionTest::moveOnlyArgumentTrivialFunctor() {
         } sum;
 
         Function<int(MoveOnly, int)> a = sum;
-        Function<int(MoveOnly, int)> b{NoAllocateInit, sum};
+        Function<int(MoveOnly, int)> b = {NoAllocateInit, sum};
         CORRADE_VERIFY(!a.isAllocated());
         CORRADE_VERIFY(!b.isAllocated());
         CORRADE_COMPARE(a(MoveOnly{2}, 3), 5);
@@ -2232,7 +2244,7 @@ void FunctionTest::moveOnlyResultTrivialFunctor() {
         } subtract;
 
         Function<MoveOnly(int, int)> a = subtract;
-        Function<MoveOnly(int, int)> b{NoAllocateInit, subtract};
+        Function<MoveOnly(int, int)> b = {NoAllocateInit, subtract};
         CORRADE_VERIFY(!a.isAllocated());
         CORRADE_VERIFY(!b.isAllocated());
         CORRADE_COMPARE(a(2, 3).a, -1);

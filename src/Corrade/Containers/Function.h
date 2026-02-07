@@ -423,7 +423,7 @@ template<class R, class ...Args> class Function<R(Args...)>: public FunctionData
                overload makes no sense */
             , typename std::enable_if<Implementation::IsFunctor<typename std::decay<F>::type, R(Args...)>::value, int>::type = 0
             #endif
-        > explicit Function(NoAllocateInitT, F&& f) noexcept;
+        > /*implicit*/ Function(NoAllocateInitT, F&& f) noexcept;
 
         /**
          * @brief Call the function pointer
