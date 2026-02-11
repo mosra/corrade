@@ -24,7 +24,10 @@ build() {
             -DCMAKE_CROSS_CONFIGS=all \
             -DCMAKE_CXX_FLAGS_RELWITHDEBINFO="-O2 -g -DNDEBUG -fno-omit-frame-pointer" \
             -DCMAKE_CXX_COMPILER=clang++ \
-            -DCMAKE_CXX_FLAGS="-stdlib=libc++" \
+            `# Make libc++ remove transitive includes, both for faster build` \
+            `# times and to detect if we're missing a transitive include.` \
+            `# Works with libc++ 16+, which is used by NDK r26+.` \
+            -DCMAKE_CXX_FLAGS="-stdlib=libc++ -D_LIBCPP_REMOVE_TRANSITIVE_INCLUDES" \
             -DCMAKE_EXE_LINKER_FLAGS=-lc++abi \
             -G "Ninja Multi-Config"
     fi

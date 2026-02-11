@@ -24,6 +24,11 @@ cmake .. \
     -DCMAKE_OSX_ARCHITECTURES="x86_64" \
     -DCORRADE_RC_EXECUTABLE=$HOME/deps-native/bin/corrade-rc \
     -DCMAKE_INSTALL_PREFIX=$HOME/deps \
+    `# Make libc++ remove transitive includes, both for faster build times` \
+    `# and to detect if we're missing a transitive include. Works with` \
+    `# libc++ 16+, which is used by Xcode 15 (i.e., will get used on the` \
+    `# next CircleCI executor update).` \
+    -DCMAKE_CXX_FLAGS="-D_LIBCPP_REMOVE_TRANSITIVE_INCLUDES" \
     -DCORRADE_BUILD_STATIC=ON \
     -DCORRADE_BUILD_TESTS=ON \
     -DCORRADE_TESTSUITE_TARGET_XCTEST=ON \

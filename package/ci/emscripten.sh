@@ -13,6 +13,11 @@ cmake .. \
     -DCMAKE_BUILD_TYPE=Debug \
     -DCMAKE_INSTALL_PREFIX=$HOME/deps \
     -DCORRADE_BUILD_TESTS=ON \
+    `# Make libc++ remove transitive includes, both for faster build times` \
+    `# and to detect if we're missing a transitive include. Works with` \
+    `# libc++ 16+, which is used by Emscripten 3.1.18+ (i.e., will get used` \
+    `# next time emsdk is bumped).` \
+    -DCMAKE_CXX_FLAGS="-D_LIBCPP_REMOVE_TRANSITIVE_INCLUDES" \
     $EXTRA_OPTS \
     -G Ninja
 ninja $NINJA_JOBS
@@ -32,6 +37,8 @@ cmake ../src/examples \
     -DCMAKE_TOOLCHAIN_FILE="../toolchains/generic/Emscripten-wasm.cmake" \
     -DCMAKE_BUILD_TYPE=Debug \
     -DCMAKE_FIND_ROOT_PATH=$HOME/deps \
+    `# Make libc++ remove transitive includes, same as above` \
+    -DCMAKE_CXX_FLAGS="-D_LIBCPP_REMOVE_TRANSITIVE_INCLUDES" \
     $EXTRA_OPTS \
     -G Ninja
 ninja $NINJA_JOBS

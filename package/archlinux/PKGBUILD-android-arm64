@@ -34,6 +34,10 @@ build() {
     # CLICOLOR_FORCE=1: https://github.com/ninja-build/ninja/issues/2196
     cmake .. \
         -DCMAKE_BUILD_TYPE=Release \
+        `# Make libc++ remove transitive includes, both for faster build` \
+        `# times and to detect if we're missing a transitive include. Works` \
+        `# with libc++ 16+, which is used by NDK r26+.` \
+        -DCMAKE_CXX_FLAGS="-D_LIBCPP_REMOVE_TRANSITIVE_INCLUDES" \
         -DCMAKE_COLOR_DIAGNOSTICS=ON \
         -DCORRADE_BUILD_TESTS=ON
     ninja

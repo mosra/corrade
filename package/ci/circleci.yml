@@ -460,7 +460,11 @@ jobs:
   macos:
     executor: xcode-14_3
     environment:
-      CMAKE_CXX_FLAGS: --coverage
+      # Make libc++ remove transitive includes, both for faster build times and
+      # to detect if we're missing a transitive include. Works with libc++ 16+,
+      # which is used by Xcode 15 (i.e., will get used on the next CircleCI
+      # executor update).
+      CMAKE_CXX_FLAGS: --coverage -D_LIBCPP_REMOVE_TRANSITIVE_INCLUDES
       CONFIGURATION: Debug
     steps:
     - install-base-macos
@@ -476,7 +480,11 @@ jobs:
     environment:
       # STUPID yml interprets unquoted ON as a boolean
       BUILD_STATIC: "ON"
-      CMAKE_CXX_FLAGS: --coverage
+      # Make libc++ remove transitive includes, both for faster build times and
+      # to detect if we're missing a transitive include. Works with libc++ 16+,
+      # which is used by Xcode 15 (i.e., will get used on the next CircleCI
+      # executor update).
+      CMAKE_CXX_FLAGS: --coverage -D_LIBCPP_REMOVE_TRANSITIVE_INCLUDES
       CONFIGURATION: Debug
     steps:
     - install-base-macos

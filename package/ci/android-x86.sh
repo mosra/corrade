@@ -24,6 +24,11 @@ cmake .. \
     -DCMAKE_ANDROID_STL_TYPE=c++_static \
     -DCMAKE_INSTALL_PREFIX=$HOME/deps \
     -DCMAKE_BUILD_TYPE=Release \
+    `# Make libc++ remove transitive includes, both for faster build times` \
+    `# and to detect if we're missing a transitive include. Works with` \
+    `# libc++ 16+, which is used by NDK r26+ (i.e., will get used next time` \
+    `# the android image is bumped).` \
+    -DCMAKE_CXX_FLAGS="-D_LIBCPP_REMOVE_TRANSITIVE_INCLUDES" \
     -DCORRADE_RC_EXECUTABLE=$HOME/deps-native/bin/corrade-rc \
     -DCORRADE_BUILD_TESTS=ON \
     -G Ninja
