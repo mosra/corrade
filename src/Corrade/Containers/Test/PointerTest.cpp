@@ -474,7 +474,10 @@ void PointerTest::constructConvertibleButNotDerived() {
     struct Derived: Base {};
 
     struct Unrelated {
-        operator Base&() { return base; }
+        /* The operator would only get used in the `b = move(a)` expression
+           below, and only if it's implemented incorrectly, so yes, it's
+           unused */
+        CORRADE_UNUSED operator Base&() { return base; }
         Base base{3};
     };
 
@@ -484,10 +487,10 @@ void PointerTest::constructConvertibleButNotDerived() {
     CORRADE_VERIFY(!std::is_constructible<Containers::Pointer<Base>, Containers::Pointer<Unrelated>&&>::value);
 
     Containers::Pointer<Unrelated> a{Corrade::InPlaceInit};
-    Containers::Pointer<Base> b;
     CORRADE_COMPARE(a->base.a, 3);
 
     /* This shouldn't compile */
+    Containers::Pointer<Base> b;
     // b = Utility::move(a);
     CORRADE_VERIFY(!b);
 }
