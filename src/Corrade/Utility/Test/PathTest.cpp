@@ -1328,7 +1328,7 @@ void PathTest::makeDotDotDot() {
     {
         /* https://github.com/emscripten-core/emscripten/pull/23136 */
         #if defined(CORRADE_TARGET_EMSCRIPTEN) && __EMSCRIPTEN_major__ < 4
-        CORRADE_EXPECT_FAIL("Emscripten before 4.0.0 doesn't return EEXIST on mdkir(\".\") but fails instead.");
+        CORRADE_EXPECT_FAIL("Emscripten before 4.0.0 doesn't return EEXIST on mkdir(\".\") but fails instead.");
         #endif
         CORRADE_VERIFY(Path::make("."));
     }
@@ -1338,7 +1338,7 @@ void PathTest::makeDotDotDot() {
     {
         /* https://github.com/emscripten-core/emscripten/pull/23136 */
         #if defined(CORRADE_TARGET_EMSCRIPTEN) && __EMSCRIPTEN_major__ < 4
-        CORRADE_EXPECT_FAIL("Emscripten before 4.0.0 doesn't return EEXIST on mdkir(\"..\") but fails instead.");
+        CORRADE_EXPECT_FAIL("Emscripten before 4.0.0 doesn't return EEXIST on mkdir(\"..\") but fails instead.");
         #endif
         CORRADE_VERIFY(Path::make(".."));
     }

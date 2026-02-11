@@ -910,8 +910,9 @@ void DirectoryTest::mkpathDotDotDot() {
     /* Creating current directory should be a no-op because it exists */
     CORRADE_VERIFY(Directory::exists("."));
     {
-        #ifdef CORRADE_TARGET_EMSCRIPTEN
-        CORRADE_EXPECT_FAIL("Emscripten doesn't return EEXIST on mdkir(\".\") but fails instead.");
+        /* https://github.com/emscripten-core/emscripten/pull/23136 */
+        #if defined(CORRADE_TARGET_EMSCRIPTEN) && __EMSCRIPTEN_major__ < 4
+        CORRADE_EXPECT_FAIL("Emscripten before 4.0.0 doesn't return EEXIST on mkdir(\".\") but fails instead.");
         #endif
         CORRADE_VERIFY(Directory::mkpath("."));
     }
@@ -919,8 +920,9 @@ void DirectoryTest::mkpathDotDotDot() {
     /* Parent as well */
     CORRADE_VERIFY(Directory::exists(".."));
     {
-        #ifdef CORRADE_TARGET_EMSCRIPTEN
-        CORRADE_EXPECT_FAIL("Emscripten doesn't return EEXIST on mdkir(\"..\") but fails instead.");
+        /* https://github.com/emscripten-core/emscripten/pull/23136 */
+        #if defined(CORRADE_TARGET_EMSCRIPTEN) && __EMSCRIPTEN_major__ < 4
+        CORRADE_EXPECT_FAIL("Emscripten before 4.0.0 doesn't return EEXIST on mkdir(\"..\") but fails instead.");
         #endif
         CORRADE_VERIFY(Directory::mkpath(".."));
     }
