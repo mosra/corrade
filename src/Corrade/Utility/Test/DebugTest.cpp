@@ -39,6 +39,7 @@
 #include "Corrade/Utility/FormatStl.h" /** @todo remove once Debug is fully stream-free */
 
 #ifndef CORRADE_TARGET_EMSCRIPTEN
+#include <functional> /* std::ref() */
 #include <thread>
 #endif
 
