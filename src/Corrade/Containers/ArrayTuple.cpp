@@ -280,35 +280,35 @@ void ArrayTuple::create(const ArrayView<const Item>& items, const Item& arrayDel
 
     /* Store the items */
     auto* nextDestructibleItem = reinterpret_cast<DestructibleItem*>(_data + sizeof(std::size_t));
-    for(std::size_t i = 0; i != items.size(); ++i) {
+    for(const Item& item: items) {
         /** @todo once we're asserting for alignment in Array, assert also here
-            that `_data % items[i]._elementAlignment == 0`. Especially
-            important when custom allocators passing static char[] arrays are
-            involved, like in the tests */
-        offset = alignFor(offset, items[i]._elementAlignment);
+            that `_data % item._elementAlignment == 0`. Especially important
+            when custom allocators passing static char[] arrays are involved,
+            like in the tests */
+        offset = alignFor(offset, item._elementAlignment);
 
         /* If the item has a default constructor, call it on each element */
-        if(items[i]._constructor)
-            for(std::size_t j = 0; j != items[i]._elementCount; ++j)
-                items[i]._constructor(_data + offset + j*items[i]._elementSize, items[i]._elementSize);
+        if(item._constructor)
+            for(std::size_t i = 0; i != item._elementCount; ++i)
+                item._constructor(_data + offset + i*item._elementSize, item._elementSize);
 
         /* If the item has a destructor and there's not zero elements, populate
            the DestructibleItem instance */
-        if(items[i]._destructor && items[i]._elementCount) {
+        if(item._destructor && item._elementCount) {
             nextDestructibleItem->data = _data + offset;
-            nextDestructibleItem->elementCount = items[i]._elementCount;
-            nextDestructibleItem->elementSize = items[i]._elementSize;
-            nextDestructibleItem->destructor = items[i]._destructor;
+            nextDestructibleItem->elementCount = item._elementCount;
+            nextDestructibleItem->elementSize = item._elementSize;
+            nextDestructibleItem->destructor = item._destructor;
             ++nextDestructibleItem;
         }
 
         /* Save the data pointer to the output array. The size was already
            saved in the Item constructor */
-        CORRADE_INTERNAL_ASSERT(items[i]._destinationPointer);
-        *items[i]._destinationPointer = _data + offset;
+        CORRADE_INTERNAL_ASSERT(item._destinationPointer);
+        *item._destinationPointer = _data + offset;
 
         /* Increase the offset for next round */
-        offset += items[i]._elementCount*items[i]._elementSize;
+        offset += item._elementCount*item._elementSize;
     }
 
     /* Check that we're consistent with what sizeFor() calculated */
