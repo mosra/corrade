@@ -298,7 +298,7 @@ namespace Implementation {
 
 namespace Implementation {
     /* To avoid including <cstring> */
-    CORRADE_UTILITY_EXPORT void arrayTupleMemset(void* data, std::size_t size);
+    CORRADE_UTILITY_EXPORT void arrayTupleMemset(void* data, std::size_t elementSize, std::size_t elementCount);
 }
 
 /**
@@ -530,10 +530,11 @@ class CORRADE_UTILITY_EXPORT ArrayTuple::Item {
         || !std::is_trivially_destructible<T>::value, int>::type = 0> explicit Item(Corrade::ValueInitT, std::size_t size, T*& destinationPointer): Item{Corrade::NoInit, size, destinationPointer} {
             static_assert(std::is_default_constructible<T>::value,
                 "can't default-init a type with no default constructor, use NoInit instead and manually initialize each item");
-            _constructor = [](void* data, std::size_t) {
-                /* Default-construct the T and work around various compiler
-                   issues, see construct() for details */
-                Implementation::construct(*static_cast<T*>(data));
+            _constructor = [](void* data, std::size_t, std::size_t elementCount) {
+                for(T *i = static_cast<T*>(data), *end = i + elementCount; i != end; ++i)
+                    /* Default-construct the T and work around various compiler
+                       issues, see construct() for details */
+                    Implementation::construct(*static_cast<T*>(i));
             };
         }
 
@@ -635,13 +636,17 @@ class CORRADE_UTILITY_EXPORT ArrayTuple::Item {
             _elementCount;
 
         /* Constructor is null if using the NoInit constructor; in case of
-           memory deleters it's null always. Second argument is
-           _elementSize. */
-        void(*_constructor)(void*, std::size_t);
+           memory deleters it's null always. It's called once for all elements
+           to allow the compiler to optimize the contents, such as turning them
+           into a memset. */
+        void(*_constructor)(void* data, std::size_t elementSize, std::size_t elementCount);
 
         /* Destructor is set for non-trivially-destructible types; in case of
-           memory deleters only if it's a default or a stateful deleter */
-        void(*_destructor)(char*, std::size_t);
+           memory deleters only if it's a default or a stateful deleter. While
+           the constructor is called once for all elements, the deleter is not
+           as storing non-trivially-destructible data is far less common and
+           it isn't worth the extra testing effort. */
+        void(*_destructor)(char*, std::size_t elementSize);
 
         /* Output pointer is always set */
         void** _destinationPointer;

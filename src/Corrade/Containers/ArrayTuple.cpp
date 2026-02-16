@@ -287,10 +287,10 @@ void ArrayTuple::create(const ArrayView<const Item>& items, const Item& arrayDel
             like in the tests */
         offset = alignFor(offset, item._elementAlignment);
 
-        /* If the item has a default constructor, call it on each element */
+        /* If the item has a default constructor, call it. It should itself
+           perform construction on each element. */
         if(item._constructor)
-            for(std::size_t i = 0; i != item._elementCount; ++i)
-                item._constructor(_data + offset + i*item._elementSize, item._elementSize);
+            item._constructor(_data + offset, item._elementSize, item._elementCount);
 
         /* If the item has a destructor and there's not zero elements, populate
            the DestructibleItem instance */
@@ -374,8 +374,8 @@ char* ArrayTuple::release() {
 
 namespace Implementation {
 
-void arrayTupleMemset(void* const data, const std::size_t size) {
-    std::memset(data, 0, size);
+void arrayTupleMemset(void* const data, const std::size_t elementSize, const std::size_t elementCount) {
+    std::memset(data, 0, elementSize*elementCount);
 }
 
 }
@@ -419,9 +419,14 @@ ArrayTuple::Item::Item(const std::size_t size, MutableStringView& outputView): I
 ArrayTuple::Item::Item(Corrade::NoInitT, const std::size_t size, MutableStringView& outputView, const StringViewFlags flags):
     _elementSize{size + (flags & StringViewFlag::NullTerminated ? 1 : 0)}, _elementAlignment{1},
     _elementCount{1},
-    _constructor{flags & StringViewFlag::NullTerminated ? [](void* data, std::size_t size) {
-        static_cast<char*>(data)[size - 1] = '\0';
-    } : static_cast<void(*)(void*, std::size_t)>(nullptr)},
+    _constructor{flags & StringViewFlag::NullTerminated ? [](void* data, std::size_t elementSize, std::size_t elementCount) {
+        #ifdef CORRADE_NO_DEBUG_ASSERT
+        static_cast<void>(elementCount);
+        #else
+        CORRADE_INTERNAL_DEBUG_ASSERT(elementCount == 1);
+        #endif
+        static_cast<char*>(data)[elementSize - 1] = '\0';
+    } : static_cast<void(*)(void*, std::size_t, std::size_t)>(nullptr)},
     _destructor{},
     _destinationPointer{&reinterpret_cast<void*&>(Implementation::dataRef(outputView))}
 {
