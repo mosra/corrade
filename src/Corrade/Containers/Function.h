@@ -27,7 +27,7 @@
 */
 
 /** @file
- * @brief Class @ref Corrade::Containers::FunctionData, @ref Corrade::Containers::Function<R(Args...)> "Corrade::Containers::Function"
+ * @brief Class @ref Corrade::Containers::FunctionData, @ref Corrade::Containers::Function<R(Args...)> "Corrade::Containers::Function", tag type @ref Corrade::Containers::NoAllocateInitT, tag @ref Corrade::Containers::NoAllocateInit
  * @m_since_latest
  */
 
