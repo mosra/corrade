@@ -62,6 +62,9 @@ guaranteed to contain those in order to define them for @ref std::pair.
     _STD_BEGIN
 #endif
 
+/* Note that while the <utility> include *seems* to be inside a STL namespace,
+   it's not -- either the STL namespace is defined with forward declarations
+   inside, or there's no namespace at all and <utility> is included instead */
 /** @todo the include is indented to work around acme.py extracting it to the
     top, fix properly */
 #if defined(CORRADE_TARGET_LIBCXX) || defined(CORRADE_TARGET_LIBSTDCXX) || defined(CORRADE_TARGET_DINKUMWARE)
