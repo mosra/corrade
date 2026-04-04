@@ -52,6 +52,7 @@ struct DebugTest: TestSuite::Tester {
 
     void debug();
     void string();
+    void stringEmpty();
     /** @todo once we get rid of iostreams, move this and other STL stuff to
         dedicated DebugStlTest */
     void stringStl();
@@ -128,6 +129,7 @@ DebugTest::DebugTest() {
 
         &DebugTest::debug,
         &DebugTest::string,
+        &DebugTest::stringEmpty,
         &DebugTest::stringStl,
         &DebugTest::boolean,
         &DebugTest::ints<unsigned char>,
@@ -244,6 +246,29 @@ void DebugTest::string() {
     std::ostringstream out;
     Debug{&out} << "hello\0world,"_s << Containers::String{"very\0well!"_s} << Containers::MutableStringView{a};
     CORRADE_COMPARE(out.str(), (std::string{"hello\0world, very\0well! mutable\n", 32}));
+}
+
+void DebugTest::stringEmpty() {
+    using namespace Containers::Literals;
+
+    /* All these should result in nothing being printed, but the separating
+       spaces should still be there. Null char pointers and null views should
+       be treated as empty strings as well. */
+    std::ostringstream out;
+    Debug{&out}
+        /* A null-terminated empty const char array */
+        << ""_s << "0"
+        /* A null-terminated empty const char array */
+        << Containers::String{} << "1"
+        /* A non-null-terminated empty const char array */
+        << Containers::StringView{"a", 0} << "2"
+        /* Zero-size arrays */
+        << Containers::StringView{nullptr, 0} << "3"
+        << Containers::MutableStringView{nullptr, 0} << "4"
+        /* Null pointers */
+        << static_cast<const char*>(nullptr) << "5"
+        << static_cast<char*>(nullptr) << "6";
+    CORRADE_COMPARE(out.str(), " 0  1  2  3  4  5  6\n");
 }
 
 void DebugTest::stringStl() {

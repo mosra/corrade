@@ -84,6 +84,18 @@ template<class T> inline void toStream(std::ostream& s, const T& value) {
     s << value;
 }
 
+/* On certain platforms, passing a null char pointer to a stream causes
+   segfault or other nasty behavior. Treat a null char pointer as an empty
+   string instead, printing nothing. */
+template<> inline void toStream(std::ostream& s, const char* const& value) {
+    if(value)
+        s << value;
+}
+template<> inline void toStream(std::ostream& s, char* const& value) {
+    if(value)
+        s << value;
+}
+
 template<> inline void toStream(std::ostream& s, const Containers::StringView& value) {
     s.write(value.data(), value.size());
 }
@@ -765,6 +777,7 @@ Debug& Debug::operator<<(const void* const value) {
 }
 
 Debug& Debug::operator<<(const char* value) { return print(value); }
+Debug& Debug::operator<<(char* value) { return print(value); }
 Debug& Debug::operator<<(Containers::StringView value) { return print(value); }
 Debug& Debug::operator<<(Containers::MutableStringView value) { return print(value); }
 Debug& Debug::operator<<(const Containers::String& value) { return print(value); }

@@ -672,6 +672,12 @@ class CORRADE_UTILITY_EXPORT Debug {
          * @overload
          * @m_since_latest
          */
+        Debug& operator<<(char* value);
+
+        /**
+         * @overload
+         * @m_since_latest
+         */
         Debug& operator<<(Containers::StringView value);
 
         /* Unfortunately we can't have just a StringView overload because

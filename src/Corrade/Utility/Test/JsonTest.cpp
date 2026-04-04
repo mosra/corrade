@@ -2725,7 +2725,7 @@ void JsonTest::parseStringKeys() {
         /* Token data should still inherit the Global flag even after parsing */
         CORRADE_COMPARE(json->root().data().flags(), data.json.flags());
         {
-            CORRADE_EXPECT_FAIL_IF(data.expectFail, Containers::StringView{data.expectFail});
+            CORRADE_EXPECT_FAIL_IF(data.expectFail, data.expectFail);
             CORRADE_COMPARE(token.asString(), data.expected);
         }
         CORRADE_COMPARE(token.asString().flags() & ~Containers::StringViewFlag::NullTerminated,
@@ -2783,7 +2783,7 @@ void JsonTest::parseStrings() {
         /* Token data should still inherit the Global flag even after parsing */
         CORRADE_COMPARE(json->root().data().flags(), data.json.flags());
         {
-            CORRADE_EXPECT_FAIL_IF(data.expectFail, Containers::StringView{data.expectFail});
+            CORRADE_EXPECT_FAIL_IF(data.expectFail, data.expectFail);
             CORRADE_COMPARE(json->root().asString(), data.expected);
         }
         CORRADE_COMPARE(json->root().asString().flags() & ~Containers::StringViewFlag::NullTerminated,
