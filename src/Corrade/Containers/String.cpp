@@ -107,9 +107,7 @@ inline void String::construct(const char* const data, const std::size_t size) {
 
     /* Otherwise allocate. Assuming the size is small enough -- this should
        have been checked in the caller already. */
-    } else {
-        std::memcpy(_large.data, data, size);
-    }
+    } else std::memcpy(_large.data, data, size);
 }
 
 inline void String::destruct() {
@@ -204,7 +202,8 @@ String::String(AllocatedInitT, const char* const data, const std::size_t size)
     _large.data = new char[size + 1];
     /* Apparently memcpy() can't be called with null pointers, even if size is
        zero. I call that bullying. */
-    if(size) std::memcpy(_large.data, data, size);
+    if(size)
+        std::memcpy(_large.data, data, size);
     _large.data[size] = '\0';
     _large.size = size;
     _large.deleter = nullptr;
@@ -322,7 +321,8 @@ String::String(Corrade::NoInitT, const std::size_t size)
 String::String(Corrade::DirectInitT, const std::size_t size, const char c): String{Corrade::NoInit, size} {
     #ifdef CORRADE_GRACEFUL_ASSERT
     /* If the NoInit constructor asserted, don't attempt to memset */
-    if(size >= Implementation::SmallStringSize && !_large.data) return;
+    if(size >= Implementation::SmallStringSize && !_large.data)
+        return;
     #endif
 
     std::memset(size < Implementation::SmallStringSize ? _small.data : _large.data, c, size);
