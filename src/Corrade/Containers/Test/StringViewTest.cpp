@@ -123,7 +123,7 @@ struct StringViewTest: TestSuite::Tester {
     #ifdef CORRADE_TARGET_32BIT
     void constructTooLarge();
     #endif
-    void constructNullptrNullTerminated();
+    void constructInvalidNullTerminated();
 
     void constructZeroNullPointerAmbiguity();
 
@@ -339,7 +339,7 @@ StringViewTest::StringViewTest() {
               #ifdef CORRADE_TARGET_32BIT
               &StringViewTest::constructTooLarge,
               #endif
-              &StringViewTest::constructNullptrNullTerminated,
+              &StringViewTest::constructInvalidNullTerminated,
 
               &StringViewTest::constructZeroNullPointerAmbiguity,
 
@@ -536,7 +536,7 @@ template<class T> void StringViewTest::construct() {
 
 void StringViewTest::constructConstexpr() {
     constexpr const char* string = "hell\0!!"; /* 7 chars + \0 at the end */
-    constexpr StringView view = {string, 6, StringViewFlag::Global|StringViewFlag::NullTerminated};
+    constexpr StringView view = {string, 7, StringViewFlag::Global|StringViewFlag::NullTerminated};
     constexpr bool boolConversion = !!view;
     constexpr bool empty = view.isEmpty();
     constexpr std::size_t size = view.size();
@@ -544,7 +544,7 @@ void StringViewTest::constructConstexpr() {
     constexpr const void* data = view.data();
     CORRADE_VERIFY(boolConversion);
     CORRADE_VERIFY(!empty);
-    CORRADE_COMPARE(size, 6);
+    CORRADE_COMPARE(size, 7);
     CORRADE_COMPARE(flags, StringViewFlag::Global|StringViewFlag::NullTerminated);
     {
         #if defined(CORRADE_TARGET_MSVC) && !defined(CORRADE_TARGET_CLANG) && _MSC_VER >= 1910 && _MSC_VER < 1931 && defined(_DEBUG)
@@ -674,7 +674,7 @@ void StringViewTest::constructFromMutable() {
 }
 
 void StringViewTest::constructCopy() {
-    StringView a{"hello\0!", 8, StringViewFlag::Global|StringViewFlag::NullTerminated};
+    StringView a{"hello\0!", 7, StringViewFlag::Global|StringViewFlag::NullTerminated};
 
     StringView b = a;
     CORRADE_COMPARE(b.data(), a.data());
@@ -735,14 +735,29 @@ void StringViewTest::constructTooLarge() {
 }
 #endif
 
-void StringViewTest::constructNullptrNullTerminated() {
+void StringViewTest::constructInvalidNullTerminated() {
     CORRADE_SKIP_IF_NO_DEBUG_ASSERT();
+
+    /* Null pointer and a non-null-terminated string should be file without the
+       NullTerminated flag */
+    StringView{nullptr, 0, StringViewFlag::Global};
+    StringView{ArrayView<const char>{}, StringViewFlag::Global};
+    StringView{"hello", 4, StringViewFlag::Global};
+    StringView{ArrayView<const char>{"hello", 4}, StringViewFlag::Global};
 
     Containers::String out;
     Error redirectError{&out};
+    /* Null pointer, same with an empty ArrayView */
     StringView{nullptr, 0, StringViewFlag::NullTerminated};
+    StringView{ArrayView<const char>{}, StringViewFlag::NullTerminated};
+    /* Not null-terminated (string is just "hell") */
+    StringView{"hello", 4, StringViewFlag::NullTerminated};
+    StringView{ArrayView<const char>{"hello", 4}, StringViewFlag::NullTerminated};
     CORRADE_COMPARE(out,
-        "Containers::StringView: can't use StringViewFlag::NullTerminated with null data\n");
+        "Containers::StringView: Containers::StringViewFlag::NullTerminated expects non-null null-terminated data\n"
+        "Containers::StringView: Containers::StringViewFlag::NullTerminated expects non-null null-terminated data\n"
+        "Containers::StringView: Containers::StringViewFlag::NullTerminated expects non-null null-terminated data\n"
+        "Containers::StringView: Containers::StringViewFlag::NullTerminated expects non-null null-terminated data\n");
 }
 
 /* Without a corresponding SFINAE check in the std::nullptr_t constructor, this
@@ -774,12 +789,17 @@ template<class T> void StringViewTest::convertArrayView() {
     CORRADE_COMPARE(array.size(), 7); /* includes the null terminator */
 
     BasicStringView<T> string = array;
-    CORRADE_COMPARE(string.size(), 7); /* keeps the same size */
+    /* Leeps the same size, thus the null terminator is part of the string and
+       the string itself is thus *not* null terminated */
+    CORRADE_COMPARE(string.size(), 7);
     CORRADE_COMPARE(string.flags(), StringViewFlags{});
     CORRADE_COMPARE(static_cast<const void*>(string.data()), &data[0]);
 
-    BasicStringView<T> string2 = {array, StringViewFlag::NullTerminated};
-    CORRADE_COMPARE(string2.size(), 7); /* keeps the same size */
+    /* For this we actually need to have a null-terminated view to not trip on
+       an assert */
+    ArrayView<T> arrayNullTerminated = {data, 6};
+    BasicStringView<T> string2 = {arrayNullTerminated, StringViewFlag::NullTerminated};
+    CORRADE_COMPARE(string2.size(), 6); /* keeps the same size */
     CORRADE_COMPARE(string2.flags(), StringViewFlag::NullTerminated);
     CORRADE_COMPARE(static_cast<const void*>(string2.data()), &data[0]);
 

@@ -405,8 +405,13 @@ BasicStringView {
             CORRADE_CONSTEXPR_DEBUG_ASSERT(size < std::size_t{1} << (sizeof(std::size_t)*8 - 2),
                 "Containers::StringView: string expected to be smaller than 2^" << Utility::Debug::nospace << sizeof(std::size_t)*8 - 2 << "bytes, got" << size),
             #endif
-            CORRADE_CONSTEXPR_DEBUG_ASSERT(data || !(flags & StringViewFlag::NullTerminated),
-                "Containers::StringView: can't use StringViewFlag::NullTerminated with null data"),
+            /* This *may* cause a potential OOB access if the string is not
+               actually null-terminated, OTOH not checking for this would just
+               defer the problem to a point where it'd cause something a lot
+               nastier. Same check (although not debug-only) is in the String
+               data + size + deleter constructor. */
+            CORRADE_CONSTEXPR_DEBUG_ASSERT(!(flags & StringViewFlag::NullTerminated) || (data && !data[size]),
+                "Containers::StringView:" << StringViewFlag::NullTerminated << "expects non-null null-terminated data"),
             size|(std::size_t(flags) & Implementation::StringViewSizeMask))} {}
 
         /**

@@ -258,6 +258,11 @@ String::String(char* const data, const std::size_t size, void(*deleter)(char*, s
     CORRADE_ASSERT(size < std::size_t{1} << (sizeof(std::size_t)*8 - 2),
         "Containers::String: string expected to be smaller than 2^" << Utility::Debug::nospace << sizeof(std::size_t)*8 - 2 << "bytes, got" << size, );
     #endif
+    /* This *may* cause a potential OOB access if the string is not actually
+       null-terminated, OTOH not checking for this would just defer the problem
+       to a point where it'd cause something a lot nastier. Same check
+       (although debug-only) is in the StringView data + size + flags
+       constructor. */
     CORRADE_ASSERT(data && !data[size],
         "Containers::String: can only take ownership of a non-null null-terminated array", );
 
