@@ -60,6 +60,7 @@ struct ArrayTupleTest: TestSuite::Tester {
 
     void constructTriviallyConstructibleNonTriviallyDestructible();
 
+    void constructStringNullTerminated();
     void constructStringInvalidFlags();
 
     void constructCopy();
@@ -97,6 +98,7 @@ ArrayTupleTest::ArrayTupleTest() {
 
               &ArrayTupleTest::constructTriviallyConstructibleNonTriviallyDestructible,
 
+              &ArrayTupleTest::constructStringNullTerminated,
               &ArrayTupleTest::constructStringInvalidFlags,
 
               &ArrayTupleTest::constructCopy,
@@ -118,6 +120,8 @@ ArrayTupleTest::ArrayTupleTest() {
               &ArrayTupleTest::emplaceConstructItemExplicitInCopyInitialization,
               &ArrayTupleTest::copyConstructPlainDeleterStruct});
 }
+
+using namespace Literals;
 
 void ArrayTupleTest::constructEmpty() {
     /* Const in order to verify const access */
@@ -935,6 +939,34 @@ void ArrayTupleTest::constructTriviallyConstructibleNonTriviallyDestructible() {
         CORRADE_COMPARE(NonTriviallyDestructible::destructorCallCount, 0);
     }
     CORRADE_COMPARE(NonTriviallyDestructible::destructorCallCount, 5);
+}
+
+void ArrayTupleTest::constructStringNullTerminated() {
+    /* While the construct() and constructNoInit() cases check with
+       NullTerminated strings, they use the default system allocator which may
+       just give a zero-initialized block of memory to the internals, thus
+       satisfying StringView's null-terminated assertion. To make sure the
+       behavior is correctly tested even without Address Sanitizer and such
+       present, the following uses a custom allocator providing a definitely
+       not zeroed-out memory. */
+
+    MutableStringView noInit, valueInit;
+
+    char preallocated[] = "this!memory!is!not!zeroed!at!all!";
+    ArrayTuple data{
+        {{Corrade::NoInit, 4, noInit, StringViewFlag::NullTerminated},
+         {Corrade::ValueInit, 6, valueInit, StringViewFlag::NullTerminated}},
+        [&](std::size_t, std::size_t) -> Containers::Pair<char*, void(*)(char*, std::size_t)> {
+            return {preallocated, [](char*, std::size_t) {}};
+        }
+    };
+    CORRADE_COMPARE(StringView{noInit}, "this");
+    CORRADE_COMPARE(noInit.flags(), StringViewFlag::NullTerminated);
+    CORRADE_COMPARE(noInit[noInit.size()], '\0');
+
+    CORRADE_COMPARE(StringView{valueInit}, "\0\0\0\0\0\0"_s);
+    CORRADE_COMPARE(valueInit.flags(), StringViewFlag::NullTerminated);
+    CORRADE_COMPARE(valueInit[valueInit.size()], '\0');
 }
 
 void ArrayTupleTest::constructStringInvalidFlags() {

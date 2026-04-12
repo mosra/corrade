@@ -401,10 +401,14 @@ ArrayTuple::Item::Item(Corrade::ValueInitT, const std::size_t size, MutableStrin
         "Containers::ArrayTuple:" << (flags & ~StringViewFlag::NullTerminated) << "not allowed for a string view", );
 
     /* Populate size of the output view. Pointer gets updated inside
-       create(), however here we have to set it to something non-null to not
-       trip on an assert in case the NullTerminated flag is set. */
+       create(), however here we have to set it to something non-null *and*
+       with `data[size] == '\0'` to not trip on an assert in case the
+       NullTerminated flag is set. The very hopeful assumption is that
+       `(zero - size) + size` results in `zero` and so the read in the assert
+       doesn't access some wildly incorrect location even in case the pointer
+       wraps around or some such. */
     char zero[1]{};
-    outputView = {zero, size, flags};
+    outputView = {zero - size, size, flags};
 }
 
 ArrayTuple::Item::Item(Corrade::ValueInitT, const std::size_t size, MutableStringView& outputView): Item{Corrade::ValueInit, size, outputView, {}} {}
@@ -434,10 +438,14 @@ ArrayTuple::Item::Item(Corrade::NoInitT, const std::size_t size, MutableStringVi
         "Containers::ArrayTuple:" << (flags & ~StringViewFlag::NullTerminated) << "not allowed for a string view", );
 
     /* Populate size of the output view. Pointer gets updated inside
-       create(), however here we have to set it to something non-null to not
-       trip on an assert in case the NullTerminated flag is set. */
+       create(), however here we have to set it to something non-null *and*
+       with `data[size] == '\0'` to not trip on an assert in case the
+       NullTerminated flag is set. The very hopeful assumption is that
+       `(zero - size) + size` results in `zero` and so the read in the assert
+       doesn't access some wildly incorrect location even in case the pointer
+       wraps around or some such. */
     char zero[1]{};
-    outputView = {zero, size, flags};
+    outputView = {zero - size, size, flags};
 }
 
 ArrayTuple::Item::Item(Corrade::NoInitT, const std::size_t size, MutableStringView& outputView): Item{Corrade::NoInit, size, outputView, {}} {}
