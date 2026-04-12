@@ -53,7 +53,7 @@ namespace Implementation {
         return reinterpret_cast<T*&>(view._data);
     }
 
-    #ifndef CORRADE_NO_DEBUG_ASSERT
+    #if defined(CORRADE_TARGET_32BIT) && !defined(CORRADE_NO_DEBUG_ASSERT)
     template<unsigned dimensions> constexpr bool isSizeSmallEnoughForBitArrayView(const Size<dimensions>&, Sequence<>) {
         return true;
     }
@@ -63,8 +63,14 @@ namespace Implementation {
     #endif
 
     template<std::size_t first, std::size_t ...next> constexpr Size<1 + sizeof...(next)> sizeWithOffset(const Size<1 + sizeof...(next)>& size, std::size_t offset, Implementation::Sequence<first, next...>) {
-        return CORRADE_CONSTEXPR_DEBUG_ASSERT(isSizeSmallEnoughForBitArrayView(size, Implementation::Sequence<first, next...>{}),
-            "Containers::StridedBitArrayView: size expected to be smaller than 2^" << Utility::Debug::nospace << (sizeof(std::size_t)*8 - 3) << "bits, got" << size),
+        return
+            #ifdef CORRADE_TARGET_32BIT
+            /* It makes little sense to test for this on 64-bit, if 64-bit code
+               happens to go over then it's got bigger problems than this
+               assert */
+            CORRADE_CONSTEXPR_DEBUG_ASSERT(isSizeSmallEnoughForBitArrayView(size, Implementation::Sequence<first, next...>{}),
+                "Containers::StridedBitArrayView: size expected to be smaller than 2^" << Utility::Debug::nospace << (sizeof(std::size_t)*8 - 3) << "bits, got" << size),
+            #endif
             Size<1 + sizeof...(next)>{(size[first] << 3)|offset, (size[next] << 3)...};
     }
 

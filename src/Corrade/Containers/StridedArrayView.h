@@ -2540,10 +2540,14 @@ template<unsigned dimensions, class T> auto StridedArrayView<dimensions, T>::sli
     Containers::Size<dimensions> sizeOffset{Corrade::NoInit};
     Containers::Stride<dimensions> stride{Corrade::NoInit};
     for(std::size_t i = 0; i != dimensions; ++i) {
+        #ifdef CORRADE_TARGET_32BIT
         /* All asserts related to BitArray size limits are debug so make this
-           one debug as well */
+           one debug as well. Additionally, it makes little sense to check the
+           size constraint on 64-bit, if 64-bit code happens to go over then
+           it's got bigger problems than this assert. */
         CORRADE_DEBUG_ASSERT(_size._data[i] < std::size_t{1} << (sizeof(std::size_t)*8 - 3),
             "Containers::StridedArrayView::sliceBit(): size expected to be smaller than 2^" << Utility::Debug::nospace << (sizeof(std::size_t)*8 - 3) << "bits, got" << _size, {});
+        #endif
         sizeOffset._data[i] = _size._data[i] << 3;
         stride._data[i] = _stride._data[i] << 3;
     }

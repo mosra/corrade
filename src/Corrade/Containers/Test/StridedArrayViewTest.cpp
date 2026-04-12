@@ -246,7 +246,9 @@ struct StridedArrayViewTest: TestSuite::Tester {
 
     void sliceBit();
     void sliceBitIndexTooLarge();
+    #ifdef CORRADE_TARGET_32BIT
     void sliceBitSizeTooLarge();
+    #endif
 
     void every();
     void everyNegative();
@@ -477,7 +479,9 @@ StridedArrayViewTest::StridedArrayViewTest() {
 
               &StridedArrayViewTest::sliceBit,
               &StridedArrayViewTest::sliceBitIndexTooLarge,
+              #ifdef CORRADE_TARGET_32BIT
               &StridedArrayViewTest::sliceBitSizeTooLarge,
+              #endif
 
               &StridedArrayViewTest::every,
               &StridedArrayViewTest::everyNegative,
@@ -4006,6 +4010,7 @@ void StridedArrayViewTest::sliceBitIndexTooLarge() {
     CORRADE_COMPARE(out, "Containers::StridedArrayView::sliceBit(): index 32 out of range for a 32-bit type\n");
 }
 
+#ifdef CORRADE_TARGET_32BIT
 void StridedArrayViewTest::sliceBitSizeTooLarge() {
     CORRADE_SKIP_IF_NO_DEBUG_ASSERT();
 
@@ -4014,12 +4019,9 @@ void StridedArrayViewTest::sliceBitSizeTooLarge() {
     Containers::String out;
     Error redirectError{&out};
     view.sliceBit(0);
-    #ifndef CORRADE_TARGET_32BIT
-    CORRADE_COMPARE(out, "Containers::StridedArrayView::sliceBit(): size expected to be smaller than 2^61 bits, got {1, 2305843009213693952, 1}\n");
-    #else
     CORRADE_COMPARE(out, "Containers::StridedArrayView::sliceBit(): size expected to be smaller than 2^29 bits, got {1, 536870912, 1}\n");
-    #endif
 }
+#endif
 
 void StridedArrayViewTest::every() {
     int data[]{0, 1, 2, 3, 4, 5, 6, 7};

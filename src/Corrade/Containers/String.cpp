@@ -189,11 +189,15 @@ String::String(AllocatedInitT, const char* const data, const std::size_t size)
     : _large{}
     #endif
 {
+    #ifdef CORRADE_TARGET_32BIT
     /* Compared to StringView construction which happens a lot this shouldn't,
        and the chance of strings > 1 GB on 32-bit is rare but possible and thus
-       worth checking even in release */
+       worth checking even in release. OTOH it makes little sense to test for
+       this on 64-bit, if 64-bit code happens to go over then it's got bigger
+       problems than this assert. */
     CORRADE_ASSERT(size < std::size_t{1} << (sizeof(std::size_t)*8 - 2),
         "Containers::String: string expected to be smaller than 2^" << Utility::Debug::nospace << sizeof(std::size_t)*8 - 2 << "bytes, got" << size, );
+    #endif
     CORRADE_ASSERT(data || !size,
         "Containers::String: received a null string of size" << size, );
 
@@ -245,12 +249,16 @@ String::String(char* const data, const std::size_t size, void(*deleter)(char*, s
     : _large{}
     #endif
 {
+    #ifdef CORRADE_TARGET_32BIT
     /* Compared to StringView construction which happens a lot this shouldn't,
        the chance of strings > 1 GB on 32-bit is rare but possible and thus
-       worth checking even in release; but most importantly checking for null
-       termination outweighs potential speed issues */
+       worth checking even in release. OTOH it makes little sense to test for
+       this on 64-bit, if 64-bit code happens to go over then it's got bigger
+       problems than this assert. But most importantly checking for null
+       termination outweighs potential speed issues. */
     CORRADE_ASSERT(size < std::size_t{1} << (sizeof(std::size_t)*8 - 2),
         "Containers::String: string expected to be smaller than 2^" << Utility::Debug::nospace << sizeof(std::size_t)*8 - 2 << "bytes, got" << size, );
+    #endif
     CORRADE_ASSERT(data && !data[size],
         "Containers::String: can only take ownership of a non-null null-terminated array", );
 
@@ -272,11 +280,15 @@ String::String(void(*deleter)(char*, std::size_t), std::nullptr_t, char* const d
 } {}
 
 String::String(Corrade::ValueInitT, const std::size_t size): _large{} {
+    #ifdef CORRADE_TARGET_32BIT
     /* Compared to StringView construction which happens a lot this shouldn't,
        and the chance of strings > 1 GB on 32-bit is rare but possible and thus
-       worth checking even in release */
+       worth checking even in release. OTOH it makes little sense to test for
+       this on 64-bit, if 64-bit code happens to go over then it's got bigger
+       problems than this assert. */
     CORRADE_ASSERT(size < std::size_t{1} << (sizeof(std::size_t)*8 - 2),
         "Containers::String: string expected to be smaller than 2^" << Utility::Debug::nospace << sizeof(std::size_t)*8 - 2 << "bytes, got" << size, );
+    #endif
 
     if(size < Implementation::SmallStringSize) {
         /* Everything already zero-init'd in the constructor init list */
@@ -294,11 +306,15 @@ String::String(Corrade::NoInitT, const std::size_t size)
     : _large{}
     #endif
 {
+    #ifdef CORRADE_TARGET_32BIT
     /* Compared to StringView construction which happens a lot this shouldn't,
        and the chance of strings > 1 GB on 32-bit is rare but possible and thus
-       worth checking even in release */
+       worth checking even in release. OTOH it makes little sense to test for
+       this on 64-bit, if 64-bit code happens to go over then it's got bigger
+       problems than this assert. */
     CORRADE_ASSERT(size < std::size_t{1} << (sizeof(std::size_t)*8 - 2),
         "Containers::String: string expected to be smaller than 2^" << Utility::Debug::nospace << sizeof(std::size_t)*8 - 2 << "bytes, got" << size, );
+    #endif
 
     construct(Corrade::NoInit, size);
 }
