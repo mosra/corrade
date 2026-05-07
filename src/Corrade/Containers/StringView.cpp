@@ -1207,6 +1207,11 @@ namespace {
 
 #ifndef CORRADE_SINGLES_NO_ADVANCED_STRING_APIS
 template<class T> Array<BasicStringView<T>> BasicStringView<T>::splitOnWhitespaceWithoutEmptyParts() const {
+    /** @todo instead of doing basically what's an inefficient memchr() in a
+        loop, this could be a customized find2() SIMD algorithm that finds
+        either a space or bytes matching a 0x08 mask in groups of 16/32 and
+        then for the masked checks if it's one of the allowed 6 values;
+        similarly for trimmed() and such */
     #if !defined(CORRADE_TARGET_MSVC) || defined(CORRADE_TARGET_CLANG_CL) || _MSC_VER >= 1930 /* MSVC 2022 works */
     return splitOnAnyWithoutEmptyParts(Whitespace);
     #else
