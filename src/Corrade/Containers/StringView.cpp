@@ -1183,7 +1183,9 @@ template<class T> Array<BasicStringView<T>> BasicStringView<T>::splitWithoutEmpt
 #endif
 
 namespace {
-    /* If I use an externally defined view in splitWithoutEmptyParts(),
+    /* Same as what std::isspace() defines as whitespace:
+        https://en.cppreference.com/cpp/string/byte/isspace
+       If I use an externally defined view in splitWithoutEmptyParts(),
        trimmed() and elsewhere, MSVC (2015, 2017, 2019) will blow up on the
        explicit template instantiation with
 

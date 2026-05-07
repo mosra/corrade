@@ -848,7 +848,8 @@ BasicStringView {
          * @brief Split on whitespace, removing empty parts
          *
          * Equivalent to calling @ref splitOnAnyWithoutEmptyParts(StringView) const
-         * with @cpp " \t\f\v\r\n" @ce passed to @p delimiters.
+         * with @cpp " \t\f\v\r\n" @ce passed to @p delimiters. This is the
+         * same set of characters as recognized by @m_class{m-doc-external} [std::isspace()](https://en.cppreference.com/cpp/string/byte/isspace).
          */
         Array<BasicStringView<T>> splitOnWhitespaceWithoutEmptyParts() const;
 
@@ -1051,7 +1052,8 @@ BasicStringView {
          * @brief View with whitespace trimmed from prefix and suffix
          *
          * Equivalent to calling @ref trimmed(StringView) const with
-         * @cpp " \t\f\v\r\n" @ce passed to @p characters.
+         * @cpp " \t\f\v\r\n" @ce passed to @p characters. This is the same set
+         * of characters as recognized by @m_class{m-doc-external} [std::isspace()](https://en.cppreference.com/cpp/string/byte/isspace).
          * @see @ref trimmedPrefix() const, @ref trimmedSuffix() const
          */
         BasicStringView<T> trimmed() const;
@@ -1072,7 +1074,8 @@ BasicStringView {
          * @brief View with whitespace trimmed from prefix
          *
          * Equivalent to calling @ref trimmedPrefix(StringView) const with
-         * @cpp " \t\f\v\r\n" @ce passed to @p characters.
+         * @cpp " \t\f\v\r\n" @ce passed to @p characters. This is the same set
+         * of characters as recognized by @m_class{m-doc-external} [std::isspace()](https://en.cppreference.com/cpp/string/byte/isspace).
          * @see @ref trimmed() const, @ref trimmedSuffix() const
          */
         BasicStringView<T> trimmedPrefix() const;
@@ -1093,7 +1096,8 @@ BasicStringView {
          * @brief View with whitespace trimmed from suffix
          *
          * Equivalent to calling @ref trimmedSuffix(StringView) const with
-         * @cpp " \t\f\v\r\n" @ce passed to @p characters.
+         * @cpp " \t\f\v\r\n" @ce passed to @p characters. This is the same set
+         * of characters as recognized by @m_class{m-doc-external} [std::isspace()](https://en.cppreference.com/cpp/string/byte/isspace).
          * @see @ref trimmed() const, @ref trimmedPrefix() const
          */
         BasicStringView<T> trimmedSuffix() const;

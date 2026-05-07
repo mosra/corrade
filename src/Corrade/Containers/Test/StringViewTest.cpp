@@ -28,6 +28,8 @@
    included first */
 #include "Corrade/Containers/StringView.h"
 
+#include <cctype> /* std::isspace() */
+
 #include "Corrade/Cpu.h"
 #include "Corrade/Containers/Array.h"
 #include "Corrade/Containers/StaticArray.h"
@@ -161,6 +163,7 @@ struct StringViewTest: TestSuite::Tester {
     void splitOnAny();
     void splitOnAnyFlags();
     void splitOnWhitespace();
+    void splitOnWhitespaceStlIsspaceCompatibility();
     void splitNullView();
 
     void partitionCharacter();
@@ -187,6 +190,7 @@ struct StringViewTest: TestSuite::Tester {
     void exceptSuffixDisabledOverloads();
 
     void trimmed();
+    void trimmedStlIsspaceCompatibility();
     void trimmedFlags();
     void trimmedNullView();
 
@@ -376,6 +380,7 @@ StringViewTest::StringViewTest() {
               &StringViewTest::splitOnAny,
               &StringViewTest::splitOnAnyFlags,
               &StringViewTest::splitOnWhitespace,
+              &StringViewTest::splitOnWhitespaceStlIsspaceCompatibility,
               &StringViewTest::splitNullView,
 
               &StringViewTest::partitionCharacter,
@@ -400,6 +405,7 @@ StringViewTest::StringViewTest() {
               &StringViewTest::exceptSuffixDisabledOverloads,
 
               &StringViewTest::trimmed,
+              &StringViewTest::trimmedStlIsspaceCompatibility,
               &StringViewTest::trimmedFlags,
               &StringViewTest::trimmedNullView,
 
@@ -1546,6 +1552,24 @@ void StringViewTest::splitOnWhitespace() {
         TestSuite::Compare::Container);
 }
 
+void StringViewTest::splitOnWhitespaceStlIsspaceCompatibility() {
+    /* Verifies that it splits on exactly the same characters as the ones
+       recognized by std::isspace() */
+    for(int c = 0; c != 256; ++c) {
+        CORRADE_ITERATION(c);
+
+        /* Explicit size to test with c being '\0' as well */
+        const char data[]{'h', 'e', 'y', char(c), 't', 'h', 'e', 'r', 'e'};
+        Containers::StringView string{data, 9};
+
+        CORRADE_COMPARE_AS(string.splitOnWhitespaceWithoutEmptyParts(),
+            std::isspace(c) ?
+                arrayView({"hey"_s, "there"_s}) :
+                arrayView({string}),
+            TestSuite::Compare::Container);
+    }
+}
+
 void StringViewTest::splitNullView() {
     CORRADE_COMPARE_AS(StringView{}.split(' '),
         Array<StringView>{},
@@ -2017,6 +2041,24 @@ void StringViewTest::trimmed() {
     CORRADE_COMPARE("oubya"_s.trimmedPrefix("aeiyou"), "bya");
     CORRADE_COMPARE("oubya"_s.trimmedSuffix("aeiyou"), "oub");
     CORRADE_COMPARE("oubya"_s.trimmed("aeiyou"), "b");
+}
+
+void StringViewTest::trimmedStlIsspaceCompatibility() {
+    /* Verifies that it trims exactly the same characters as the ones
+       recognized by std::isspace() */
+    for(int c = 0; c != 256; ++c) {
+        CORRADE_ITERATION(c);
+
+        /* Explicit size to test with c being '\0' as well */
+        const char data[]{char(c)};
+        Containers::StringView string{data, 1};
+
+        /* std::isspace() doesn't return just 0 or 1 but for example 8192
+           (wtf!), have to coerce into a bool to compare properly */
+        CORRADE_COMPARE(!string.trimmed(), !!std::isspace(c));
+        CORRADE_COMPARE(!string.trimmedPrefix(), !!std::isspace(c));
+        CORRADE_COMPARE(!string.trimmedSuffix(), !!std::isspace(c));
+    }
 }
 
 void StringViewTest::trimmedFlags() {
