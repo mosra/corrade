@@ -1493,17 +1493,17 @@ void StringViewTest::splitOnAny() {
 
     /* No delimiters */
     CORRADE_COMPARE_AS("abcdef"_s.splitOnAnyWithoutEmptyParts(delimiters),
-        array({"abcdef"_s}),
+        arrayView({"abcdef"_s}),
         TestSuite::Compare::Container);
 
     /* Common case */
     CORRADE_COMPARE_AS("ab:c;def"_s.splitOnAnyWithoutEmptyParts(delimiters),
-        array({"ab"_s, "c"_s, "def"_s}),
+        arrayView({"ab"_s, "c"_s, "def"_s}),
         TestSuite::Compare::Container);
 
     /* Empty parts */
     CORRADE_COMPARE_AS("ab:c;;def."_s.splitOnAnyWithoutEmptyParts(delimiters),
-        array({"ab"_s, "c"_s, "def"_s}),
+        arrayView({"ab"_s, "c"_s, "def"_s}),
         TestSuite::Compare::Container);
 }
 
@@ -1542,7 +1542,7 @@ void StringViewTest::splitOnAnyFlags() {
 
 void StringViewTest::splitOnWhitespace() {
     CORRADE_COMPARE_AS("ab c  \t \ndef\r"_s.splitOnWhitespaceWithoutEmptyParts(),
-        array({"ab"_s, "c"_s, "def"_s}),
+        arrayView({"ab"_s, "c"_s, "def"_s}),
         TestSuite::Compare::Container);
 }
 
