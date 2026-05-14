@@ -185,8 +185,12 @@ CORRADE_VISIBILITY_EXPORT
     #endif
 #endif
 DebugGlobals debugGlobals{
-    #if defined(CORRADE_TARGET_MINGW) && defined(CORRADE_TARGET_CLANG)
-    /* Referencing the globals directly makes MinGW Clang segfault for some reason */
+    #ifdef CORRADE_TARGET_MINGW
+    /* Referencing the globals directly makes MinGW Clang (which uses native
+       TLS) and MSYS2 GCC 16.1+ (which switched to native TLS from emulated TLS
+       in that version, https://github.com/msys2/msys2.github.io/pull/434)
+       segfault, most likely because std::cout etc. are TLS variables as well
+       and they're queried too early, before they get initialized. */
     Debug::defaultOutput(), Warning::defaultOutput(), Error::defaultOutput(),
     #else
     &std::cout, &std::cerr, &std::cerr,

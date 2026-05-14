@@ -612,6 +612,11 @@ namespace Corrade {
 -   Fixed a shadowing warning on Clang 19 (see [mosra/corrade#204](https://github.com/mosra/corrade/pull/204))
 -   Skipping a test that fails to compile due to GCC 11 and 12 regression (see
     [mosra/corrade#205](https://github.com/mosra/corrade/issues/205))
+-   Made thread-local storage in @ref Utility::Debug internals work with MSYS2
+    GCC 16.1+, which switched to native TLS instead of emulated. MinGW Clang,
+    which uses native TLS as well, worked before already. See
+    [mosra/corrade#208](https://github.com/mosra/corrade/issues/208) for
+    details.
 
 @subsection corrade-changelog-latest-bugfixes Bug fixes
 
