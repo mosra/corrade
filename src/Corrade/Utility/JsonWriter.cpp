@@ -47,6 +47,7 @@ using namespace Containers::Literals;
 
 namespace {
 
+#ifndef CORRADE_NO_ASSERT
 constexpr const char* ExpectingString[]{
     "a value",
     "an array value or array end",
@@ -55,6 +56,7 @@ constexpr const char* ExpectingString[]{
     "an object value",
     "document end"
 };
+#endif
 
 enum class Expecting {
     Value,
