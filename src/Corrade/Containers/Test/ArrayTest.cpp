@@ -1328,7 +1328,8 @@ void ArrayTest::customDeleterTypeMovedOutInstance() {
         CustomDeleter(): deletedCount{} {}
         CustomDeleter(int& deletedCountOutput): deletedCount{&deletedCountOutput} {}
         void operator()(int*, std::size_t) {
-            if(deletedCount) ++*deletedCount;
+            if(deletedCount)
+                ++*deletedCount;
             ++CustomDeleterCallCount;
         }
         int* deletedCount;

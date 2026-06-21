@@ -442,14 +442,16 @@ namespace Implementation {
 }
 
 template<class T> T Tweakable::operator()(const char* file, int line, int variable, T&& value) {
-    if(!_data) return value;
+    if(!_data)
+        return value;
 
     /* This function registers the variable, if not already, saving the
        file/line/counter, parser and getter function pointer. Returns a
        reference to the internal storage, which may not be initialized yet, in
        which case we save the initial value to it. */
     Containers::Pair<bool, void*> registered = registerVariable(file, line, variable, Implementation::TweakableTraits<T>::parse);
-    if(!registered.first()) *static_cast<T*>(registered.second()) = value;
+    if(!registered.first())
+        *static_cast<T*>(registered.second()) = value;
     return *static_cast<T*>(registered.second());
 }
 

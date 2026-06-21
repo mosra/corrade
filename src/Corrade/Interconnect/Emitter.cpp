@@ -63,13 +63,15 @@ ConnectionData::~ConnectionData() {
 Emitter::Emitter(): _lastHandledSignal{0}, _connectionsChanged{false} {}
 
 Emitter::~Emitter() {
-    for(auto& connection: _connections) disconnectFromReceiver(connection.second);
+    for(auto& connection: _connections)
+        disconnectFromReceiver(connection.second);
 }
 
 bool Emitter::isConnected(const Connection& connection) const {
     auto range = _connections.equal_range(connection._signal);
     for(auto it = range.first; it != range.second; ++it)
-        if(&it->second == &*connection._data) return true;
+        if(&it->second == &*connection._data)
+            return true;
 
     return false;
 }
@@ -106,11 +108,13 @@ void Emitter::disconnectAllSignals() {
 }
 
 void Emitter::disconnectFromReceiver(const Implementation::ConnectionData& data) {
-    if(data.type != Implementation::ConnectionType::Member) return;
+    if(data.type != Implementation::ConnectionType::Member)
+        return;
 
     auto& receiverConnections = data.storage.member.receiver->_connections;
     for(auto end = receiverConnections.end(), rit = receiverConnections.begin(); rit != end; ++rit) {
-        if(&*rit->data != &data) continue;
+        if(&*rit->data != &data)
+            continue;
 
         receiverConnections.erase(rit);
         return;
@@ -123,7 +127,8 @@ void Emitter::disconnectFromReceiver(const Implementation::ConnectionData& data)
 bool disconnect(Emitter& emitter, const Connection& connection) {
     auto range = emitter._connections.equal_range(connection._signal);
     for(auto it = range.first; it != range.second; ++it) {
-        if(&it->second != &*connection._data) continue;
+        if(&it->second != &*connection._data)
+            continue;
 
         emitter.disconnectFromReceiver(it->second);
         emitter._connections.erase(it);

@@ -58,7 +58,8 @@ using namespace Containers::Literals;
 namespace {
     inline int digitCount(int number) {
         int digits = 0;
-        while(number != 0) number /= 10, digits++;
+        while(number != 0)
+            number /= 10, digits++;
         return digits;
     }
 
@@ -105,7 +106,8 @@ Tester::TesterConfiguration& Tester::TesterConfiguration::operator=(TesterConfig
 Tester::TesterConfiguration::~TesterConfiguration() = default;
 
 Containers::Array<Containers::StringView> Tester::TesterConfiguration::skippedArgumentPrefixes() const {
-    if(!_data) return nullptr;
+    if(!_data)
+        return nullptr;
 
     Containers::Array<Containers::StringView> out{NoInit, _data->skippedArgumentPrefixes.size()};
     for(std::size_t i = 0; i != out.size(); ++i)
@@ -114,7 +116,8 @@ Containers::Array<Containers::StringView> Tester::TesterConfiguration::skippedAr
 }
 
 Tester::TesterConfiguration& Tester::TesterConfiguration::setSkippedArgumentPrefixes(std::initializer_list<Containers::StringView> prefixes) {
-    if(!_data) _data.reset(new Data);
+    if(!_data)
+        _data.reset(new Data);
     const Containers::ArrayView<const Containers::StringView> in = Containers::arrayView(prefixes);
     const Containers::ArrayView<Containers::String> out = arrayAppend(_data->skippedArgumentPrefixes, NoInit, prefixes.size());
     for(std::size_t i = 0; i != prefixes.size(); ++i) {
@@ -125,7 +128,8 @@ Tester::TesterConfiguration& Tester::TesterConfiguration::setSkippedArgumentPref
 }
 
 Tester::TesterConfiguration& Tester::TesterConfiguration::setSkippedArgumentPrefixes(std::initializer_list<const char*> prefixes) {
-    if(!_data) _data.reset(new Data);
+    if(!_data)
+        _data.reset(new Data);
     const Containers::ArrayView<const char* const> in = Containers::arrayView(prefixes);
     const Containers::ArrayView<Containers::String> out = arrayAppend(_data->skippedArgumentPrefixes, NoInit, prefixes.size());
     for(std::size_t i = 0; i != prefixes.size(); ++i) {
@@ -142,7 +146,8 @@ Containers::StringView Tester::TesterConfiguration::cpuScalingGovernorFile() con
 }
 
 Tester::TesterConfiguration& Tester::TesterConfiguration::setCpuScalingGovernorFile(const Containers::StringView filename) {
-    if(!_data) _data.reset(new Data);
+    if(!_data)
+        _data.reset(new Data);
     _data->cpuScalingGovernorFile = Containers::String::nullTerminatedGlobalView(filename);
     return *this;
 }
@@ -327,12 +332,14 @@ benchmark types:
     /* Skip test cases, if requested */
     if(args.isSet("skip-tests"))
         for(TestCase& testCase: _state->testCases)
-            if(testCase.type == TestCaseType::Test) testCase.test = nullptr;
+            if(testCase.type == TestCaseType::Test)
+                testCase.test = nullptr;
 
     /* Skip benchmarks, if requested */
     if(args.isSet("skip-benchmarks"))
         for(TestCase& testCase: _state->testCases)
-            if(testCase.type != TestCaseType::Test) testCase.test = nullptr;
+            if(testCase.type != TestCaseType::Test)
+                testCase.test = nullptr;
 
     /* Remove skipped test cases */
     if(!args.value("skip").empty()) {
@@ -341,7 +348,8 @@ benchmark types:
            characters, bail. The error should be already printed by the
            utility. */
         const Containers::Optional<Containers::Array<std::uint32_t>> range = Utility::String::parseNumberSequence(args.value<Containers::StringView>("skip"), 1, _state->testCases.size() + 1);
-        if(!range) return 2;
+        if(!range)
+            return 2;
         for(std::uint32_t index: *range)
             _state->testCases[index - 1].test = nullptr;
     }
@@ -353,14 +361,16 @@ benchmark types:
            characters, bail. The error should be already printed by the
            utility. */
         const Containers::Optional<Containers::Array<std::uint32_t>> range = Utility::String::parseNumberSequence(args.value<Containers::StringView>("only"), 1, _state->testCases.size() + 1);
-        if(!range) return 2;
+        if(!range)
+            return 2;
         for(std::uint32_t index: *range)
             if(_state->testCases[index - 1].test)
                 arrayAppend(usedTestCases, index);
 
     /* Otherwise extract all (and skip skipped) */
     } else for(std::uint32_t i = 0; i != _state->testCases.size(); ++i) {
-        if(!_state->testCases[i].test) continue;
+        if(!_state->testCases[i].test)
+            continue;
         arrayAppend(usedTestCases, i + 1);
     }
 
@@ -689,9 +699,11 @@ benchmark types:
     } else {
         out << Debug::boldColor(Debug::Color::Default) << "Finished"
             << _state->testName << "with";
-        if(errorCount) out << Debug::boldColor(Debug::Color::Red);
+        if(errorCount)
+            out << Debug::boldColor(Debug::Color::Red);
         out << errorCount << "errors";
-        if(errorCount) out << Debug::boldColor(Debug::Color::Default);
+        if(errorCount)
+            out << Debug::boldColor(Debug::Color::Default);
         out << "out of" << _state->checkCount << "checks.";
     }
     if(_state->diagnosticCount) {
@@ -780,7 +792,8 @@ void Tester::verifyInternal(const char* expression, bool expressionValue) {
 
     /* If the expression is true or the failure is expected, done */
     if(!_state->expectedFailure) {
-        if(expressionValue) return;
+        if(expressionValue)
+            return;
     } else if(!expressionValue) {
         Debug out{_state->logOutput, _state->useColor};
         printTestCaseLabel(out, " XFAIL", Debug::Color::Yellow, Debug::Color::Default);
@@ -795,7 +808,8 @@ void Tester::verifyInternal(const char* expression, bool expressionValue) {
     printTestCaseLabel(out, _state->expectedFailure ? " XPASS" : "  FAIL", Debug::Color::Red, Debug::Color::Default);
     printFileLineInfo(out);
     out << "        Expression" << expression;
-    if(!_state->expectedFailure) out << "failed.";
+    if(!_state->expectedFailure)
+        out << "failed.";
     else out << "was expected to fail.";
     throw Exception();
 }
@@ -805,7 +819,8 @@ void Tester::printComparisonMessageInternal(ComparisonStatusFlags flags, const c
 
     /* If verbose output is not enabled, remove verbose stuff from comparison
        status flags */
-    if(!_state->verbose) flags &= ~(ComparisonStatusFlag::Verbose|ComparisonStatusFlag::VerboseDiagnostic);
+    if(!_state->verbose)
+        flags &= ~(ComparisonStatusFlag::Verbose|ComparisonStatusFlag::VerboseDiagnostic);
 
     /* In case of an expected failure, print a static message */
     if(_state->expectedFailure && (flags & ComparisonStatusFlag::Failed)) {
@@ -823,7 +838,8 @@ void Tester::printComparisonMessageInternal(ComparisonStatusFlags flags, const c
         printTestCaseLabel(out, _state->expectedFailure ? " XPASS" : "  FAIL", Debug::Color::Red, Debug::Color::Default);
         printFileLineInfo(out);
         out << "       ";
-        if(!_state->expectedFailure) printer(comparator, flags, out, actual, expected);
+        if(!_state->expectedFailure)
+            printer(comparator, flags, out, actual, expected);
         else out << actual << "and" << expected << "were expected to fail the comparison.";
 
     /* Otherwise, if the comparison succeeded but the comparator wants to print
@@ -871,7 +887,8 @@ void Tester::registerTest(const char* filename, const char* name, bool isDebugBu
     /* The file is __FILE__, thus assumed to be global */
     _state->testFilename = Containers::StringView{filename, Containers::StringViewFlag::Global};
     /* The name is a stringified class name, thus also assumed to be global */
-    if(!_state->testName) _state->testName = Containers::String::nullTerminatedGlobalView(Containers::StringView{name, Containers::StringViewFlag::Global});
+    if(!_state->testName)
+        _state->testName = Containers::String::nullTerminatedGlobalView(Containers::StringView{name, Containers::StringViewFlag::Global});
     _state->isDebugBuild = isDebugBuild;
 }
 
@@ -902,7 +919,8 @@ void Tester::failIf(const Printer& printer, const bool fail) {
         printTestCaseLabel(out, _state->expectedFailure ? " XPASS" : "  FAIL", Debug::Color::Red, Debug::Color::Default);
         printFileLineInfo(out);
         out << "       ";
-        if(!_state->expectedFailure) out << *printer._data;
+        if(!_state->expectedFailure)
+            out << *printer._data;
         else out << "Failure was expected to happen.";
         throw Exception{};
     }
@@ -1051,7 +1069,8 @@ void Tester::registerTestCase(const char* name) {
         "TestSuite::Tester: using verification macros outside of test cases is not allowed", );
 
     /* The name is CORRADE_FUNCTION, thus assumed to be global */
-    if(!_state->testCaseName) _state->testCaseName = Containers::String::nullTerminatedGlobalView(Containers::StringView{name, Containers::StringViewFlag::Global});
+    if(!_state->testCaseName)
+        _state->testCaseName = Containers::String::nullTerminatedGlobalView(Containers::StringView{name, Containers::StringViewFlag::Global});
 }
 
 void Tester::registerTestCase(const char* name, int line) {
@@ -1112,7 +1131,8 @@ Tester::Printer::~Printer() = default;
 
 Tester::ExpectedFailure::ExpectedFailure(const bool enabled) {
     Tester& instance = Tester::instance();
-    if(!enabled || instance._state->expectedFailuresDisabled) return;
+    if(!enabled || instance._state->expectedFailuresDisabled)
+        return;
     /** @todo some assert to avoid multiple active expected failures at the same time */
     instance._state->expectedFailure = this;
 }

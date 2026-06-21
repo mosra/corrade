@@ -952,7 +952,8 @@ template<unsigned dimensions> Utility::Debug& operator<<(Utility::Debug& debug, 
     debug << "{" << Utility::Debug::nospace;
 
     for(std::size_t i = 0, iMax = value.size()[0]; i != iMax; ++i) {
-        if(i) debug << ",";
+        if(i)
+            debug << ",";
         debug << value[i] << Utility::Debug::nospace;
     }
 

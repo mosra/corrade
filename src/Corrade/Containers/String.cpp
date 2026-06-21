@@ -103,7 +103,8 @@ inline void String::construct(const char* const data, const std::size_t size) {
     if(size < Implementation::SmallStringSize) {
         /* Apparently memcpy() can't be called with null pointers, even if size
            is zero. I call that bullying. */
-        if(size) std::memcpy(_small.data, data, size);
+        if(size)
+            std::memcpy(_small.data, data, size);
 
     /* Otherwise allocate. Assuming the size is small enough -- this should
        have been checked in the caller already. */
@@ -112,7 +113,8 @@ inline void String::construct(const char* const data, const std::size_t size) {
 
 inline void String::destruct() {
     /* If not SSO, delete the data */
-    if(_small.size & Implementation::SmallStringBit) return;
+    if(_small.size & Implementation::SmallStringBit)
+        return;
     /* Instances created with a custom deleter either don't the Global bit set
        at all, or have it set but the deleter is a no-op passed from
        nullTerminatedView() / nullTerminatedGlobalView(). Thus *technically*

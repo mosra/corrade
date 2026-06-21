@@ -96,7 +96,8 @@ template<class T, typename std::enable_if<
     std::is_trivially_constructible<T>::value
     #endif
 , int>::type = 0> inline void arrayConstruct(Corrade::ValueInitT, T* const begin, T* const end) {
-    if(begin < end) std::memset(begin, 0, (end - begin)*sizeof(T));
+    if(begin < end)
+        std::memset(begin, 0, (end - begin)*sizeof(T));
 }
 
 template<class T, typename std::enable_if<!

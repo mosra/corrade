@@ -66,7 +66,8 @@ Sha1& Sha1::operator<<(Containers::ArrayView<const char> data) {
         if(data.size() + _bufferSize < 64) {
             /* Apparently memcpy() can't be called with null pointers, even if
                size is zero. I call that bullying. */
-            if(data.size()) std::memcpy(_buffer + _bufferSize, data.data(), data.size());
+            if(data.size())
+                std::memcpy(_buffer + _bufferSize, data.data(), data.size());
             _bufferSize += data.size();
             _dataSize += data.size();
             return *this;

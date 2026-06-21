@@ -164,7 +164,8 @@ template<std::size_t size> struct Data {
 
     bool operator==(const Data& other) const {
         for(std::size_t i = 0; i != size; ++i)
-            if(data[i] != other.data[i]) return false;
+            if(data[i] != other.data[i])
+                return false;
         return true;
     }
 };
@@ -282,7 +283,8 @@ void AlgorithmsTest::copy() {
     int dst[5];
 
     int n = 0;
-    for(int& i: src) i = ++n;
+    for(int& i: src)
+        i = ++n;
 
     Utility::copy(Containers::arrayView(src), Containers::arrayView(dst));
 
@@ -300,7 +302,8 @@ void AlgorithmsTest::copyConstVoidToVoid() {
     int dst[5];
 
     int n = 0;
-    for(int& i: src) i = ++n;
+    for(int& i: src)
+        i = ++n;
 
     Utility::copy(Containers::ArrayView<const void>{src},
                   Containers::ArrayView<void>{dst});
@@ -318,7 +321,8 @@ void AlgorithmsTest::copyVoidToVoid() {
     int dst[5];
 
     int n = 0;
-    for(int& i: src) i = ++n;
+    for(int& i: src)
+        i = ++n;
 
     Utility::copy(Containers::ArrayView<void>{src},
                   Containers::ArrayView<void>{dst});
@@ -353,7 +357,8 @@ template<class T> void AlgorithmsTest::copyStrided1D() {
     }
 
     T n = 0;
-    for(T& i: src) i = ++n;
+    for(T& i: src)
+        i = ++n;
 
     Utility::copy(src, dst);
 
@@ -370,9 +375,11 @@ template<class T> void AlgorithmsTest::copyStrided2D() {
     Containers::Array<T> dstData{NoInit, std::size_t(data.dstStride[0]*3*2)};
 
     auto srcStride = data.srcStride;
-    for(auto& i: srcStride) i *= sizeof(T);
+    for(auto& i: srcStride)
+        i *= sizeof(T);
     auto dstStride = data.srcStride;
-    for(auto& i: dstStride) i *= sizeof(T);
+    for(auto& i: dstStride)
+        i *= sizeof(T);
     Containers::StridedArrayView2D<T> src{srcData, {3, 5}, srcStride};
     Containers::StridedArrayView2D<T> dst{dstData, {3, 5}, dstStride};
     if(data.flipped) {
@@ -406,9 +413,11 @@ template<class T> void AlgorithmsTest::copyStrided3D() {
     Containers::Array<T> dstData{NoInit, std::size_t(data.dstStride[0]*7*2)};
 
     auto srcStride = data.srcStride;
-    for(auto& i: srcStride) i *= sizeof(T);
+    for(auto& i: srcStride)
+        i *= sizeof(T);
     auto dstStride = data.srcStride;
-    for(auto& i: dstStride) i *= sizeof(T);
+    for(auto& i: dstStride)
+        i *= sizeof(T);
     Containers::StridedArrayView3D<T> src{srcData, {7, 3, 5}, srcStride};
     Containers::StridedArrayView3D<T> dst{dstData, {7, 3, 5}, dstStride};
     if(data.flipped) {
@@ -444,9 +453,11 @@ template<class T> void AlgorithmsTest::copyStrided4D() {
     Containers::Array<T> dstData{NoInit, std::size_t(data.dstStride[0]*2*2)};
 
     auto srcStride = data.srcStride;
-    for(auto& i: srcStride) i *= sizeof(T);
+    for(auto& i: srcStride)
+        i *= sizeof(T);
     auto dstStride = data.srcStride;
-    for(auto& i: dstStride) i *= sizeof(T);
+    for(auto& i: dstStride)
+        i *= sizeof(T);
     Containers::StridedArrayView4D<T> src{srcData, {2, 7, 3, 5}, srcStride};
     Containers::StridedArrayView4D<T> dst{dstData, {2, 7, 3, 5}, dstStride};
     if(data.flipped) {
@@ -649,7 +660,8 @@ void AlgorithmsTest::copyBenchmarkFlatStdCopy() {
     int base = 0;
     CORRADE_BENCHMARK(10) {
         int n = base;
-        for(int& i: src) i = ++n;
+        for(int& i: src)
+            i = ++n;
 
         std::copy(std::begin(src), std::end(src), std::begin(dst));
 
@@ -666,7 +678,8 @@ void AlgorithmsTest::copyBenchmarkFlatLoop() {
     int base = 0;
     CORRADE_BENCHMARK(10) {
         int n = base;
-        for(int& i: src) i = ++n;
+        for(int& i: src)
+            i = ++n;
 
         for(std::size_t i = 0, max = Containers::arraySize(src); i != max; ++i)
             dst[i] = src[i];
@@ -684,7 +697,8 @@ void AlgorithmsTest::copyBenchmarkFlat() {
     int base = 0;
     CORRADE_BENCHMARK(10) {
         int n = base;
-        for(int& i: src) i = ++n;
+        for(int& i: src)
+            i = ++n;
 
         Utility::copy(Containers::arrayView(src), Containers::arrayView(dst));
 
@@ -703,7 +717,8 @@ void AlgorithmsTest::copyBenchmark1DLoop() {
     int base = 0;
     CORRADE_BENCHMARK(10) {
         int n = base;
-        for(int& i: srcData) i = ++n;
+        for(int& i: srcData)
+            i = ++n;
 
         for(std::size_t i = 0; i != src.size(); ++i)
             dst[i] = src[i];
@@ -725,7 +740,8 @@ void AlgorithmsTest::copyBenchmark2DLoop() {
     int base = 0;
     CORRADE_BENCHMARK(10) {
         int n = base;
-        for(int& i: srcData) i = ++n;
+        for(int& i: srcData)
+            i = ++n;
 
         /* Caching some of the calculations, otherwise it's REALLY slow */
         for(std::size_t i = 0; i != src.size()[0]; ++i) {
@@ -750,7 +766,8 @@ void AlgorithmsTest::copyBenchmark3DLoop() {
     int base = 0;
     CORRADE_BENCHMARK(10) {
         int n = base;
-        for(int& i: srcData) i = ++n;
+        for(int& i: srcData)
+            i = ++n;
 
         /* Caching some of the calculations, otherwise it's REALLY slow */
         for(std::size_t i = 0; i != src.size()[0]; ++i) {
@@ -781,7 +798,8 @@ void AlgorithmsTest::copyBenchmark1DContiguous() {
     int base = 0;
     CORRADE_BENCHMARK(10) {
         int n = base;
-        for(int& i: src) i = ++n;
+        for(int& i: src)
+            i = ++n;
 
         Utility::copy(src, dst);
 
@@ -804,7 +822,8 @@ void AlgorithmsTest::copyBenchmark2DAllContiguous() {
     int base = 0;
     CORRADE_BENCHMARK(10) {
         int n = base;
-        for(int& i: srcData) i = ++n;
+        for(int& i: srcData)
+            i = ++n;
 
         Utility::copy(src, dst);
 
@@ -827,7 +846,8 @@ void AlgorithmsTest::copyBenchmark3DAllContiguous() {
     int base = 0;
     CORRADE_BENCHMARK(10) {
         int n = base;
-        for(int& i: srcData) i = ++n;
+        for(int& i: srcData)
+            i = ++n;
 
         Utility::copy(src, dst);
 
@@ -852,7 +872,8 @@ void AlgorithmsTest::copyBenchmark2DLastContiguous() {
     int base = 0;
     CORRADE_BENCHMARK(10) {
         int n = base;
-        for(int& i: srcData) i = ++n;
+        for(int& i: srcData)
+            i = ++n;
 
         Utility::copy(src, dst);
 
@@ -877,7 +898,8 @@ void AlgorithmsTest::copyBenchmark3DLastContiguous() {
     int base = 0;
     CORRADE_BENCHMARK(10) {
         int n = base;
-        for(int& i: srcData) i = ++n;
+        for(int& i: srcData)
+            i = ++n;
 
         Utility::copy(src, dst);
 
@@ -898,7 +920,8 @@ void AlgorithmsTest::copyBenchmark1DNonContiguous() {
     int base = 0;
     CORRADE_BENCHMARK(10) {
         int n = base;
-        for(int& i: src) i = ++n;
+        for(int& i: src)
+            i = ++n;
 
         Utility::copy(src, dst);
 
@@ -921,7 +944,8 @@ void AlgorithmsTest::copyBenchmark2DNonContiguous() {
     int base = 0;
     CORRADE_BENCHMARK(10) {
         int n = base;
-        for(int& i: srcData) i = ++n;
+        for(int& i: srcData)
+            i = ++n;
 
         Utility::copy(src, dst);
 
@@ -946,7 +970,8 @@ template<class T> void AlgorithmsTest::copyBenchmark3DNonContiguous() {
     int base = 0;
     CORRADE_BENCHMARK(10) {
         int n = base;
-        for(T& i: srcData) i.data[0] = ++n;
+        for(T& i: srcData)
+            i.data[0] = ++n;
 
         Utility::copy(src, dst);
 

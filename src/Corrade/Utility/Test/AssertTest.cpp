@@ -211,7 +211,11 @@ void AssertTest::test() {
 
     if(c != 3 || _failAssertUnreachable)
         TESTED_ASSERT_UNREACHABLE("C should be 3", );
-    int d = [&](){ if(c != 3) TESTED_ASSERT_UNREACHABLE("C should be 3!", 7); return 3; }();
+    int d = [&](){
+        if(c != 3)
+            TESTED_ASSERT_UNREACHABLE("C should be 3!", 7);
+        return 3;
+    }();
     if(c != 3 || _failInternalAssertUnreachable)
         TESTED_INTERNAL_ASSERT_UNREACHABLE();
 

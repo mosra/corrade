@@ -144,7 +144,8 @@ Containers::Array<Containers::String> implicitPluginSearchPaths(const Containers
     arrayReserve(out, 3);
     #endif
 
-    if(hardcodedPath) arrayAppend(out, Containers::String::nullTerminatedGlobalView(hardcodedPath));
+    if(hardcodedPath)
+        arrayAppend(out, Containers::String::nullTerminatedGlobalView(hardcodedPath));
     #ifdef CORRADE_TARGET_APPLE
     arrayAppend(out, Utility::Path::join("../PlugIns"_s, relativePath));
     #endif

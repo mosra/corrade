@@ -776,7 +776,8 @@ void DirectoryTest::moveFile() {
 
     /* New file, remove if exists */
     std::string newFile = Directory::join(_writeTestDir, "newFile.txt");
-    if(Directory::exists(newFile)) Directory::rm(newFile);
+    if(Directory::exists(newFile))
+        Directory::rm(newFile);
 
     CORRADE_VERIFY(Directory::exists(oldFile));
     CORRADE_VERIFY(!Directory::exists(newFile));
@@ -867,7 +868,8 @@ void DirectoryTest::moveUtf8() {
 
     /* New file, remove if exists */
     std::string newFile = Directory::join(_writeTestDir, "nový hýždě.txt");
-    if(Directory::exists(newFile)) CORRADE_VERIFY(Directory::rm(newFile));
+    if(Directory::exists(newFile))
+        CORRADE_VERIFY(Directory::rm(newFile));
 
     CORRADE_VERIFY(Directory::exists(oldFile));
     CORRADE_VERIFY(!Directory::exists(newFile));
@@ -883,13 +885,15 @@ void DirectoryTest::mkpath() {
 
     /* Leaf */
     std::string leaf = Directory::join(_writeTestDir, "leaf");
-    if(Directory::exists(leaf)) CORRADE_VERIFY(Directory::rm(leaf));
+    if(Directory::exists(leaf))
+        CORRADE_VERIFY(Directory::rm(leaf));
     CORRADE_VERIFY(Directory::mkpath(leaf));
     CORRADE_VERIFY(Directory::exists(leaf));
 
     /* Path */
     std::string path = Directory::join(_writeTestDir, "path/to/new/dir");
-    if(Directory::exists(path)) CORRADE_VERIFY(Directory::rm(path));
+    if(Directory::exists(path))
+        CORRADE_VERIFY(Directory::rm(path));
     if(Directory::exists(Directory::join(_writeTestDir, "path/to/new")))
         CORRADE_VERIFY(Directory::rm(Directory::join(_writeTestDir, "path/to/new")));
     if(Directory::exists(Directory::join(_writeTestDir, "path/to")))
@@ -970,7 +974,8 @@ void DirectoryTest::mkpathNoPermission() {
 
 void DirectoryTest::mkpathUtf8() {
     std::string leaf = Directory::join(_writeTestDir, "šňůra");
-    if(Directory::exists(leaf)) CORRADE_VERIFY(Directory::rm(leaf));
+    if(Directory::exists(leaf))
+        CORRADE_VERIFY(Directory::rm(leaf));
     CORRADE_VERIFY(Directory::mkpath(leaf));
     CORRADE_VERIFY(Directory::exists(leaf));
 }
@@ -1823,7 +1828,8 @@ void DirectoryTest::readUtf8() {
 void DirectoryTest::write() {
     std::string file = Directory::join(_writeTestDir, "file");
 
-    if(Directory::exists(file)) CORRADE_VERIFY(Directory::rm(file));
+    if(Directory::exists(file))
+        CORRADE_VERIFY(Directory::rm(file));
     CORRADE_VERIFY(Directory::write(file, Data));
     CORRADE_COMPARE_AS(file, Directory::join(_testDir, "file"),
         TestSuite::Compare::File);
@@ -1837,7 +1843,8 @@ void DirectoryTest::write() {
 void DirectoryTest::writeEmpty() {
     std::string file = Directory::join(_writeTestDir, "empty");
 
-    if(Directory::exists(file)) CORRADE_VERIFY(Directory::rm(file));
+    if(Directory::exists(file))
+        CORRADE_VERIFY(Directory::rm(file));
     CORRADE_VERIFY(Directory::write(file, nullptr));
     CORRADE_COMPARE_AS(file, "",
         TestSuite::Compare::FileToString);
@@ -1912,7 +1919,8 @@ void DirectoryTest::writeUtf8() {
 
     std::string file = Directory::join(_writeTestDir, "hýždě");
 
-    if(Directory::exists(file)) CORRADE_VERIFY(Directory::rm(file));
+    if(Directory::exists(file))
+        CORRADE_VERIFY(Directory::rm(file));
     CORRADE_VERIFY(Directory::write(file, Data));
     CORRADE_COMPARE_AS(file, Directory::join(_testDirUtf8, "hýždě"),
         TestSuite::Compare::File);
@@ -1922,7 +1930,8 @@ void DirectoryTest::append() {
     constexpr const char expected[]{'h', 'e', 'l', 'l', 'o', '\xCA', '\xFE', '\xBA', '\xBE', '\x0D', '\x0A', '\x00', '\xDE', '\xAD', '\xBE', '\xEF'};
 
     std::string file = Directory::join(_writeTestDir, "file");
-    if(Directory::exists(file)) CORRADE_VERIFY(Directory::rm(file));
+    if(Directory::exists(file))
+        CORRADE_VERIFY(Directory::rm(file));
     CORRADE_VERIFY(Directory::writeString(file, "hello"));
 
     CORRADE_VERIFY(Directory::append(file, Data));
@@ -1939,7 +1948,8 @@ void DirectoryTest::append() {
 void DirectoryTest::appendToNonexistent() {
     std::string file = Directory::join(_writeTestDir, "empty");
 
-    if(Directory::exists(file)) CORRADE_VERIFY(Directory::rm(file));
+    if(Directory::exists(file))
+        CORRADE_VERIFY(Directory::rm(file));
 
     CORRADE_VERIFY(Directory::appendString(file, "hello"));
     CORRADE_COMPARE_AS(file, "hello",
@@ -1949,7 +1959,8 @@ void DirectoryTest::appendToNonexistent() {
 void DirectoryTest::appendEmpty() {
     std::string file = Directory::join(_writeTestDir, "empty");
 
-    if(Directory::exists(file)) CORRADE_VERIFY(Directory::rm(file));
+    if(Directory::exists(file))
+        CORRADE_VERIFY(Directory::rm(file));
     CORRADE_VERIFY(Directory::writeString(file, "hello"));
 
     CORRADE_VERIFY(Directory::append(file, nullptr));
@@ -2025,7 +2036,8 @@ void DirectoryTest::appendUtf8() {
 
     std::string file = Directory::join(_writeTestDir, "hýždě");
 
-    if(Directory::exists(file)) CORRADE_VERIFY(Directory::rm(file));
+    if(Directory::exists(file))
+        CORRADE_VERIFY(Directory::rm(file));
     CORRADE_VERIFY(Directory::append(file, Data));
     CORRADE_COMPARE_AS(file, Directory::join(_testDirUtf8, "hýždě"),
         TestSuite::Compare::File);
@@ -2054,7 +2066,8 @@ void DirectoryTest::copyEmpty() {
     CORRADE_VERIFY(Directory::exists(source));
 
     std::string destination = Directory::join(_writeTestDir, "empty");
-    if(Directory::exists(destination)) CORRADE_VERIFY(Directory::rm(destination));
+    if(Directory::exists(destination))
+        CORRADE_VERIFY(Directory::rm(destination));
 
     CORRADE_VERIFY(Directory::copy(source, destination));
 
@@ -2189,7 +2202,8 @@ void DirectoryTest::copyUtf8() {
 
     std::string output = Directory::join(_writeTestDir, "hýždě");
 
-    if(Directory::exists(output)) CORRADE_VERIFY(Directory::rm(output));
+    if(Directory::exists(output))
+        CORRADE_VERIFY(Directory::rm(output));
 
     CORRADE_VERIFY(Directory::copy(Directory::join(_testDirUtf8, "hýždě"), output));
     CORRADE_COMPARE_AS(Directory::join(_writeTestDir, "hýždě"),
@@ -2214,7 +2228,8 @@ void DirectoryTest::copy100MReadWrite() {
     std::string input = Directory::join(_writeTestDir, "copyBenchmarkSource.dat");
     std::string output = Directory::join(_writeTestDir, "copyDestination.dat");
     CORRADE_VERIFY(Directory::exists(input));
-    if(Directory::exists(output)) CORRADE_VERIFY(Directory::rm(output));
+    if(Directory::exists(output))
+        CORRADE_VERIFY(Directory::rm(output));
 
     CORRADE_BENCHMARK(1)
         Directory::write(output, Directory::read(input));
@@ -2224,7 +2239,8 @@ void DirectoryTest::copy100MReadWriteString() {
     std::string input = Directory::join(_writeTestDir, "copyBenchmarkSource.dat");
     std::string output = Directory::join(_writeTestDir, "copyDestination.dat");
     CORRADE_VERIFY(Directory::exists(input));
-    if(Directory::exists(output)) CORRADE_VERIFY(Directory::rm(output));
+    if(Directory::exists(output))
+        CORRADE_VERIFY(Directory::rm(output));
 
     CORRADE_BENCHMARK(1)
         Directory::writeString(output, Directory::readString(input));
@@ -2234,7 +2250,8 @@ void DirectoryTest::copy100MCopy() {
     std::string input = Directory::join(_writeTestDir, "copyBenchmarkSource.dat");
     std::string output = Directory::join(_writeTestDir, "copyDestination.dat");
     CORRADE_VERIFY(Directory::exists(input));
-    if(Directory::exists(output)) CORRADE_VERIFY(Directory::rm(output));
+    if(Directory::exists(output))
+        CORRADE_VERIFY(Directory::rm(output));
 
     CORRADE_BENCHMARK(1)
         Directory::copy(input, output);
@@ -2245,7 +2262,8 @@ void DirectoryTest::copy100MMap() {
     std::string input = Directory::join(_writeTestDir, "copyBenchmarkSource.dat");
     std::string output = Directory::join(_writeTestDir, "copyDestination.dat");
     CORRADE_VERIFY(Directory::exists(input));
-    if(Directory::exists(output)) CORRADE_VERIFY(Directory::rm(output));
+    if(Directory::exists(output))
+        CORRADE_VERIFY(Directory::rm(output));
 
     CORRADE_BENCHMARK(1)
         Directory::write(output, Directory::mapRead(input));
@@ -2256,7 +2274,8 @@ void DirectoryTest::copy100MMap() {
 void DirectoryTest::map() {
     #if defined(CORRADE_TARGET_UNIX) || (defined(CORRADE_TARGET_WINDOWS) && !defined(CORRADE_TARGET_WINDOWS_RT))
     std::string file = Directory::join(_writeTestDir, "mappedFile");
-    if(Directory::exists(file)) CORRADE_VERIFY(Directory::rm(file));
+    if(Directory::exists(file))
+        CORRADE_VERIFY(Directory::rm(file));
     CORRADE_VERIFY(Directory::write(file, Data));
 
     {
@@ -2284,7 +2303,8 @@ void DirectoryTest::map() {
 void DirectoryTest::mapEmpty() {
     #if defined(CORRADE_TARGET_UNIX) || (defined(CORRADE_TARGET_WINDOWS) && !defined(CORRADE_TARGET_WINDOWS_RT))
     std::string file = Directory::join(_writeTestDir, "mappedEmpty");
-    if(Directory::exists(file)) CORRADE_VERIFY(Directory::rm(file));
+    if(Directory::exists(file))
+        CORRADE_VERIFY(Directory::rm(file));
     CORRADE_VERIFY(Directory::write(file, nullptr));
 
     {

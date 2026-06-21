@@ -774,8 +774,8 @@ void StringBenchmark::lowercaseBranchless32() {
 /* This is the original implementation that used to be in
    String::lowercaseInPlace() */
 CORRADE_NEVER_INLINE void lowercaseInPlaceNaive(Containers::MutableStringView string) {
-    for(char& c: string)
-        if(c >= 'A' && c <= 'Z') c |= 0x20;
+    for(char& c: string) if(c >= 'A' && c <= 'Z')
+        c |= 0x20;
 }
 
 void StringBenchmark::lowercaseNaive() {
@@ -886,8 +886,8 @@ void StringBenchmark::uppercaseBranchless32() {
 /* This is the original implementation that used to be in
    String::uppercaseInPlace() */
 CORRADE_NEVER_INLINE void uppercaseInPlaceNaive(Containers::MutableStringView string) {
-    for(char& c: string)
-        if(c >= 'a' && c <= 'z') c &= ~0x20;
+    for(char& c: string) if(c >= 'a' && c <= 'z')
+        c &= ~0x20;
 }
 
 void StringBenchmark::uppercaseNaive() {
@@ -1052,7 +1052,8 @@ template<char character> void StringBenchmark::replaceAllInPlaceCharacterNaive()
     std::size_t i = 0;
     CORRADE_BENCHMARK(CharacterRepeats) {
         for(char& j: string.sliceSize((i++)*_text->size(), _text->size()))
-            if(j == character) j = '_';
+            if(j == character)
+                j = '_';
     }
 
     CORRADE_VERIFY(!string.contains(character));

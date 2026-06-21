@@ -96,8 +96,15 @@ void AssertGracefulTest::test() {
     [&](){ TESTED_ASSERT_OUTPUT(foo(), "foo() should succeed", ); }();
     int c = [&](){ TESTED_ASSERT_OUTPUT(foo(), "foo() should succeed!", 7); return 3; }();
 
-    [&](){ if(c != 3) TESTED_ASSERT_UNREACHABLE("C should be 3", ); }();
-    int d = [&](){ if(a) TESTED_ASSERT_UNREACHABLE("C should be 3!", 7); return 3; }();
+    [&](){
+        if(c != 3)
+            TESTED_ASSERT_UNREACHABLE("C should be 3", );
+    }();
+    int d = [&](){
+        if(a)
+            TESTED_ASSERT_UNREACHABLE("C should be 3!", 7);
+        return 3;
+    }();
 
     /* CORRADE_INTERNAL_[DEBUG_]ASSERT(),
        CORRADE_INTERNAL_[DEBUG_]ASSERT_OUTPUT(),

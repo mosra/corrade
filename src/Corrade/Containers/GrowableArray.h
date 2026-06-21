@@ -280,7 +280,8 @@ template<class T> struct ArrayMallocAllocator {
      * store its capacity.
      */
     static void deallocate(T* data) {
-        if(data) std::free(reinterpret_cast<char*>(data) - AllocationOffset);
+        if(data)
+            std::free(reinterpret_cast<char*>(data) - AllocationOffset);
     }
 
     /**
@@ -1831,7 +1832,8 @@ template<class T, typename std::enable_if<
 , int>::type = 0> inline void arrayMoveConstruct(T* const src, T* const dst, const std::size_t count) {
     /* Apparently memcpy() can't be called with null pointers, even if size is
        zero. I call that bullying. */
-    if(count) std::memcpy(dst, src, count*sizeof(T));
+    if(count)
+        std::memcpy(dst, src, count*sizeof(T));
 }
 
 template<class T, typename std::enable_if<
@@ -1861,7 +1863,8 @@ template<class T, typename std::enable_if<
 , int>::type = 0> inline void arrayMoveAssign(T* const src, T* const dst, const std::size_t count) {
     /* Apparently memcpy() can't be called with null pointers, even if size is
        zero. I call that bullying. */
-    if(count) std::memcpy(dst, src, count*sizeof(T));
+    if(count)
+        std::memcpy(dst, src, count*sizeof(T));
 }
 
 template<class T, typename std::enable_if<
@@ -1886,7 +1889,8 @@ template<class T, typename std::enable_if<
 , int>::type = 0> inline void arrayCopyConstruct(const T* const src, T* const dst, const std::size_t count) {
     /* Apparently memcpy() can't be called with null pointers, even if size is
        zero. I call that bullying. */
-    if(count) std::memcpy(dst, src, count*sizeof(T));
+    if(count)
+        std::memcpy(dst, src, count*sizeof(T));
 }
 
 template<class T, typename std::enable_if<
@@ -1989,7 +1993,8 @@ template<class T, class Allocator> std::size_t arrayReserve(Array<T>& array, con
     /* If the capacity is large enough, nothing to do (even if we have the
        array allocated by something different) */
     const std::size_t currentCapacity = arrayCapacity<T, Allocator>(array);
-    if(currentCapacity >= capacity) return currentCapacity;
+    if(currentCapacity >= capacity)
+        return currentCapacity;
 
     /* Otherwise allocate a new array, move the previous data there and replace
        the old Array instance with it. Array's deleter will take care of
@@ -2019,7 +2024,8 @@ template<class T, class Allocator> void arrayResize(Array<T>& array, Corrade::No
     const bool hasGrowingDeleter = arrayGuts.deleter == Allocator::deleter;
 
     /* New size is the same as the old one, nothing to do */
-    if(arrayGuts.size == size) return;
+    if(arrayGuts.size == size)
+        return;
 
     /* Reallocate if we don't have our growable deleter, as the default deleter
        might then call destructors even in the non-initialized area ... */
@@ -2269,7 +2275,8 @@ template<class T, typename std::enable_if<
 
        Same as with memcpy(), apparently memmove() can't be called with null
        pointers, even if size is zero. I call that bullying. */
-    if(count) std::memmove(dst, src, count*sizeof(T));
+    if(count)
+        std::memmove(dst, src, count*sizeof(T));
 }
 
 template<class T, typename std::enable_if<
@@ -2505,7 +2512,8 @@ template<class T, typename std::enable_if<
 
        Same as with memcpy(), apparently memmove() can't be called with null
        pointers, even if size is zero. I call that bullying. */
-    if(moveCount) std::memmove(dst, src, moveCount*sizeof(T));
+    if(moveCount)
+        std::memmove(dst, src, moveCount*sizeof(T));
 }
 
 template<class T, typename std::enable_if<
@@ -2535,7 +2543,8 @@ template<class T, class Allocator> void arrayRemove(Array<T>& array, const std::
     CORRADE_DEBUG_ASSERT(index + count <= arrayGuts.size, "Containers::arrayRemove(): can't remove" << count << "elements at index" << index << "from an array of size" << arrayGuts.size, );
 
     /* Nothing to remove, yay! */
-    if(!count) return;
+    if(!count)
+        return;
 
     /* If we don't have our own deleter, we need to reallocate in order to
        store the capacity. Move the parts before and after the index separately,
@@ -2577,7 +2586,8 @@ template<class T, class Allocator> void arrayRemoveUnordered(Array<T>& array, co
     CORRADE_DEBUG_ASSERT(index + count <= arrayGuts.size, "Containers::arrayRemoveUnordered(): can't remove" << count << "elements at index" << index << "from an array of size" << arrayGuts.size, );
 
     /* Nothing to remove, yay! */
-    if(!count) return;
+    if(!count)
+        return;
 
     /* If we don't have our own deleter, we need to reallocate in order to
        store the capacity. Move the parts before and after the index separately,
@@ -2621,7 +2631,8 @@ template<class T, class Allocator> void arrayRemoveSuffix(Array<T>& array, const
     CORRADE_DEBUG_ASSERT(count <= arrayGuts.size, "Containers::arrayRemoveSuffix(): can't remove" << count << "elements from an array of size" << arrayGuts.size, );
 
     /* Nothing to remove, yay! */
-    if(!count) return;
+    if(!count)
+        return;
 
     /* If we don't have our own deleter, we need to reallocate in order to
        store the capacity. That'll also cause the excessive elements to be

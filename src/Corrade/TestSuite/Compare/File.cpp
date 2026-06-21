@@ -107,7 +107,8 @@ void Comparator<Compare::File>::printMessage(ComparisonStatusFlags, Utility::Deb
         out << "contents.";
 
     for(std::size_t i = 0, end = Utility::max(_state->actualContents.size(), _state->expectedContents.size()); i != end; ++i) {
-        if(_state->actualContents.size() > i && _state->expectedContents.size() > i && _state->actualContents[i] == _state->expectedContents[i]) continue;
+        if(_state->actualContents.size() > i && _state->expectedContents.size() > i && _state->actualContents[i] == _state->expectedContents[i])
+            continue;
 
         if(_state->actualContents.size() <= i)
             out << "Expected has character" << _state->expectedContents.slice(i, i + 1);

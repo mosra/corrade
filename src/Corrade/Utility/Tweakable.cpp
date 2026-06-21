@@ -264,7 +264,8 @@ TweakableState parseTweakables(const std::string& name, const std::string& filen
             /* If inside a char or a non-raw string literal, it's an error.
                This will cause unterminated string to be reported after the
                loop. */
-            } else if(insideChar || (insideString && !rawStringEndDelimiterLength)) break;
+            } else if(insideChar || (insideString && !rawStringEndDelimiterLength))
+                break;
 
             /* Update the line counter */
             ++line;
@@ -279,7 +280,8 @@ TweakableState parseTweakables(const std::string& name, const std::string& filen
 
             /* There should be something after, if not, it's an unterminated
                comment; it'll get reported after the loop ends */
-            if(pos == data.size()) break;
+            if(pos == data.size())
+                break;
 
             /* Start of a line comment */
             if(data[pos] == '/') {
@@ -306,7 +308,8 @@ TweakableState parseTweakables(const std::string& name, const std::string& filen
 
             /* There should be something after, if not, it's an unterminated
                comment; it'll get reported after the loop ends */
-            if(pos == data.size()) break;
+            if(pos == data.size())
+                break;
 
             /* End of a block comment */
             if(data[pos] == '/') {
@@ -468,7 +471,8 @@ TweakableState parseTweakables(const std::string& name, const std::string& filen
             if(data[beg] == '"') {
                 end = beg + 1;
                 while((end = data.find('"', end)) != std::string::npos) {
-                    if(data[end - 1] != '\\') break;
+                    if(data[end - 1] != '\\')
+                        break;
                     ++end;
                 }
                 if(end == std::string::npos) {
@@ -485,7 +489,8 @@ TweakableState parseTweakables(const std::string& name, const std::string& filen
             } else if(data[beg] == '\'') {
                 end = beg + 1;
                 while((end = data.find('\'', end)) != std::string::npos) {
-                    if(data[end - 1] != '\\') break;
+                    if(data[end - 1] != '\\')
+                        break;
                     ++end;
                 }
                 if(end == std::string::npos) {
@@ -569,7 +574,8 @@ TweakableState parseTweakables(const std::string& name, const std::string& filen
                 if(variableState != TweakableState::NoChange) {
                     CORRADE_INTERNAL_ASSERT(variableState == TweakableState::Success);
                     Debug{} << "Utility::Tweakable::update(): updating" << data.substr(pos, end - pos) << "in" << filename << Debug::nospace << ":" << Debug::nospace << line;
-                    if(v.scopeLambda) scopes.emplace(v.scopeLambda, v.scopeUserCall, v.scopeUserData);
+                    if(v.scopeLambda)
+                        scopes.emplace(v.scopeLambda, v.scopeUserCall, v.scopeUserData);
                     state = TweakableState::Success;
                 }
             }
@@ -607,7 +613,8 @@ TweakableState parseTweakables(const std::string& name, const std::string& filen
 }
 
 TweakableState Tweakable::update() {
-    if(!_data) return TweakableState::NoChange;
+    if(!_data)
+        return TweakableState::NoChange;
 
     /* Set of unique scopes that have to be re-run after variable updates.
        Using a classic set with a tuple so it does all the and comparison for
@@ -619,7 +626,8 @@ TweakableState Tweakable::update() {
     TweakableState state = TweakableState::NoChange;
     for(auto& file: _data->files) {
         /** @todo suggest recompile if the watcher is not valid anymore */
-        if(!file.second.watcher.hasChanged()) continue;
+        if(!file.second.watcher.hasChanged())
+            continue;
 
         /* Assume the file could be read -- if it got for example (temporarily)
            deleted, hasChanged() returns false and thus it shouldn't get here.

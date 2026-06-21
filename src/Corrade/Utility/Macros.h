@@ -366,7 +366,7 @@ You can override this implementation by placing your own
 #else
 #define CORRADE_ASSUME(condition)                                           \
     do {                                                                    \
-        if(!(condition)) __builtin_unreachable(); \
+        if(!(condition)) __builtin_unreachable();                           \
     } while(false)
 #endif
 #else

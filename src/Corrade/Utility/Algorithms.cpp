@@ -55,7 +55,8 @@ void copy(const Containers::ArrayView<const void> src, const Containers::ArrayVi
 
     /* Apparently memcpy() can't be called with null pointers, even if size is
        zero. I call that bullying. */
-    if(srcSize) std::memcpy(dst.data(), src.data(), srcSize);
+    if(srcSize)
+        std::memcpy(dst.data(), src.data(), srcSize);
 }
 
 namespace Implementation {
@@ -89,7 +90,8 @@ void copy(const Containers::StridedArrayView4D<const char>& src, const Container
        Ideally this check would be directly in the 1D/2D/3D "delegators" above
        as well, but I don't think it'd be a perf issue so checking just here,
        at the bottom of it all. */
-    for(std::size_t i = 0; i != 4; ++i) if(!size[i]) return;
+    for(std::size_t i = 0; i != 4; ++i) if(!size[i])
+        return;
 
     if(src.isContiguous() && dst.isContiguous())
         std::memcpy(dstPtr, srcPtr, size[0]*size[1]*size[2]*size[3]);

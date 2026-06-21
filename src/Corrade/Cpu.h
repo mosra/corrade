@@ -3278,18 +3278,24 @@ inline Features runtimeFeatures() {
 
     /* https://en.wikipedia.org/wiki/CPUID#EAX=1:_Processor_Info_and_Feature_Bits */
     unsigned int out = 0;
-    if(cpuid.e.dx & (1 << 26)) out |= TypeTraits<Sse2T>::Index;
-    if(cpuid.e.cx & (1 <<  0)) out |= TypeTraits<Sse3T>::Index;
-    if(cpuid.e.cx & (1 <<  9)) out |= TypeTraits<Ssse3T>::Index;
-    if(cpuid.e.cx & (1 << 19)) out |= TypeTraits<Sse41T>::Index;
-    if(cpuid.e.cx & (1 << 20)) out |= TypeTraits<Sse42T>::Index;
+    if(cpuid.e.dx & (1 << 26))
+        out |= TypeTraits<Sse2T>::Index;
+    if(cpuid.e.cx & (1 <<  0))
+        out |= TypeTraits<Sse3T>::Index;
+    if(cpuid.e.cx & (1 <<  9))
+        out |= TypeTraits<Ssse3T>::Index;
+    if(cpuid.e.cx & (1 << 19))
+        out |= TypeTraits<Sse41T>::Index;
+    if(cpuid.e.cx & (1 << 20))
+        out |= TypeTraits<Sse42T>::Index;
 
     /* https://en.wikipedia.org/wiki/CPUID#EAX=80000001h:_Extended_Processor_Info_and_Feature_Bits,
        bit 5 says "ABM (lzcnt and popcnt)", but
        https://en.wikipedia.org/wiki/X86_Bit_manipulation_instruction_set#ABM_(Advanced_Bit_Manipulation)
        says that while LZCNT is advertised in the ABM CPUID bit, POPCNT is a
        separate CPUID flag. Get POPCNT first, ABM later. */
-    if(cpuid.e.cx & (1 << 23)) out |= TypeTraits<PopcntT>::Index;
+    if(cpuid.e.cx & (1 << 23))
+        out |= TypeTraits<PopcntT>::Index;
 
     /* AVX needs OS support checked, as the OS needs to be capable of saving
        and restoring the expanded registers when switching contexts:
@@ -3318,14 +3324,19 @@ inline Features runtimeFeatures() {
         if((xgetbv & 0x06) == 0x06 /* XSTATE_SSE|XSTATE_YMM */) {
             out |= TypeTraits<AvxT>::Index;
 
-            if(cpuid.e.cx & (1 << 29)) out |= TypeTraits<AvxF16cT>::Index;
-            if(cpuid.e.cx & (1 << 12)) out |= TypeTraits<AvxFmaT>::Index;
+            if(cpuid.e.cx & (1 << 29))
+                out |= TypeTraits<AvxF16cT>::Index;
+            if(cpuid.e.cx & (1 << 12))
+                out |= TypeTraits<AvxFmaT>::Index;
 
             /* https://en.wikipedia.org/wiki/CPUID#EAX=7,_ECX=0:_Extended_Features */
             Implementation::cpuid(cpuid.data, 7, 0);
-            if(cpuid.e.bx & (1 << 3)) out |= TypeTraits<Bmi1T>::Index;
-            if(cpuid.e.bx & (1 << 5)) out |= TypeTraits<Avx2T>::Index;
-            if(cpuid.e.bx & (1 << 8)) out |= TypeTraits<Bmi2T>::Index;
+            if(cpuid.e.bx & (1 << 3))
+                out |= TypeTraits<Bmi1T>::Index;
+            if(cpuid.e.bx & (1 << 5))
+                out |= TypeTraits<Avx2T>::Index;
+            if(cpuid.e.bx & (1 << 8))
+                out |= TypeTraits<Bmi2T>::Index;
         }
 
         /* AVX-512 needs additional state saving support
@@ -3342,7 +3353,8 @@ inline Features runtimeFeatures() {
     /* And now the LZCNT bit, finally
        https://en.wikipedia.org/wiki/CPUID#EAX=80000001h:_Extended_Processor_Info_and_Feature_Bits */
     Implementation::cpuid(cpuid.data, 0x80000001, 0);
-    if(cpuid.e.cx & (1 << 5)) out |= TypeTraits<LzcntT>::Index;
+    if(cpuid.e.cx & (1 << 5))
+        out |= TypeTraits<LzcntT>::Index;
 
     return Features{out};
 }
@@ -3369,10 +3381,12 @@ namespace Implementation {
     inline Features runtimeFeatures(const unsigned long caps) {
         unsigned int out = 0;
         #ifdef CORRADE_TARGET_32BIT
-        if(caps & (1 << 12) /*HWCAP_NEON*/) out |= TypeTraits<NeonT>::Index;
+        if(caps & (1 << 12) /*HWCAP_NEON*/)
+            out |= TypeTraits<NeonT>::Index;
         /* Since FMA is enabled by passing -mfpu=neon-vfpv4, I assume this is
            the flag that corresponds to it. */
-        if(caps & (1 << 16) /*HWCAP_VFPv4*/) out |= TypeTraits<NeonFmaT>::Index;
+        if(caps & (1 << 16) /*HWCAP_VFPv4*/)
+            out |= TypeTraits<NeonFmaT>::Index;
         #else
         /* On ARM64 NEON and NEON FMA is implicit. For extra security make use
            of the CORRADE_TARGET_ defines (which should be always there). Clang
@@ -3393,7 +3407,8 @@ namespace Implementation {
             https://github.com/torvalds/linux/blame/master/arch/arm64/include/uapi/asm/hwcap.h
            This one also isn't present on 32-bit, so I assume it's
            ARM64-only? */
-        if(caps & (1 << 10) /*HWCAP_ASIMDHP*/) out |= TypeTraits<NeonFp16T>::Index;
+        if(caps & (1 << 10) /*HWCAP_ASIMDHP*/)
+            out |= TypeTraits<NeonFp16T>::Index;
         #endif
         return Features{out};
     }

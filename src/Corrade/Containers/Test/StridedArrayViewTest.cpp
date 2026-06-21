@@ -2730,7 +2730,8 @@ void StridedArrayViewTest::iterator() {
     /* Verifying also that iterators of different views and iterators of
        different strides are not comparable */
     StridedArrayView1Di a{d, &d[0].value, 7, data.stride1};
-    if(data.flipped) a = a.flipped<0>();
+    if(data.flipped)
+        a = a.flipped<0>();
     StridedArrayView1Di b;
 
     CORRADE_VERIFY(a.begin() == a.begin());
@@ -2794,7 +2795,8 @@ void StridedArrayViewTest::iterator3D() {
 
     /* Verifying also that iterators of different views are not compared equal */
     StridedArrayView3Di a{d, &d[0].value, {2, 2, 3}, data.stride3};
-    if(data.flipped) a = a.flipped<2>();
+    if(data.flipped)
+        a = a.flipped<2>();
     StridedArrayView3Di b;
 
     CORRADE_VERIFY(a.begin() == a.begin());

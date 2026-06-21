@@ -59,16 +59,19 @@ The output is then as follows:
 /* The set has to be taken by value because it gets modified in the process */
 template<class T, std::size_t size> Utility::Debug& bigEnumSetDebugOutput(Utility::Debug& debug, BigEnumSet<T, size> value, const char* empty) {
     /* Print the empty value in case there is nothing */
-    if(!value) return debug << empty;
+    if(!value)
+        return debug << empty;
 
     /* Go through all bits in the range and print each of them, if set. This
        will mean known and unknown values will be interleaved, but better than
        forcing users to supply a list of 100+ values like with EnumSet. */
     bool separate = false;
     for(std::size_t i = 0; value && i != size*64; ++i) {
-        if(!(value & T(i))) continue;
+        if(!(value & T(i)))
+            continue;
 
-        if(separate) debug << Utility::Debug::nospace << "|" << Utility::Debug::nospace;
+        if(separate)
+            debug << Utility::Debug::nospace << "|" << Utility::Debug::nospace;
         else separate = true;
         debug << T(i);
 

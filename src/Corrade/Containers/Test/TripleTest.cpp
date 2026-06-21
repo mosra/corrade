@@ -47,7 +47,10 @@ struct BoolPtrDouble {
     BoolPtrDouble(BoolPtrDouble&& other): a{other.a}, b{other.b}, c{other.c} {
         other.b = nullptr;
     }
-    ~BoolPtrDouble() { if(a) delete b; }
+    ~BoolPtrDouble() {
+        if(a)
+            delete b;
+    }
     BoolPtrDouble& operator=(const BoolPtrDouble&) = delete;
     /* Clang complains this function is unused. But removing it may have
        unintended consequences, so don't. */
@@ -1410,7 +1413,8 @@ void TripleTest::accessRvalueLifetimeExtension() {
         }
 
         ~DiesLoudly() {
-            if(orphaned) Debug{} << "dying!";
+            if(orphaned)
+                Debug{} << "dying!";
         }
 
         bool orphaned = true;

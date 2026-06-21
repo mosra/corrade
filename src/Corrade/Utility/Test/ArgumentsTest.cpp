@@ -284,7 +284,8 @@ ArgumentsTest::ArgumentsTest() {
 }
 
 bool hasEnv(const std::string& value) {
-    if(std::getenv(value.data())) return true;
+    if(std::getenv(value.data()))
+        return true;
 
     std::vector<std::string> list = Arguments::environment();
     return std::find_if(list.begin(), list.end(),
@@ -1852,7 +1853,8 @@ void ArgumentsTest::parseErrorCallbackIgnoreAll() {
             #endif
             switch(error) {
                 case Arguments::ParseError::InvalidShortArgument:
-                    if(key == "?") CORRADE_COMPARE(key, "?");
+                    if(key == "?")
+                        CORRADE_COMPARE(key, "?");
                     else CORRADE_COMPARE(key, "help");
                     return true;
                 case Arguments::ParseError::InvalidArgument:

@@ -248,7 +248,10 @@ template<class T> class Optional {
          * If the optional object is not empty, calls destructor on stored
          * value.
          */
-        ~Optional() { if(_set) _value.~T(); }
+        ~Optional() {
+            if(_set)
+                _value.~T();
+        }
 
         /**
          * @brief Whether the optional object has a value
@@ -493,7 +496,8 @@ inline Utility::Debug& operator<<(Utility::Debug& debug, NullOptT) {
 
 /** @debugoperator{Optional} */
 template<class T> Utility::Debug& operator<<(Utility::Debug& debug, const Optional<T>& value) {
-    if(!value) return debug << NullOpt;
+    if(!value)
+        return debug << NullOpt;
     else return debug << *value;
 }
 #endif
@@ -519,7 +523,8 @@ template<class T> Optional<T>::Optional(Optional<T>&& other) noexcept(std::is_no
 }
 
 template<class T> Optional<T>& Optional<T>::operator=(const Optional<T>& other) noexcept(std::is_nothrow_copy_assignable<T>::value) {
-    if(_set) _value.~T();
+    if(_set)
+        _value.~T();
     if((_set = other._set))
         /* Can't use {}, see the GCC 4.8-specific overload for details */
         #if defined(CORRADE_TARGET_GCC) && !defined(CORRADE_TARGET_CLANG) && __GNUC__ < 5
@@ -535,7 +540,8 @@ template<class T> Optional<T>& Optional<T>::operator=(Optional<T>&& other) noexc
         using Utility::swap;
         swap(other._value, _value);
     } else {
-        if(_set) _value.~T();
+        if(_set)
+            _value.~T();
         if((_set = other._set))
             /* Can't use {}, see the GCC 4.8-specific overload for details */
             #if defined(CORRADE_TARGET_GCC) && !defined(CORRADE_TARGET_CLANG) && __GNUC__ < 5
@@ -548,7 +554,8 @@ template<class T> Optional<T>& Optional<T>::operator=(Optional<T>&& other) noexc
 }
 
 template<class T> Optional<T>& Optional<T>::operator=(NullOptT) noexcept {
-    if(_set) _value.~T();
+    if(_set)
+        _value.~T();
     _set = false;
     return *this;
 }
@@ -556,7 +563,8 @@ template<class T> Optional<T>& Optional<T>::operator=(NullOptT) noexcept {
 template<class T> template<class ...Args> T& Optional<T>::emplace(Args&&... args) {
     /* Done like this instead of Utility::swap() so it works for non-movable /
        non-copyable types as well. */
-    if(_set) _value.~T();
+    if(_set)
+        _value.~T();
     Implementation::construct<T>(_value, Utility::forward<Args>(args)...);
     /* For exception safety flip the _set bit only after the constructor
        finished -- if the constructor would throw, this means we don't call

@@ -401,7 +401,8 @@ struct Foo {
 Containers::Array<Foo> e{NoInit, 5};
 
 int index = 0;
-for(Foo& f: e) new(&f) Foo{index++};
+for(Foo& f: e)
+    new(&f) Foo{index++};
 /* [Array-NoInit] */
 }
 
@@ -470,12 +471,14 @@ Containers::ArrayView<int> view = DOXYGEN_ELLIPSIS({});
 
 if(!view.isEmpty()) {
     int min = view.front();
-    for(int i: view) if(i < min) min = i;
+    for(int i: view) if(i < min)
+        min = i;
 
     DOXYGEN_ELLIPSIS(static_cast<void>(min);)
 }
 
-if(view.size() > 2 && view[2] < 3) view[2] += 5;
+if(view.size() > 2 && view[2] < 3)
+    view[2] += 5;
 /* [ArrayView-usage-access] */
 }
 
@@ -499,7 +502,8 @@ static_cast<void>(d);
 
 /* [ArrayView-usage-slicing2] */
 int* end = view;
-while(*end < 25) ++end;
+while(*end < 25)
+    ++end;
 Containers::ArrayView<int> numbersLessThan25 = view.prefix(end); // {0, 10, 20}
 
 int* fortyfive = nullptr;
@@ -712,7 +716,8 @@ unsigned indexBuffer[5]{};
 /* [BitArray-usage] */
 Containers::BitArray used{ValueInit, vertexCount};
 
-for(unsigned index: indexBuffer) used.set(index);
+for(unsigned index: indexBuffer)
+    used.set(index);
 /* [BitArray-usage] */
 }
 
@@ -1091,7 +1096,8 @@ struct Foo {
 Containers::StaticArray<5, Foo> e{NoInit};
 
 int index = 0;
-for(Foo& f: e) new(&f) Foo{index++};
+for(Foo& f: e)
+    new(&f) Foo{index++};
 /* [StaticArray-NoInit] */
 }
 
@@ -1151,7 +1157,8 @@ Containers::StridedArrayView1D<float> horizontalPositions{positions,
     &positions[0].x, Containers::arraySize(positions), sizeof(Position)};
 
 /* Move to the right */
-for(float& x: horizontalPositions) x += 3.0f;
+for(float& x: horizontalPositions)
+    x += 3.0f;
 /* [StridedArrayView-usage] */
 }
 

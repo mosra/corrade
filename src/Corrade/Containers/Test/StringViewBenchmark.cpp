@@ -450,7 +450,8 @@ template<char character> void StringViewBenchmark::findCharacterNaive() {
                     break;
                 }
             }
-            if(!found) break;
+            if(!found)
+                break;
 
             ++count;
             a = found + 1;
@@ -570,7 +571,8 @@ template<char character> void StringViewBenchmark::findLastCharacterNaive() {
                     break;
                 }
             }
-            if(!found) break;
+            if(!found)
+                break;
 
             ++count;
             end = found - _text->begin();

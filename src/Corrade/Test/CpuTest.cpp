@@ -682,16 +682,25 @@ void CpuTest::detect() {
 
     #ifdef CORRADE_TARGET_X86
     /* Test that for every feature, the subset is present as well */
-    if(features & Cpu::Avx512f) CORRADE_VERIFY(features & Cpu::Avx2);
-    if(features & Cpu::Avx2) CORRADE_VERIFY(features & Cpu::Avx);
-    if(features & Cpu::Avx) CORRADE_VERIFY(features & Cpu::Sse42);
-    if(features & Cpu::Sse42) CORRADE_VERIFY(features & Cpu::Sse41);
-    if(features & Cpu::Sse41) CORRADE_VERIFY(features & Cpu::Ssse3);
-    if(features & Cpu::Ssse3) CORRADE_VERIFY(features & Cpu::Sse3);
-    if(features & Cpu::Sse3) CORRADE_VERIFY(features & Cpu::Sse2);
+    if(features & Cpu::Avx512f)
+        CORRADE_VERIFY(features & Cpu::Avx2);
+    if(features & Cpu::Avx2)
+        CORRADE_VERIFY(features & Cpu::Avx);
+    if(features & Cpu::Avx)
+        CORRADE_VERIFY(features & Cpu::Sse42);
+    if(features & Cpu::Sse42)
+        CORRADE_VERIFY(features & Cpu::Sse41);
+    if(features & Cpu::Sse41)
+        CORRADE_VERIFY(features & Cpu::Ssse3);
+    if(features & Cpu::Ssse3)
+        CORRADE_VERIFY(features & Cpu::Sse3);
+    if(features & Cpu::Sse3)
+        CORRADE_VERIFY(features & Cpu::Sse2);
     #elif defined(CORRADE_TARGET_ARM)
-    if(features & Cpu::NeonFp16) CORRADE_VERIFY(features & Cpu::NeonFma);
-    if(features & Cpu::NeonFma) CORRADE_VERIFY(features & Cpu::Neon);
+    if(features & Cpu::NeonFp16)
+        CORRADE_VERIFY(features & Cpu::NeonFma);
+    if(features & Cpu::NeonFma)
+        CORRADE_VERIFY(features & Cpu::Neon);
     #else
     /* WebAssembly currently has just one feature, so no subset testing applies
        on those */

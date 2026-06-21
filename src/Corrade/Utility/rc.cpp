@@ -118,7 +118,8 @@ compatibility check.)")
         Utility::Implementation::resourceCompileFrom(args.value("name"), args.value("input"));
 
     /* Compilation failed */
-    if(!compiled) return 2;
+    if(!compiled)
+        return 2;
 
     /* Save output */
     if(!Utility::Path::write(args.value("output"), compiled)) {

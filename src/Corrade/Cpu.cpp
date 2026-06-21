@@ -100,7 +100,8 @@ Features runtimeFeatures() {
        Sigh. */
     #ifdef CORRADE_TARGET_32BIT
     /* Apple says I should use hw.optional.AdvSIMD instead tho */
-    if(appleSysctlByName("hw.optional.neon")) out |= TypeTraits<NeonT>::Index;
+    if(appleSysctlByName("hw.optional.neon"))
+        out |= TypeTraits<NeonT>::Index;
     /* On 32bit I have no idea how to query FMA / vfpv4 support, so that'll
        only be implied if FP16 is available as well. Since I don't think there are many 32bit iOS devices left, that's not worth bothering with. */
     #else
@@ -155,12 +156,14 @@ Utility::Debug& operator<<(Utility::Debug& debug, Features value) {
 
     /* First one without the | */
     debug << prefix.exceptPrefix(1) << Utility::Debug::nospace;
-    if(!value) return debug << "Scalar"_s;
+    if(!value)
+        return debug << "Scalar"_s;
 
     bool written = false;
     #define _c(tag)                                                         \
         if(value & tag) {                                                   \
-            if(!written) written = true;                                    \
+            if(!written)                                                    \
+                written = true;                                             \
             else debug << Utility::Debug::nospace << prefix << Utility::Debug::nospace; \
             debug << TypeTraits<tag ## T>::name();                          \
             value &= ~tag;                                                  \
@@ -192,7 +195,8 @@ Utility::Debug& operator<<(Utility::Debug& debug, Features value) {
     #undef _c
 
     if(value) {
-        if(written) debug << Utility::Debug::nospace << prefix << Utility::Debug::nospace;
+        if(written)
+            debug << Utility::Debug::nospace << prefix << Utility::Debug::nospace;
         debug << (packed ? "" : "Features(") << Utility::Debug::nospace << Utility::Debug::hex << static_cast<unsigned int>(value) << Utility::Debug::nospace << (packed ? "" : ")");
     }
 

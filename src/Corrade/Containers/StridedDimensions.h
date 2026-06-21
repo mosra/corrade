@@ -226,14 +226,16 @@ template<unsigned dimensions, class T> class StridedDimensions {
         /** @brief Equality comparison */
         bool operator==(const StridedDimensions<dimensions, T>& other) const {
             for(std::size_t i = 0; i != dimensions; ++i)
-                if(_data[i] != other._data[i]) return false;
+                if(_data[i] != other._data[i])
+                    return false;
             return true;
         }
 
         /** @brief Non-equality comparison */
         bool operator!=(const StridedDimensions<dimensions, T>& other) const {
             for(std::size_t i = 0; i != dimensions; ++i)
-                if(_data[i] != other._data[i]) return true;
+                if(_data[i] != other._data[i])
+                    return true;
             return false;
         }
 

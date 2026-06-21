@@ -520,7 +520,8 @@ void StringIterableTest::iterator() {
     /* Verifying also that iterators of different views and iterators of
        different strides are not comparable */
     StridedArrayView1D<const char*> a{d, &d[0].value, 7, data.stride};
-    if(data.flipped) a = a.flipped<0>();
+    if(data.flipped)
+        a = a.flipped<0>();
     StridedArrayView1D<const char*> b;
 
     StringIterable ai = a;

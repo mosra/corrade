@@ -852,7 +852,8 @@ void BitArrayViewTest::countBitPattern()  {
     std::uint8_t bitsShifted[4*8];
     for(std::size_t i = 0; i != 4; ++i) {
         std::uint64_t shifted = (bits[i + 1] << shift);
-        if(shift) shifted |= bits[i] >> (64 - shift);
+        if(shift)
+            shifted |= bits[i] >> (64 - shift);
         for(std::size_t j = 0; j != 8; ++j)
             bitsShifted[i*8 + j] = (shifted >> j*8) & 0xff;
     }
@@ -879,16 +880,19 @@ void BitArrayViewTest::countBitPattern()  {
     /* Verify that we have the shift correct with the naive counting first */
     std::size_t naiveCount = 0;
     for(std::size_t i = 0; i != size; ++i) {
-        if(view[i]) ++naiveCount;
+        if(view[i])
+            ++naiveCount;
     }
 
     /* Set to 1 to generate data for the above table */
     #if 0
     if(shift == 0) {
         Debug d{Debug::Flag::NoNewlineAtTheEnd};
-        if(naiveCount < 10) d << " " << Debug::nospace;
+        if(naiveCount < 10)
+            d << " " << Debug::nospace;
         d << naiveCount << Debug::nospace << ",";
-        if(size % 16 == 0 || size == 187) d << Debug::newline;
+        if(size % 16 == 0 || size == 187)
+            d << Debug::newline;
         else d << Debug::space;
     }
     #else

@@ -41,12 +41,14 @@ namespace Corrade { namespace Containers { namespace Implementation {
 template<class T> inline void forwardListInsert(T*& list, T& item) {
     /* If the item is already in a list, do nothing -- handles plugin /
        resource registration done more than once. */
-    if(item.next) return;
+    if(item.next)
+        return;
 
     /* If this is the first item in the list, set its next to `nullptr` to
        make it possible to distinguish if the item is in a list or not (as
        it would be `nullptr` otherwise as well. */
-    if(list) item.next = list;
+    if(list)
+        item.next = list;
     else item.next = &item;
 
     /* The item is the new list head */
@@ -56,12 +58,14 @@ template<class T> inline void forwardListInsert(T*& list, T& item) {
 template<class T> inline void forwardListRemove(T*& list, T& item) {
     /* If the item is not in a list, do nothing -- handles plugin /
        resource registration done more than once. */
-    if(!item.next) return;
+    if(!item.next)
+        return;
 
     /* Special case if the item is first */
     if(list == &item) {
         /* ... and if it's last as well */
-        if(item.next == &item) list = nullptr;
+        if(item.next == &item)
+            list = nullptr;
         else list = item.next;
         item.next = nullptr;
         return;
@@ -69,10 +73,12 @@ template<class T> inline void forwardListRemove(T*& list, T& item) {
 
     /* Assuming the item is in the list, this shouldn't cycle */
     T* prev = list;
-    while(prev->next != &item) prev = prev->next;
+    while(prev->next != &item)
+        prev = prev->next;
 
     /* Special case if the item is last */
-    if(item.next == &item) prev->next = prev;
+    if(item.next == &item)
+        prev->next = prev;
     else prev->next = item.next;
     item.next = nullptr;
 }

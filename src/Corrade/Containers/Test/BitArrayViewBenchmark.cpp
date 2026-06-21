@@ -482,7 +482,8 @@ void BitArrayViewBenchmark::countNaive128() {
     std::size_t count = 0;
     CORRADE_BENCHMARK(CountRepeats) {
         for(std::size_t i = 0; i != view.size(); ++i)
-            if(view[i]) ++count;
+            if(view[i])
+                ++count;
     }
 
     CORRADE_COMPARE(count, 126*CountRepeats);

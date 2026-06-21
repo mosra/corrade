@@ -367,12 +367,14 @@ void StridedDimensionsTest::accessInvalid() {
 
 void StridedDimensionsTest::accessRangeFor() {
     Size3D a{6, 12, 28};
-    for(std::size_t& i: a) ++i;
+    for(std::size_t& i: a)
+        ++i;
     CORRADE_COMPARE(a, (Size3D{7, 13, 29}));
 
     const Size3D ca = a;
     std::size_t sum = 1;
-    for(std::size_t i: ca) sum *= i;
+    for(std::size_t i: ca)
+        sum *= i;
     CORRADE_COMPARE(sum, 29*13*7);
 }
 

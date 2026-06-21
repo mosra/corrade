@@ -252,12 +252,14 @@ Containers::String join(Containers::StringView path, const Containers::StringVie
 
     /* Join with a slash in between. If it's already there, slice it away first
        so we have uniform handling. */
-    if(path.hasSuffix('/')) path = path.exceptSuffix(1);
+    if(path.hasSuffix('/'))
+        path = path.exceptSuffix(1);
     return "/"_s.join({path, filename});
 }
 
 Containers::String join(const Containers::StringIterable& paths) {
-    if(paths.isEmpty()) return {};
+    if(paths.isEmpty())
+        return {};
 
     /** @todo once growable strings are a thing, do this in a loop instead of
         recursing and allocating once for every item! One possibility would be
@@ -355,7 +357,8 @@ bool isDirectory(const Containers::StringView path) {
 }
 
 bool make(const Containers::StringView path) {
-    if(!path) return true;
+    if(!path)
+        return true;
 
     /* If the path contains trailing slash, strip it */
     if(path.hasSuffix('/'))
@@ -1208,7 +1211,8 @@ Containers::Optional<Containers::String> readString(const Containers::StringView
            terminator is generally desirable so it shouldn't cause ASan
            failures. Thus we first resize it to include the null terminator,
            which will update ASan container annotations. */
-        if(arrayIsGrowable(*data)) arrayResize(*data, NoInit, size + 1);
+        if(arrayIsGrowable(*data))
+            arrayResize(*data, NoInit, size + 1);
 
         /* Now it's safe to set the null terminator. In case the array is not
            growable, the allocation doesn't have any ASan annotations, so it's
@@ -1344,11 +1348,15 @@ void MapDeleter::operator()(const char* const data, const std::size_t size) {
     #ifdef CORRADE_TARGET_UNIX
     if(data && munmap(const_cast<char*>(data), size) == -1)
         Error() << "Utility::Path: can't unmap memory-mapped file";
-    if(_fd) close(_fd);
+    if(_fd)
+        close(_fd);
     #elif defined(CORRADE_TARGET_WINDOWS) && !defined(CORRADE_TARGET_WINDOWS_RT)
-    if(data) UnmapViewOfFile(data);
-    if(_hMap) CloseHandle(_hMap);
-    if(_hFile) CloseHandle(_hFile);
+    if(data)
+        UnmapViewOfFile(data);
+    if(_hMap)
+        CloseHandle(_hMap);
+    if(_hFile)
+        CloseHandle(_hFile);
     static_cast<void>(size);
     #endif
 }
@@ -1374,7 +1382,8 @@ Containers::Optional<Containers::Array<char, MapDeleter>> map(const Containers::
        open and let it be handled by the deleter. Array guarantees that deleter
        gets called even in case of a null data. */
     char* data;
-    if(!size) data = nullptr;
+    if(!size)
+        data = nullptr;
     else if((data = reinterpret_cast<char*>(mmap(nullptr, size, PROT_READ|PROT_WRITE, MAP_SHARED, fd, 0))) == MAP_FAILED) {
         Error err;
         err << "Utility::Path::map(): can't map" << filename << Debug::nospace << ":";
@@ -1461,7 +1470,8 @@ Containers::Optional<Containers::Array<const char, MapDeleter>> mapRead(const Co
        open and let it be handled by the deleter. Array guarantees that deleter
        gets called even in case of a null data. */
     const char* data;
-    if(!size) data = nullptr;
+    if(!size)
+        data = nullptr;
     else if((data = reinterpret_cast<const char*>(mmap(nullptr, size, PROT_READ, MAP_SHARED, fd, 0))) == MAP_FAILED) {
         Error err;
         err << "Utility::Path::mapRead(): can't map" << filename << Debug::nospace << ":";

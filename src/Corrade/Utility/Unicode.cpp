@@ -95,7 +95,8 @@ Containers::Pair<char32_t, std::size_t> nextChar(const Containers::StringView te
     } else return {U'\xffffffff', cursor+1};
 
     /* Unexpected end */
-    if(text.size() < end) return {U'\xffffffff', cursor+1};
+    if(text.size() < end)
+        return {U'\xffffffff', cursor+1};
 
     /* Compute the codepoint */
     char32_t result = character & mask;
@@ -189,7 +190,8 @@ Containers::String narrow(const wchar_t* const text, const int size) {
     /* Compared to the above case with an Array, if size is zero, we can just
        do an early return -- the String constructor takes care of the
        guarantee itself */
-    if(!size) return {};
+    if(!size)
+        return {};
     /* WCtoMB counts the trailing \0 into the size, which we have to cut.
        Containers::String takes care of allocating extra for the null
        terminator so we don't need to do that explicitly. */
@@ -212,7 +214,8 @@ Containers::Array<wchar_t> widen(const Containers::StringView text) {
     Containers::Array<wchar_t> result{NoInit, resultSize + 1};
     result[resultSize] = L'\0';
     /* Again, this function doesn't like to be called if size is zero */
-    if(size) MultiByteToWideChar(CP_UTF8, 0, text.data(), size, result.data(), resultSize);
+    if(size)
+        MultiByteToWideChar(CP_UTF8, 0, text.data(), size, result.data(), resultSize);
     /* Return the size without the null terminator */
     return Containers::Array<wchar_t>{result.release(), resultSize};
 }

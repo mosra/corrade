@@ -82,7 +82,8 @@ namespace Implementation {
 
             bool operator==(const SignalData& other) const {
                 for(std::size_t i = 0; i != FunctionPointerSize; ++i)
-                    if(data[i] != other.data[i]) return false;
+                    if(data[i] != other.data[i])
+                        return false;
                 return true;
             }
 

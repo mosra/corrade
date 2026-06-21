@@ -175,7 +175,8 @@ ArrayTuple::ArrayTuple(ArrayTuple&& other) noexcept: _data{other._data}, _size{o
 }
 
 ArrayTuple::~ArrayTuple() {
-    if(_deleter) _deleter(_data, _size);
+    if(_deleter)
+        _deleter(_data, _size);
     else delete[] _data;
 }
 
@@ -232,7 +233,8 @@ Containers::Pair<std::size_t, std::size_t> ArrayTuple::sizeAlignmentFor(const Ar
     for(const Item& item: items) {
         if(item._elementAlignment > maxAlignment)
             maxAlignment = item._elementAlignment;
-        if(item._destructor && item._elementCount) ++destructibleItemCount;
+        if(item._destructor && item._elementCount)
+            ++destructibleItemCount;
     }
 
     /* If all items have trivially destructible types and the array deleter is

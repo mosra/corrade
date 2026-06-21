@@ -142,7 +142,8 @@ class ScopeGuard {
          * @ref release() has been called.
          */
         ~ScopeGuard() {
-            if(_deleterWrapper) _deleterWrapper(&_deleter, &_handle);
+            if(_deleterWrapper)
+                _deleterWrapper(&_deleter, &_handle);
         }
 
     private:

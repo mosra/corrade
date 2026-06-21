@@ -74,7 +74,8 @@ template<class T> Containers::Triple<std::size_t, std::size_t, std::size_t> long
 
         /* Go through all elements of B */
         for(std::size_t j = 0; j != b.size(); ++j) {
-            if(a[i] != b[j]) continue;
+            if(a[i] != b[j])
+                continue;
 
             /* If elements match, extend the previous line with them */
             const std::size_t runSize = newRuns[j] = (j ? runs[j - 1] : 0) + 1;

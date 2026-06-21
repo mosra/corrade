@@ -46,7 +46,8 @@ Configuration::Configuration(const Flags flags): ConfigurationGroup(this), _flag
 
 Configuration::Configuration(const std::string& filename, const Flags flags): ConfigurationGroup(this), _filename(flags & Flag::ReadOnly ? std::string() : filename), _flags(static_cast<InternalFlag>(std::uint32_t(flags))|InternalFlag::IsValid) {
     /* File doesn't exist yet, nothing to do */
-    if(!Path::exists(filename)) return;
+    if(!Path::exists(filename))
+        return;
 
     /* The user wants to truncate the file, mark it as changed and do nothing */
     if(flags & Flag::Truncate) {
@@ -55,7 +56,8 @@ Configuration::Configuration(const std::string& filename, const Flags flags): Co
     }
 
     Containers::Optional<Containers::Array<char>> data = Path::read(filename);
-    if(data && parse(*data)) return;
+    if(data && parse(*data))
+        return;
 
     /* Error, reset everything back */
     _filename = {};
@@ -71,7 +73,8 @@ Configuration::Configuration(std::istream& in, const Flags flags): Configuration
 
     /** @todo deprecate and remove completely */
     const std::string data{std::istreambuf_iterator<char>(in), std::istreambuf_iterator<char>()};
-    if(parse({data.data(), data.size()})) _flags |= InternalFlag::IsValid;
+    if(parse({data.data(), data.size()}))
+        _flags |= InternalFlag::IsValid;
 }
 
 Configuration::Configuration(Configuration&& other) noexcept: ConfigurationGroup{std::move(other)}, _filename{std::move(other._filename)}, _flags{other._flags} {
@@ -79,7 +82,10 @@ Configuration::Configuration(Configuration&& other) noexcept: ConfigurationGroup
     setConfigurationPointer(this);
 }
 
-Configuration::~Configuration() { if(_flags & InternalFlag::Changed) save(); }
+Configuration::~Configuration() {
+    if(_flags & InternalFlag::Changed)
+        save();
+}
 
 Configuration& Configuration::operator=(Configuration&& other) noexcept {
     ConfigurationGroup::operator=(std::move(other));
@@ -154,7 +160,8 @@ std::pair<Containers::StringView, const char*> Configuration::parse(Containers::
             }
 
             /* Remove Windows EOL, if present */
-            if(buffer.hasSuffix('\r')) buffer = buffer.exceptSuffix(1);
+            if(buffer.hasSuffix('\r'))
+                buffer = buffer.exceptSuffix(1);
 
             /* Append it (with newline) to current value */
             group->_values.back().value += buffer;
@@ -167,10 +174,12 @@ std::pair<Containers::StringView, const char*> Configuration::parse(Containers::
 
         /* Empty line */
         if(!buffer) {
-            if(_flags & InternalFlag::SkipComments) continue;
+            if(_flags & InternalFlag::SkipComments)
+                continue;
 
             /* Save it only if this is not the last one */
-            if(in) group->_values.emplace_back();
+            if(in)
+                group->_values.emplace_back();
 
         /* Group header */
         } else if(buffer.hasPrefix('[')) {
@@ -203,7 +212,8 @@ std::pair<Containers::StringView, const char*> Configuration::parse(Containers::
                        be leaked */
                     group->_groups.push_back(std::move(g));
                     std::pair<Containers::ArrayView<const char>, const char*> parsed = parse(currentLine, g.group, nextGroup.prefix(groupEnd .end()));
-                    if(parsed.second) return parsed; /* Error, bubble up */
+                    if(parsed.second)
+                        return parsed; /* Error, bubble up */
                     in = parsed.first;
 
                 /* Otherwise call parse() on the next line */
@@ -215,7 +225,8 @@ std::pair<Containers::StringView, const char*> Configuration::parse(Containers::
                        be leaked */
                     group->_groups.push_back(std::move(g));
                     std::pair<Containers::ArrayView<const char>, const char*> parsed = parse(in, g.group, nextGroup + "/"_s);
-                    if(parsed.second) return parsed; /* Error, bubble up */
+                    if(parsed.second)
+                        return parsed; /* Error, bubble up */
                     in = parsed.first;
                 }
 
@@ -225,7 +236,8 @@ std::pair<Containers::StringView, const char*> Configuration::parse(Containers::
 
         /* Comment */
         } else if(buffer[0] == '#' || buffer[0] == ';') {
-            if(_flags & InternalFlag::SkipComments) continue;
+            if(_flags & InternalFlag::SkipComments)
+                continue;
 
             ConfigurationGroup::Value item;
             item.value = buffer;
@@ -287,7 +299,8 @@ void Configuration::save(std::ostream& out) {
 
     /* EOL character */
     std::string eol;
-    if(_flags & (InternalFlag::ForceWindowsEol|InternalFlag::WindowsEol) && !(_flags & InternalFlag::ForceUnixEol)) eol = "\r\n";
+    if(_flags & (InternalFlag::ForceWindowsEol|InternalFlag::WindowsEol) && !(_flags & InternalFlag::ForceUnixEol))
+        eol = "\r\n";
     else eol = "\n";
 
     /** @todo Checking file.good() after every operation */
@@ -298,7 +311,8 @@ void Configuration::save(std::ostream& out) {
 }
 
 bool Configuration::save() {
-    if(_filename.empty()) return false;
+    if(_filename.empty())
+        return false;
     return save(_filename);
 }
 
@@ -349,7 +363,8 @@ void Configuration::save(std::ostream& out, const std::string& eol, Configuratio
 
         /* Subgroup name */
         std::string name = g.name;
-        if(!fullPath.empty()) name = fullPath + '/' + name;
+        if(!fullPath.empty())
+            name = fullPath + '/' + name;
 
         /* Omit the name if the group is a first subgroup of given name, has no
            values and only subgroups */

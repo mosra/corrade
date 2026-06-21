@@ -587,7 +587,8 @@ constexpr struct {
 
 void Test::instancedTest() {
     const auto& data = InstanceData[testCaseInstanceId()];
-    if(data.desc) setTestCaseDescription(data.desc);
+    if(data.desc)
+        setTestCaseDescription(data.desc);
 
     CORRADE_COMPARE(data.value*data.value*data.value, data.result);
 }
@@ -604,7 +605,8 @@ void Test::repeatedTestFail() {
 }
 
 void Test::repeatedTestSkip() {
-    if(_i++ > 45) CORRADE_SKIP("Too late.");
+    if(_i++ > 45)
+        CORRADE_SKIP("Too late.");
 }
 
 void Test::repeatedTestSetupTeardown() {

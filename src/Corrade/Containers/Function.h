@@ -622,7 +622,8 @@ template<class R, class ...Args> template<class Instance, class Class> Function<
        otherwise this would get confused with a heap-allocated functor (that
        has nullptr _call but non-null _storage.functor.call, which aliases
        _storage.member.instance) */
-    if(!f) return;
+    if(!f)
+        return;
 
     _storage.member.instance = &instance;
     reinterpret_cast<R(Class::*&)(Args...)>(_storage.member.data) = f;
@@ -643,7 +644,8 @@ template<class R, class ...Args> template<class Instance, class Class> Function<
 template<class R, class ...Args> template<class Instance, class Class> Function<R(Args...)>::Function(Instance& instance, R(Class::*f)(Args...) &) noexcept {
     static_assert(sizeof(f) <= sizeof(_storage.member.data),
         "size of member function pointer is incorrectly assumed to be smaller");
-    if(!f) return;
+    if(!f)
+        return;
 
     _storage.member.instance = &instance;
     reinterpret_cast<R(Class::*&)(Args...) &>(_storage.member.data) = f;
@@ -660,7 +662,8 @@ template<class R, class ...Args> template<class Instance, class Class> Function<
 template<class R, class ...Args> template<class Instance, class Class> Function<R(Args...)>::Function(Instance& instance, R(Class::*f)(Args...) const) noexcept {
     static_assert(sizeof(f) <= sizeof(_storage.member.data),
         "size of member function pointer is incorrectly assumed to be smaller");
-    if(!f) return;
+    if(!f)
+        return;
 
     _storage.member.instance = &instance;
     reinterpret_cast<R(Class::*&)(Args...) const>(_storage.member.data) = f;
@@ -677,7 +680,8 @@ template<class R, class ...Args> template<class Instance, class Class> Function<
 template<class R, class ...Args> template<class Instance, class Class> Function<R(Args...)>::Function(Instance& instance, R(Class::*f)(Args...) const &) noexcept {
     static_assert(sizeof(f) <= sizeof(_storage.member.data),
         "size of member function pointer is incorrectly assumed to be smaller");
-    if(!f) return;
+    if(!f)
+        return;
 
     _storage.member.instance = &instance;
     reinterpret_cast<R(Class::*&)(Args...) const &>(_storage.member.data) = f;

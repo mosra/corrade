@@ -1003,7 +1003,8 @@ void OptionalTest::accessRvalueLifetimeExtension() {
         }
 
         ~DiesLoudly() {
-            if(orphaned) Debug{} << "dying!";
+            if(orphaned)
+                Debug{} << "dying!";
         }
 
         bool orphaned = true;

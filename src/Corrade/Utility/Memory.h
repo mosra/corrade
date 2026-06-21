@@ -221,7 +221,8 @@ template<class T, std::size_t alignment> Containers::Array<T> allocateAligned(No
     #ifdef CORRADE_TARGET_UNIX
     /* For some reason, allocating zero bytes still returns a non-null pointer
        which seems weird and confusing. Handle that explicitly instead. */
-    if(!size) return {};
+    if(!size)
+        return {};
 
     /* I would use aligned_alloc() but then there's APPLE who comes and says
        NO. And on top of everything they DARE to have posix_memalign() in a
@@ -239,7 +240,8 @@ template<class T, std::size_t alignment> Containers::Array<T> allocateAligned(No
     /* Windows */
     #elif defined(CORRADE_TARGET_WINDOWS)
     /* Zero size is not allowed: https://docs.microsoft.com/en-us/cpp/c-runtime-library/reference/aligned-malloc */
-    if(!size) return {};
+    if(!size)
+        return {};
 
     return Containers::Array<T>{static_cast<T*>(_aligned_malloc(size*sizeof(T), alignment)), size, Implementation::alignedDeleter<T>};
 
@@ -249,7 +251,8 @@ template<class T, std::size_t alignment> Containers::Array<T> allocateAligned(No
     #else
     /* Because we always allocate `alignment - 1` more than the size, it means
        even zero-size allocations would be allocations. Not desirable. */
-    if(!size) return {};
+    if(!size)
+        return {};
 
     /* Using a unsigned byte in order to be able to represent a 255 byte offset
        as well */

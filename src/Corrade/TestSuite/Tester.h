@@ -2258,7 +2258,8 @@ template<class T, class U, class V> void Tester::compareWith(Comparator<T>& comp
 }
 
 template<class T> void Tester::verify(const char* expression, T&& value) {
-    if(value) verifyInternal(expression, true);
+    if(value)
+        verifyInternal(expression, true);
     else verifyInternal(expression, false);
 }
 

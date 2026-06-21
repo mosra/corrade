@@ -66,7 +66,8 @@ namespace Implementation {
     }
 
     template<class T> T IntegerConfigurationValue<T>::fromString(const std::string& stringValue, ConfigurationValueFlags flags) {
-        if(stringValue.empty()) return T{};
+        if(stringValue.empty())
+            return T{};
 
         std::istringstream stream{stringValue};
 
@@ -108,7 +109,8 @@ namespace Implementation {
     }
 
     template<class T> T FloatConfigurationValue<T>::fromString(const std::string& stringValue, ConfigurationValueFlags flags) {
-        if(stringValue.empty()) return T{};
+        if(stringValue.empty())
+            return T{};
 
         std::istringstream stream{stringValue};
 

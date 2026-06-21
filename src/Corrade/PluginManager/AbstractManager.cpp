@@ -226,7 +226,8 @@ AbstractManager::AbstractManager(const Containers::StringView pluginInterface, c
        manager assigned to them (i.e, aren't in the map yet). */
     for(const Implementation::StaticPlugin* staticPlugin = globalStaticPlugins; staticPlugin; staticPlugin = Containers::Implementation::forwardListNext(*staticPlugin)) {
         /* The plugin doesn't belong to this manager, skip it */
-        if(staticPlugin->interface != _state->pluginInterface) continue;
+        if(staticPlugin->interface != _state->pluginInterface)
+            continue;
 
         /* Assign the plugin to this manager, parse its metadata and
            initialize it (unless the plugin is metadata-less) */
@@ -265,7 +266,8 @@ AbstractManager::AbstractManager(const Containers::StringView pluginInterface, c
                to find it, prevent that from happening by wrapping it again */
             /** @todo clean this up once we kill std::map */
             const auto alias = _state->aliases.find(Containers::String::nullTerminatedView(staticPlugin->plugin));
-            if(alias != _state->aliases.end()) _state->aliases.erase(alias);
+            if(alias != _state->aliases.end())
+                _state->aliases.erase(alias);
             /* And here as well -- wrap the string to avoid a copy */
             /* Libc++ frees the passed Plugin& reference when using
                emplace(), causing double-free memory corruption later.
@@ -287,7 +289,8 @@ AbstractManager::AbstractManager(const Containers::StringView pluginInterface, c
 
     #ifndef CORRADE_PLUGINMANAGER_NO_DYNAMIC_PLUGIN_SUPPORT
     /* If plugin directory is set, use it, otherwise loop through */
-    if(pluginDirectory) setPluginDirectory(pluginDirectory);
+    if(pluginDirectory)
+        setPluginDirectory(pluginDirectory);
     else {
         CORRADE_ASSERT(!pluginSearchPaths.isEmpty(),
             "PluginManager::Manager: either pluginDirectory has to be set or T::pluginSearchPaths() is expected to have at least one entry", );
@@ -297,7 +300,8 @@ AbstractManager::AbstractManager(const Containers::StringView pluginInterface, c
         const Containers::StringView executableDir = Utility::Path::path(*executableLocation);
         for(const Containers::StringView path: pluginSearchPaths) {
             const Containers::String fullPath = Utility::Path::join(executableDir, path);
-            if(!Utility::Path::exists(fullPath)) continue;
+            if(!Utility::Path::exists(fullPath))
+                continue;
 
             setPluginDirectory(fullPath);
             break;
@@ -420,7 +424,8 @@ void AbstractManager::setPluginDirectory(const Containers::StringView directory)
             const Containers::StringView name = filename.exceptSuffix(_state->pluginSuffix);
 
             /* Skip the plugin if it is among loaded */
-            if(_state->plugins.find(name) != _state->plugins.end()) continue;
+            if(_state->plugins.find(name) != _state->plugins.end())
+                continue;
 
             registerDynamicPlugin(name, Containers::Pointer<Implementation::Plugin>{InPlaceInit, name,
                 _state->pluginMetadataSuffix ? Utility::Path::join(_state->pluginDirectory, name + _state->pluginMetadataSuffix) : Containers::String{}});
@@ -498,7 +503,8 @@ const PluginMetadata* AbstractManager::metadata(const Containers::StringView plu
        find it, prevent that from happening by wrapping a view */
     /** @todo clean this up once we kill std::map */
     auto found = _state->aliases.find(Containers::String::nullTerminatedView(plugin));
-    if(found != _state->aliases.end()) return &found->second;
+    if(found != _state->aliases.end())
+        return &found->second;
 
     return nullptr;
 }
@@ -508,7 +514,8 @@ PluginMetadata* AbstractManager::metadata(const Containers::StringView plugin) {
        find it, prevent that from happening by wrapping a view */
     /** @todo clean this up once we kill std::map */
     auto found = _state->aliases.find(Containers::String::nullTerminatedView(plugin));
-    if(found != _state->aliases.end()) return &found->second;
+    if(found != _state->aliases.end())
+        return &found->second;
 
     return nullptr;
 }
@@ -518,7 +525,8 @@ LoadState AbstractManager::loadState(const Containers::StringView plugin) const 
        find it, prevent that from happening by wrapping a view */
     /** @todo clean this up once we kill std::map */
     auto found = _state->aliases.find(Containers::String::nullTerminatedView(plugin));
-    if(found != _state->aliases.end()) return found->second.loadState;
+    if(found != _state->aliases.end())
+        return found->second.loadState;
 
     return LoadState::NotFound;
 }
@@ -1020,7 +1028,8 @@ void AbstractManager::registerDynamicPlugin(const Containers::StringView name, C
            prevent anything with String::nullTerminatedView() */
         /** @todo clean this up once we kill std::map */
         const auto alias = _state->aliases.find(name);
-        if(alias != _state->aliases.end()) _state->aliases.erase(alias);
+        if(alias != _state->aliases.end())
+            _state->aliases.erase(alias);
         CORRADE_INTERNAL_ASSERT_OUTPUT(_state->aliases.insert({name, *result.first->second}).second);
     }
 
@@ -1066,7 +1075,8 @@ void AbstractManager::reregisterInstance(const Containers::StringView plugin, Ab
 
     /* If the plugin is being moved, replace the instance pointer. Otherwise
        remove it from the list, and if the list is empty, delete it fully. */
-    if(newInstance) *pos = newInstance;
+    if(newInstance)
+        *pos = newInstance;
     else found->second->instances.erase(pos);
 }
 
@@ -1083,7 +1093,8 @@ Containers::Pointer<AbstractPlugin> AbstractManager::instantiateInternal(const C
 }
 
 Containers::Pointer<AbstractPlugin> AbstractManager::loadAndInstantiateInternal(const Containers::StringView plugin) {
-    if(!(load(plugin) & LoadState::Loaded)) return nullptr;
+    if(!(load(plugin) & LoadState::Loaded))
+        return nullptr;
 
     #ifndef CORRADE_PLUGINMANAGER_NO_DYNAMIC_PLUGIN_SUPPORT
     /* If file path passed, instantiate extracted name instead */
@@ -1104,7 +1115,8 @@ AbstractManager* AbstractManager::externalManagerInternal(const Containers::Stri
     CORRADE_ASSERT(pluginInterface,
         "PluginManager::Manager::externalManager(): can only retrieve managers with a non-empty plugin interface", {});
     for(AbstractManager* manager: _state->externalManagers)
-        if(manager->pluginInterface() == pluginInterface) return manager;
+        if(manager->pluginInterface() == pluginInterface)
+            return manager;
     return nullptr;
 }
 

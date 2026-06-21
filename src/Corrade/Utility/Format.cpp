@@ -136,83 +136,98 @@ template<> char formatTypeChar<float>(FormatType type) {
 }
 
 std::size_t Formatter<int>::format(const Containers::MutableStringView& buffer, const int value, int precision, const FormatType type) {
-    if(precision == -1) precision = 1;
+    if(precision == -1)
+        precision = 1;
     const char format[]{ '%', '.', '*', formatTypeChar<int>(type), 0 };
     return std::snprintf(buffer.data(), buffer.size(), format, precision, value);
     return {};
 }
 void Formatter<int>::format(std::FILE* const file, const int value, int precision, FormatType type) {
-    if(precision == -1) precision = 1;
+    if(precision == -1)
+        precision = 1;
     const char format[]{ '%', '.', '*', formatTypeChar<int>(type), 0 };
     std::fprintf(file, format, precision, value);
 }
 std::size_t Formatter<unsigned int>::format(const Containers::MutableStringView& buffer, const unsigned int value, int precision, const FormatType type) {
-    if(precision == -1) precision = 1;
+    if(precision == -1)
+        precision = 1;
     const char format[]{ '%', '.', '*', formatTypeChar<unsigned int>(type), 0 };
     return std::snprintf(buffer.data(), buffer.size(), format, precision, value);
 }
 void Formatter<unsigned int>::format(std::FILE* const file, const unsigned int value, int precision, const FormatType type) {
-    if(precision == -1) precision = 1;
+    if(precision == -1)
+        precision = 1;
     const char format[]{ '%', '.', '*', formatTypeChar<unsigned int>(type), 0 };
     std::fprintf(file, format, precision, value);
 }
 std::size_t Formatter<long long>::format(const Containers::MutableStringView& buffer, const long long value, int precision, const FormatType type) {
-    if(precision == -1) precision = 1;
+    if(precision == -1)
+        precision = 1;
     const char format[]{ '%', '.', '*', 'l', 'l', formatTypeChar<long long>(type), 0 };
     return std::snprintf(buffer.data(), buffer.size(), format, precision, value);
 }
 void Formatter<long long>::format(std::FILE* const file, const long long value, int precision, const FormatType type) {
-    if(precision == -1) precision = 1;
+    if(precision == -1)
+        precision = 1;
     const char format[]{ '%', '.', '*', 'l', 'l', formatTypeChar<long long>(type), 0 };
     std::fprintf(file, format, precision, value);
 }
 std::size_t Formatter<unsigned long long>::format(const Containers::MutableStringView& buffer, const unsigned long long value, int precision, const FormatType type) {
-    if(precision == -1) precision = 1;
+    if(precision == -1)
+        precision = 1;
     const char format[]{ '%', '.', '*', 'l', 'l', formatTypeChar<unsigned long long>(type), 0 };
     return std::snprintf(buffer.data(), buffer.size(), format, precision, value);
 }
 void Formatter<unsigned long long>::format(std::FILE* const file, const unsigned long long value, int precision, const FormatType type) {
-    if(precision == -1) precision = 1;
+    if(precision == -1)
+        precision = 1;
     const char format[]{ '%', '.', '*', 'l', 'l', formatTypeChar<unsigned long long>(type), 0 };
     std::fprintf(file, format, precision, value);
 }
 
 std::size_t Formatter<float>::format(const Containers::MutableStringView& buffer, const float value, int precision, const FormatType type) {
-    if(precision == -1) precision = Implementation::FloatPrecision<float>::Digits;
+    if(precision == -1)
+        precision = Implementation::FloatPrecision<float>::Digits;
     const char format[]{ '%', '.', '*', formatTypeChar<float>(type), 0 };
     return std::snprintf(buffer.data(), buffer.size(), format, precision, double(value));
 }
 void Formatter<float>::format(std::FILE* const file, const float value, int precision, const FormatType type) {
-    if(precision == -1) precision = Implementation::FloatPrecision<float>::Digits;
+    if(precision == -1)
+        precision = Implementation::FloatPrecision<float>::Digits;
     const char format[]{ '%', '.', '*', formatTypeChar<float>(type), 0 };
     std::fprintf(file, format, precision, double(value));
 }
 
 std::size_t Formatter<double>::format(const Containers::MutableStringView& buffer, const double value, int precision, const FormatType type) {
-    if(precision == -1) precision = Implementation::FloatPrecision<double>::Digits;
+    if(precision == -1)
+        precision = Implementation::FloatPrecision<double>::Digits;
     const char format[]{ '%', '.', '*', formatTypeChar<float>(type), 0 };
     return std::snprintf(buffer.data(), buffer.size(), format, precision, value);
 }
 void Formatter<double>::format(std::FILE* const file, const double value, int precision, const FormatType type) {
-    if(precision == -1) precision = Implementation::FloatPrecision<double>::Digits;
+    if(precision == -1)
+        precision = Implementation::FloatPrecision<double>::Digits;
     const char format[]{ '%', '.', '*', formatTypeChar<float>(type), 0 };
     std::fprintf(file, format, precision, value);
 }
 
 std::size_t Formatter<long double>::format(const Containers::MutableStringView& buffer, const long double value, int precision, const FormatType type) {
-    if(precision == -1) precision = Implementation::FloatPrecision<long double>::Digits;
+    if(precision == -1)
+        precision = Implementation::FloatPrecision<long double>::Digits;
     const char format[]{ '%', '.', '*', 'L', formatTypeChar<float>(type), 0 };
     return std::snprintf(buffer.data(), buffer.size(), format, precision, value);
 }
 void Formatter<long double>::format(std::FILE* const file, const long double value, int precision, const FormatType type) {
-    if(precision == -1) precision = Implementation::FloatPrecision<long double>::Digits;
+    if(precision == -1)
+        precision = Implementation::FloatPrecision<long double>::Digits;
     const char format[]{ '%', '.', '*', 'L', formatTypeChar<float>(type), 0 };
     std::fprintf(file, format, precision, value);
 }
 
 std::size_t Formatter<Containers::StringView>::format(const Containers::MutableStringView& buffer, const Containers::StringView value, const int precision, const FormatType type) {
     std::size_t size = value.size();
-    if(std::size_t(precision) < size) size = precision;
+    if(std::size_t(precision) < size)
+        size = precision;
     CORRADE_ASSERT(type == FormatType::Unspecified,
         "Utility::format(): type specifier can't be used for a string value", {});
     #ifdef CORRADE_NO_ASSERT
@@ -221,12 +236,14 @@ std::size_t Formatter<Containers::StringView>::format(const Containers::MutableS
     /* strncpy() would stop on \0 characters */
     /* Apparently memcpy() can't be called with null pointers, even if size is
        zero. I call that bullying. */
-    if(buffer.data() && size) std::memcpy(buffer.data(), value.data(), size);
+    if(buffer.data() && size)
+        std::memcpy(buffer.data(), value.data(), size);
     return size;
 }
 void Formatter<Containers::StringView>::format(std::FILE* const file, const Containers::StringView value, const int precision, const FormatType type) {
     std::size_t size = value.size();
-    if(std::size_t(precision) < size) size = precision;
+    if(std::size_t(precision) < size)
+        size = precision;
     CORRADE_ASSERT(type == FormatType::Unspecified,
         "Utility::format(): type specifier can't be used for a string value", );
     #ifdef CORRADE_NO_ASSERT
@@ -254,7 +271,8 @@ namespace {
 int parseNumber(const Containers::StringView format, std::size_t& formatOffset) {
     int number = -1;
     while(formatOffset < format.size() && format[formatOffset] >= '0' && format[formatOffset] <= '9') {
-        if(number == -1) number = 0;
+        if(number == -1)
+            number = 0;
         else number *= 10;
         number += (format[formatOffset] - '0');
         ++formatOffset;
@@ -302,7 +320,8 @@ template<class Writer, class FormattedWriter, class Formatter> void formatWith(c
 
             /* If the placeholder was numbered, use that number, otherwise
                just use the formatter that's next */
-            if(placeholderIndex != -1) formatterToGo = placeholderIndex;
+            if(placeholderIndex != -1)
+                formatterToGo = placeholderIndex;
 
             /* Formatter index is in bounds, write */
             if(formatterToGo < formatters.size())
@@ -383,7 +402,8 @@ template<class Writer, class FormattedWriter, class Formatter> void formatWith(c
 
             /* Unexpected end, break -- the assert at the end of function
                takes care of this */
-            if(formatOffset == format.size()) break;
+            if(formatOffset == format.size())
+                break;
 
             /* Next should be the placeholder end */
             CORRADE_ASSERT(format[formatOffset] == '}',

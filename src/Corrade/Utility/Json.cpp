@@ -389,7 +389,8 @@ Containers::Optional<Json> Json::tokenize(const Containers::StringView filename,
 
                 /* If we're in an object, we're expecting an object key (or
                    end) next, otherwise a value (or end) */
-                if(c == '{') expecting = Expecting::ObjectKeyOrEnd;
+                if(c == '{')
+                    expecting = Expecting::ObjectKeyOrEnd;
                 else expecting = Expecting::ValueOrArrayEnd;
             } break;
 
@@ -1229,9 +1230,12 @@ bool Json::parseStringInternal(const char* const errorPrefix, JsonTokenData& tok
                 } else for(; in != unicodeEnd - 1; ++in) {
                     character <<= 4;
                     const char uc = in[1];
-                    if(uc >= '0' && uc <= '9') character |= uc - '0';
-                    else if(uc >= 'A' && uc <= 'F') character |= 10 + uc - 'A';
-                    else if(uc >= 'a' && uc <= 'f') character |= 10 + uc - 'a';
+                    if(uc >= '0' && uc <= '9')
+                        character |= uc - '0';
+                    else if(uc >= 'A' && uc <= 'F')
+                        character |= 10 + uc - 'A';
+                    else if(uc >= 'a' && uc <= 'f')
+                        character |= 10 + uc - 'a';
                     else {
                         /* Handled below together with values out of range */
                         character = ~char32_t{};

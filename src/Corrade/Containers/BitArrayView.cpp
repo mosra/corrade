@@ -385,7 +385,8 @@ Utility::Debug& operator<<(Utility::Debug& debug, BitArrayView value) {
             mask = 1;
         }
 
-        if(i && i % 8 == 0) debug << ",";
+        if(i && i % 8 == 0)
+            debug << ",";
 
         debug << (*data & mask ? "1" : "0") << Utility::Debug::nospace;
 

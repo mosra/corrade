@@ -106,7 +106,8 @@ template<class T> Array<BasicStringView<T>> BasicStringView<T>::splitWithoutEmpt
         T* pos = static_cast<T*>(std::memchr(oldpos, delimiter, end - oldpos));
         /* Not sure why memchr can't just do this, it would make much more
            sense */
-        if(!pos) pos = end;
+        if(!pos)
+            pos = end;
 
         if(pos != oldpos)
             arrayAppend(parts, slice(oldpos, pos));
@@ -128,7 +129,8 @@ const char* stringFindString(const char* data, const std::size_t size, const cha
            potential "this is UB so I can whatever YOLO!" misoptimizations and
            implementation differences when calling memcmp() with zero size and
            potentially null pointers also. */
-        if(!size) return data;
+        if(!size)
+            return data;
 
         /* Otherwise compare it with the string at all possible positions in
            the string until we have a match. */
@@ -176,7 +178,8 @@ const char* stringFindLastString(const char* const data, const std::size_t size,
            potential "this is UB so I can whatever YOLO!" misoptimizations and
            implementation differences when calling memcmp() with zero size and
            potentially null pointers also. */
-        if(!size) return data;
+        if(!size)
+            return data;
 
         /* Otherwise compare it with the string at all possible positions in
            the string until we have a match. */
@@ -462,7 +465,8 @@ CORRADE_UTILITY_CPU_MAYBE_UNUSED CORRADE_ENABLE(NEON) typename std::decay<declty
     /** @todo investigate why */
     if(size < 16) {
         for(const char* i = data; i != end; ++i)
-            if(*i == character) return i;
+            if(*i == character)
+                return i;
         return static_cast<const char*>(nullptr);
     }
 
@@ -778,7 +782,8 @@ const char* stringFindLastCharacter(const char* const data, const std::size_t si
        allowed or not ... haha, well, except that if data is nullptr,
        `*(data - 1)` blows up, so I actually need to. */
     if(data) for(const char* i = data + size - 1; i >= data; --i)
-        if(*i == character) return i;
+        if(*i == character)
+            return i;
     return {};
 }
 
@@ -805,7 +810,8 @@ const char* stringFindLastCharacter(const char* const data, const std::size_t si
    but I'd first need to allocate to make use of that and FUCK NO. */
 const char* stringFindAny(const char* const data, const std::size_t size, const char* const characters, const std::size_t characterCount) {
     for(const char* i = data, *end = data + size; i != end; ++i)
-        if(std::memchr(characters, *i, characterCount)) return i;
+        if(std::memchr(characters, *i, characterCount))
+            return i;
     return {};
 }
 
@@ -814,19 +820,22 @@ const char* stringFindAny(const char* const data, const std::size_t size, const 
 
 const char* stringFindLastAny(const char* const data, const std::size_t size, const char* const characters, const std::size_t characterCount) {
     for(const char* i = data + size; i != data; --i)
-        if(std::memchr(characters, *(i - 1), characterCount)) return i - 1;
+        if(std::memchr(characters, *(i - 1), characterCount))
+            return i - 1;
     return {};
 }
 
 const char* stringFindNotAny(const char* const data, const std::size_t size, const char* const characters, const std::size_t characterCount) {
     for(const char* i = data, *end = data + size; i != end; ++i)
-        if(!std::memchr(characters, *i, characterCount)) return i;
+        if(!std::memchr(characters, *i, characterCount))
+            return i;
     return {};
 }
 
 const char* stringFindLastNotAny(const char* const data, const std::size_t size, const char* const characters, const std::size_t characterCount) {
     for(const char* i = data + size; i != data; --i)
-        if(!std::memchr(characters, *(i - 1), characterCount)) return i - 1;
+        if(!std::memchr(characters, *(i - 1), characterCount))
+            return i - 1;
     return {};
 }
 
@@ -1135,7 +1144,8 @@ CORRADE_UTILITY_CPU_MAYBE_UNUSED typename std::decay<decltype(stringCountCharact
   return [](const char* const data, const std::size_t size, const char character) -> std::size_t {
     std::size_t count = 0;
     for(const char* i = data, *end = data + size; i != end; ++i)
-        if(*i == character) ++count;
+        if(*i == character)
+            ++count;
     return count;
   };
 }
@@ -1287,7 +1297,8 @@ template<> CORRADE_UTILITY_EXPORT String BasicStringView<const char>::join(const
     /* Calculate size of the resulting string including delimiters */
     const std::size_t delimiterSize = size();
     std::size_t totalSize = strings.isEmpty() ? 0 : (strings.size() - 1)*delimiterSize;
-    for(const StringView s: strings) totalSize += s.size();
+    for(const StringView s: strings)
+        totalSize += s.size();
 
     /* Reserve memory for the resulting string */
     String result{Corrade::NoInit, totalSize};
@@ -1329,10 +1340,12 @@ template<> CORRADE_UTILITY_EXPORT String BasicStringView<const char>::joinWithou
     const std::size_t delimiterSize = size();
     std::size_t totalSize = 0;
     for(const StringView string: strings) {
-        if(string.isEmpty()) continue;
+        if(string.isEmpty())
+            continue;
         totalSize += string.size() + delimiterSize;
     }
-    if(totalSize) totalSize -= delimiterSize;
+    if(totalSize)
+        totalSize -= delimiterSize;
 
     /* Reserve memory for the resulting string */
     String result{Corrade::NoInit, totalSize};
@@ -1341,7 +1354,8 @@ template<> CORRADE_UTILITY_EXPORT String BasicStringView<const char>::joinWithou
     char* out = result.data();
     char* const end = out + totalSize;
     for(const StringView string: strings) {
-        if(string.isEmpty()) continue;
+        if(string.isEmpty())
+            continue;
 
         const std::size_t stringSize = string.size();
         /* Apparently memcpy() can't be called with null pointers, even if size
@@ -1372,7 +1386,8 @@ template<> CORRADE_UTILITY_EXPORT String BasicStringView<char>::joinWithoutEmpty
 
 template<class T> bool BasicStringView<T>::hasPrefix(const StringView prefix) const {
     const std::size_t prefixSize = prefix.size();
-    if(size() < prefixSize) return false;
+    if(size() < prefixSize)
+        return false;
 
     return std::memcmp(_data, prefix._data, prefixSize) == 0;
 }
@@ -1385,7 +1400,8 @@ template<class T> bool BasicStringView<T>::hasPrefix(const char prefix) const {
 template<class T> bool BasicStringView<T>::hasSuffix(const StringView suffix) const {
     const std::size_t size = this->size();
     const std::size_t suffixSize = suffix.size();
-    if(size < suffixSize) return false;
+    if(size < suffixSize)
+        return false;
 
     return std::memcmp(_data + size - suffixSize, suffix._data, suffixSize) == 0;
 }
@@ -1473,8 +1489,10 @@ bool operator<(const StringView a, const StringView b) {
     const std::size_t aSize = a._sizePlusFlags & ~Implementation::StringViewSizeMask;
     const std::size_t bSize = b._sizePlusFlags & ~Implementation::StringViewSizeMask;
     const int result = std::memcmp(a._data, b._data, Utility::min(aSize, bSize));
-    if(result != 0) return result < 0;
-    if(aSize < bSize) return true;
+    if(result != 0)
+        return result < 0;
+    if(aSize < bSize)
+        return true;
     return false;
 }
 
@@ -1483,8 +1501,10 @@ bool operator<=(const StringView a, const StringView b) {
     const std::size_t aSize = a._sizePlusFlags & ~Implementation::StringViewSizeMask;
     const std::size_t bSize = b._sizePlusFlags & ~Implementation::StringViewSizeMask;
     const int result = std::memcmp(a._data, b._data, Utility::min(aSize, bSize));
-    if(result != 0) return result < 0;
-    if(aSize <= bSize) return true;
+    if(result != 0)
+        return result < 0;
+    if(aSize <= bSize)
+        return true;
     return false;
 }
 
@@ -1493,8 +1513,10 @@ bool operator>=(const StringView a, const StringView b) {
     const std::size_t aSize = a._sizePlusFlags & ~Implementation::StringViewSizeMask;
     const std::size_t bSize = b._sizePlusFlags & ~Implementation::StringViewSizeMask;
     const int result = std::memcmp(a._data, b._data, Utility::min(aSize, bSize));
-    if(result != 0) return result > 0;
-    if(aSize >= bSize) return true;
+    if(result != 0)
+        return result > 0;
+    if(aSize >= bSize)
+        return true;
     return false;
 }
 
@@ -1503,8 +1525,10 @@ bool operator>(const StringView a, const StringView b) {
     const std::size_t aSize = a._sizePlusFlags & ~Implementation::StringViewSizeMask;
     const std::size_t bSize = b._sizePlusFlags & ~Implementation::StringViewSizeMask;
     const int result = std::memcmp(a._data, b._data, Utility::min(aSize, bSize));
-    if(result != 0) return result > 0;
-    if(aSize > bSize) return true;
+    if(result != 0)
+        return result > 0;
+    if(aSize > bSize)
+        return true;
     return false;
 }
 
@@ -1518,8 +1542,10 @@ String operator+(const StringView a, const StringView b) {
     /* Apparently memcpy() can't be called with null pointers, even if size is
        zero. I call that bullying. */
     char* out = result.data();
-    if(aSize) std::memcpy(out, a._data, aSize);
-    if(bSize) std::memcpy(out + aSize, b._data, bSize);
+    if(aSize)
+        std::memcpy(out, a._data, aSize);
+    if(bSize)
+        std::memcpy(out + aSize, b._data, bSize);
 
     return result;
 }

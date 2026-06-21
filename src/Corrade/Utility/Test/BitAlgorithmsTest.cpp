@@ -108,9 +108,12 @@ void BitAlgorithmsTest::copyMasked() {
     Containers::StridedArrayView1D<std::uint64_t> dst = dstData;
     Containers::StridedArrayView1D<const std::uint64_t> expected = expectedData;
 
-    if(data.flipSrc) src = src.flipped<0>();
-    if(data.flipDst) dst = dst.flipped<0>();
-    if(data.flipExpected) expected = expected.flipped<0>();
+    if(data.flipSrc)
+        src = src.flipped<0>();
+    if(data.flipDst)
+        dst = dst.flipped<0>();
+    if(data.flipExpected)
+        expected = expected.flipped<0>();
 
     Containers::BitArray srcMask{ValueInit, src.size()};
     if(data.flipMask) {
@@ -217,7 +220,8 @@ void BitAlgorithmsTest::copyMaskedNotContiguous() {
 CORRADE_NEVER_INLINE void copyMaskedNaive(Containers::ArrayView<const std::size_t> src, Containers::BitArrayView srcMask, Containers::ArrayView<std::size_t> dst) {
     std::size_t offset = 0;
     for(std::size_t i = 0; i != src.size(); ++i) {
-        if(!srcMask[i]) continue;
+        if(!srcMask[i])
+            continue;
         dst[offset++] = src[i];
     }
 }

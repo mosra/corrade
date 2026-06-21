@@ -384,13 +384,16 @@ void ArrayTupleTest::construct() {
 
         /* Check that trivial types are zero-init'd and nontrivial had their
            constructor called */
-        for(char i: chars) CORRADE_COMPARE(i, 0);
+        for(char i: chars)
+            CORRADE_COMPARE(i, 0);
         CORRADE_COMPARE(NonCopyable::constructed, 4);
         CORRADE_COMPARE(NonCopyable::destructed, 0);
-        for(int i: ints) CORRADE_COMPARE(i, 0);
+        for(int i: ints)
+            CORRADE_COMPARE(i, 0);
         CORRADE_COMPARE(Aligned<16>::constructed, 3);
         CORRADE_COMPARE(Aligned<16>::destructed, 0);
-        for(double i: strided) CORRADE_COMPARE(i, 0.0);
+        for(double i: strided)
+            CORRADE_COMPARE(i, 0.0);
         /* MSVC 2015 needs the {}s, FFS */
         for(auto i: strided3D) {
             for(auto j: i) {
@@ -407,8 +410,10 @@ void ArrayTupleTest::construct() {
             for(std::size_t j = 0; j != bitsStrided3D.size()[1]; ++j)
                 for(std::size_t k = 0; k != bitsStrided3D.size()[2]; ++k)
                     CORRADE_VERIFY(!bitsStrided3D[i][j][k]);
-        for(char i: stringNullTerminated) CORRADE_COMPARE(i, 0);
-        for(char i: string) CORRADE_COMPARE(i, 0);
+        for(char i: stringNullTerminated)
+            CORRADE_COMPARE(i, 0);
+        for(char i: string)
+            CORRADE_COMPARE(i, 0);
     }
 
     /* Check that non-trivial destructors were called */
@@ -423,7 +428,8 @@ void ArrayTupleTest::constructNoInit() {
     NonCopyable::destructed = 0;
 
     char storage[357];
-    for(char& i: storage) i = '\xce';
+    for(char& i: storage)
+        i = '\xce';
 
     CORRADE_VERIFY(true); /* to capture correct function name */
 
@@ -477,13 +483,16 @@ void ArrayTupleTest::constructNoInit() {
 
         /* Verify that NoInit stayed at 0xce, while the ValueInit are 0x0 and
            only the constructors for the ValueInit'd view were called */
-        for(char i: chars) CORRADE_COMPARE(i, '\xce');
-        for(char i: initializedChars) CORRADE_COMPARE(i, 0);
+        for(char i: chars)
+            CORRADE_COMPARE(i, '\xce');
+        for(char i: initializedChars)
+            CORRADE_COMPARE(i, 0);
         for(auto i: arrayCast<2, char>(strided))
             CORRADE_COMPARE_AS(i, stridedArrayView({
                 '\xce', '\xce', '\xce', '\xce', '\xce', '\xce', '\xce', '\xce'
             }), TestSuite::Compare::Container);
-        for(double i: initializedStrided) CORRADE_COMPARE(i, 0.0);
+        for(double i: initializedStrided)
+            CORRADE_COMPARE(i, 0.0);
         /* MSVC 2015 needs the {}s, FFS */
         for(auto i: arrayCast<4, char>(strided3D)) {
             for(auto j: i) {
@@ -535,9 +544,11 @@ void ArrayTupleTest::constructNoInit() {
             CORRADE_COMPARE(i, 0);
         CORRADE_COMPARE(initializedStringNullTerminated.flags(), StringViewFlag::NullTerminated);
         CORRADE_COMPARE(initializedStringNullTerminated[initializedStringNullTerminated.size()], 0);
-        for(char i: string) CORRADE_COMPARE(i, '\xce');
+        for(char i: string)
+            CORRADE_COMPARE(i, '\xce');
         CORRADE_COMPARE(string.flags(), StringViewFlag{});
-        for(char i: initializedString) CORRADE_COMPARE(i, 0);
+        for(char i: initializedString)
+            CORRADE_COMPARE(i, 0);
         CORRADE_COMPARE(initializedString.flags(), StringViewFlag{});
 
         /* Construct the remaining NonCopyables, so their destruction is
@@ -1086,7 +1097,8 @@ void ArrayTupleTest::constructBig() {
 
         /* Check that trivial types are zero-init'd and nontrivial had their
            constructor called */
-        for(char i: chars) CORRADE_COMPARE(i, 0);
+        for(char i: chars)
+            CORRADE_COMPARE(i, 0);
         CORRADE_COMPARE(Big::constructed, 7);
         CORRADE_COMPARE(Big::destructed, 0);
     }

@@ -82,7 +82,8 @@ bool FileWatcher::isValid() const {
 FileWatcher& FileWatcher::operator=(FileWatcher&&) noexcept = default;
 
 bool FileWatcher::hasChanged() {
-    if(!(_flags & InternalFlag::Valid)) return false;
+    if(!(_flags & InternalFlag::Valid))
+        return false;
 
     /** @todo all this code is now in Path::lastModification() as well, except
         that here it caches the UTF-16-converted filename for Windows, and it

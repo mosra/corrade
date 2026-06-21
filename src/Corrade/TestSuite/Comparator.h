@@ -266,7 +266,8 @@ template<class T> class Comparator {
 template<class T> Comparator<T>::Comparator(): actualValue(), expectedValue() {}
 
 template<class T> ComparisonStatusFlags Comparator<T>::operator()(const T& actual, const T& expected) {
-    if(actual == expected) return {};
+    if(actual == expected)
+        return {};
 
     actualValue = &actual;
     expectedValue = &expected;

@@ -181,7 +181,8 @@ void JsonWriter::writeCommaNewlineIndentInternal() {
     }
 
     /* Comma after previous value */
-    if(state.needsCommaBefore) arrayAppend(state.out, state.commaAndSpace);
+    if(state.needsCommaBefore)
+        arrayAppend(state.out, state.commaAndSpace);
 
     /* Newline and indent */
     arrayAppend(state.out, state.whitespace.prefix(state.levels.back().first()));

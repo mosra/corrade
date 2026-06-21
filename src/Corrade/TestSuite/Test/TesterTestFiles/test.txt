@@ -91,7 +91,7 @@ Starting TesterTest::Test with 65 test cases...
        [43] tearing down...
     OK [44] instancedTest(zero)
     OK [45] instancedTest(1)
-  FAIL [46] instancedTest(two) at here.cpp:592
+  FAIL [46] instancedTest(two) at here.cpp:593
         Values data.value*data.value*data.value and data.result are not the same, actual is
         125
         but expected
@@ -105,7 +105,7 @@ Starting TesterTest::Test with 65 test cases...
 4
     OK [49] repeatedTest()@5
      ? [50] <unknown>()@50
-  FAIL [51] repeatedTestFail()@18 at here.cpp:603
+  FAIL [51] repeatedTestFail()@18 at here.cpp:604
         Expression _i++ < 17 failed.
   SKIP [52] repeatedTestSkip()@29
         Too late.
@@ -120,7 +120,7 @@ Starting TesterTest::Test with 65 test cases...
        [54] tearing down...
      ? [54] <unknown>()@2
        [55] setting up...
-  FAIL [55] repeatedTestSetupTeardownFail()@1 at here.cpp:617
+  FAIL [55] repeatedTestSetupTeardownFail()@1 at here.cpp:619
         Expression false failed.
        [55] tearing down...
        [56] setting up...
@@ -146,26 +146,26 @@ Benchmark end: 500
  BENCH [61] (no data)        B benchmarkNoMacro(this is gonna fail)@1x0
   SKIP [62] benchmarkSkip()@1
         Can't verify the measurements anyway.
- XFAIL [63] macrosInALambda() at here.cpp:691 (iteration 37)
+ XFAIL [63] macrosInALambda() at here.cpp:693 (iteration 37)
         Expected here to test CORRADE_EXPECT_FAIL(). Expression false failed.
-  INFO [63] macrosInALambda() at here.cpp:693
+  INFO [63] macrosInALambda() at here.cpp:695
         Expected here to test CORRADE_INFO().
-  WARN [63] macrosInALambda() at here.cpp:694
+  WARN [63] macrosInALambda() at here.cpp:696
         Expected here to test CORRADE_WARN().
- XFAIL [63] macrosInALambda() at here.cpp:699
+ XFAIL [63] macrosInALambda() at here.cpp:701
         Expected here to test CORRADE_FAIL(). Condition failed.
- XFAIL [63] macrosInALambda() at here.cpp:703
+ XFAIL [63] macrosInALambda() at here.cpp:705
         Expected here to test CORRADE_FAIL_IF(). Condition failed.
   SKIP [63] macrosInALambda()
         Expected here to test CORRADE_SKIP().
  BENCH [64] 348.36          kB benchmarkMacrosInALambda()@1x1
-  INFO [65] macrosInASingleExpressionBlock() at here.cpp:745
+  INFO [65] macrosInASingleExpressionBlock() at here.cpp:747
         Expected here to test CORRADE_INFO().
-  WARN [65] macrosInASingleExpressionBlock() at here.cpp:747
+  WARN [65] macrosInASingleExpressionBlock() at here.cpp:749
         Expected here to test CORRADE_WARN().
- XFAIL [65] macrosInASingleExpressionBlock() at here.cpp:752
+ XFAIL [65] macrosInASingleExpressionBlock() at here.cpp:754
         Expected here to test CORRADE_FAIL(). Condition failed.
- XFAIL [65] macrosInASingleExpressionBlock() at here.cpp:757
+ XFAIL [65] macrosInASingleExpressionBlock() at here.cpp:759
         Expected here to test CORRADE_FAIL_IF(). Condition failed.
   SKIP [65] macrosInASingleExpressionBlock()
         Expected here to test CORRADE_SKIP().

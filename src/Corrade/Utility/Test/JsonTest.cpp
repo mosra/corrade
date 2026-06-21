@@ -1870,7 +1870,8 @@ void JsonTest::simpleObject() {
         /* All the same parent */
         CORRADE_VERIFY(key->parent() == object);
         /* Next should always point to the key */
-        if(prevKey) CORRADE_VERIFY(prevKey->next() == key);
+        if(prevKey)
+            CORRADE_VERIFY(prevKey->next() == key);
         prevKey = key;
 
         /* The value having no nested children */
@@ -1881,7 +1882,8 @@ void JsonTest::simpleObject() {
         /* Key being the parent */
         CORRADE_VERIFY(value->parent() == key);
         /* Next should always point to the next key */
-        if(prevValue) CORRADE_VERIFY(prevValue->next() == key);
+        if(prevValue)
+            CORRADE_VERIFY(prevValue->next() == key);
         prevValue = value;
     }
     CORRADE_VERIFY(prevValue == json->tokens().back());
@@ -1959,7 +1961,8 @@ void JsonTest::simpleArray() {
         /* All the same parent */
         CORRADE_VERIFY(i.parent() == array);
         /* Next should always point to ... the next */
-        if(prev) CORRADE_VERIFY(JsonToken{*json, *prev}.next() == i);
+        if(prev)
+            CORRADE_VERIFY(JsonToken{*json, *prev}.next() == i);
         prev = &i.token();
     }
     CORRADE_COMPARE(prev, &json->tokens().back().token());
@@ -2832,7 +2835,8 @@ void JsonTest::parseOption() {
     /* Verify tokens of other type are not parsed by accident */
     std::size_t notParsedCount = 0;
     for(JsonToken token: json->tokens())
-        if(!token.isParsed()) ++notParsedCount;
+        if(!token.isParsed())
+            ++notParsedCount;
     CORRADE_COMPARE(notParsedCount, data.tokenNotParsedCount);
 }
 
@@ -2887,7 +2891,8 @@ void JsonTest::parseSubtree() {
     /* Verify tokens of other type are not parsed by accident */
     std::size_t notParsedCount = 0;
     for(JsonToken token: json->tokens())
-        if(!token.isParsed()) ++notParsedCount;
+        if(!token.isParsed())
+            ++notParsedCount;
     CORRADE_COMPARE(notParsedCount, data.tokenNotParsedCount);
 }
 
@@ -3599,7 +3604,8 @@ void JsonTest::parseError() {
     Error redirectError{&out};
     CORRADE_EXPECT_FAIL_IF(!data.message, "Not implemented yet.");
     CORRADE_VERIFY(!((*json).*data.function)(json->root()));
-    if(!data.message) return;
+    if(!data.message)
+        return;
     CORRADE_COMPARE(out, format("Utility::Json::{}\n", data.message));
 
     /* Verify that the JSON token doesn't get corrupted by the error */

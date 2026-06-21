@@ -475,7 +475,8 @@ void LinkedListTest::accessListInDestructor() {
 
         ~UpdatesListOnDestruction() {
             /* If the item is in a list, list() should be non-null */
-            if(list()) ++list()->insertedDestructedItemCount;
+            if(list())
+                ++list()->insertedDestructedItemCount;
             else ++disconnectedDestructedItemCount;
         }
 

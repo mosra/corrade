@@ -135,7 +135,8 @@ void Resource::unregisterData(Implementation::ResourceGroup& resource) {
 namespace {
     Implementation::ResourceGroup* findGroup(const Containers::StringView name) {
         for(Implementation::ResourceGroup* group = resourceGlobals.groups; group; group = Containers::Implementation::forwardListNext(*group)) {
-            if(group->name == name) return group;
+            if(group->name == name)
+                return group;
         }
 
         return nullptr;
@@ -224,7 +225,8 @@ Containers::StringView Resource::getString(const Containers::StringView filename
         const std::vector<const ConfigurationGroup*> files = _overrideGroup->conf.groups("file");
         for(const ConfigurationGroup* const file: files) {
             const Containers::StringView name = file->hasValue("alias") ? file->value<Containers::StringView>("alias") : file->value<Containers::StringView>("filename");
-            if(name != filename) continue;
+            if(name != filename)
+                continue;
 
             /* Load the file */
             Containers::Optional<Containers::String> data = Path::readString(Path::join(Path::path(_overrideGroup->conf.filename()), file->value("filename")));

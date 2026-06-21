@@ -45,7 +45,8 @@ void Receiver::disconnectAllSlots() {
     for(Implementation::ReceiverConnection& connection: _connections) {
         auto range = connection.emitter->_connections.equal_range(connection.signal);
         for(auto it = range.first; it != range.second; ++it) {
-            if(&it->second != &*connection.data) continue;
+            if(&it->second != &*connection.data)
+                continue;
 
             connection.emitter->_connections.erase(it);
             connection.emitter->_connectionsChanged = true;

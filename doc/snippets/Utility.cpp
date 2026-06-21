@@ -434,7 +434,8 @@ struct Foo {
 Containers::Array<Foo> data = Utility::allocateAligned<Foo>(NoInit, 5);
 
 int index = 0;
-for(Foo& f: data) new(&f) Foo{index++};
+for(Foo& f: data)
+    new(&f) Foo{index++};
 /* [allocateAligned-NoInit] */
 }
 
@@ -583,7 +584,8 @@ Utility::Debug{} << "this has default color";
 
 {
     Utility::Debug d;
-    if(errorHappened) d << Utility::Debug::color(Utility::Debug::Color::Red);
+    if(errorHappened)
+        d << Utility::Debug::color(Utility::Debug::Color::Red);
 
     Utility::Debug{} << "if an error happened, this will be printed red";
     Utility::Debug{} << "this also"
@@ -1068,8 +1070,10 @@ Utility::JsonWriter gltfNodes{
 
 for(const Mesh& mesh: meshes) {
     /* Open the mesh and node arrays if they're empty */
-    if(gltfMeshes.isEmpty()) gltfMeshes.beginArray();
-    if(gltfNodes.isEmpty()) gltfNodes.beginArray();
+    if(gltfMeshes.isEmpty())
+        gltfMeshes.beginArray();
+    if(gltfNodes.isEmpty())
+        gltfNodes.beginArray();
 
     std::size_t gltfMeshId = gltfMeshes.currentArraySize();
     Containers::ScopeGuard gltfMesh = gltfMeshes.beginObjectScope();

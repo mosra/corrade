@@ -403,15 +403,36 @@ if(expression) {
 }
 @endcode
 
-If the block is only one statement and short enough (&lt;80 columns), it can be
-on the same line:
+If a function block is only one statement and short enough (&lt;80 columns), it
+can be on the same line:
 
 @code{.cpp}
 void setProcessingDelay(int delay) { processingDelay = delay; }
 @endcode
 
+On the other hand, single-statement @cpp if @ce, @cpp while @ce and
+@cpp for @ce blocks should always have the contents on the next line, to make
+code coverage properly report if the branch contents aren't taken. Wrapping
+them in braces is discouraged, as it only makes the code longer and doesn't
+really prevent bugs anyway.
+
 @code{.cpp}
-if(!initialized) return false;
+if(!initialized)
+    return false;
+
+for(int& i: data)
+    i = 1337;
+@endcode
+
+Single-statement contents can be on the same line if they wouldn't affect code
+coverage anyway, such as when they're excluded from it, when they're inside a
+macro that's reported as a single line, or when doing so would seriously hurt
+readability. The following formatting is also fine, because ultimately it's
+the assignment expression that matters for code coverage:
+
+@code{.cpp}
+if(initialize) for(int& i: data)
+    i = 1337;
 @endcode
 
 The only exceptions when opening braces are on the following line is when the

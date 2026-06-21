@@ -87,12 +87,14 @@ inline std::size_t resourceLookup(const unsigned int count, const unsigned int* 
         });
 
     /* No lower bound found */
-    if(found == positions.end()) return count;
+    if(found == positions.end())
+        return count;
 
     /* Check that the filenames match --- it only returns a lower bound, not an
        exact match */
     const std::size_t i = found - positions.begin();
-    if(filename != resourceFilenameAt(positionData, filenames, i)) return count;
+    if(filename != resourceFilenameAt(positionData, filenames, i))
+        return count;
 
     /* Return the found index */
     return i;

@@ -46,7 +46,10 @@ struct BoolPtr {
     BoolPtr(BoolPtr&& other): a{other.a}, b{other.b} {
         other.b = nullptr;
     }
-    ~BoolPtr() { if(a) delete b; }
+    ~BoolPtr() {
+        if(a)
+            delete b;
+    }
     BoolPtr& operator=(const BoolPtr&) = delete;
     /* Clang complains this function is unused. But removing it may have
        unintended consequences, so don't. */
@@ -948,7 +951,8 @@ void PairTest::accessRvalueLifetimeExtension() {
         }
 
         ~DiesLoudly() {
-            if(orphaned) Debug{} << "dying!";
+            if(orphaned)
+                Debug{} << "dying!";
         }
 
         bool orphaned = true;

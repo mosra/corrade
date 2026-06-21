@@ -283,7 +283,8 @@ CORRADE_UTILITY_CPU_MAYBE_UNUSED typename std::decay<decltype(commonPrefix)>::ty
     const std::size_t size = Utility::min(sizeA, sizeB);
     const char* const endA = a + size;
     for(const char *i = a, *j = b; i != endA; ++i, ++j)
-        if(*i != *j) return i;
+        if(*i != *j)
+            return i;
     return endA;
   };
 }
@@ -854,7 +855,8 @@ Containers::String lowercase(Containers::String string) {
        String::nullTerminatedView() passed right into the function), make it
        owned first. Usually it'll get copied however, which already makes it
        owned. */
-    if(!string.isSmall() && string.deleter()) string = Containers::String{string};
+    if(!string.isSmall() && string.deleter())
+        string = Containers::String{string};
 
     lowercaseInPlace(string);
     return string;
@@ -877,7 +879,8 @@ Containers::String uppercase(Containers::String string) {
        String::nullTerminatedView() passed right into the function), make it
        owned first. Usually it'll get copied however, which already makes it
        owned. */
-    if(!string.isSmall() && string.deleter()) string = Containers::String{string};
+    if(!string.isSmall() && string.deleter())
+        string = Containers::String{string};
 
     uppercaseInPlace(string);
     return string;
@@ -930,7 +933,8 @@ Containers::String replaceAll(Containers::String string, const char search, cons
     /* If not even a single character is found, pass the argument through
        unchanged */
     const Containers::MutableStringView found = string.find(search);
-    if(!found) return Utility::move(string);
+    if(!found)
+        return Utility::move(string);
 
     /* Convert the found pointer to an index to be able to replace even after a
        potential reallocation below */
@@ -940,7 +944,8 @@ Containers::String replaceAll(Containers::String string, const char search, cons
        as String::nullTerminatedView() passed right into the function), make it
        owned first. Usually it'll get copied however, which already makes it
        owned. */
-    if(!string.isSmall() && string.deleter()) string = Containers::String{string};
+    if(!string.isSmall() && string.deleter())
+        string = Containers::String{string};
 
     /* Replace the already-found occurence and delegate the rest further */
     string[firstFoundPosition] = replace;
@@ -957,7 +962,8 @@ namespace {
 CORRADE_UTILITY_CPU_MAYBE_UNUSED typename std::decay<decltype(replaceAllInPlaceCharacter)>::type replaceAllInPlaceCharacterImplementation(Cpu::ScalarT) {
     return [](char* const data, const std::size_t size, const char search, const char replace) {
         for(char* i = data, *end = data + size; i != end; ++i)
-            if(*i == search) *i = replace;
+            if(*i == search)
+                *i = replace;
     };
 }
 
@@ -1339,7 +1345,8 @@ Containers::Optional<Containers::Array<std::uint32_t>> parseNumberSequence(const
                https://stackoverflow.com/a/1815371 are mostly just crap, using
                a *division* to test if a multiplication overflowed?! */
             const std::uint64_t next = std::uint64_t{number}*10 + (c - '0');
-            if(next > ~std::uint32_t{}) overflow = true;
+            if(next > ~std::uint32_t{})
+                overflow = true;
 
             number = next;
 

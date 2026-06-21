@@ -323,7 +323,8 @@ template<class T> void LinkedList<T>::insert(T* const item, T* const before) {
     /* Adding as last item */
     if(!before) {
         /* First item in the list ever */
-        if(!_first) _first = item;
+        if(!_first)
+            _first = item;
 
         else {
             _last->_next = item;
@@ -353,7 +354,8 @@ template<class T> void LinkedList<T>::cut(T* const item) {
     /* Removing first item */
     if(item == _first) {
         _first = _first->_next;
-        if(_first) _first->_previous = nullptr;
+        if(_first)
+            _first->_previous = nullptr;
 
         /* The item is last remaining in the list */
         if(item == _last)
@@ -362,7 +364,8 @@ template<class T> void LinkedList<T>::cut(T* const item) {
     /* Removing last item */
     } else if(item == _last) {
         _last = _last->_previous;
-        if(_last) _last->_next = nullptr;
+        if(_last)
+            _last->_next = nullptr;
 
     /* Removing item in the middle */
     } else {
@@ -376,7 +379,8 @@ template<class T> void LinkedList<T>::cut(T* const item) {
 }
 
 template<class T> inline void LinkedList<T>::move(T* const item, T* const before) {
-    if(item == before) return;
+    if(item == before)
+        return;
     cut(item);
     insert(item, before);
 }
@@ -405,12 +409,14 @@ template<class Derived, class List> LinkedListItem<Derived, List>::LinkedListIte
 }
 
 template<class Derived, class List> LinkedListItem<Derived, List>::~LinkedListItem() {
-    if(_list) _list->LinkedList<Derived>::cut(static_cast<Derived*>(this));
+    if(_list)
+        _list->LinkedList<Derived>::cut(static_cast<Derived*>(this));
 }
 
 template<class Derived, class List> LinkedListItem<Derived, List>& LinkedListItem<Derived, List>::operator=(LinkedListItem<Derived, List>&& other) {
     /* Cut self from previous list */
-    if(_list) _list->LinkedList<Derived>::cut(static_cast<Derived*>(this));
+    if(_list)
+        _list->LinkedList<Derived>::cut(static_cast<Derived*>(this));
 
     /* Replace other with self in new list */
     if(other._list) {

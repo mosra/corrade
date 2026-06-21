@@ -743,7 +743,8 @@ Fatal::~Fatal() {
 #endif
 
 template<class T> Debug& Debug::print(const T& value) {
-    if(!_output) return *this;
+    if(!_output)
+        return *this;
 
     #ifdef CORRADE_SOURCE_LOCATION_BUILTINS_SUPPORTED
     /* Print source location, if not printed yet */
@@ -835,17 +836,20 @@ Debug& Debug::operator<<(unsigned long value) { return print(value); }
 Debug& Debug::operator<<(unsigned long long value) { return print(value); }
 
 Debug& Debug::operator<<(float value) {
-    if(!_output) return *this;
+    if(!_output)
+        return *this;
     *_output << std::setprecision(Implementation::FloatPrecision<float>::Digits);
     return print(value);
 }
 Debug& Debug::operator<<(double value) {
-    if(!_output) return *this;
+    if(!_output)
+        return *this;
     *_output << std::setprecision(Implementation::FloatPrecision<double>::Digits);
     return print(value);
 }
 Debug& Debug::operator<<(long double value) {
-    if(!_output) return *this;
+    if(!_output)
+        return *this;
     *_output << std::setprecision(Implementation::FloatPrecision<long double>::Digits);
     return print(value);
 }
