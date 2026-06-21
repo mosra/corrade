@@ -30,7 +30,6 @@
 #include <algorithm> /* std::shuffle() */
 #include <iostream>
 #include <random> /* random device for std::shuffle() */
-#include <sstream>
 #include <typeinfo>
 
 #include "Corrade/Containers/Array.h"
@@ -40,7 +39,6 @@
 #include "Corrade/Containers/Reference.h"
 #include "Corrade/Containers/ScopeGuard.h"
 #include "Corrade/Containers/StringIterable.h"
-#include "Corrade/Containers/StringStl.h" /** @todo remove once Debug is stream-free */
 #include "Corrade/TestSuite/Implementation/BenchmarkCounters.h"
 #include "Corrade/TestSuite/Implementation/BenchmarkStats.h"
 #include "Corrade/Utility/Arguments.h"
@@ -149,10 +147,6 @@ Tester::TesterConfiguration& Tester::TesterConfiguration::setCpuScalingGovernorF
     return *this;
 }
 #endif
-
-struct Tester::Printer::Printer::Data {
-    std::ostringstream out;
-};
 
 struct Tester::TesterState {
     explicit TesterState(const TesterConfiguration& configuration): configuration{Utility::move(configuration)} {}
@@ -765,10 +759,9 @@ void Tester::printFileLineInfo(Debug& out, std::size_t line) {
        are linked in reverse order so we have to reverse the array before
        printing. */
     if(_state->iterationPrinter) {
-        /** @todo remove std::string once Debug doesn't rely on streams */
-        Containers::Array<std::string> iterations;
+        Containers::Array<Containers::StringView> iterations;
         for(IterationPrinter* iterationPrinter = _state->iterationPrinter; iterationPrinter; iterationPrinter = iterationPrinter->_parent) {
-            arrayAppend(iterations, iterationPrinter->_data->out.str());
+            arrayAppend(iterations, *iterationPrinter->_data);
         }
         /** @todo could also use a flipped StridedArrayView here instead */
         std::reverse(iterations.begin(), iterations.end());
@@ -792,7 +785,7 @@ void Tester::verifyInternal(const char* expression, bool expressionValue) {
         Debug out{_state->logOutput, _state->useColor};
         printTestCaseLabel(out, " XFAIL", Debug::Color::Yellow, Debug::Color::Default);
         printFileLineInfo(out);
-        out << "       " << _state->expectedFailure->_data->out.str() << "Expression"
+        out << "       " << *_state->expectedFailure->_data << "Expression"
             << expression << "failed.";
         return;
     }
@@ -819,7 +812,7 @@ void Tester::printComparisonMessageInternal(ComparisonStatusFlags flags, const c
         Debug out{_state->logOutput, _state->useColor};
         printTestCaseLabel(out, " XFAIL", Debug::Color::Yellow, Debug::Color::Default);
         printFileLineInfo(out);
-        out << "       " << _state->expectedFailure->_data->out.str() << actual << "and"
+        out << "       " << *_state->expectedFailure->_data << actual << "and"
             << expected << "failed the comparison.";
 
     /* Otherwise, in case of an unexpected failure or an unexpected pass, print
@@ -889,7 +882,7 @@ void Tester::infoOrWarn(const Printer& printer, std::size_t line, bool warn) {
         warn ? Debug::Color::Yellow : Debug::Color::Default,
         Debug::Color::Default);
     printFileLineInfo(out, line);
-    out << "       " << printer._data->out.str();
+    out << "       " << *printer._data;
 }
 
 void Tester::failIf(const Printer& printer, const bool fail) {
@@ -900,7 +893,7 @@ void Tester::failIf(const Printer& printer, const bool fail) {
         /** @todo this is extremely uninformative, implement the verbose output
             for XFAIL/XPASS at least, or figure out a better way to report
             this */
-        out << "       " << _state->expectedFailure->_data->out.str() << "Condition failed.";
+        out << "       " << *_state->expectedFailure->_data << "Condition failed.";
         return;
     }
 
@@ -909,7 +902,7 @@ void Tester::failIf(const Printer& printer, const bool fail) {
         printTestCaseLabel(out, _state->expectedFailure ? " XPASS" : "  FAIL", Debug::Color::Red, Debug::Color::Default);
         printFileLineInfo(out);
         out << "       ";
-        if(!_state->expectedFailure) out << printer._data->out.str();
+        if(!_state->expectedFailure) out << *printer._data;
         else out << "Failure was expected to happen.";
         throw Exception{};
     }
@@ -918,7 +911,7 @@ void Tester::failIf(const Printer& printer, const bool fail) {
 void Tester::skip(const Printer& printer) {
     Debug out{_state->logOutput, _state->useColor};
     printTestCaseLabel(out, "  SKIP", Debug::Color::Default, Debug::Color::Default);
-    out << Debug::newline << "       " << printer._data->out.str();
+    out << Debug::newline << "       " << *printer._data;
     throw SkipException();
 }
 
@@ -1110,7 +1103,7 @@ void Tester::addTestCaseInternal(const TestCase& testCase) {
 }
 
 Utility::Debug Tester::Printer::debug() {
-    return Debug{&_data->out, Debug::Flag::NoNewlineAtTheEnd};
+    return Debug{_data.get(), Debug::Flag::NoNewlineAtTheEnd};
 }
 
 Tester::Printer::Printer(): _data{InPlaceInit} {}

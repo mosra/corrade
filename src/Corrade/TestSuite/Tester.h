@@ -1490,10 +1490,8 @@ class CORRADE_TESTSUITE_EXPORT Tester {
                 Printer();
                 Debug debug();
 
-                /* There's a std::ostringstream inside (yes, ew); don't want
-                   that in a header */
-                struct Data;
-                Containers::Pointer<Data> _data;
+                /* Don't want to include the whole String in this header */
+                Containers::Pointer<Containers::String> _data;
         };
 
         class CORRADE_TESTSUITE_EXPORT ExpectedFailure: public Printer {
