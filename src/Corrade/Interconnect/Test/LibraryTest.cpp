@@ -24,6 +24,8 @@
     DEALINGS IN THE SOFTWARE.
 */
 
+#define _CORRADE_NO_DEPRECATED_INTERCONNECT
+
 #include "Corrade/Interconnect/Test/EmitterLibrary.h"
 #include "Corrade/TestSuite/Tester.h"
 
@@ -40,6 +42,7 @@ LibraryTest::LibraryTest() {
 }
 
 void LibraryTest::test() {
+    CORRADE_IGNORE_DEPRECATED_PUSH
     EmitterLibrary e;
 
     int fired = 1;
@@ -62,6 +65,7 @@ void LibraryTest::test() {
         e.fireInlineThroughAFunction();
         CORRADE_COMPARE(fired, 36);
     }
+    CORRADE_IGNORE_DEPRECATED_POP
 }
 
 }}}}

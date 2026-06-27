@@ -27,6 +27,7 @@
 */
 
 #include "Corrade/Interconnect/Emitter.h"
+#include "Corrade/Utility/DeprecationMacros.h"
 
 #ifndef CORRADE_BUILD_STATIC
     #ifdef InterconnectTestEmitterLibrary_EXPORTS
@@ -42,6 +43,7 @@
 
 namespace Corrade { namespace Interconnect { namespace Test {
 
+CORRADE_IGNORE_DEPRECATED_PUSH
 struct CORRADE_INTERCONNECT_TESTEMITTERLIBRARY_EXPORT EmitterLibrary: Emitter {
     void fireInlineThroughAFunction();
     void fireNonInlineThroughAFunction();
@@ -52,6 +54,7 @@ struct CORRADE_INTERCONNECT_TESTEMITTERLIBRARY_EXPORT EmitterLibrary: Emitter {
 
     Signal fireNonInline();
 };
+CORRADE_IGNORE_DEPRECATED_POP
 
 }}}
 

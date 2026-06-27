@@ -531,8 +531,9 @@ By default the library is built with everything included. Using the following
 `CORRADE_WITH_*` CMake options you can specify which parts will be built and
 which not:
 
--   `CORRADE_WITH_INTERCONNECT` --- Build the @ref Interconnect library.
-    Enables also building of the Utility library.
+-   `CORRADE_WITH_INTERCONNECT`  @m_class{m-label m-danger} **deprecated** ---
+    Build the @ref Interconnect library. Enables also building of the Utility
+    library.
 -   `CORRADE_WITH_MAIN` --- build The @ref main "Main" library. Enabled
     automatically if `CORRADE_WITH_TESTSUITE` is enabled.
 -   `CORRADE_WITH_PLUGINMANAGER` --- Build the @ref PluginManager library.

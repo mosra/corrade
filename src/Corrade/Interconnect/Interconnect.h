@@ -26,29 +26,46 @@
     DEALINGS IN THE SOFTWARE.
 */
 
+#ifdef CORRADE_BUILD_DEPRECATED
 /** @file
  * @brief Forward declarations for the @ref Corrade::Interconnect namespace
+ * @m_deprecated_since_latest Design of the @ref Corrade::Interconnect library
+ *      relies on member function pointers being unique, which is impossible to
+ *      guarantee across all platform configurations and compilers, leading to
+ *      subtle hard-to-discover bugs. The library is thus scheduled for
+ *      removal, at the moment with no builtin replacement.
  */
-
-#include <cstddef>
+#endif
 
 #include "Corrade/configure.h"
+
+#ifdef CORRADE_BUILD_DEPRECATED
+#include <cstddef>
+
+#include "Corrade/Utility/DeprecationMacros.h"
+
+#ifndef _CORRADE_NO_DEPRECATED_INTERCONNECT
+CORRADE_DEPRECATED_FILE("the Interconnect library is broken by design and thus obsolete")
+#endif
 
 #ifndef DOXYGEN_GENERATING_OUTPUT
 namespace Corrade { namespace Interconnect {
 
-class Connection;
-class Emitter;
-class Receiver;
+class CORRADE_DEPRECATED("the Interconnect library is broken by design and thus obsolete") Connection;
+class CORRADE_DEPRECATED("the Interconnect library is broken by design and thus obsolete") Emitter;
+class CORRADE_DEPRECATED("the Interconnect library is broken by design and thus obsolete") Receiver;
 
 namespace Implementation {
     struct ConnectionData;
     class SignalData;
 }
 
-template<std::size_t, std::size_t, class, class> class StateMachine;
+template<std::size_t, std::size_t, class, class> class CORRADE_DEPRECATED("the Interconnect library is broken by design and thus obsolete") StateMachine;
 
 }}
+#endif
+#else
+#error the Interconnect library is broken by design and thus obsolete
 #endif
 
 #endif

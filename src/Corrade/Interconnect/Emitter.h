@@ -26,18 +26,31 @@
     DEALINGS IN THE SOFTWARE.
 */
 
+#ifdef CORRADE_BUILD_DEPRECATED
 /** @file
  * @brief Class @ref Corrade::Interconnect::Emitter
+ * @m_deprecated_since_latest Design of the @ref Corrade::Interconnect library
+ *      relies on member function pointers being unique, which is impossible to
+ *      guarantee across all platform configurations and compilers, leading to
+ *      subtle hard-to-discover bugs. The library is thus scheduled for
+ *      removal, at the moment with no builtin replacement.
  */
+#endif
 
+#include "Corrade/configure.h"
+
+#ifdef CORRADE_BUILD_DEPRECATED
 #include <cstddef>
 #include <cstdint>
 #include <type_traits>
 #include <unordered_map>
 #include <utility>
 
+#include "Corrade/Interconnect/Interconnect.h" /* for file deprecation warning */
 #include "Corrade/Interconnect/Connection.h"
 #include "Corrade/Utility/Assert.h"
+
+/* File deprecation warning printed in Interconnect.h */
 
 namespace Corrade { namespace Interconnect {
 
@@ -82,7 +95,9 @@ struct CORRADE_INTERCONNECT_EXPORT ConnectionData {
         void(*function)();
         struct {
             char data[FunctionPointerSize*sizeof(std::size_t)];
+            CORRADE_IGNORE_DEPRECATED_PUSH
             Receiver* receiver;
+            CORRADE_IGNORE_DEPRECATED_POP
         } member;
         struct {
             void* data;
@@ -174,9 +189,13 @@ struct CORRADE_INTERCONNECT_EXPORT ConnectionData {
 
 /**
 @brief Emitter object
+@m_deprecated_since_latest Design of the @ref Interconnect library relies on
+    member function pointers being unique, which is impossible to guarantee
+    across all platform configurations and compilers, leading to subtle
+    hard-to-discover bugs. The library is thus scheduled for removal, at the
+    moment with no builtin replacement.
 
-Contains signals and manages connections between signals and slots. See
-@ref interconnect for introduction.
+Contains signals and manages connections between signals and slots.
 
 @section Interconnect-Emitter-signals Implementing signals
 
@@ -345,9 +364,8 @@ Convoluted example:
 @snippet Interconnect.cpp Emitter-connect-receiver-multiple-inheritance
 
 @see @ref Receiver, @ref Connection
-@todo Allow move
 */
-class CORRADE_INTERCONNECT_EXPORT Emitter {
+class CORRADE_DEPRECATED("the Interconnect library is broken by design and thus obsolete") CORRADE_INTERCONNECT_EXPORT Emitter {
     public:
         /**
          * @brief Signature for signals
@@ -364,16 +382,24 @@ class CORRADE_INTERCONNECT_EXPORT Emitter {
         explicit Emitter();
 
         /** @brief Copying is not allowed */
+        CORRADE_IGNORE_DEPRECATED_PUSH /* GCC 4.8 warns here */
         Emitter(const Emitter&) = delete;
+        CORRADE_IGNORE_DEPRECATED_POP
 
         /** @brief Moving is not allowed */
+        CORRADE_IGNORE_DEPRECATED_PUSH /* GCC 4.8 warns here */
         Emitter(Emitter&&) = delete;
+        CORRADE_IGNORE_DEPRECATED_POP
 
         /** @brief Copying is not allowed */
+        CORRADE_IGNORE_DEPRECATED_PUSH /* GCC 4.8 warns here */
         Emitter& operator=(const Emitter&) = delete;
+        CORRADE_IGNORE_DEPRECATED_POP
 
         /** @brief Moving is not allowed */
+        CORRADE_IGNORE_DEPRECATED_PUSH /* GCC 4.8 warns here */
         Emitter& operator=(Emitter&&) = delete;
+        CORRADE_IGNORE_DEPRECATED_POP
 
         /**
          * @brief Whether the emitter is connected to any slot
@@ -413,7 +439,9 @@ class CORRADE_INTERCONNECT_EXPORT Emitter {
          * @see @ref hasSignalConnections(),
          *      @ref Receiver::hasSlotConnections(), @ref disconnect()
          */
+        CORRADE_IGNORE_DEPRECATED_PUSH
         bool isConnected(const Connection& connection) const;
+        CORRADE_IGNORE_DEPRECATED_POP
 
         /**
          * @brief Count of connections to this emitter signals
@@ -492,6 +520,7 @@ class CORRADE_INTERCONNECT_EXPORT Emitter {
         /* https://bugzilla.gnome.org/show_bug.cgi?id=776986. Also the class
            docs link to this connect() instead of Interconnect::connect(). Ugh. */
         #ifndef DOXYGEN_GENERATING_OUTPUT
+        CORRADE_IGNORE_DEPRECATED_PUSH
         friend Connection;
         friend Receiver;
 
@@ -510,6 +539,7 @@ class CORRADE_INTERCONNECT_EXPORT Emitter {
         #if defined(CORRADE_TARGET_MINGW) && !defined(CORRADE_TARGET_CLANG)
         #pragma GCC diagnostic pop
         #endif
+        CORRADE_IGNORE_DEPRECATED_POP
         #endif
 
         /* Returns the actual location of the connection in the hashmap */
@@ -528,6 +558,11 @@ class CORRADE_INTERCONNECT_EXPORT Emitter {
 @param emitter       Emitter
 @param signal        Signal
 @param slot          Slot
+@m_deprecated_since_latest Design of the @ref Interconnect library relies on
+    member function pointers being unique, which is impossible to guarantee
+    across all platform configurations and compilers, leading to subtle
+    hard-to-discover bugs. The library is thus scheduled for removal, at the
+    moment with no builtin replacement.
 
 Connects given signal to compatible slot. @p emitter must be subclass of
 @ref Emitter, @p signal must be implemented signal and @p slot can be either
@@ -546,7 +581,8 @@ more information about connections.
 @see @ref Emitter::hasSignalConnections(), @ref Emitter::isConnected(),
      @ref Emitter::signalConnectionCount()
 */
-template<class EmitterObject, class Emitter, class Functor, class ...Args> Connection connect(EmitterObject& emitter, Interconnect::Emitter::Signal(Emitter::*signal)(Args...), Functor&& slot) {
+CORRADE_IGNORE_DEPRECATED_PUSH
+template<class EmitterObject, class Emitter, class Functor, class ...Args> CORRADE_DEPRECATED("the Interconnect library is broken by design and thus obsolete") Connection connect(EmitterObject& emitter, Interconnect::Emitter::Signal(Emitter::*signal)(Args...), Functor&& slot) {
     static_assert(sizeof(Interconnect::Emitter::Signal(Emitter::*)(Args...)) <= sizeof(Implementation::SignalData),
         "size of member function pointer is incorrectly assumed to be smaller");
     static_assert(std::is_base_of<Emitter, EmitterObject>::value,
@@ -561,6 +597,7 @@ template<class EmitterObject, class Emitter, class Functor, class ...Args> Conne
     #endif
     return Connection{signalData, emitter.connectInternal(signalData, Implementation::ConnectionData::createFunctor<Args...>(std::move(slot)))};
 }
+CORRADE_IGNORE_DEPRECATED_POP
 
 /** @relatesalso Emitter
 @brief Connect signal to member function slot
@@ -568,6 +605,11 @@ template<class EmitterObject, class Emitter, class Functor, class ...Args> Conne
 @param signal        Signal
 @param receiver      Receiver
 @param slot          Slot
+@m_deprecated_since_latest Design of the @ref Interconnect library relies on
+    member function pointers being unique, which is impossible to guarantee
+    across all platform configurations and compilers, leading to subtle
+    hard-to-discover bugs. The library is thus scheduled for removal, at the
+    moment with no builtin replacement.
 
 Connects given signal to compatible slot in receiver object. @p emitter must be
 subclass of @ref Emitter, @p signal must be implemented signal, @p receiver
@@ -580,9 +622,9 @@ more information about connections.
 
 @see @ref Emitter::hasSignalConnections(), @ref Emitter::isConnected(),
      @ref Emitter::signalConnectionCount()
-@todo Connecting to signals
 */
-template<class EmitterObject, class Emitter, class Receiver, class ReceiverObject, class ...Args> Connection connect(EmitterObject& emitter, Interconnect::Emitter::Signal(Emitter::*signal)(Args...), ReceiverObject& receiver, void(Receiver::*slot)(Args...)) {
+CORRADE_IGNORE_DEPRECATED_PUSH
+template<class EmitterObject, class Emitter, class Receiver, class ReceiverObject, class ...Args> CORRADE_DEPRECATED("the Interconnect library is broken by design and thus obsolete") Connection connect(EmitterObject& emitter, Interconnect::Emitter::Signal(Emitter::*signal)(Args...), ReceiverObject& receiver, void(Receiver::*slot)(Args...)) {
     static_assert(sizeof(Interconnect::Emitter::Signal(Emitter::*)(Args...)) <= sizeof(Implementation::SignalData),
         "Size of member function pointer is incorrectly assumed to be smaller");
     static_assert(std::is_base_of<Emitter, EmitterObject>::value,
@@ -599,19 +641,28 @@ template<class EmitterObject, class Emitter, class Receiver, class ReceiverObjec
     #endif
     return Connection{signalData, emitter.connectInternal(signalData, Implementation::ConnectionData::createMember<Receiver, ReceiverObject, Args...>(receiver, slot))};
 }
+CORRADE_IGNORE_DEPRECATED_POP
 
 /** @relatesalso Emitter
 @brief Disconnect a signal/slot connection
 @param emitter      Emitter
 @param connection   Connection handle returned by @ref connect()
+@m_deprecated_since_latest Design of the @ref Interconnect library relies on
+    member function pointers being unique, which is impossible to guarantee
+    across all platform configurations and compilers, leading to subtle
+    hard-to-discover bugs. The library is thus scheduled for removal, at the
+    moment with no builtin replacement.
 
 It's the user responsibility to ensure that @p connection corresponds to given
 @p emitter instance. See @ref Interconnect-Emitter-connections "Emitter class documentation"
 for more information about connections.
 */
-CORRADE_INTERCONNECT_EXPORT bool disconnect(Emitter& emitter, const Connection& connection);
+CORRADE_IGNORE_DEPRECATED_PUSH
+CORRADE_DEPRECATED("the Interconnect library is broken by design and thus obsolete") CORRADE_INTERCONNECT_EXPORT bool disconnect(Emitter& emitter, const Connection& connection);
+CORRADE_IGNORE_DEPRECATED_POP
 
 #ifndef DOXYGEN_GENERATING_OUTPUT
+CORRADE_IGNORE_DEPRECATED_PUSH
 template<class Emitter_, class ...Args> Emitter::Signal Emitter::emit(Signal(Emitter_::*signal)(Args...), typename Implementation::Identity<Args>::Type... args) {
     _connectionsChanged = false;
     ++_lastHandledSignal;
@@ -658,8 +709,12 @@ template<class Emitter_, class ...Args> Emitter::Signal Emitter::emit(Signal(Emi
 
     return Signal();
 }
+CORRADE_IGNORE_DEPRECATED_POP
 #endif
 
 }}
+#else
+#error the Interconnect library is broken by design and thus obsolete
+#endif
 
 #endif

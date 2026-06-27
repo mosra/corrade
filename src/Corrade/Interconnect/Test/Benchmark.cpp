@@ -24,6 +24,8 @@
     DEALINGS IN THE SOFTWARE.
 */
 
+#define _CORRADE_NO_DEPRECATED_INTERCONNECT
+
 #include <functional>
 
 #include "Corrade/Containers/Optional.h"
@@ -88,6 +90,7 @@ CORRADE_NEVER_INLINE void freeFunctionSlot() {
     ++globalOutput;
 }
 
+CORRADE_IGNORE_DEPRECATED_PUSH
 void Benchmark::connect1kFunctions() {
     struct E: Emitter {
         Signal fire() {
@@ -383,6 +386,7 @@ void Benchmark::call1kSlotMembers() {
 
     CORRADE_COMPARE(receiver.output, 1000*100);
 }
+CORRADE_IGNORE_DEPRECATED_POP
 
 }}}}
 

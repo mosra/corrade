@@ -24,6 +24,8 @@
     DEALINGS IN THE SOFTWARE.
 */
 
+#define _CORRADE_NO_DEPRECATED_INTERCONNECT
+
 #include "EmitterLibrary.h"
 
 namespace Corrade { namespace Interconnect { namespace Test {
@@ -36,8 +38,10 @@ void EmitterLibrary::fireNonInlineThroughAFunction() {
     fireNonInline();
 }
 
+CORRADE_IGNORE_DEPRECATED_PUSH
 auto EmitterLibrary::fireNonInline() -> Signal {
     return emit(&EmitterLibrary::fireNonInline);
 }
+CORRADE_IGNORE_DEPRECATED_POP
 
 }}}

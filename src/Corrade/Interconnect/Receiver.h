@@ -26,15 +26,27 @@
     DEALINGS IN THE SOFTWARE.
 */
 
+#ifdef CORRADE_BUILD_DEPRECATED
 /** @file
  * @brief Class @ref Corrade::Interconnect::Receiver
+ * @m_deprecated_since_latest Design of the @ref Corrade::Interconnect library
+ *      relies on member function pointers being unique, which is impossible to
+ *      guarantee across all platform configurations and compilers, leading to
+ *      subtle hard-to-discover bugs. The library is thus scheduled for
+ *      removal, at the moment with no builtin replacement.
  */
+#endif
 
+#include "Corrade/configure.h"
+
+#ifdef CORRADE_BUILD_DEPRECATED
 #include <cstddef>
 #include <vector>
 
-#include "Corrade/Interconnect/Interconnect.h"
+#include "Corrade/Interconnect/Interconnect.h" /* for file deprecation warning */
 #include "Corrade/Interconnect/visibility.h"
+
+/* File deprecation warning printed in Interconnect.h */
 
 namespace Corrade { namespace Interconnect {
 
@@ -42,26 +54,38 @@ namespace Implementation { struct ReceiverConnection; }
 
 /**
 @brief Receiver object
+@m_deprecated_since_latest Design of the @ref Interconnect library relies on
+    member function pointers being unique, which is impossible to guarantee
+    across all platform configurations and compilers, leading to subtle
+    hard-to-discover bugs. The library is thus scheduled for removal, at the
+    moment with no builtin replacement.
 
-Contains member function slots. See @ref interconnect for introduction.
+Contains member function slots.
 @see @ref Emitter, @ref Connection
-@todo Allow move
 */
-class CORRADE_INTERCONNECT_EXPORT Receiver {
+class CORRADE_DEPRECATED("the Interconnect library is broken by design and thus obsolete") CORRADE_INTERCONNECT_EXPORT Receiver {
     public:
         explicit Receiver();
 
         /** @brief Copying is not allowed */
+        CORRADE_IGNORE_DEPRECATED_PUSH /* GCC 4.8 warns here */
         Receiver(const Receiver&) = delete;
+        CORRADE_IGNORE_DEPRECATED_POP
 
         /** @brief Moving is not allowed */
+        CORRADE_IGNORE_DEPRECATED_PUSH /* GCC 4.8 warns here */
         Receiver(Receiver&&) = delete;
+        CORRADE_IGNORE_DEPRECATED_POP
 
         /** @brief Copying is not allowed */
+        CORRADE_IGNORE_DEPRECATED_PUSH /* GCC 4.8 warns here */
         Receiver& operator=(const Receiver&) = delete;
+        CORRADE_IGNORE_DEPRECATED_POP
 
         /** @brief Moving is not allowed */
+        CORRADE_IGNORE_DEPRECATED_PUSH /* GCC 4.8 warns here */
         Receiver& operator=(Receiver&&) = delete;
+        CORRADE_IGNORE_DEPRECATED_POP
 
         /**
          * @brief Whether the receiver is connected to any signal
@@ -97,12 +121,17 @@ class CORRADE_INTERCONNECT_EXPORT Receiver {
         /* https://bugzilla.gnome.org/show_bug.cgi?id=776986 */
         #ifndef DOXYGEN_GENERATING_OUTPUT
         friend Implementation::ConnectionData;
+        CORRADE_IGNORE_DEPRECATED_PUSH
         friend Emitter;
+        CORRADE_IGNORE_DEPRECATED_POP
         #endif
 
         std::vector<Implementation::ReceiverConnection> _connections;
 };
 
 }}
+#else
+#error the Interconnect library is broken by design and thus obsolete
+#endif
 
 #endif

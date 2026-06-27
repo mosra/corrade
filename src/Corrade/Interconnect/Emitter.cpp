@@ -24,6 +24,8 @@
     DEALINGS IN THE SOFTWARE.
 */
 
+#define _CORRADE_NO_DEPRECATED_INTERCONNECT
+
 #include "Emitter.h"
 
 #include "Corrade/Interconnect/Receiver.h"
@@ -32,6 +34,7 @@
 
 namespace Corrade { namespace Interconnect {
 
+CORRADE_IGNORE_DEPRECATED_PUSH
 namespace Implementation {
 
 ConnectionData::ConnectionData(ConnectionData&& other) noexcept:
@@ -67,6 +70,7 @@ Emitter::~Emitter() {
         disconnectFromReceiver(connection.second);
 }
 
+CORRADE_IGNORE_DEPRECATED_PUSH
 bool Emitter::isConnected(const Connection& connection) const {
     auto range = _connections.equal_range(connection._signal);
     for(auto it = range.first; it != range.second; ++it)
@@ -75,6 +79,7 @@ bool Emitter::isConnected(const Connection& connection) const {
 
     return false;
 }
+CORRADE_IGNORE_DEPRECATED_POP
 
 Implementation::ConnectionData& Emitter::connectInternal(const Implementation::SignalData& signal, Implementation::ConnectionData&& data) {
     /* Add connection to emitter */
@@ -138,5 +143,6 @@ bool disconnect(Emitter& emitter, const Connection& connection) {
 
     return false;
 }
+CORRADE_IGNORE_DEPRECATED_POP
 
 }}

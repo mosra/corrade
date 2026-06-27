@@ -574,8 +574,8 @@ namespace Corrade {
     crash on Emscripten 3.1.27+, which reduced the default stack size from
     5 MB to 64 kB.
 -   New @cpp #pragma ACME forget @ce option in the @ref acme utility
--   `/OPT:NOICF` is now added for the @ref Interconnect library for clang-cl
-    as well (see [mosra/corrade#178](https://github.com/mosra/corrade/issues/178))
+-   `/OPT:NOICF` is now added for the @cpp Interconnect @ce library for
+    clang-cl as well (see [mosra/corrade#178](https://github.com/mosra/corrade/issues/178))
 -   The Emscripten toolchain no longer uses a `*.bc` extension for static
     libraries, as that breaks builds with version 3.1.52+. See
     [mosra/magnum#633](https://github.com/mosra/magnum/issues/633) for more
@@ -727,6 +727,11 @@ namespace Corrade {
     recognized with a warning. In particular, if `BUILD_DEPRECATED` is set but
     `CORRADE_BUILD_DEPRECATED` not, the unprefixed options are also recognized.
     See also [mosra/corrade#139](https://github.com/mosra/corrade/issues/139).
+-   The @cpp Interconnect @ce library is deprecated as a whole as its design
+    relies on member function pointers being unique, which is impossible to
+    guarantee across all platform configurations and compilers, leading to
+    subtle hard-to-discover bugs. At the moment there is no builtin
+    replacement.
 -   @cpp Containers::Array::empty() @ce, @cpp ArrayView::empty() @ce,
     @cpp StaticArray::empty() @ce, @cpp StaticArrayView::empty() @ce and
     @cpp StridedArrayView::empty() @ce is deprecated in favor of
@@ -969,8 +974,8 @@ namespace Corrade {
 -   Removed the @cpp Interconnect::Connection::isConnected() @ce,
     @cpp disconnect() @ce, @cpp isConnectionPossible() @ce and
     @cpp connect() @ce APIs that were deprecated in 2019.10. Use
-    @ref Interconnect::Emitter::isConnected() and
-    @ref Interconnect::disconnect() instead.
+    @cpp Interconnect::Emitter::isConnected() @ce and
+    @cpp Interconnect::disconnect() @ce instead.
 -   @ref PluginManager::AbstractManager::pluginList(),
     @relativeref{PluginManager::AbstractManager,aliasList()} and
     @ref PluginManager::PluginMetadata APIs now return @ref Containers::String,
@@ -1208,8 +1213,8 @@ Released 2020-06-27, tagged as
 
 @subsubsection corrade-changelog-2020-06-changes-interconnect Interconnect library
 
--   @ref Interconnect::connect() now can recognize trivially copyable lambdas
-    also on GCC versions before 5 and store them more efficiently
+-   @cpp Interconnect::connect() @ce now can recognize trivially copyable
+    lambdas also on GCC versions before 5 and store them more efficiently
 
 @subsubsection corrade-changelog-2020-06-changes-pluginmanager PluginManager library
 
@@ -1521,11 +1526,11 @@ Released 2019-10-24, tagged as
 
 @subsubsection corrade-changelog-2019-10-changes-Interconnect Interconnect library
 
--   The @ref Interconnect library internals got reworked with less allocations,
-    better memory usage, improved signal emitting performance and support for
-    connecting to arbitrary function objects along with @ref std::function. See
-    also [mosra/corrade#63](https://github.com/mosra/corrade/pull/63) for more
-    information.
+-   The @cpp Interconnect @ce library internals got reworked with less
+    allocations, better memory usage, improved signal emitting performance and
+    support for connecting to arbitrary function objects along with
+    @ref std::function. See also [mosra/corrade#63](https://github.com/mosra/corrade/pull/63)
+    for more information.
 
 @subsubsection corrade-changelog-2019-10-changes-pluginmanager PluginManager library
 
@@ -1597,9 +1602,8 @@ Released 2019-10-24, tagged as
 -   Explicitly disabling a MSVC linker optimization that causes seemingly
     similar signals to be conflated together, causing erratic behavior. This is
     done automatically for CMake-based projects, see the
-    @ref Interconnect-Emitter-msvc-icf "Interconnect::Emitter" documentation
-    for more information when using custom buildsystems, see also
-    [mosra/corrade#51](https://github.com/mosra/corrade/issues/51).
+    @cpp Interconnect::Emitter @ce documentation for more information when
+    using custom buildsystems, see also [mosra/corrade#51](https://github.com/mosra/corrade/issues/51).
 -   Fixed compilation with Clang and `-std=gnu++14` (see [mosra/corrade#62](https://github.com/mosra/corrade/pull/62))
 -   @ref CORRADE_VISIBILITY_STATIC no longer exports symbols in static
     libraries to be consistent with hidden visibility by default, additionally
@@ -1618,7 +1622,7 @@ Released 2019-10-24, tagged as
     Studio as a C++ compiler, resulting in seemingly impossible errors. See
     [mosra/corrade#78](https://github.com/mosra/corrade/issues/78).
 -   Clarified interaction of `-fvisibility-inlines-hidden` and/or
-    `-Wl,-Bsymbolic-functions` GCC/Clang flags and @ref Interconnect::Emitter
+    `-Wl,-Bsymbolic-functions` GCC/Clang flags and @cpp Interconnect::Emitter @ce
 -   The @ref TestSuite library and all tests created with
     @ref corrade-cmake-add-test "corrade_add_test()" are now built with
     `-s DISABLE_EXCEPTION_CATCHING=0` being explicitly specified both for the
@@ -1656,13 +1660,13 @@ Released 2019-10-24, tagged as
     Android and API levels below 24
 -   Fixed @cpp Utility::Directory::read() @ce to work with files that report an
     early EOF (such as stuff from `/sys` on Linux)
--   Fixed @ref Interconnect::Emitter::emit() for signals from
+-   Fixed @cpp Interconnect::Emitter::emit() @ce for signals from
     multiply-inherited base classes on MSVC --- it was due to an insufficiently
     tested workaround for a template deduction limitation in the compiler (see
     [mosra/corrade#51](https://github.com/mosra/corrade/issues/51))
--   @ref Interconnect::Emitter::emit() now works correctly on MSVC for signals
-    from classes where multiple and/or virtual inheritance is involved (see
-    [mosra/corrade#51](https://github.com/mosra/corrade/issues/51))
+-   @cpp Interconnect::Emitter::emit() @ce now works correctly on MSVC for
+    signals from classes where multiple and/or virtual inheritance is involved
+    (see [mosra/corrade#51](https://github.com/mosra/corrade/issues/51))
 -   Fixed @ref CORRADE_COMPARE_WITH() to be callable with expressions such as
     @cpp *comparator @ce
 -   Fixed @ref Utility::Tweakable to work correctly with buildsystems using
@@ -1674,8 +1678,8 @@ Released 2019-10-24, tagged as
     this to be allowed on both.
 -   @cpp Utility::Directory::copy() @ce wasn't properly freeing both opened
     files if one of them failed to open (see [mosra/corrade#70](https://github.com/mosra/corrade/pull/70))
--   @ref Interconnect::Emitter::emit() (and signal/slot connections in general)
-    now work correctly with non-copyable arguments
+-   @cpp Interconnect::Emitter::emit() @ce (and signal/slot connections in
+    general) now work correctly with non-copyable arguments
 -   Fixed @ref Utility::Debug::isTty() (and thus also @ref TestSuite colored
     output) to reliably work on macOS. Because Xcode output window doesn't
     support ANSI color escape codes, tt was relying on an undocumented
@@ -1695,18 +1699,19 @@ Released 2019-10-24, tagged as
     @cpp Utility::Directory::exists() @ce. It was named like this to prevent it
     from looking like it works on directories only, but such name then caused
     people to ask if it works on directories as well, not helping anything.
--   `Interconnect::Connection::isConnected()` and
-    `Interconnect::Connection::disconnect()` are deprecated and print a warning
-    at runtime as the redesigned internals of the @ref Interconnect library now
-    make it impossible to check that the original @ref Interconnect::Emitter
-    object still exists. Use @ref Interconnect::Emitter::isConnected() and
-    @ref Interconnect::disconnect() instead.
+-   @cpp Interconnect::Connection::isConnected() @ce and
+    @cpp Interconnect::Connection::disconnect() @ce are deprecated and print a
+    warning at runtime as the redesigned internals of the @cpp Interconnect @ce
+    library now make it impossible to check that the original
+    @cpp Interconnect::Emitter @ce object still exists. Use
+    @cpp Interconnect::Emitter::isConnected() @ce and
+    @cpp Interconnect::disconnect() @ce instead.
 -   Re-connecting a disconnected signal using
-    `Interconnect::Connection::isConnectionPossible()` and
-    `Interconnect::Connection::connect()` is not possible anymore in order
-    to make the @ref Interconnect library more efficient. These two functions
-    are now deprecated and just returning the value of (also deprecated)
-    `isConnected()`.
+    @cpp Interconnect::Connection::isConnectionPossible() @ce and
+    @cpp Interconnect::Connection::connect() @ce is not possible anymore in
+    order to make the @cpp Interconnect @ce library more efficient. These two
+    functions are now deprecated and just returning the value of (also
+    deprecated) @cpp isConnected() @ce.
 -   Signatures of @ref TestSuite::Comparator methods were changed in order to
     support new features. The old variant with
     @ref TestSuite::Comparator::operator()() "operator()()" returning a
@@ -2024,7 +2029,7 @@ Released 2018-10-23, tagged as
 -   Worked around a misoptimization of @ref Utility::Sha1 when using GCC 6 with
     -O3 on Raspberry Pi Model 3 B+ (AArch64) (GCC 8 works properly again). See
     [mosra/corrade#45](https://github.com/mosra/corrade/issues/45).
--   It was not possible to use the @ref Interconnect::Emitter class with
+-   It was not possible to use the @cpp Interconnect::Emitter @ce class with
     virtual base classes on 32-bit Windows due to an incorrect assumption about
     member function pointer sizes (see
     [mosra/magnum-extras#7](https://github.com/mosra/magnum-extras/issues/7))

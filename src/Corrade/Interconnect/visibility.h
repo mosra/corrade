@@ -27,7 +27,12 @@
 */
 
 #include "Corrade/configure.h"
+
+#ifdef CORRADE_BUILD_DEPRECATED
+#include "Corrade/Interconnect/Interconnect.h" /* for file deprecation warning */
 #include "Corrade/Utility/VisibilityMacros.h"
+
+/* File deprecation warning printed in Interconnect.h */
 
 #ifndef DOXYGEN_GENERATING_OUTPUT
 #ifndef CORRADE_BUILD_STATIC
@@ -43,6 +48,9 @@
 #else
 #define CORRADE_INTERCONNECT_EXPORT
 #define CORRADE_INTERCONNECT_LOCAL
+#endif
+#else
+#error the Interconnect library is broken by design and thus obsolete
 #endif
 
 #endif

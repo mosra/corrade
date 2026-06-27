@@ -24,6 +24,8 @@
     DEALINGS IN THE SOFTWARE.
 */
 
+#define _CORRADE_NO_DEPRECATED_INTERCONNECT
+
 #include "Receiver.h"
 
 #include "Corrade/Interconnect/Connection.h"
@@ -33,6 +35,7 @@
 
 namespace Corrade { namespace Interconnect {
 
+CORRADE_IGNORE_DEPRECATED_PUSH
 Receiver::Receiver() = default;
 
 Receiver::~Receiver() { disconnectAllSlots(); }
@@ -56,5 +59,6 @@ void Receiver::disconnectAllSlots() {
 
     _connections.clear();
 }
+CORRADE_IGNORE_DEPRECATED_POP
 
 }}

@@ -24,6 +24,10 @@
 #   DEALINGS IN THE SOFTWARE.
 #
 
+if(NOT CORRADE_BUILD_DEPRECATED)
+    message(SEND_ERROR "The Interconnect library is deprecated. Either remove CORRADE_WITH_INTERCONNECT from your options or rebuild Corrade with CORRADE_BUILD_DEPRECATED enabled to keep using the library.")
+endif()
+
 # IDE folder in VS, Xcode etc. CMake 3.12+, older versions have only the FOLDER
 # property that would have to be set on each target separately.
 set(CMAKE_FOLDER "Corrade/Interconnect")

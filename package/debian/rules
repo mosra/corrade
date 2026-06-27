@@ -6,6 +6,7 @@
 # unintended/dangerous effects as well, so I'm just disabling it globally. See:
 #  http://stackoverflow.com/questions/7216973/is-there-a-downside-to-using-bsymbolic-functions
 #  https://software.intel.com/en-us/articles/performance-tools-for-software-developers-bsymbolic-can-cause-dangerous-side-effects
+# TODO: drop once Interconnect is not a thing anymore
 export DEB_LDFLAGS_MAINT_STRIP = -Wl,-Bsymbolic-functions
 
 %:

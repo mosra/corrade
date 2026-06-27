@@ -26,15 +26,27 @@
     DEALINGS IN THE SOFTWARE.
 */
 
+#ifdef CORRADE_BUILD_DEPRECATED
 /** @file
  * @brief Class @ref Corrade::Interconnect::Connection
+ * @m_deprecated_since_latest Design of the @ref Corrade::Interconnect library
+ *      relies on member function pointers being unique, which is impossible to
+ *      guarantee across all platform configurations and compilers, leading to
+ *      subtle hard-to-discover bugs. The library is thus scheduled for
+ *      removal, at the moment with no builtin replacement.
  */
+#endif
 
+#include "Corrade/configure.h"
+
+#ifdef CORRADE_BUILD_DEPRECATED
 #include <cstddef>
 
 #include "Corrade/Containers/Reference.h"
 #include "Corrade/Interconnect/Interconnect.h"
 #include "Corrade/Interconnect/visibility.h"
+
+/* File deprecation warning printed in Interconnect.h */
 
 namespace Corrade { namespace Interconnect {
 
@@ -94,7 +106,9 @@ namespace Implementation {
         private:
             /* https://bugzilla.gnome.org/show_bug.cgi?id=776986 */
             #ifndef DOXYGEN_GENERATING_OUTPUT
+            CORRADE_IGNORE_DEPRECATED_PUSH
             friend Interconnect::Emitter;
+            CORRADE_IGNORE_DEPRECATED_POP
             friend SignalDataHash;
             #endif
 
@@ -110,6 +124,11 @@ namespace Implementation {
 
 /**
 @brief Connection
+@m_deprecated_since_latest Design of the @ref Interconnect library relies on
+    member function pointers being unique, which is impossible to guarantee
+    across all platform configurations and compilers, leading to subtle
+    hard-to-discover bugs. The library is thus scheduled for removal, at the
+    moment with no builtin replacement.
 
 Returned by @ref Interconnect::connect(), allows to remove the connection
 later using @ref Interconnect::disconnect(). Destruction of the @ref Connection
@@ -120,9 +139,9 @@ disconnect everything connected to given signal using
 @ref Receiver::disconnectAllSlots(), or destroy either the emitter or receiver
 object.
 
-@see @ref interconnect, @ref Emitter, @ref Receiver
+@see @ref Emitter, @ref Receiver
 */
-class CORRADE_INTERCONNECT_EXPORT Connection {
+class CORRADE_DEPRECATED("the Interconnect library is broken by design and thus obsolete") CORRADE_INTERCONNECT_EXPORT Connection {
     #ifdef DOXYGEN_GENERATING_OUTPUT
     private:
     #else
@@ -133,12 +152,14 @@ class CORRADE_INTERCONNECT_EXPORT Connection {
     private:
         /* https://bugzilla.gnome.org/show_bug.cgi?id=776986 */
         #ifndef DOXYGEN_GENERATING_OUTPUT
+        CORRADE_IGNORE_DEPRECATED_PUSH
         friend Emitter;
         friend Receiver;
         /* Interestingly enough, unlike in Emitter.h, here MinGW GCC doesn't
            warn about disconnect() being redeclared without a dllimport
            attribute. */
         friend CORRADE_INTERCONNECT_EXPORT bool disconnect(Emitter&, const Connection&);
+        CORRADE_IGNORE_DEPRECATED_POP
         #endif
 
         Implementation::SignalData _signal;
@@ -147,5 +168,8 @@ class CORRADE_INTERCONNECT_EXPORT Connection {
 };
 
 }}
+#else
+#error the Interconnect library is broken by design and thus obsolete
+#endif
 
 #endif

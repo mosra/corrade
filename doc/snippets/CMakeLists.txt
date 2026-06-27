@@ -97,7 +97,7 @@ if(NOT CMAKE_CXX_FLAGS MATCHES "-std=")
     endif()
 endif()
 
-if(CORRADE_WITH_INTERCONNECT)
+if(CORRADE_BUILD_DEPRECATED AND CORRADE_WITH_INTERCONNECT)
     add_library(snippets-Interconnect STATIC ${EXCLUDE_FROM_ALL_IF_TEST_TARGET} Interconnect.cpp)
     target_link_libraries(snippets-Interconnect PRIVATE CorradeInterconnect)
     if(CORRADE_TESTSUITE_TEST_TARGET)

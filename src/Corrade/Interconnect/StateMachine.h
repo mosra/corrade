@@ -26,20 +26,38 @@
     DEALINGS IN THE SOFTWARE.
 */
 
+#ifdef CORRADE_BUILD_DEPRECATED
 /** @file
  * @brief Class @ref Corrade::Interconnect::StateMachine, @ref Corrade::Interconnect::StateTransition
+ * @m_deprecated_since_latest Design of the @ref Corrade::Interconnect library
+ *      relies on member function pointers being unique, which is impossible to
+ *      guarantee across all platform configurations and compilers, leading to
+ *      subtle hard-to-discover bugs. The library is thus scheduled for
+ *      removal, at the moment with no builtin replacement.
  */
+#endif
 
+#include "Corrade/configure.h"
+
+#ifdef CORRADE_BUILD_DEPRECATED
+#include "Corrade/Interconnect/Interconnect.h"
 #include "Corrade/Interconnect/Emitter.h"
+
+/* File deprecation warning printed in Interconnect.h */
 
 namespace Corrade { namespace Interconnect {
 
 /**
 @brief Transition between states
+@m_deprecated_since_latest Design of the @ref Interconnect library relies on
+    member function pointers being unique, which is impossible to guarantee
+    across all platform configurations and compilers, leading to subtle
+    hard-to-discover bugs. The library is thus scheduled for removal, at the
+    moment with no builtin replacement.
 
 See @ref StateMachine for more information.
 */
-template<class State, class Input> class StateTransition {
+template<class State, class Input> class CORRADE_DEPRECATED("the Interconnect library is broken by design and thus obsolete") StateTransition {
     template<std::size_t, std::size_t, class, class> friend class StateMachine;
 
     public:
@@ -54,6 +72,11 @@ template<class State, class Input> class StateTransition {
 
 /**
 @brief State machine
+@m_deprecated_since_latest Design of the @ref Interconnect library relies on
+    member function pointers being unique, which is impossible to guarantee
+    across all platform configurations and compilers, leading to subtle
+    hard-to-discover bugs. The library is thus scheduled for removal, at the
+    moment with no builtin replacement.
 
 Exploits the Interconnect library for a simple state machine. Information about
 state transitions is broadcasted through signals. The machine is meant to be
@@ -95,7 +118,8 @@ Printer is ready.
 @endcode
 
 */
-template<std::size_t states, std::size_t inputs, class State, class Input> class StateMachine: public Emitter {
+CORRADE_IGNORE_DEPRECATED_PUSH
+template<std::size_t states, std::size_t inputs, class State, class Input> class CORRADE_DEPRECATED("the Interconnect library is broken by design and thus obsolete") StateMachine: public Emitter {
     public:
         enum: std::size_t {
             StateCount = states, /**< Count of states in the machine */
@@ -255,7 +279,11 @@ template<std::size_t states, std::size_t inputs, class State, class Input> State
 
     return *this;
 }
+CORRADE_IGNORE_DEPRECATED_POP
 
 }}
+#else
+#error the Interconnect library is broken by design and thus obsolete
+#endif
 
 #endif

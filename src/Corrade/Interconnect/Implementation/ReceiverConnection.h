@@ -31,6 +31,7 @@
 
 namespace Corrade { namespace Interconnect { namespace Implementation {
 
+CORRADE_IGNORE_DEPRECATED_PUSH
 struct ReceiverConnection {
     explicit ReceiverConnection(Emitter& emitter, Implementation::SignalData signal, Implementation::ConnectionData& data) noexcept: emitter{emitter}, signal{signal}, data{data} {}
 
@@ -38,6 +39,7 @@ struct ReceiverConnection {
     Implementation::SignalData signal;
     Containers::Reference<Implementation::ConnectionData> data;
 };
+CORRADE_IGNORE_DEPRECATED_POP
 
 }}}
 

@@ -42,7 +42,6 @@ endif()
 # level otherwise
 find_package(Corrade REQUIRED)
 
-add_subdirectory(interconnect)
 add_subdirectory(json)
 if(NOT CORRADE_PLUGINMANAGER_NO_DYNAMIC_PLUGIN_SUPPORT)
     add_subdirectory(pluginmanager)

@@ -24,6 +24,8 @@
     DEALINGS IN THE SOFTWARE.
 */
 
+#define _CORRADE_NO_DEPRECATED_INTERCONNECT
+
 #include <string>
 
 #include "Corrade/Interconnect/Emitter.h"
@@ -39,6 +41,7 @@ using namespace Corrade;
    avoid -Wmisssing-prototypes */
 void mainInterconnect();
 void mainInterconnect() {
+CORRADE_IGNORE_DEPRECATED_PUSH
 {
 /* [Emitter-signals] */
 class Postman: public Interconnect::Emitter {
@@ -198,5 +201,6 @@ p.step(Input::Operate);
 p.step(Input::TakeDocument);
 /* [StateMachine-step] */
 }
+CORRADE_IGNORE_DEPRECATED_POP
 
 }

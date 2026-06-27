@@ -200,12 +200,21 @@ See also @ref building-corrade and @ref corrade-cmake for more information.
 
 /** @dir Corrade/Interconnect
  * @brief Namespace @ref Corrade::Interconnect
+ * @m_deprecated_since_latest Design of the @ref Corrade::Interconnect library
+ *      relies on member function pointers being unique, which is impossible to
+ *      guarantee across all platform configurations and compilers, leading to
+ *      subtle hard-to-discover bugs. The library is thus scheduled for
+ *      removal, at the moment with no builtin replacement.
  */
 /** @namespace Corrade::Interconnect
 @brief Signal/slot connections
+@m_deprecated_since_latest Design of the @ref Interconnect library relies on
+    member function pointers being unique, which is impossible to guarantee
+    across all platform configurations and compilers, leading to subtle
+    hard-to-discover bugs. The library is thus scheduled for removal, at the
+    moment with no builtin replacement.
 
-This library allows you to interconnect objects. See @ref interconnect for more
-information.
+This library allows you to interconnect objects.
 
 This library is built if `CORRADE_WITH_INTERCONNECT` is enabled when building
 Corrade. To use this library with CMake, request the `Interconnect` component

@@ -24,6 +24,8 @@
     DEALINGS IN THE SOFTWARE.
 */
 
+#define _CORRADE_NO_DEPRECATED_INTERCONNECT
+
 #include "Corrade/Containers/String.h"
 #include "Corrade/Interconnect/StateMachine.h"
 #include "Corrade/TestSuite/Tester.h"
@@ -52,6 +54,7 @@ enum class Input: std::uint8_t {
     KeyB
 };
 
+CORRADE_IGNORE_DEPRECATED_PUSH
 typedef Interconnect::StateMachine<2, 2, State, Input> StateMachine;
 
 void StateMachineTest::signalData() {
@@ -113,6 +116,7 @@ void StateMachineTest::test() {
         "going from end to start\n"
         "start entered, previous 1\n");
 }
+CORRADE_IGNORE_DEPRECATED_POP
 
 }}}}
 

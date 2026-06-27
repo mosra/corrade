@@ -24,6 +24,8 @@
     DEALINGS IN THE SOFTWARE.
 */
 
+#define _CORRADE_NO_DEPRECATED_INTERCONNECT
+
 #include <functional>
 #include <string>
 
@@ -81,6 +83,7 @@ struct Test: TestSuite::Tester {
     void nonCopyableParameter();
 };
 
+CORRADE_IGNORE_DEPRECATED_PUSH
 class Postman: public Interconnect::Emitter {
     public:
         Signal newMessage(int price, Containers::StringView message) {
@@ -958,6 +961,7 @@ void Test::nonCopyableParameter() {
     emitter.send(a);
     CORRADE_COMPARE(receiver.received, 42);
 }
+CORRADE_IGNORE_DEPRECATED_POP
 
 }}}}
 
