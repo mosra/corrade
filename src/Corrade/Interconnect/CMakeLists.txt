@@ -29,7 +29,6 @@
 set(CMAKE_FOLDER "Corrade/Interconnect")
 
 set(CorradeInterconnect_SRCS
-    Connection.cpp
     Emitter.cpp
     Receiver.cpp)
 

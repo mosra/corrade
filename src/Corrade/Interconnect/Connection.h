@@ -123,59 +123,12 @@ object.
 @see @ref interconnect, @ref Emitter, @ref Receiver
 */
 class CORRADE_INTERCONNECT_EXPORT Connection {
-    public:
-        #ifdef CORRADE_BUILD_DEPRECATED
-        /**
-         * @brief Whether the connection exists
-         * @m_deprecated_since{2019,10} This function is dangerous as it has no
-         *      way to check that the original @ref Emitter object still
-         *      exists, use @ref Emitter::isConnected() instead.
-         */
-        CORRADE_DEPRECATED("dangerous, use Emitter::isConnected() instead") bool isConnected() const;
-
-        /**
-         * @brief Remove the connection
-         * @m_deprecated_since{2019,10} This function is dangerous as it has no
-         *      way to check that the original @ref Emitter object still
-         *      exists, use @ref Interconnect::disconnect() instead.
-         */
-        CORRADE_DEPRECATED("dangerous, use Interconnect::disconnect() instead") void disconnect();
-
-        /**
-         * @brief Whether connection is possible
-         * @m_deprecated_since{2019,10} Re-connecting a disconnected signal is
-         *      not possible anymore in order to make the library more
-         *      efficient. This function now just returns the value of (also
-         *      deprecated) @ref isConnected().
-         */
-        CORRADE_DEPRECATED("re-connecting a disconnected signal is not possible anymore") bool isConnectionPossible() const {
-            CORRADE_IGNORE_DEPRECATED_PUSH
-            return isConnected();
-            CORRADE_IGNORE_DEPRECATED_POP
-        }
-
-        /**
-         * @brief Re-establish the connection
-         * @m_deprecated_since{2019,10} Re-connecting a disconnected signal is
-         *      not possible anymore in order to make the library more
-         *      efficient. This function now just returns the value of (also
-         *      deprecated) @ref isConnected().
-         */
-        CORRADE_DEPRECATED("re-connecting a disconnected signal is not possible anymore") bool connect() {
-            CORRADE_IGNORE_DEPRECATED_PUSH
-            return isConnected();
-            CORRADE_IGNORE_DEPRECATED_POP
-        }
-        #endif
-
     #ifdef DOXYGEN_GENERATING_OUTPUT
     private:
+    #else
+    public:
     #endif
-        explicit Connection(
-            #ifdef CORRADE_BUILD_DEPRECATED
-            Emitter& emitter,
-            #endif
-            Implementation::SignalData signal, Implementation::ConnectionData& data);
+        explicit Connection(Implementation::SignalData signal, Implementation::ConnectionData& data): _signal{signal}, _data{&data} {}
 
     private:
         /* https://bugzilla.gnome.org/show_bug.cgi?id=776986 */
@@ -188,9 +141,6 @@ class CORRADE_INTERCONNECT_EXPORT Connection {
         friend CORRADE_INTERCONNECT_EXPORT bool disconnect(Emitter&, const Connection&);
         #endif
 
-        #ifdef CORRADE_BUILD_DEPRECATED
-        Containers::Reference<Emitter> _emitter;
-        #endif
         Implementation::SignalData _signal;
         /* Note: this might become dangling at some point */
         Implementation::ConnectionData* _data;

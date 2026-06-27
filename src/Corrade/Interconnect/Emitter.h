@@ -559,11 +559,7 @@ template<class EmitterObject, class Emitter, class Functor, class ...Args> Conne
     #else
     auto signalData = Implementation::SignalData::create<Emitter, Args...>(signal);
     #endif
-    return Connection{
-        #ifdef CORRADE_BUILD_DEPRECATED
-        emitter,
-        #endif
-        signalData, emitter.connectInternal(signalData, Implementation::ConnectionData::createFunctor<Args...>(std::move(slot)))};
+    return Connection{signalData, emitter.connectInternal(signalData, Implementation::ConnectionData::createFunctor<Args...>(std::move(slot)))};
 }
 
 /** @relatesalso Emitter
@@ -601,11 +597,7 @@ template<class EmitterObject, class Emitter, class Receiver, class ReceiverObjec
     #else
     auto signalData = Implementation::SignalData::create<Emitter, Args...>(signal);
     #endif
-    return Connection{
-        #ifdef CORRADE_BUILD_DEPRECATED
-        emitter,
-        #endif
-        signalData, emitter.connectInternal(signalData, Implementation::ConnectionData::createMember<Receiver, ReceiverObject, Args...>(receiver, slot))};
+    return Connection{signalData, emitter.connectInternal(signalData, Implementation::ConnectionData::createMember<Receiver, ReceiverObject, Args...>(receiver, slot))};
 }
 
 /** @relatesalso Emitter

@@ -966,6 +966,11 @@ namespace Corrade {
     pointer would lead to resource leaks as the derived type destructor would
     never get called. Existing code where this silently happened will now fail
     to compile and has to be updated.
+-   Removed the @cpp Interconnect::Connection::isConnected() @ce,
+    @cpp disconnect() @ce, @cpp isConnectionPossible() @ce and
+    @cpp connect() @ce APIs that were deprecated in 2019.10. Use
+    @ref Interconnect::Emitter::isConnected() and
+    @ref Interconnect::disconnect() instead.
 -   @ref PluginManager::AbstractManager::pluginList(),
     @relativeref{PluginManager::AbstractManager,aliasList()} and
     @ref PluginManager::PluginMetadata APIs now return @ref Containers::String,
@@ -1700,7 +1705,7 @@ Released 2019-10-24, tagged as
     `Interconnect::Connection::isConnectionPossible()` and
     `Interconnect::Connection::connect()` is not possible anymore in order
     to make the @ref Interconnect library more efficient. These two functions
-    are now deprecated and just returningthe value of (also deprecated)
+    are now deprecated and just returning the value of (also deprecated)
     `isConnected()`.
 -   Signatures of @ref TestSuite::Comparator methods were changed in order to
     support new features. The old variant with
