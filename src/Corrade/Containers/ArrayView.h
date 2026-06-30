@@ -113,7 +113,7 @@ convertible to them:
 @subsection Containers-ArrayView-usage-access Data access
 
 The class provides the usual C++ container interface --- @ref data(),
-@ref size() and @ref isEmpty(); subscript access via @ref operator T*(), range
+@ref size() and @ref isEmpty(); subscript access via @ref operator[](), range
 access via @ref begin() / @ref end(), and their overloads and acess to the
 @ref front() and @ref back() element, if the view is non-empty. The view itself
 is immutable and thus all member functions are @cpp const @ce, but if the
@@ -125,9 +125,9 @@ mutable as well.
 @subsection Containers-ArrayView-usage-slicing View slicing
 
 Except for the usual element access via @ref begin(), @ref end() and
-@ref operator T*() that provides also access via @cpp [] @ce, there's a
-collection of slicing functions --- @ref slice(), @ref sliceSize(),
-@ref prefix(), @ref suffix(), @ref exceptPrefix() and @ref exceptSuffix():
+@ref operator[](), there's a collection of slicing functions --- @ref slice(),
+@ref sliceSize(), @ref prefix(), @ref suffix(), @ref exceptPrefix() and
+@ref exceptSuffix():
 
 @snippet Containers.cpp ArrayView-usage-slicing
 
