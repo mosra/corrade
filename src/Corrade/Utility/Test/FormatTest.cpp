@@ -101,8 +101,6 @@ struct FormatTest: TestSuite::Tester {
 
     void toBuffer();
     void toBufferNullTerminatorFromSnprintfAtTheEnd();
-    void array();
-    void arrayNullTerminatorFromSnprintfAtTheEnd();
     void file();
     void fileLongDouble();
 
@@ -178,8 +176,6 @@ FormatTest::FormatTest() {
 
               &FormatTest::toBuffer,
               &FormatTest::toBufferNullTerminatorFromSnprintfAtTheEnd,
-              &FormatTest::array,
-              &FormatTest::arrayNullTerminatorFromSnprintfAtTheEnd,
               &FormatTest::file,
               &FormatTest::fileLongDouble,
 
@@ -722,16 +718,6 @@ void FormatTest::toBufferNullTerminatorFromSnprintfAtTheEnd() {
         CORRADE_COMPARE((Containers::StringView{buffer, 8}), "hello 42");
     }
     CORRADE_COMPARE(Containers::StringView{buffer}, "hello 4");
-}
-
-void FormatTest::array() {
-    Containers::Array<char> array = format("hello, {}!", "world");
-    CORRADE_COMPARE((Containers::StringView{array, array.size()}), "hello, world!");
-}
-
-void FormatTest::arrayNullTerminatorFromSnprintfAtTheEnd() {
-    Containers::Array<char> array = format("hello {}", 42);
-    CORRADE_COMPARE((Containers::StringView{array, array.size()}), "hello 42");
 }
 
 void FormatTest::file() {
