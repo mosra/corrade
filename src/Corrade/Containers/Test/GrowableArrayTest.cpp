@@ -64,9 +64,9 @@ extern "C" const void *__sanitizer_contiguous_container_find_bad_address(
     const void *beg, const void *mid, const void *end);
 #define VERIFY_SANITIZED_PROPERLY(array, Allocator) \
     do {                                                                    \
-        bool sanitized = __sanitizer_verify_contiguous_container(Allocator::base(array.begin()), array.end(), array.begin() + Allocator::capacity(array)); \
+        bool sanitized = __sanitizer_verify_contiguous_container(Allocator::base(array.begin()), array.end(), array.begin() + Allocator::capacity(array.begin())); \
         if(!sanitized) {                                                    \
-            Debug{} << "Sanitization annotation for array of capacity" << Allocator::capacity(array) << "and size" << array.size() << "failed at offset" << reinterpret_cast<const typename Allocator::Type*>(__sanitizer_contiguous_container_find_bad_address(Allocator::base(array.begin()), array.end(), array.begin() + Allocator::capacity(array))) - array.begin(); \
+            Debug{} << "Sanitization annotation for array of capacity" << Allocator::capacity(array.begin()) << "and size" << array.size() << "failed at offset" << reinterpret_cast<const typename Allocator::Type*>(__sanitizer_contiguous_container_find_bad_address(Allocator::base(array.begin()), array.end(), array.begin() + Allocator::capacity(array.begin()))) - array.begin(); \
         }                                                                   \
         CORRADE_VERIFY(sanitized);                                          \
     } while(false)
@@ -677,7 +677,7 @@ template<class T> void GrowableArrayTest::reserveFromNonGrowable() {
 
     {
         Array<T> a{3};
-        T* prev = a;
+        T* prev = a.data();
         a[0] = 1;
         a[1] = 2;
         a[2] = 3;
@@ -691,7 +691,7 @@ template<class T> void GrowableArrayTest::reserveFromNonGrowable() {
         /* Not growable, no ASan annotation check */
 
         CORRADE_COMPARE(arrayReserve(a, 100), 100);
-        CORRADE_VERIFY(a != prev);
+        CORRADE_VERIFY(a.data() != prev);
         CORRADE_VERIFY(arrayIsGrowable(a));
         CORRADE_COMPARE(a.size(), 3);
         CORRADE_COMPARE(arrayCapacity(a), 100);
@@ -715,7 +715,7 @@ template<class T> void GrowableArrayTest::reserveFromNonGrowableNoOp() {
 
     {
         Array<T> a{3};
-        T* prev = a;
+        T* prev = a.data();
         a[0] = 1;
         a[1] = 2;
         a[2] = 3;
@@ -764,7 +764,7 @@ template<class T> void GrowableArrayTest::reserveFromGrowable() {
         /* Not growable, no ASan annotation check */
 
         CORRADE_COMPARE(arrayReserve(a, 50), 50);
-        T* prev = a;
+        T* prev = a.data();
         CORRADE_VERIFY(arrayIsGrowable(a));
         CORRADE_COMPARE(a.size(), 3);
         CORRADE_COMPARE(arrayCapacity(a), 50);
@@ -780,7 +780,7 @@ template<class T> void GrowableArrayTest::reserveFromGrowable() {
         CORRADE_VERIFY(arrayIsGrowable(a));
         /* std::realloc() for ints might extend it in-place */
         if(std::is_same<T, Movable>::value)
-            CORRADE_VERIFY(a != prev);
+            CORRADE_VERIFY(a.data() != prev);
         CORRADE_COMPARE(a.size(), 3);
         CORRADE_COMPARE(arrayCapacity(a), 100);
         CORRADE_COMPARE(int(a[0]), 1);
@@ -815,7 +815,7 @@ template<class T> void GrowableArrayTest::reserveFromGrowableNoOp() {
         /* Not growable, no ASan annotation check */
 
         CORRADE_COMPARE(arrayReserve(a, 100), 100);
-        T* prev = a;
+        T* prev = a.data();
         CORRADE_VERIFY(arrayIsGrowable(a));
         CORRADE_COMPARE(a.size(), 3);
         CORRADE_COMPARE(arrayCapacity(a), 100);
@@ -911,7 +911,7 @@ template<class T> void GrowableArrayTest::resizeFromNonGrowableNoOp() {
 
     {
         Array<T> a{3};
-        T* prev = a;
+        T* prev = a.data();
         a[0] = 1;
         a[1] = 2;
         a[2] = 3;
@@ -951,7 +951,7 @@ template<class T> void GrowableArrayTest::resizeFromGrowable() {
     {
         Array<T> a;
         arrayResize(a, 2);
-        T* prev = a;
+        T* prev = a.data();
         a[0] = 1;
         a[1] = 2;
         CORRADE_VERIFY(arrayIsGrowable(a));
@@ -966,7 +966,7 @@ template<class T> void GrowableArrayTest::resizeFromGrowable() {
         arrayResize(a, 4);
         /* std::realloc() for ints might extend it in-place */
         if(std::is_same<T, Movable>::value)
-            CORRADE_VERIFY(a != prev);
+            CORRADE_VERIFY(a.data() != prev);
         CORRADE_VERIFY(arrayIsGrowable(a));
         CORRADE_COMPARE(a.size(), 4);
         CORRADE_COMPARE(arrayCapacity(a), 4);
@@ -992,7 +992,7 @@ template<class T> void GrowableArrayTest::resizeFromGrowableNoOp() {
     {
         Array<T> a;
         arrayResize(a, 3);
-        T* prev = a;
+        T* prev = a.data();
         a[0] = 1;
         a[1] = 2;
         a[2] = 3;
@@ -1033,7 +1033,7 @@ template<class T> void GrowableArrayTest::resizeFromGrowableNoRealloc() {
         arrayReserve(a, 4);
         CORRADE_VERIFY(arrayIsGrowable(a));
         VERIFY_SANITIZED_PROPERLY(a, ArrayAllocator<T>);
-        T* prev = a;
+        T* prev = a.data();
         arrayResize(a, 2);
         CORRADE_VERIFY(arrayIsGrowable(a));
         a[0] = 1;
@@ -1163,7 +1163,7 @@ template<class T, class Init> void GrowableArrayTest::resizeFromNonGrowableToLes
 
     {
         Array<T> a{4};
-        T* prev = a;
+        T* prev = a.data();
         a[0] = 1;
         a[1] = 2;
         a[2] = 3;
@@ -1184,7 +1184,7 @@ template<class T, class Init> void GrowableArrayTest::resizeFromNonGrowableToLes
         #ifdef CORRADE_BUILD_DEPRECATED
         CORRADE_IGNORE_DEPRECATED_POP
         #endif
-        CORRADE_VERIFY(a != prev);
+        CORRADE_VERIFY(a.data() != prev);
         CORRADE_VERIFY(arrayIsGrowable(a));
         CORRADE_COMPARE(a.size(), 2);
         CORRADE_COMPARE(arrayCapacity(a), 2);
@@ -1208,7 +1208,7 @@ template<class T, class Init> void GrowableArrayTest::resizeFromGrowableToLess()
     {
         Array<T> a;
         arrayResize(a, 4);
-        T* prev = a;
+        T* prev = a.data();
         a[0] = 1;
         a[1] = 2;
         a[2] = 3;
@@ -1321,7 +1321,7 @@ template<class T> void GrowableArrayTest::appendFromNonGrowable() {
 
     {
         Array<T> a{1};
-        T* prev = a;
+        T* prev = a.data();
         a[0] = 28;
         if(std::is_same<T, Movable>::value) {
             CORRADE_COMPARE(Movable::constructed, 1);
@@ -1331,7 +1331,7 @@ template<class T> void GrowableArrayTest::appendFromNonGrowable() {
         }
 
         T& appended = arrayAppend(a, T{37});
-        CORRADE_VERIFY(a != prev);
+        CORRADE_VERIFY(a.data() != prev);
         CORRADE_VERIFY(arrayIsGrowable(a));
         CORRADE_COMPARE(a.size(), 2);
         #ifndef CORRADE_TARGET_32BIT
@@ -1366,7 +1366,7 @@ template<class T> void GrowableArrayTest::insertFromNonGrowable() {
 
     {
         Array<T> a{3};
-        T* prev = a;
+        T* prev = a.data();
         a[0] = 28;
         a[1] = 42;
         a[2] = 56;
@@ -1378,7 +1378,7 @@ template<class T> void GrowableArrayTest::insertFromNonGrowable() {
         }
 
         T& inserted = arrayInsert(a, 1, T{37});
-        CORRADE_VERIFY(a != prev);
+        CORRADE_VERIFY(a.data() != prev);
         CORRADE_VERIFY(arrayIsGrowable(a));
         CORRADE_COMPARE(a.size(), 4);
         CORRADE_COMPARE(arrayCapacity(a), 4);
@@ -1409,7 +1409,7 @@ template<class T> void GrowableArrayTest::appendFromGrowable() {
     {
         Array<T> a;
         arrayResize(a, 1);
-        T* prev = a;
+        T* prev = a.data();
         CORRADE_VERIFY(arrayIsGrowable(a));
         VERIFY_SANITIZED_PROPERLY(a, ArrayAllocator<T>);
 
@@ -1417,7 +1417,7 @@ template<class T> void GrowableArrayTest::appendFromGrowable() {
         T& appended = arrayAppend(a, T{37});
         /* std::realloc() for ints might extend it in-place */
         if(std::is_same<T, Movable>::value)
-            CORRADE_VERIFY(a != prev);
+            CORRADE_VERIFY(a.data() != prev);
         CORRADE_VERIFY(arrayIsGrowable(a));
         CORRADE_COMPARE(a.size(), 2);
         #ifndef CORRADE_TARGET_32BIT
@@ -1449,7 +1449,7 @@ template<class T> void GrowableArrayTest::insertFromGrowable() {
     {
         Array<T> a;
         arrayResize(a, 3);
-        T* prev = a;
+        T* prev = a.data();
         CORRADE_VERIFY(arrayIsGrowable(a));
         VERIFY_SANITIZED_PROPERLY(a, ArrayAllocator<T>);
 
@@ -1459,7 +1459,7 @@ template<class T> void GrowableArrayTest::insertFromGrowable() {
         T& inserted = arrayInsert(a, 1, T{37});
         /* std::realloc() for ints might extend it in-place */
         if(std::is_same<T, Movable>::value)
-            CORRADE_VERIFY(a != prev);
+            CORRADE_VERIFY(a.data() != prev);
         CORRADE_VERIFY(arrayIsGrowable(a));
         CORRADE_COMPARE(a.size(), 4);
         #ifndef CORRADE_TARGET_32BIT
@@ -1500,7 +1500,7 @@ template<class T> void GrowableArrayTest::appendFromGrowableNoRealloc() {
         Array<T> a;
         arrayReserve(a, 2);
         VERIFY_SANITIZED_PROPERLY(a, ArrayAllocator<T>);
-        T* prev = a;
+        T* prev = a.data();
         arrayResize(a, 1);
         VERIFY_SANITIZED_PROPERLY(a, ArrayAllocator<T>);
         a[0] = 28;
@@ -1532,7 +1532,7 @@ template<class T> void GrowableArrayTest::insertFromGrowableNoRealloc() {
         Array<T> a;
         arrayReserve(a, 4);
         VERIFY_SANITIZED_PROPERLY(a, ArrayAllocator<T>);
-        T* prev = a;
+        T* prev = a.data();
         arrayResize(a, 3);
         VERIFY_SANITIZED_PROPERLY(a, ArrayAllocator<T>);
         a[0] = 28;
@@ -1572,7 +1572,7 @@ template<class T> void GrowableArrayTest::insertFromGrowableNoReallocNoInit() {
         Array<T> a;
         arrayReserve(a, 4);
         VERIFY_SANITIZED_PROPERLY(a, ArrayAllocator<T>);
-        T* prev = a;
+        T* prev = a.data();
         arrayResize(a, 3);
         VERIFY_SANITIZED_PROPERLY(a, ArrayAllocator<T>);
         a[0] = 28;

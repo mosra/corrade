@@ -818,7 +818,7 @@ Containers::StringView JsonWriter::toString() const {
     /* The array contains a non-sentinel \0, strip it. See finalizeDocument()
        for more information. */
     /** @todo drop workarounds once growable String exists */
-    return Containers::StringView{state.out, state.out.size() - 1, Containers::StringViewFlag::NullTerminated};
+    return Containers::StringView{state.out.data(), state.out.size() - 1, Containers::StringViewFlag::NullTerminated};
 }
 
 bool JsonWriter::toFile(const Containers::StringView filename) const {

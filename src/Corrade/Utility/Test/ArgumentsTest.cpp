@@ -1464,12 +1464,12 @@ void ArgumentsTest::prefixedParse() {
     CORRADE_COMPARE(arg1.prefix(), "");
     CORRADE_COMPARE(arg2.prefix(), "read");
 
-    CORRADE_VERIFY(arg1.tryParse(data.argv.size(), data.argv));
+    CORRADE_VERIFY(arg1.tryParse(data.argv.size(), data.argv.data()));
     CORRADE_VERIFY(arg1.isSet("binary"));
     CORRADE_COMPARE(arg1.value("speed"), "fast");
     CORRADE_COMPARE(arg1.value("file"), "file.dat");
 
-    CORRADE_VERIFY(arg2.tryParse(data.argv.size(), data.argv));
+    CORRADE_VERIFY(arg2.tryParse(data.argv.size(), data.argv.data()));
     CORRADE_COMPARE(arg2.value("behavior"), "buffered");
     CORRADE_COMPARE(arg2.value("buffer-size"), "4K");
     CORRADE_COMPARE(arg2.arrayValueCount("seek"), 2);

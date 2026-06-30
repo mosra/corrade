@@ -59,12 +59,12 @@ void StaticArrayViewStlTest::convertFromArray() {
     std::array<float, 3> a{{42.0f, 13.37f, -25.0f}};
 
     StaticArrayView<3, float> b = a;
-    CORRADE_COMPARE(b, &a[0]);
+    CORRADE_COMPARE(b.data(), &a[0]);
     CORRADE_COMPARE(b[0], 42.0f);
 
     auto c = staticArrayView(a);
     CORRADE_VERIFY(std::is_same<decltype(c), StaticArrayView<3, float>>::value);
-    CORRADE_COMPARE(c, &a[0]);
+    CORRADE_COMPARE(c.data(), &a[0]);
     CORRADE_COMPARE(c[0], 42.0f);
 }
 
@@ -76,7 +76,7 @@ void StaticArrayViewStlTest::convertFromConstArray() {
     const std::array<float, 3> a{{42.0f, 13.37f, -25.0f}};
 
     StaticArrayView<3, const float> b = a;
-    CORRADE_COMPARE(b, &a[0]);
+    CORRADE_COMPARE(b.data(), &a[0]);
     CORRADE_COMPARE(b[0], 42.0f);
 }
 
@@ -88,7 +88,7 @@ void StaticArrayViewStlTest::convertConstFromArray() {
     std::array<float, 3> a{{42.0f, 13.37f, -25.0f}};
 
     StaticArrayView<3, const float> b = a;
-    CORRADE_COMPARE(b, &a[0]);
+    CORRADE_COMPARE(b.data(), &a[0]);
     CORRADE_COMPARE(b[0], 42.0f);
 
     /* Creating a non-const view from a const array should not be possible. Not

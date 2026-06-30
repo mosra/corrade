@@ -581,22 +581,59 @@ class Array {
             return Implementation::ArrayViewConverter<const T, U>::to(*this);
         }
 
-        #ifndef CORRADE_MSVC_COMPATIBILITY
+        #if !defined(CORRADE_MSVC_COMPATIBILITY) || !defined(CORRADE_BUILD_DEPRECATED)
         /** @brief Whether the array is non-empty */
         /* Disabled on MSVC w/o /permissive- to avoid ambiguous operator+()
            when doing pointer arithmetic. */
+        /** @todo remove the ifdef once the operators below are gone */
         explicit operator bool() const { return _data; }
+        #endif
+
+        #ifdef CORRADE_BUILD_DEPRECATED
+        #if !defined(DOXYGEN_GENERATING_OUTPUT) && !defined(CORRADE_MSVC_COMPATIBILITY)
+        /* Added only so `if(!array)` and `if(array)` doesn't produce a
+           deprecation warning due to a non-const operator T* being picked over
+           a const operator bool. On MSVC w/o /permissive- these would cause
+           ambiguity so instead the operator T*() omits the deprecation warning
+           altogether to not produce warning noise for valid usage. */
+        /** @todo remove once the operators below are gone */
+        explicit operator bool() { return _data; }
         #endif
 
         /* `char* a = Containers::Array<char>(5); a[3] = 5;` would result in
            instant segfault, disallowing it in the following conversion
            operators */
 
-        /** @brief Conversion to array type */
-        /*implicit*/ operator T*() & { return _data; }
+        /**
+         * @brief Conversion to array type
+         * @m_deprecated_since_latest Use @ref data() or @ref begin() instead,
+         *      which conveys the intent clearer than an implicit pointer
+         *      conversion.
+         */
+        /*implicit*/
+        #ifndef CORRADE_MSVC_COMPATIBILITY
+        /* On MSVC w/o /permissive- boolean conversion has to use operator T*()
+           as well, as operator bool() causes an ambiguity, so the deprecation
+           warning has to be omitted to not produce warning noise for valid
+           usage, sorry. *Please* regularly use at least one other compiler or
+           build with CORRADE_BUILD_DEPRECATED disabled from time to time to
+           catch use of these deprecated APIs in your code. */
+        CORRADE_DEPRECATED("use data() or begin() instead")
+        #endif
+        operator T*() & { return _data; }
 
-        /** @overload */
-        /*implicit*/ operator const T*() const & { return _data; }
+        /**
+         * @brief Conversion to array type
+         * @m_deprecated_since_latest Use @ref data() or @ref begin() instead,
+         *      which conveys the intent clearer than an implicit pointer
+         *      conversion.
+         */
+        /*implicit*/
+        #ifndef CORRADE_MSVC_COMPATIBILITY /* see above */
+        CORRADE_DEPRECATED("use data() or begin() instead")
+        #endif
+        operator const T*() const & { return _data; }
+        #endif
 
         /** @brief Array data */
         T* data() { return _data; }

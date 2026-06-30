@@ -466,7 +466,7 @@ void ArrayViewStlSpanTest::convertConstFromSpanSized() {
     std::span<float, 3> a = data;
 
     ArrayView<const float> b = a;
-    CORRADE_COMPARE(b, static_cast<const void*>(data));
+    CORRADE_COMPARE(b.data(), static_cast<const void*>(data));
     CORRADE_COMPARE(b.size(), 3);
     CORRADE_COMPARE(b[0], 42.0f);
 
@@ -484,7 +484,7 @@ void ArrayViewStlSpanTest::convertConstFromSpanSizedEmpty() {
     std::span<float, 0> a;
 
     ArrayView<const float> b = a;
-    CORRADE_COMPARE(b, nullptr);
+    CORRADE_COMPARE(b.data(), nullptr);
     CORRADE_COMPARE(b.size(), 0);
     #endif
 }
@@ -562,7 +562,7 @@ void ArrayViewStlSpanTest::convertVoidFromSpanSized() {
     std::span<float, 3> a = data;
 
     ArrayView<void> b = a;
-    CORRADE_COMPARE(b, static_cast<void*>(data));
+    CORRADE_COMPARE(b.data(), static_cast<void*>(data));
     CORRADE_COMPARE(b.size(), 3*4);
     #endif
 }
@@ -574,7 +574,7 @@ void ArrayViewStlSpanTest::convertVoidFromSpanSizedEmpty() {
     std::span<float, 0> a;
 
     ArrayView<void> b = a;
-    CORRADE_COMPARE(b, nullptr);
+    CORRADE_COMPARE(b.data(), nullptr);
     CORRADE_COMPARE(b.size(), 0);
     #endif
 }
@@ -587,12 +587,12 @@ void ArrayViewStlSpanTest::convertVoidFromConstSpanSized() {
     std::span<const float, 3> a = data;
 
     ArrayView<const void> b = a;
-    CORRADE_COMPARE(b, static_cast<const void*>(data));
+    CORRADE_COMPARE(b.data(), static_cast<const void*>(data));
     CORRADE_COMPARE(b.size(), 3*4);
 
     constexpr std::span<const float, 3> ca = Data;
     constexpr ArrayView<const void> cb = ca;
-    CORRADE_COMPARE(cb, static_cast<const void*>(Data));
+    CORRADE_COMPARE(cb.data(), static_cast<const void*>(Data));
     CORRADE_COMPARE(cb.size(), 3*4);
     #endif
 }
@@ -604,7 +604,7 @@ void ArrayViewStlSpanTest::convertVoidFromConstSpanSizedEmpty() {
     std::span<const float, 0> a;
 
     ArrayView<const void> b = a;
-    CORRADE_COMPARE(b, nullptr);
+    CORRADE_COMPARE(b.data(), nullptr);
     CORRADE_COMPARE(b.size(), 0);
     #endif
 }
@@ -617,7 +617,7 @@ void ArrayViewStlSpanTest::convertConstVoidFromSpanSized() {
     std::span<float, 3> a = data;
 
     ArrayView<const void> b = a;
-    CORRADE_COMPARE(b, static_cast<const void*>(data));
+    CORRADE_COMPARE(b.data(), static_cast<const void*>(data));
     CORRADE_COMPARE(b.size(), 3*4);
 
     /* Creating a non-const view from a const span should not be possible. Not
@@ -634,7 +634,7 @@ void ArrayViewStlSpanTest::convertConstVoidFromSpanSizedEmpty() {
     std::span<float, 0> a;
 
     ArrayView<const void> b = a;
-    CORRADE_COMPARE(b, nullptr);
+    CORRADE_COMPARE(b.data(), nullptr);
     CORRADE_COMPARE(b.size(), 0);;
     #endif
 }

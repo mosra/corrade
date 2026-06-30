@@ -107,13 +107,13 @@ void ArrayViewStlTest::convertFromArray() {
     std::array<float, 3> a{{42.0f, 13.37f, -25.0f}};
 
     ArrayView<float> b = a;
-    CORRADE_COMPARE(b, &a[0]);
+    CORRADE_COMPARE(b.data(), &a[0]);
     CORRADE_COMPARE(b.size(), 3);
     CORRADE_COMPARE(b[0], 42.0f);
 
     auto c = arrayView(a);
     CORRADE_VERIFY(std::is_same<decltype(c), ArrayView<float>>::value);
-    CORRADE_COMPARE(c, &a[0]);
+    CORRADE_COMPARE(c.data(), &a[0]);
     CORRADE_COMPARE(c.size(), 3);
     CORRADE_COMPARE(c[0], 42.0f);
 
@@ -136,13 +136,13 @@ void ArrayViewStlTest::convertFromConstArray() {
     const std::array<float, 3> a{{42.0f, 13.37f, -25.0f}};
 
     ArrayView<const float> b = a;
-    CORRADE_COMPARE(b, &a[0]);
+    CORRADE_COMPARE(b.data(), &a[0]);
     CORRADE_COMPARE(b.size(), 3);
     CORRADE_COMPARE(b[0], 42.0f);
 
     auto c = arrayView(a);
     CORRADE_VERIFY(std::is_same<decltype(c), ArrayView<const float>>::value);
-    CORRADE_COMPARE(c, &a[0]);
+    CORRADE_COMPARE(c.data(), &a[0]);
     CORRADE_COMPARE(c.size(), 3);
     CORRADE_COMPARE(c[0], 42.0f);
 }
@@ -165,7 +165,7 @@ void ArrayViewStlTest::convertConstFromArray() {
     std::array<float, 3> a{{42.0f, 13.37f, -25.0f}};
 
     ArrayView<const float> b = a;
-    CORRADE_COMPARE(b, &a[0]);
+    CORRADE_COMPARE(b.data(), &a[0]);
     CORRADE_COMPARE(b.size(), 3);
     CORRADE_COMPARE(b[0], 42.0f);
 
@@ -297,13 +297,13 @@ void ArrayViewStlTest::convertFromVector() {
     std::vector<float> a{42.0f, 13.37f, -25.0f};
 
     ArrayView<float> b = a;
-    CORRADE_COMPARE(b, &a[0]);
+    CORRADE_COMPARE(b.data(), &a[0]);
     CORRADE_COMPARE(b.size(), 3);
     CORRADE_COMPARE(b[0], 42.0f);
 
     auto c = arrayView(a);
     CORRADE_VERIFY(std::is_same<decltype(c), ArrayView<float>>::value);
-    CORRADE_COMPARE(c, &a[0]);
+    CORRADE_COMPARE(c.data(), &a[0]);
     CORRADE_COMPARE(c.size(), 3);
     CORRADE_COMPARE(c[0], 42.0f);
 
@@ -325,13 +325,13 @@ void ArrayViewStlTest::convertFromConstVector() {
     const std::vector<float> a{42.0f, 13.37f, -25.0f};
 
     ArrayView<const float> b = a;
-    CORRADE_COMPARE(b, &a[0]);
+    CORRADE_COMPARE(b.data(), &a[0]);
     CORRADE_COMPARE(b.size(), 3);
     CORRADE_COMPARE(b[0], 42.0f);
 
     auto c = arrayView(a);
     CORRADE_VERIFY(std::is_same<decltype(c), ArrayView<const float>>::value);
-    CORRADE_COMPARE(c, &a[0]);
+    CORRADE_COMPARE(c.data(), &a[0]);
     CORRADE_COMPARE(c.size(), 3);
     CORRADE_COMPARE(c[0], 42.0f);
 }
@@ -348,7 +348,7 @@ void ArrayViewStlTest::convertConstFromVector() {
     std::vector<float> a{42.0f, 13.37f, -25.0f};
 
     ArrayView<const float> b = a;
-    CORRADE_COMPARE(b, &a[0]);
+    CORRADE_COMPARE(b.data(), &a[0]);
     CORRADE_COMPARE(b.size(), 3);
     CORRADE_COMPARE(b[0], 42.0f);
 

@@ -657,7 +657,7 @@ LoadState AbstractManager::loadInternal(Implementation::Plugin& plugin, Containe
     #ifndef CORRADE_TARGET_WINDOWS
     void* module = dlopen(Containers::String::nullTerminatedView(filename).data(), RTLD_NOW|RTLD_GLOBAL);
     #else
-    HMODULE module = LoadLibraryW(Utility::Unicode::widen(filename));
+    HMODULE module = LoadLibraryW(Utility::Unicode::widen(filename).data());
     #endif
     if(!module) {
         Utility::Error err;

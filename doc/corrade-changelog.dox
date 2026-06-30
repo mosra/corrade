@@ -760,6 +760,13 @@ namespace Corrade {
         @cpp suffix() @ce API, taking a suffix length instead of an offset, is
         scheduled to be reintroduced once enough time passes after the
         deprecated API gets removed to avoid silent breakages in existing code.
+-   Implicit conversion of @ref Containers::Array,
+    @relativeref{Containers,ArrayView},
+    @relativeref{Containers,StaticArray} and
+    @relativeref{Containers,StaticArrayView} to a pointer is deprecated in
+    favor of using the explicit @relativeref{Containers::Array,data()} or
+    @relativeref{Containers::Array,begin()} functions that convey the intent
+    clearer
 -   `Size` and `Stride` typedefs in @ref Containers::StridedArrayView are
     deprecated in favor of @relativeref{Containers,Size},
     @relativeref{Containers,Size1D}, @relativeref{Containers,Size2D},

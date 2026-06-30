@@ -501,7 +501,7 @@ static_cast<void>(c);
 static_cast<void>(d);
 
 /* [ArrayView-usage-slicing2] */
-int* end = view;
+int* end = view.begin();
 while(*end < 25)
     ++end;
 Containers::ArrayView<int> numbersLessThan25 = view.prefix(end); // {0, 10, 20}
@@ -610,12 +610,12 @@ Containers::ArrayTuple data{
 // Fill the attachment, subpass and dependency info...
 
 VkRenderPassCreateInfo info{DOXYGEN_ELLIPSIS()};
-info.attachmentCount = 3;
-info.pAttachments = attachments;
-info.subpassCount = 2;
-info.pSubpasses = subpasses;
-info.dependencyCount = 7;
-info.pDependencies = dependencies;
+info.attachmentCount = attachments.size();
+info.pAttachments = attachments.data();
+info.subpassCount = subpasses.size();
+info.pSubpasses = subpasses.data();
+info.dependencyCount = dependencies.size();
+info.pDependencies = dependencies.data();
 /* [ArrayTuple-usage] */
 static_cast<void>(info);
 }
@@ -631,7 +631,7 @@ Containers::ArrayTuple data{
 
 /* Initialize all references to point to the strings */
 for(std::size_t i = 0; i != strings.size(); ++i)
-    new(references + i) Containers::Reference<std::string>{strings[i]};
+    new(references.data() + i) Containers::Reference<std::string>{strings[i]};
 /* [ArrayTuple-usage-nontrivial] */
 }
 

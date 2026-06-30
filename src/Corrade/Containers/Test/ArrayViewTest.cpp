@@ -118,7 +118,9 @@ struct ArrayViewTest: TestSuite::Tester {
     void constructZeroNullPointerAmbiguityConstVoid();
 
     void convertBool();
+    #ifdef CORRADE_BUILD_DEPRECATED
     void convertPointer();
+    #endif
     void convertConst();
     void convertExternalView();
     void convertConstFromExternalView();
@@ -178,7 +180,9 @@ ArrayViewTest::ArrayViewTest() {
               &ArrayViewTest::constructZeroNullPointerAmbiguityConstVoid,
 
               &ArrayViewTest::convertBool,
+              #ifdef CORRADE_BUILD_DEPRECATED
               &ArrayViewTest::convertPointer,
+              #endif
               &ArrayViewTest::convertConst,
               &ArrayViewTest::convertExternalView,
               &ArrayViewTest::convertConstFromExternalView,
@@ -736,33 +740,47 @@ void ArrayViewTest::convertBool() {
     CORRADE_VERIFY(!std::is_constructible<int, ConstVoidArrayView>::value);
 }
 
+#ifdef CORRADE_BUILD_DEPRECATED
 void ArrayViewTest::convertPointer() {
     int a[7];
     ArrayView b = a;
+    CORRADE_IGNORE_DEPRECATED_PUSH
     int* bp = b;
+    CORRADE_IGNORE_DEPRECATED_POP
     CORRADE_COMPARE(bp, static_cast<int*>(a));
 
     const ArrayView c = a;
+    CORRADE_IGNORE_DEPRECATED_PUSH
     const int* cp = c;
+    CORRADE_IGNORE_DEPRECATED_POP
     CORRADE_COMPARE(cp, static_cast<const int*>(a));
 
     constexpr ConstArrayView cc = Array13;
+    CORRADE_IGNORE_DEPRECATED_PUSH
     constexpr const int* ccp = cc;
+    CORRADE_IGNORE_DEPRECATED_POP
     CORRADE_COMPARE(ccp, static_cast<const int*>(Array13));
 
     const ConstVoidArrayView d = a;
+    CORRADE_IGNORE_DEPRECATED_PUSH
     const void* dp = d;
+    CORRADE_IGNORE_DEPRECATED_POP
     CORRADE_COMPARE(dp, static_cast<const void*>(a));
 
     constexpr ConstVoidArrayView cd = Array30;
+    CORRADE_IGNORE_DEPRECATED_PUSH
     constexpr const void* cdp = cd;
+    CORRADE_IGNORE_DEPRECATED_POP
     CORRADE_COMPARE(cdp, static_cast<const void*>(Array30));
 
     /* Pointer arithmetic */
     const ArrayView e = a;
+    CORRADE_IGNORE_DEPRECATED_PUSH
     const int* ep = e + 2;
+    CORRADE_IGNORE_DEPRECATED_POP
     CORRADE_COMPARE(ep, &e[2]);
 }
+#endif
 
 void ArrayViewTest::convertConst() {
     int a[3];
@@ -1046,15 +1064,15 @@ void ArrayViewTest::sliceInvalid() {
     Error redirectError{&out};
 
     /* Testing both pointer and size versions */
-    a.slice(a - 1, a);
-    a.slice(a + 5, a + 6);
+    a.slice(a.data() - 1, a.data());
+    a.slice(a.data() + 5, a.data() + 6);
     a.slice(5, 6);
-    a.slice(a + 2, a + 1);
+    a.slice(a.data() + 2, a.data() + 1);
     a.slice(2, 1);
     /* Testing template size + pointer, template size + size and full template
        version */
-    a.slice<1>(a - 1);
-    a.slice<5>(a + 1);
+    a.slice<1>(a.data() - 1);
+    a.slice<5>(a.data() + 1);
     a.slice<5>(1);
     a.slice<1, 6>();
 
@@ -1291,7 +1309,7 @@ void ArrayViewTest::sliceToStaticPointer() {
     int data[5] = {1, 2, 3, 4, 5};
     ArrayView a = data;
 
-    StaticArrayView<3, int> b = a.slice<3>(a + 1);
+    StaticArrayView<3, int> b = a.slice<3>(a.data() + 1);
     CORRADE_COMPARE(b[0], 2);
     CORRADE_COMPARE(b[1], 3);
     CORRADE_COMPARE(b[2], 4);
@@ -1300,7 +1318,7 @@ void ArrayViewTest::sliceToStaticPointer() {
        pointer arithmetic on _data inside the assert. */
     #ifndef CORRADE_MSVC2015_COMPATIBILITY
     constexpr ConstArrayView ca = Array5;
-    constexpr StaticArrayView<3, const int> cb = ca.slice<3>(ca + 1);
+    constexpr StaticArrayView<3, const int> cb = ca.slice<3>(ca.data() + 1);
     CORRADE_COMPARE(cb[0], 2);
     CORRADE_COMPARE(cb[1], 3);
     CORRADE_COMPARE(cb[2], 4);

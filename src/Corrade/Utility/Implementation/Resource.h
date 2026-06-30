@@ -66,7 +66,7 @@ inline std::size_t resourceLookup(const unsigned int count, const unsigned int* 
         [positions, filenames](const Position& position, const Containers::StringView filename) {
             /* The upper 8 bits of filename are reserved for padding */
             const std::size_t end = position.filenamePadding & 0x00ffffffu;
-            const std::size_t begin = &position == positions ? 0 : (&position - 1)->filenamePadding & 0x00ffffffu;
+            const std::size_t begin = &position == positions.data() ? 0 : (&position - 1)->filenamePadding & 0x00ffffffu;
             /* Not constructing a temporary StringView here as this shall be
                faster */
             /** @todo Actually, temporary StringView *could* be faster because

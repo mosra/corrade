@@ -91,7 +91,9 @@ struct StaticArrayViewTest: TestSuite::Tester {
     void constructZeroNullPointerAmbiguity();
 
     void convertBool();
+    #ifdef CORRADE_BUILD_DEPRECATED
     void convertPointer();
+    #endif
     void convertConst();
     void convertExternalView();
     void convertConstFromExternalView();
@@ -128,7 +130,9 @@ StaticArrayViewTest::StaticArrayViewTest() {
               &StaticArrayViewTest::constructZeroNullPointerAmbiguity,
 
               &StaticArrayViewTest::convertBool,
+              #ifdef CORRADE_BUILD_DEPRECATED
               &StaticArrayViewTest::convertPointer,
+              #endif
               &StaticArrayViewTest::convertConst,
               &StaticArrayViewTest::convertExternalView,
               &StaticArrayViewTest::convertConstFromExternalView,
@@ -350,25 +354,35 @@ void StaticArrayViewTest::convertBool() {
     CORRADE_VERIFY(!std::is_constructible<int, StaticArrayView<5>>::value);
 }
 
+#ifdef CORRADE_BUILD_DEPRECATED
 void StaticArrayViewTest::convertPointer() {
     int a[7];
     StaticArrayView<7> b = a;
+    CORRADE_IGNORE_DEPRECATED_PUSH
     int* bp = b;
+    CORRADE_IGNORE_DEPRECATED_POP
     CORRADE_COMPARE(bp, static_cast<int*>(a));
 
     const StaticArrayView<7> c = a;
+    CORRADE_IGNORE_DEPRECATED_PUSH
     const int* cp = c;
+    CORRADE_IGNORE_DEPRECATED_POP
     CORRADE_COMPARE(cp, static_cast<const int*>(a));
 
     constexpr ConstStaticArrayView<13> cc = Array13;
+    CORRADE_IGNORE_DEPRECATED_PUSH
     constexpr const int* ccp = cc;
+    CORRADE_IGNORE_DEPRECATED_POP
     CORRADE_COMPARE(ccp, static_cast<const int*>(Array13));
 
     /* Pointer arithmetic */
     const StaticArrayView<7> e = a;
+    CORRADE_IGNORE_DEPRECATED_PUSH
     const int* ep = e + 2;
+    CORRADE_IGNORE_DEPRECATED_POP
     CORRADE_COMPARE(ep, &e[2]);
 }
+#endif
 
 void StaticArrayViewTest::convertConst() {
     int a[3];
@@ -753,7 +767,7 @@ void StaticArrayViewTest::sliceToStaticPointer() {
     int data[5] = {1, 2, 3, 4, 5};
     StaticArrayView<5> a = data;
 
-    StaticArrayView<3> b = a.slice<3>(a + 1);
+    StaticArrayView<3> b = a.slice<3>(a.data() + 1);
     CORRADE_COMPARE(b[0], 2);
     CORRADE_COMPARE(b[1], 3);
     CORRADE_COMPARE(b[2], 4);
@@ -762,7 +776,7 @@ void StaticArrayViewTest::sliceToStaticPointer() {
        pointer arithmetic on _data inside the assert. */
     #ifndef CORRADE_MSVC2015_COMPATIBILITY
     constexpr ConstStaticArrayView<5> ca = Array5;
-    constexpr ConstStaticArrayView<3> cb = ca.slice<3>(ca + 1);
+    constexpr ConstStaticArrayView<3> cb = ca.slice<3>(ca.data() + 1);
     CORRADE_COMPARE(cb[0], 2);
     CORRADE_COMPARE(cb[1], 3);
     CORRADE_COMPARE(cb[2], 4);

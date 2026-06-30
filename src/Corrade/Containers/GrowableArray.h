@@ -2031,7 +2031,7 @@ template<class T, class Allocator> void arrayResize(Array<T>& array, Corrade::No
        might then call destructors even in the non-initialized area ... */
     if(!hasGrowingDeleter) {
         T* newArray = Allocator::allocate(size);
-        Implementation::arrayMoveConstruct<T>(array, newArray,
+        Implementation::arrayMoveConstruct<T>(array.data(), newArray,
             /* Move the min of the two sizes -- if we shrink, move only what
                will fit in the new array; if we extend, move only what's
                initialized in the original and left the rest not initialized */
@@ -2049,7 +2049,7 @@ template<class T, class Allocator> void arrayResize(Array<T>& array, Corrade::No
 
     /* ... or the desired size is larger than the capacity. In that case make
        use of the reallocate() function that might be able to grow in-place. */
-    } else if(Allocator::capacity(array) < size) {
+    } else if(Allocator::capacity(arrayGuts.data) < size) {
         Allocator::reallocate(arrayGuts.data,
             /* Move the min of the two sizes -- if we shrink, move only what
                will fit in the new array; if we extend, move only what's
@@ -2078,7 +2078,7 @@ template<class T, class Allocator> void arrayResize(Array<T>& array, Corrade::No
         #ifdef _CORRADE_CONTAINERS_SANITIZER_ENABLED
         __sanitizer_annotate_contiguous_container(
             Allocator::base(arrayGuts.data),
-            arrayGuts.data + Allocator::capacity(array),
+            arrayGuts.data + Allocator::capacity(arrayGuts.data),
             arrayGuts.data + arrayGuts.size,
             arrayGuts.data + size);
         #endif
@@ -2090,14 +2090,14 @@ template<class T, class Allocator> void arrayResize(Array<T>& array, Corrade::No
 template<class T, class Allocator> void arrayResize(Array<T>& array, Corrade::DefaultInitT, const std::size_t size) {
     const std::size_t prevSize = array.size();
     arrayResize<T, Allocator>(array, Corrade::NoInit, size);
-    Implementation::arrayConstruct(Corrade::DefaultInit, array + prevSize, array.end());
+    Implementation::arrayConstruct(Corrade::DefaultInit, array.begin() + prevSize, array.end());
 }
 #endif
 
 template<class T, class Allocator> void arrayResize(Array<T>& array, Corrade::ValueInitT, const std::size_t size) {
     const std::size_t prevSize = array.size();
     arrayResize<T, Allocator>(array, Corrade::NoInit, size);
-    Implementation::arrayConstruct(Corrade::ValueInit, array + prevSize, array.end());
+    Implementation::arrayConstruct(Corrade::ValueInit, array.begin() + prevSize, array.end());
 }
 
 template<class T, class Allocator, class ...Args> void arrayResize(Array<T>& array, Corrade::DirectInitT, const std::size_t size, Args&&... args) {
@@ -2106,7 +2106,7 @@ template<class T, class Allocator, class ...Args> void arrayResize(Array<T>& arr
 
     /* In-place construct the new elements. No helper function for this as
        there's no way we could memcpy such a thing. */
-    for(T* it = array + prevSize; it < array.end(); ++it)
+    for(T* it = array.begin() + prevSize; it < array.end(); ++it)
         Implementation::construct(*it, Utility::forward<Args>(args)...);
 }
 
@@ -2702,7 +2702,7 @@ template<class T, class Allocator> void arrayShrink(Array<T>& array, Corrade::No
     /* Even if we don't need to shrink, reallocating to an usual array with
        common deleters to avoid surprises */
     Array<T> newArray{Corrade::NoInit, arrayGuts.size};
-    Implementation::arrayMoveConstruct<T>(arrayGuts.data, newArray, arrayGuts.size);
+    Implementation::arrayMoveConstruct<T>(arrayGuts.data, newArray.data(), arrayGuts.size);
     array = Utility::move(newArray);
 
     #ifdef _CORRADE_CONTAINERS_SANITIZER_ENABLED
@@ -2725,7 +2725,7 @@ template<class T, class Allocator> void arrayShrink(Array<T>& array, Corrade::De
     CORRADE_IGNORE_DEPRECATED_PUSH
     Array<T> newArray{Corrade::DefaultInit, arrayGuts.size};
     CORRADE_IGNORE_DEPRECATED_POP
-    Implementation::arrayMoveAssign<T>(arrayGuts.data, newArray, arrayGuts.size);
+    Implementation::arrayMoveAssign<T>(arrayGuts.data, newArray.data(), arrayGuts.size);
     array = Utility::move(newArray);
 
     #ifdef _CORRADE_CONTAINERS_SANITIZER_ENABLED
@@ -2746,7 +2746,7 @@ template<class T, class Allocator> void arrayShrink(Array<T>& array, Corrade::Va
     /* Even if we don't need to shrink, reallocating to an usual array with
        common deleters to avoid surprises */
     Array<T> newArray{Corrade::ValueInit, arrayGuts.size};
-    Implementation::arrayMoveAssign<T>(arrayGuts.data, newArray, arrayGuts.size);
+    Implementation::arrayMoveAssign<T>(arrayGuts.data, newArray.data(), arrayGuts.size);
     array = Utility::move(newArray);
 
     #ifdef _CORRADE_CONTAINERS_SANITIZER_ENABLED

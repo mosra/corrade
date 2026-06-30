@@ -318,7 +318,7 @@ void Json::printFilePosition(Debug& out, const Containers::StringView string) co
 
 void Json::printFilePosition(Debug& out, const JsonTokenData& token) const {
     const State& state = *_state;
-    const std::size_t tokenIndex = &token - state.tokenStorage;
+    const std::size_t tokenIndex = &token - state.tokenStorage.data();
     printFilePosition(out, state.string.prefix(state.tokenOffsetSizeStorage[tokenIndex]._offset));
 }
 

@@ -335,7 +335,7 @@ template<class T> class ArrayView {
             #ifndef DOXYGEN_GENERATING_OUTPUT
             , typename std::enable_if<std::is_convertible<U*, T*>::value, int>::type = 0
             #endif
-        > constexpr /*implicit*/ ArrayView(ArrayView<U> view) noexcept: _data{view}, _size{view.size()} {
+        > constexpr /*implicit*/ ArrayView(ArrayView<U> view) noexcept: _data{view.data()}, _size{view.size()} {
             static_assert(sizeof(T) == sizeof(U), "type sizes are not compatible");
         }
 
@@ -350,7 +350,7 @@ template<class T> class ArrayView {
             #ifndef DOXYGEN_GENERATING_OUTPUT
             , typename std::enable_if<std::is_convertible<U*, T*>::value, int>::type = 0
             #endif
-        > constexpr /*implicit*/ ArrayView(StaticArrayView<size, U> view) noexcept: _data{view}, _size{size} {
+        > constexpr /*implicit*/ ArrayView(StaticArrayView<size, U> view) noexcept: _data{view.data()}, _size{size} {
             static_assert(sizeof(U) == sizeof(T), "type sizes are not compatible");
         }
 
@@ -379,15 +379,33 @@ template<class T> class ArrayView {
             return Implementation::ArrayViewConverter<T, U>::to(*this);
         }
 
-        #ifndef CORRADE_MSVC_COMPATIBILITY
+        #if !defined(CORRADE_MSVC_COMPATIBILITY) || !defined(CORRADE_BUILD_DEPRECATED)
         /** @brief Whether the view is non-empty */
         /* Disabled on MSVC w/o /permissive- to avoid ambiguous operator+()
            when doing pointer arithmetic. */
+        /** @todo remove the ifdef once the operators below are gone */
         constexpr explicit operator bool() const { return _data; }
         #endif
 
-        /** @brief Conversion to the underlying type */
-        constexpr /*implicit*/ operator T*() const { return _data; }
+        #ifdef CORRADE_BUILD_DEPRECATED
+        /**
+         * @brief Conversion to the underlying type
+         * @m_deprecated_since_latest Use @ref data() or @ref begin() instead,
+         *      which conveys the intent clearer than an implicit pointer
+         *      conversion.
+         */
+        constexpr /*implicit*/
+        #ifndef CORRADE_MSVC_COMPATIBILITY
+        /* On MSVC w/o /permissive- boolean conversion has to use operator T*()
+           as well, as operator bool() causes an ambiguity, so the deprecation
+           warning has to be omitted to not produce warning noise for valid
+           usage, sorry. *Please* regularly use at least one other compiler or
+           build with CORRADE_BUILD_DEPRECATED disabled from time to time to
+           catch use of these deprecated APIs in your code. */
+        CORRADE_DEPRECATED("use data() or begin() instead")
+        #endif
+        operator T*() const { return _data; }
+        #endif
 
         /** @brief View data */
         constexpr T* data() const { return _data; }
@@ -758,14 +776,14 @@ template<> class ArrayView<void> {
             #ifndef DOXYGEN_GENERATING_OUTPUT
             , typename std::enable_if<!std::is_const<T>::value, int>::type = 0
             #endif
-        > constexpr /*implicit*/ ArrayView(ArrayView<T> array) noexcept: _data(array), _size(array.size()*sizeof(T)) {}
+        > constexpr /*implicit*/ ArrayView(ArrayView<T> array) noexcept: _data(array.data()), _size(array.size()*sizeof(T)) {}
 
         /** @brief Construct a void view on any @ref StaticArrayView */
         template<std::size_t size, class T
             #ifndef DOXYGEN_GENERATING_OUTPUT
             , typename std::enable_if<!std::is_const<T>::value, int>::type = 0
             #endif
-        > constexpr /*implicit*/ ArrayView(const StaticArrayView<size, T>& array) noexcept: _data{array}, _size{size*sizeof(T)} {}
+        > constexpr /*implicit*/ ArrayView(const StaticArrayView<size, T>& array) noexcept: _data{array.data()}, _size{size*sizeof(T)} {}
 
         /**
          * @brief Construct a view on an external type / from an external representation
@@ -782,15 +800,32 @@ template<> class ArrayView<void> {
             #endif
         > constexpr /*implicit*/ ArrayView(T&& other) noexcept: ArrayView{Implementation::ErasedArrayViewConverter<typename std::decay<T&&>::type>::from(other)} {}
 
-        #ifndef CORRADE_MSVC_COMPATIBILITY
+        #if !defined(CORRADE_MSVC_COMPATIBILITY) || !defined(CORRADE_BUILD_DEPRECATED)
         /** @brief Whether the view is non-empty */
         /* Disabled on MSVC w/o /permissive- to avoid ambiguous operator+()
            when doing pointer arithmetic. */
+        /** @todo remove the ifdef once the operators below are gone */
         constexpr explicit operator bool() const { return _data; }
         #endif
 
-        /** @brief Conversion to the underlying type */
-        constexpr /*implicit*/ operator void*() const { return _data; }
+        #ifdef CORRADE_BUILD_DEPRECATED
+        /**
+         * @brief Conversion to the underlying type
+         * @m_deprecated_since_latest Use @ref data() instead, which conveys
+         *      the intent clearer than an implicit pointer conversion.
+         */
+        constexpr /*implicit*/
+        #ifndef CORRADE_MSVC_COMPATIBILITY
+        /* On MSVC w/o /permissive- boolean conversion has to use operator T*()
+           as well, as operator bool() causes an ambiguity, so the deprecation
+           warning has to be omitted to not produce warning noise for valid
+           usage, sorry. *Please* regularly use at least one other compiler or
+           build with CORRADE_BUILD_DEPRECATED disabled from time to time to
+           catch use of these deprecated APIs in your code. */
+        CORRADE_DEPRECATED("use data() instead")
+        #endif
+        operator void*() const { return _data; }
+        #endif
 
         /** @brief View data */
         constexpr void* data() const { return _data; }
@@ -891,13 +926,13 @@ template<> class ArrayView<const void> {
         template<class T, std::size_t size> constexpr /*implicit*/ ArrayView(T(&data)[size]) noexcept: _data(data), _size(size*sizeof(T)) {}
 
         /** @brief Construct a const void view on an @ref ArrayView<void> */
-        constexpr /*implicit*/ ArrayView(ArrayView<void> array) noexcept: _data{array}, _size{array.size()} {}
+        constexpr /*implicit*/ ArrayView(ArrayView<void> array) noexcept: _data{array.data()}, _size{array.size()} {}
 
         /** @brief Construct a const void view on any @ref ArrayView */
-        template<class T> constexpr /*implicit*/ ArrayView(ArrayView<T> array) noexcept: _data(array), _size(array.size()*sizeof(T)) {}
+        template<class T> constexpr /*implicit*/ ArrayView(ArrayView<T> array) noexcept: _data(array.data()), _size(array.size()*sizeof(T)) {}
 
         /** @brief Construct a const void view on any @ref StaticArrayView */
-        template<std::size_t size, class T> constexpr /*implicit*/ ArrayView(const StaticArrayView<size, T>& array) noexcept: _data{array}, _size{size*sizeof(T)} {}
+        template<std::size_t size, class T> constexpr /*implicit*/ ArrayView(const StaticArrayView<size, T>& array) noexcept: _data{array.data()}, _size{size*sizeof(T)} {}
 
         /**
          * @brief Construct a view on an external type / from an external representation
@@ -910,15 +945,32 @@ template<> class ArrayView<const void> {
            returns a std::vector. */
         template<class T, class = decltype(Implementation::ErasedArrayViewConverter<const T>::from(std::declval<const T&>()))> constexpr /*implicit*/ ArrayView(const T& other) noexcept: ArrayView{Implementation::ErasedArrayViewConverter<const T>::from(other)} {}
 
-        #ifndef CORRADE_MSVC_COMPATIBILITY
+        #if !defined(CORRADE_MSVC_COMPATIBILITY) || !defined(CORRADE_BUILD_DEPRECATED)
         /** @brief Whether the view is non-empty */
         /* Disabled on MSVC w/o /permissive- to avoid ambiguous operator+()
            when doing pointer arithmetic. */
+        /** @todo remove the ifdef once the operators below are gone */
         constexpr explicit operator bool() const { return _data; }
         #endif
 
-        /** @brief Conversion to the underlying type */
-        constexpr /*implicit*/ operator const void*() const { return _data; }
+        #ifdef CORRADE_BUILD_DEPRECATED
+        /**
+         * @brief Conversion to the underlying type
+         * @m_deprecated_since_latest Use @ref data() instead, which conveys
+         *      the intent clearer than an implicit pointer conversion.
+         */
+        constexpr /*implicit*/
+        #ifndef CORRADE_MSVC_COMPATIBILITY
+        /* On MSVC w/o /permissive- boolean conversion has to use operator T*()
+           as well, as operator bool() causes an ambiguity, so the deprecation
+           warning has to be omitted to not produce warning noise for valid
+           usage, sorry. *Please* regularly use at least one other compiler or
+           build with CORRADE_BUILD_DEPRECATED disabled from time to time to
+           catch use of these deprecated APIs in your code. */
+        CORRADE_DEPRECATED("use data() instead")
+        #endif
+        operator const void*() const { return _data; }
+        #endif
 
         /** @brief View data */
         constexpr const void* data() const { return _data; }
@@ -1227,7 +1279,7 @@ template<std::size_t size_, class T> class StaticArrayView {
             #ifndef DOXYGEN_GENERATING_OUTPUT
             , typename std::enable_if<std::is_convertible<U*, T*>::value, int>::type = 0
             #endif
-        > constexpr /*implicit*/ StaticArrayView(StaticArrayView<size_, U> view) noexcept: _data{view} {
+        > constexpr /*implicit*/ StaticArrayView(StaticArrayView<size_, U> view) noexcept: _data{view.data()} {
             static_assert(sizeof(T) == sizeof(U), "type sizes are not compatible");
         }
 
@@ -1257,15 +1309,33 @@ template<std::size_t size_, class T> class StaticArrayView {
             return Implementation::StaticArrayViewConverter<size_, T, U>::to(*this);
         }
 
-        #ifndef CORRADE_MSVC_COMPATIBILITY
+        #if !defined(CORRADE_MSVC_COMPATIBILITY) || !defined(CORRADE_BUILD_DEPRECATED)
         /** @brief Whether the view is non-empty */
         /* Disabled on MSVC w/o /permissive- to avoid ambiguous operator+()
            when doing pointer arithmetic. */
+        /** @todo remove the ifdef once the operators below are gone */
         constexpr explicit operator bool() const { return _data; }
         #endif
 
-        /** @brief Conversion to the underlying type */
-        constexpr /*implicit*/ operator T*() const { return _data; }
+        #ifdef CORRADE_BUILD_DEPRECATED
+        /**
+         * @brief Conversion to the underlying type
+         * @m_deprecated_since_latest Use @ref data() or @ref begin() instead,
+         *      which conveys the intent clearer than an implicit pointer
+         *      conversion.
+         */
+        constexpr /*implicit*/
+        #ifndef CORRADE_MSVC_COMPATIBILITY
+        /* On MSVC w/o /permissive- boolean conversion has to use operator T*()
+           as well, as operator bool() causes an ambiguity, so the deprecation
+           warning has to be omitted to not produce warning noise for valid
+           usage, sorry. *Please* regularly use at least one other compiler or
+           build with CORRADE_BUILD_DEPRECATED disabled from time to time to
+           catch use of these deprecated APIs in your code. */
+        CORRADE_DEPRECATED("use data() or begin() instead")
+        #endif
+        operator T*() const { return _data; }
+        #endif
 
         /** @brief View data */
         constexpr T* data() const { return _data; }

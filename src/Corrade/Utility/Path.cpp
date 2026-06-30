@@ -282,7 +282,7 @@ bool exists(const Containers::StringView filename) {
 
     /* Windows (not Store/Phone) */
     #elif defined(CORRADE_TARGET_WINDOWS) && !defined(CORRADE_TARGET_WINDOWS_RT)
-    return GetFileAttributesW(Unicode::widen(filename)) != INVALID_FILE_ATTRIBUTES;
+    return GetFileAttributesW(Unicode::widen(filename).data()) != INVALID_FILE_ATTRIBUTES;
 
     /* Windows Store/Phone not implemented */
     #else
@@ -333,7 +333,7 @@ bool isDirectory(const Containers::StringView path) {
     #if defined(CORRADE_TARGET_WINDOWS) && !defined(CORRADE_TARGET_WINDOWS_RT)
     /** @todo symlink support, https://stackoverflow.com/a/26354331 sounds
         crazy tho */
-    const DWORD fileAttributes = GetFileAttributesW(Unicode::widen(path));
+    const DWORD fileAttributes = GetFileAttributesW(Unicode::widen(path).data());
     return fileAttributes != INVALID_FILE_ATTRIBUTES && (fileAttributes & FILE_ATTRIBUTE_DIRECTORY);
     #elif defined(CORRADE_TARGET_IOS)
     /* iOS (in a Simulator, at least) used to return false for S_ISDIR() since
@@ -428,7 +428,7 @@ bool make(const Containers::StringView path) {
            directory) is not that of a big deal compared to failing always. */
         #if (defined(CORRADE_TARGET_WINDOWS) && !defined(CORRADE_TARGET_WINDOWS_RT)) || ((defined(CORRADE_TARGET_UNIX) || defined(CORRADE_TARGET_EMSCRIPTEN)) && !defined(CORRADE_TARGET_IOS))
         #if defined(CORRADE_TARGET_WINDOWS) && !defined(CORRADE_TARGET_WINDOWS_RT)
-        const DWORD fileAttributes = GetFileAttributesW(pathWide);
+        const DWORD fileAttributes = GetFileAttributesW(pathWide.data());
         #endif
         if(
             /* On iOS (Simulator at least) stat() is a no-op, returning random
@@ -556,7 +556,7 @@ bool move(Containers::StringView from, Containers::StringView to) {
     /* Windows, except RT */
     /** @todo how to implement this for RT? */
     #elif !defined(CORRADE_TARGET_WINDOWS_RT)
-    if(MoveFileExW(Unicode::widen(from), Unicode::widen(to), MOVEFILE_REPLACE_EXISTING|MOVEFILE_COPY_ALLOWED) == 0) {
+    if(MoveFileExW(Unicode::widen(from).data(), Unicode::widen(to).data(), MOVEFILE_REPLACE_EXISTING|MOVEFILE_COPY_ALLOWED) == 0) {
         Error err;
         err << "Utility::Path::move(): can't move" << from << "to" << to << Debug::nospace << ":";
         Utility::Implementation::printWindowsErrorString(err, GetLastError());
@@ -623,7 +623,7 @@ Containers::Optional<Containers::String> executableLocation() {
     Containers::Array<char> path;
     arrayResize(path, NoInit, 4);
     ssize_t size;
-    while((size = readlink(self, path, path.size())) == ssize_t(path.size()))
+    while((size = readlink(self, path.data(), path.size())) == ssize_t(path.size()))
         arrayResize(path, NoInit, path.size()*2);
     if(size == -1) {
         Error err;
@@ -694,7 +694,7 @@ Containers::Optional<Containers::String> currentDirectory() {
     Containers::Array<char> path;
     arrayResize(path, NoInit, 4);
     char* success;
-    while(!(success = getcwd(path, path.size()))) {
+    while(!(success = getcwd(path.data(), path.size()))) {
         /* Unexpected error, exit. Can be for example ENOENT when current
            working directory gets deleted while the program is running. */
         if(errno != ERANGE) {
@@ -711,7 +711,7 @@ Containers::Optional<Containers::String> currentDirectory() {
     /* Success, transfer to a string with a growable deleter and an appropriate
        size, assuming getcwd() put the null terminator at the end */
     const auto deleter = path.deleter();
-    const std::size_t size = std::strlen(path);
+    const std::size_t size = std::strlen(path.data());
     CORRADE_INTERNAL_ASSERT(size < path.size());
     return Containers::String{path.release(), size, deleter};
 
@@ -722,7 +722,7 @@ Containers::Optional<Containers::String> currentDirectory() {
     CORRADE_INTERNAL_ASSERT(sizePlusOne);
     Containers::Array<wchar_t> path{NoInit, sizePlusOne};
     /* ... but retrieving the data returns size without it */
-    CORRADE_INTERNAL_ASSERT_OUTPUT(GetCurrentDirectoryW(sizePlusOne, path) == sizePlusOne - 1);
+    CORRADE_INTERNAL_ASSERT_OUTPUT(GetCurrentDirectoryW(sizePlusOne, path.data()) == sizePlusOne - 1);
     return fromNativeSeparators(Unicode::narrow(path.exceptSuffix(1)));
 
     /* Use the root path on Emscripten */
@@ -870,7 +870,7 @@ Containers::Optional<Containers::String> temporaryDirectory() {
     /* Get the path, convert to forward slashes, strip the trailing slash and
        zero terminator */
     Containers::Array<wchar_t> path{NoInit, size};
-    GetTempPathW(size, path);
+    GetTempPathW(size, path.data());
     return fromNativeSeparators(Unicode::narrow(path.exceptSuffix(2)));
     #else
     Error{} << "Utility::Path::temporaryDirectory(): not implemented on this platform";
@@ -946,7 +946,7 @@ Containers::Optional<Containers::Array<Containers::String>> list(const Container
     /* Windows (not Store/Phone) */
     #elif defined(CORRADE_TARGET_WINDOWS) && !defined(CORRADE_TARGET_WINDOWS_RT)
     WIN32_FIND_DATAW data;
-    HANDLE hFile = FindFirstFileW(Unicode::widen(join(path, "*"_s)), &data);
+    HANDLE hFile = FindFirstFileW(Unicode::widen(join(path, "*"_s)).data(), &data);
     if(hFile == INVALID_HANDLE_VALUE) {
         Error err;
         err << "Utility::Path::list(): can't list" << path << Debug::nospace << ":";
@@ -1061,7 +1061,7 @@ Containers::Optional<std::size_t> size(const Containers::StringView filename) {
     #ifndef CORRADE_TARGET_WINDOWS
     std::FILE* const f = std::fopen(Containers::String::nullTerminatedView(filename).data(), "rb");
     #else
-    std::FILE* const f = _wfopen(Unicode::widen(filename), L"rb");
+    std::FILE* const f = _wfopen(Unicode::widen(filename).data(), L"rb");
     #endif
     if(!f) {
         Error err;
@@ -1141,7 +1141,7 @@ Containers::Optional<Containers::Array<char>> readInternal(const Containers::Str
     #ifndef CORRADE_TARGET_WINDOWS
     std::FILE* const f = std::fopen(Containers::String::nullTerminatedView(filename).data(), "rb");
     #else
-    std::FILE* const f = _wfopen(Unicode::widen(filename), L"rb");
+    std::FILE* const f = _wfopen(Unicode::widen(filename).data(), L"rb");
     #endif
     if(!f) {
         Error err;
@@ -1177,7 +1177,7 @@ Containers::Optional<Containers::Array<char>> readInternal(const Containers::Str
 
         std::size_t count;
         do {
-            count = std::fread(arrayAppend(out, NoInit, chunkSize + extra), 1, chunkSize, f);
+            count = std::fread(arrayAppend(out, NoInit, chunkSize + extra).data(), 1, chunkSize, f);
             arrayRemoveSuffix(out, chunkSize + extra - count);
         } while(count);
 
@@ -1188,7 +1188,7 @@ Containers::Optional<Containers::Array<char>> readInternal(const Containers::Str
     /* Some special files report more bytes than they actually have (such as
        stuff in /sys). Clamp the returned array to what was reported. */
     Containers::Array<char> out{NoInit, *size_ + extra};
-    const std::size_t realSize = std::fread(out, 1, *size_, f);
+    const std::size_t realSize = std::fread(out.data(), 1, *size_, f);
     CORRADE_INTERNAL_ASSERT(realSize <= *size_);
     return Containers::Array<char>{out.release(), realSize};
 }
@@ -1233,7 +1233,7 @@ bool write(const Containers::StringView filename, const Containers::ArrayView<co
     #ifndef CORRADE_TARGET_WINDOWS
     std::FILE* const f = std::fopen(Containers::String::nullTerminatedView(filename).data(), "wb");
     #else
-    std::FILE* const f = _wfopen(Unicode::widen(filename), L"wb");
+    std::FILE* const f = _wfopen(Unicode::widen(filename).data(), L"wb");
     #endif
     if(!f) {
         Error err;
@@ -1244,7 +1244,7 @@ bool write(const Containers::StringView filename, const Containers::ArrayView<co
 
     Containers::ScopeGuard exit{f, std::fclose};
 
-    std::fwrite(data, 1, data.size(), f);
+    std::fwrite(data.data(), 1, data.size(), f);
     return true;
 }
 
@@ -1253,7 +1253,7 @@ bool append(const Containers::StringView filename, const Containers::ArrayView<c
     #ifndef CORRADE_TARGET_WINDOWS
     std::FILE* const f = std::fopen(Containers::String::nullTerminatedView(filename).data(), "ab");
     #else
-    std::FILE* const f = _wfopen(Unicode::widen(filename), L"ab");
+    std::FILE* const f = _wfopen(Unicode::widen(filename).data(), L"ab");
     #endif
     if(!f) {
         Error err;
@@ -1264,7 +1264,7 @@ bool append(const Containers::StringView filename, const Containers::ArrayView<c
 
     Containers::ScopeGuard exit{f, std::fclose};
 
-    std::fwrite(data, 1, data.size(), f);
+    std::fwrite(data.data(), 1, data.size(), f);
     return true;
 }
 
@@ -1273,7 +1273,7 @@ bool copy(const Containers::StringView from, const Containers::StringView to) {
     #ifndef CORRADE_TARGET_WINDOWS
     std::FILE* const in = std::fopen(Containers::String::nullTerminatedView(from).data(), "rb");
     #else
-    std::FILE* const in = _wfopen(Unicode::widen(from), L"rb");
+    std::FILE* const in = _wfopen(Unicode::widen(from).data(), L"rb");
     #endif
     if(!in) {
         Error err;
@@ -1297,7 +1297,7 @@ bool copy(const Containers::StringView from, const Containers::StringView to) {
     #ifndef CORRADE_TARGET_WINDOWS
     std::FILE* const out = std::fopen(Containers::String::nullTerminatedView(to).data(), "wb");
     #else
-    std::FILE* const out = _wfopen(Unicode::widen(to), L"wb");
+    std::FILE* const out = _wfopen(Unicode::widen(to).data(), L"wb");
     #endif
     if(!out) {
         Error err;
@@ -1396,7 +1396,7 @@ Containers::Optional<Containers::Array<char, MapDeleter>> map(const Containers::
     #elif defined(CORRADE_TARGET_WINDOWS) && !defined(CORRADE_TARGET_WINDOWS_RT)
     /* Open the file for writing. Create if it doesn't exist, truncate it if it
        does. */
-    HANDLE hFile = CreateFileW(Unicode::widen(filename),
+    HANDLE hFile = CreateFileW(Unicode::widen(filename).data(),
         GENERIC_READ|GENERIC_WRITE, FILE_SHARE_READ|FILE_SHARE_WRITE, nullptr, OPEN_EXISTING, 0, nullptr);
     if(hFile == INVALID_HANDLE_VALUE) {
         Error err;
@@ -1483,7 +1483,7 @@ Containers::Optional<Containers::Array<const char, MapDeleter>> mapRead(const Co
     return Containers::Array<const char, MapDeleter>{data, size, MapDeleter{fd}};
     #elif defined(CORRADE_TARGET_WINDOWS) && !defined(CORRADE_TARGET_WINDOWS_RT)
     /* Open the file for reading */
-    HANDLE hFile = CreateFileW(Unicode::widen(filename),
+    HANDLE hFile = CreateFileW(Unicode::widen(filename).data(),
         GENERIC_READ, FILE_SHARE_READ, nullptr, OPEN_EXISTING, 0, nullptr);
     if(hFile == INVALID_HANDLE_VALUE) {
         Error err;
@@ -1580,7 +1580,7 @@ Containers::Optional<Containers::Array<char, MapDeleter>> mapWrite(const Contain
     return Containers::Array<char, MapDeleter>{data, size, MapDeleter{fd}};
     #elif defined(CORRADE_TARGET_WINDOWS) && !defined(CORRADE_TARGET_WINDOWS_RT)    /* Open the file for writing. Create if it doesn't exist, truncate it if it
        does. */
-    HANDLE hFile = CreateFileW(Unicode::widen(filename),
+    HANDLE hFile = CreateFileW(Unicode::widen(filename).data(),
         GENERIC_READ|GENERIC_WRITE, FILE_SHARE_READ|FILE_SHARE_WRITE, nullptr, CREATE_ALWAYS, 0, nullptr);
     if(hFile == INVALID_HANDLE_VALUE) {
         Error err;

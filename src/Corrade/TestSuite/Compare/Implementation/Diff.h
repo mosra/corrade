@@ -70,7 +70,7 @@ template<class T> Containers::Triple<std::size_t, std::size_t, std::size_t> long
     for(std::size_t i = 0; i != a.size(); ++i) {
         /* Start with no active runs */
         /** @todo Utility::fill(), finally */
-        std::memset(newRuns, 0, newRuns.size()*sizeof(std::size_t));
+        std::memset(newRuns.data(), 0, newRuns.size()*sizeof(std::size_t));
 
         /* Go through all elements of B */
         for(std::size_t j = 0; j != b.size(); ++j) {

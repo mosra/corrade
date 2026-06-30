@@ -99,7 +99,9 @@ struct ArrayTest: TestSuite::Tester {
     void constructZeroNullPointerAmbiguity();
 
     void convertBool();
+    #ifdef CORRADE_BUILD_DEPRECATED
     void convertPointer();
+    #endif
     void convertView();
     void convertViewDerived();
     void convertViewOverload();
@@ -184,7 +186,9 @@ ArrayTest::ArrayTest() {
               &ArrayTest::constructZeroNullPointerAmbiguity,
 
               &ArrayTest::convertBool,
+              #ifdef CORRADE_BUILD_DEPRECATED
               &ArrayTest::convertPointer,
+              #endif
               &ArrayTest::convertView,
               &ArrayTest::convertViewDerived,
               &ArrayTest::convertViewOverload,
@@ -291,7 +295,7 @@ void ArrayTest::constructEmpty() {
 
 void ArrayTest::construct() {
     const Array a(5);
-    CORRADE_VERIFY(a != nullptr);
+    CORRADE_VERIFY(a.data() != nullptr);
     CORRADE_VERIFY(!a.isEmpty());
     CORRADE_COMPARE(a.size(), 5);
 
@@ -533,7 +537,7 @@ void ArrayTest::constructMove() {
     auto myDeleter = [](int* data, std::size_t) { delete[] data; };
     Array a(new int[5], 5, myDeleter);
     CORRADE_VERIFY(a);
-    const int* const ptr = a;
+    const int* const ptr = a.data();
 
     Array b(Utility::move(a));
     CORRADE_COMPARE(a.data(), nullptr);
@@ -604,18 +608,25 @@ void ArrayTest::convertBool() {
     CORRADE_VERIFY(!std::is_constructible<int, Array>::value);
 }
 
+#ifdef CORRADE_BUILD_DEPRECATED
 void ArrayTest::convertPointer() {
     Array a(2);
+    CORRADE_IGNORE_DEPRECATED_PUSH
     int* b = a;
+    CORRADE_IGNORE_DEPRECATED_POP
     CORRADE_COMPARE(b, a.begin());
 
     const Array c(3);
+    CORRADE_IGNORE_DEPRECATED_PUSH
     const int* d = c;
+    CORRADE_IGNORE_DEPRECATED_POP
     CORRADE_COMPARE(d, c.begin());
 
     /* Pointer arithmetic */
     const Array e(3);
+    CORRADE_IGNORE_DEPRECATED_PUSH
     const int* f = e + 2;
+    CORRADE_IGNORE_DEPRECATED_POP
     CORRADE_COMPARE(f, &e[2]);
 
     /* Verify that we can't convert rvalues. Not using is_convertible to catch
@@ -636,6 +647,7 @@ void ArrayTest::convertPointer() {
         CORRADE_VERIFY(!std::is_constructible<const int*, const Array&&>::value);
     }
 }
+#endif
 
 void ArrayTest::convertView() {
     Array a(5);
@@ -736,11 +748,11 @@ void ArrayTest::convertToExternalView() {
     Array a{Corrade::InPlaceInit, {1, 2, 3, 4, 5}};
 
     IntView b = a;
-    CORRADE_COMPARE(b.data, a);
+    CORRADE_COMPARE(b.data, a.data());
     CORRADE_COMPARE(b.size, a.size());
 
     ConstIntView cb = a;
-    CORRADE_COMPARE(cb.data, a);
+    CORRADE_COMPARE(cb.data, a.data());
     CORRADE_COMPARE(cb.size, a.size());
 
     /* Conversion to a different type is not allowed. Not using is_convertible
@@ -755,7 +767,7 @@ void ArrayTest::convertToConstExternalView() {
     const Array a{Corrade::InPlaceInit, {1, 2, 3, 4, 5}};
 
     ConstIntView b = a;
-    CORRADE_COMPARE(b.data, a);
+    CORRADE_COMPARE(b.data, a.data());
     CORRADE_COMPARE(b.size, a.size());
 
     /* Conversion to a different type is not allowed. Not using is_convertible
@@ -767,7 +779,7 @@ void ArrayTest::convertToConstExternalView() {
 void ArrayTest::access() {
     Array a{Corrade::InPlaceInit, {1, 2, 3, 4, 5}};
 
-    CORRADE_COMPARE(a.data(), static_cast<int*>(a));
+    CORRADE_COMPARE(*a.data(), 1);
     CORRADE_COMPARE(a.front(), 1);
     CORRADE_COMPARE(a.back(), 5);
     CORRADE_COMPARE(*(a.begin() + 2), 3);
@@ -792,7 +804,7 @@ void ArrayTest::access() {
 void ArrayTest::accessConst() {
     const Array a{Corrade::InPlaceInit, {1, 2, 3, 4, 5}};
 
-    CORRADE_COMPARE(a.data(), static_cast<const int*>(a));
+    CORRADE_COMPARE(*a.data(), 1);
     CORRADE_COMPARE(a.front(), 1);
     CORRADE_COMPARE(a.back(), 5);
     CORRADE_COMPARE(*(a.begin() + 2), 3);
@@ -909,49 +921,49 @@ void ArrayTest::slicePointer() {
     Array a{Corrade::InPlaceInit, {1, 2, 3, 4, 5}};
     const Array ac{Corrade::InPlaceInit, {1, 2, 3, 4, 5}};
 
-    ArrayView b1 = a.slice(a + 1, a + 4);
+    ArrayView b1 = a.slice(a.data() + 1, a.data() + 4);
     CORRADE_COMPARE(b1.size(), 3);
     CORRADE_COMPARE(b1[0], 2);
     CORRADE_COMPARE(b1[1], 3);
     CORRADE_COMPARE(b1[2], 4);
 
-    ConstArrayView bc1 = ac.slice(ac + 1, ac + 4);
+    ConstArrayView bc1 = ac.slice(ac.data() + 1, ac.data() + 4);
     CORRADE_COMPARE(bc1.size(), 3);
     CORRADE_COMPARE(bc1[0], 2);
     CORRADE_COMPARE(bc1[1], 3);
     CORRADE_COMPARE(bc1[2], 4);
 
-    ArrayView b2 = a.sliceSize(a + 1, 3);
+    ArrayView b2 = a.sliceSize(a.data() + 1, 3);
     CORRADE_COMPARE(b2.size(), 3);
     CORRADE_COMPARE(b2[0], 2);
     CORRADE_COMPARE(b2[1], 3);
     CORRADE_COMPARE(b2[2], 4);
 
-    ConstArrayView bc2 = ac.sliceSize(ac + 1, 3);
+    ConstArrayView bc2 = ac.sliceSize(ac.data() + 1, 3);
     CORRADE_COMPARE(bc2.size(), 3);
     CORRADE_COMPARE(bc2[0], 2);
     CORRADE_COMPARE(bc2[1], 3);
     CORRADE_COMPARE(bc2[2], 4);
 
-    ArrayView c = a.prefix(a + 3);
+    ArrayView c = a.prefix(a.data() + 3);
     CORRADE_COMPARE(c.size(), 3);
     CORRADE_COMPARE(c[0], 1);
     CORRADE_COMPARE(c[1], 2);
     CORRADE_COMPARE(c[2], 3);
 
-    ConstArrayView cc = ac.prefix(ac + 3);
+    ConstArrayView cc = ac.prefix(ac.data() + 3);
     CORRADE_COMPARE(cc.size(), 3);
     CORRADE_COMPARE(cc[0], 1);
     CORRADE_COMPARE(cc[1], 2);
     CORRADE_COMPARE(cc[2], 3);
 
-    ArrayView d = a.suffix(a + 2);
+    ArrayView d = a.suffix(a.data() + 2);
     CORRADE_COMPARE(d.size(), 3);
     CORRADE_COMPARE(d[0], 3);
     CORRADE_COMPARE(d[1], 4);
     CORRADE_COMPARE(d[2], 5);
 
-    ConstArrayView dc = ac.suffix(ac + 2);
+    ConstArrayView dc = ac.suffix(ac.data() + 2);
     CORRADE_COMPARE(dc.size(), 3);
     CORRADE_COMPARE(dc[0], 3);
     CORRADE_COMPARE(dc[1], 4);
@@ -1017,12 +1029,12 @@ void ArrayTest::sliceToStaticPointer() {
     Array a{Corrade::InPlaceInit, {1, 2, 3, 4, 5}};
     const Array ac{Corrade::InPlaceInit, {1, 2, 3, 4, 5}};
 
-    StaticArrayView<3, int> b = a.slice<3>(a + 1);
+    StaticArrayView<3, int> b = a.slice<3>(a.data() + 1);
     CORRADE_COMPARE(b[0], 2);
     CORRADE_COMPARE(b[1], 3);
     CORRADE_COMPARE(b[2], 4);
 
-    StaticArrayView<3, const int> bc = ac.slice<3>(ac + 1);
+    StaticArrayView<3, const int> bc = ac.slice<3>(ac.data() + 1);
     CORRADE_COMPARE(bc[0], 2);
     CORRADE_COMPARE(bc[1], 3);
     CORRADE_COMPARE(bc[2], 4);
@@ -1072,7 +1084,7 @@ void ArrayTest::sliceZeroNullPointerAmbiguity() {
 void ArrayTest::release() {
     auto myDeleter = [](int* data, std::size_t) { delete[] data; };
     Array a(new int[5], 5, myDeleter);
-    int* const data = a;
+    int* const data = a.data();
     int* const released = a.release();
     delete[] released;
 
