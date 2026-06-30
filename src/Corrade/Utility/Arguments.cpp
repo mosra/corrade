@@ -585,7 +585,7 @@ bool Arguments::tryParse(const int argc, const char* const* const argv) {
     bool optionsAllowed = true;
     std::size_t shortOptionPackOffset = 0;
     std::size_t valueOffset = 0;
-    Containers::Array<bool> parsedArguments{_entries.size()};
+    Containers::Array<bool> parsedArguments{ValueInit, _entries.size()};
     Containers::Array<const char*> argumentValues;
 
     for(int i = 1; i < argc; ++i) {

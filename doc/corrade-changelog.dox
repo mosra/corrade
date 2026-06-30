@@ -767,6 +767,10 @@ namespace Corrade {
     favor of using the explicit @relativeref{Containers::Array,data()} or
     @relativeref{Containers::Array,begin()} functions that convey the intent
     clearer
+-   @ref Containers::Array construction from just a size value alone is
+    deprecated as it was a design error preventing unambiguous construction
+    from an initializer list, use @ref Containers::Array::Array(ValueInitT, std::size_t)
+    instead
 -   `Size` and `Stride` typedefs in @ref Containers::StridedArrayView are
     deprecated in favor of @relativeref{Containers,Size},
     @relativeref{Containers,Size1D}, @relativeref{Containers,Size2D},

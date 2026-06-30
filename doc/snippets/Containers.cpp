@@ -293,7 +293,7 @@ using namespace Containers::Literals::StringLiterals;
 {
 /* [Array-usage] */
 /* Create an array with 5 integers and set them to some value */
-Containers::Array<int> a{5};
+Containers::Array<int> a{ValueInit, 5};
 int b = 0;
 for(auto& i: a) i = b++;        // a == {0, 1, 2, 3, 4}
 
@@ -305,10 +305,6 @@ c[3] = 25;                      // c == {3, 18, -157, 25}
 
 {
 /* [Array-usage-initialization] */
-/* These two are equivalent */
-Containers::Array<int> a1{5};
-Containers::Array<int> a2{ValueInit, 5};
-
 /* Array of 100 integers, uninitialized */
 Containers::Array<int> b{NoInit, 100};
 
@@ -444,7 +440,7 @@ int data1[]{5, 17, -36, 185};
 Containers::ArrayView<int> a = data1;               // a.size() == 4
 
 /* Create a const view on a mutable Array */
-Containers::Array<int> data2{15};
+Containers::Array<int> data2{ValueInit, 15};
 Containers::ArrayView<const int> b = data2;         // b.size() == 15
 
 /* Construct from a pointer and explicit size */

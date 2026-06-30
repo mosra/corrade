@@ -589,7 +589,7 @@ void AlgorithmsTest::copyStridedNonMatchingSizes() {
 void AlgorithmsTest::copyDifferentViewTypes() {
     int a[]{11, -22, 33, -44, 55};
     std::array<int, 5> b;
-    Containers::Array<int> c{5};
+    Containers::Array<int> c{ValueInit, 5};
     int data[5];
     Containers::StridedArrayView1D<int> d{data};
     std::vector<int> e(5);

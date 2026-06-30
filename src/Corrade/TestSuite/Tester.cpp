@@ -552,7 +552,7 @@ benchmark types:
         const std::size_t repeatCount = testCase.repeatCount*repeatEveryCount;
 
         /* Array with benchmark measurements */
-        Containers::Array<std::uint64_t> measurements{testCase.type != TestCaseType::Test ? repeatCount : 0};
+        Containers::Array<std::uint64_t> measurements{ValueInit, testCase.type != TestCaseType::Test ? repeatCount : 0};
 
         bool aborted = false, skipped = false;
         for(std::size_t i = 0; i != repeatCount && !aborted; ++i) {

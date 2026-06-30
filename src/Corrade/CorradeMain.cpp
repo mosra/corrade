@@ -63,7 +63,7 @@ Containers::Array<char*> convertWideArgv(std::size_t argc, wchar_t** wargv, Cont
     }
 
     /* Allocate the argument array, make the relative offsets absolute */
-    storage = Containers::Array<char>{totalSize};
+    storage = Containers::Array<char>{NoInit, totalSize};
     for(std::size_t i = 0; i != argv.size(); ++i)
         /* Was `argv[i] += reinterpret_cast<std::ptrdiff_t>(storage.data());`
            originally, but that makes UBSan complain about "applying non-zero

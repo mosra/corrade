@@ -676,7 +676,7 @@ template<class T> void GrowableArrayTest::reserveFromNonGrowable() {
     setTestCaseTemplateName(TypeName<T>::name());
 
     {
-        Array<T> a{3};
+        Array<T> a{Corrade::ValueInit, 3};
         T* prev = a.data();
         a[0] = 1;
         a[1] = 2;
@@ -714,7 +714,7 @@ template<class T> void GrowableArrayTest::reserveFromNonGrowableNoOp() {
     setTestCaseTemplateName(TypeName<T>::name());
 
     {
-        Array<T> a{3};
+        Array<T> a{Corrade::ValueInit, 3};
         T* prev = a.data();
         a[0] = 1;
         a[1] = 2;
@@ -751,7 +751,7 @@ template<class T> void GrowableArrayTest::reserveFromGrowable() {
     setTestCaseTemplateName(TypeName<T>::name());
 
     {
-        Array<T> a{3};
+        Array<T> a{Corrade::ValueInit, 3};
         a[0] = 1;
         a[1] = 2;
         a[2] = 3;
@@ -802,7 +802,7 @@ template<class T> void GrowableArrayTest::reserveFromGrowableNoOp() {
     setTestCaseTemplateName(TypeName<T>::name());
 
     {
-        Array<T> a{3};
+        Array<T> a{Corrade::ValueInit, 3};
         a[0] = 1;
         a[1] = 2;
         a[2] = 3;
@@ -875,7 +875,7 @@ template<class T> void GrowableArrayTest::resizeFromNonGrowable() {
     setTestCaseTemplateName(TypeName<T>::name());
 
     {
-        Array<T> a{2};
+        Array<T> a{Corrade::ValueInit, 2};
         a[0] = 1;
         a[1] = 2;
         if(std::is_same<T, Movable>::value) {
@@ -910,7 +910,7 @@ template<class T> void GrowableArrayTest::resizeFromNonGrowableNoOp() {
     setTestCaseTemplateName(TypeName<T>::name());
 
     {
-        Array<T> a{3};
+        Array<T> a{Corrade::ValueInit, 3};
         T* prev = a.data();
         a[0] = 1;
         a[1] = 2;
@@ -1162,7 +1162,7 @@ template<class T, class Init> void GrowableArrayTest::resizeFromNonGrowableToLes
     setTestCaseTemplateName({TypeName<T>::name(), InitTagName<Init>::name()});
 
     {
-        Array<T> a{4};
+        Array<T> a{Corrade::ValueInit, 4};
         T* prev = a.data();
         a[0] = 1;
         a[1] = 2;
@@ -1320,7 +1320,7 @@ template<class T> void GrowableArrayTest::appendFromNonGrowable() {
     setTestCaseTemplateName(TypeName<T>::name());
 
     {
-        Array<T> a{1};
+        Array<T> a{Corrade::ValueInit, 1};
         T* prev = a.data();
         a[0] = 28;
         if(std::is_same<T, Movable>::value) {
@@ -1365,7 +1365,7 @@ template<class T> void GrowableArrayTest::insertFromNonGrowable() {
     setTestCaseTemplateName(TypeName<T>::name());
 
     {
-        Array<T> a{3};
+        Array<T> a{Corrade::ValueInit, 3};
         T* prev = a.data();
         a[0] = 28;
         a[1] = 42;
@@ -1778,7 +1778,7 @@ void GrowableArrayTest::insertList() {
 }
 
 void GrowableArrayTest::appendListEmpty() {
-    Array<int> a{3};
+    Array<int> a{Corrade::ValueInit, 3};
     int* prev = a.data();
     Containers::ArrayView<int> appended = arrayAppend(a, {});
 
@@ -1790,7 +1790,7 @@ void GrowableArrayTest::appendListEmpty() {
 }
 
 void GrowableArrayTest::insertListEmpty() {
-    Array<int> a{3};
+    Array<int> a{Corrade::ValueInit, 3};
     int* prev = a.data();
     Containers::ArrayView<int> inserted = arrayInsert(a, 1, {});
 
@@ -2043,7 +2043,7 @@ template<class T> void GrowableArrayTest::appendCountValueInitEmpty() {
     setTestCaseTemplateName(TypeName<T>::name());
 
     {
-        Array<T> a{3};
+        Array<T> a{Corrade::ValueInit, 3};
         T* prev = a.data();
         Containers::ArrayView<T> appended = arrayAppend(a, Corrade::ValueInit, 0);
 
@@ -2070,7 +2070,7 @@ void GrowableArrayTest::appendCountNoInitEmpty() {
        don't get constructed, so using a Movable. */
 
     {
-        Array<Movable> a{3};
+        Array<Movable> a{Corrade::ValueInit, 3};
         Movable* prev = a.data();
         Containers::ArrayView<Movable> appended = arrayAppend(a, Corrade::NoInit, 0);
 
@@ -2095,7 +2095,7 @@ void GrowableArrayTest::appendCountDirectInitEmpty() {
        don't get constructed, so using a Movable. */
 
     {
-        Array<Movable> a{3};
+        Array<Movable> a{Corrade::ValueInit, 3};
         Movable* prev = a.data();
         Containers::ArrayView<Movable> appended = arrayAppend(a, Corrade::DirectInit, 0, -1337);
 
@@ -2118,7 +2118,7 @@ template<class T> void GrowableArrayTest::insertCountValueInitEmpty() {
     setTestCaseTemplateName(TypeName<T>::name());
 
     {
-        Array<T> a{3};
+        Array<T> a{Corrade::ValueInit, 3};
         T* prev = a.data();
         Containers::ArrayView<T> inserted = arrayInsert(a, 1, Corrade::ValueInit, 0);
 
@@ -2145,7 +2145,7 @@ void GrowableArrayTest::insertCountNoInitEmpty() {
        don't get constructed, so using a Movable. */
 
     {
-        Array<Movable> a{3};
+        Array<Movable> a{Corrade::ValueInit, 3};
         Movable* prev = a.data();
         Containers::ArrayView<Movable> inserted = arrayInsert(a, 1, Corrade::NoInit, 0);
 
@@ -2170,7 +2170,7 @@ void GrowableArrayTest::insertCountDirectInitEmpty() {
        don't get constructed, so using a Movable. */
 
     {
-        Array<Movable> a{3};
+        Array<Movable> a{Corrade::ValueInit, 3};
         Movable* prev = a.data();
         Containers::ArrayView<Movable> inserted = arrayInsert(a, 1, Corrade::DirectInit, 0, -1337);
 
@@ -2323,7 +2323,7 @@ void GrowableArrayTest::insertShiftOperationOrderNoOverlap() {
 void GrowableArrayTest::insertInvalid() {
     CORRADE_SKIP_IF_NO_DEBUG_ASSERT();
 
-    Array<int> a{5};
+    Array<int> a{Corrade::ValueInit, 5};
 
     Containers::String out;
     Error redirectError{&out};
@@ -2416,7 +2416,7 @@ template<class T> void GrowableArrayTest::removeZero() {
     setTestCaseTemplateName(TypeName<T>::name());
 
     {
-        Array<T> a{3};
+        Array<T> a{Corrade::ValueInit, 3};
         T* prev = a.data();
         a[0] = 2;
         a[1] = 7;
@@ -2447,7 +2447,7 @@ template<class T> void GrowableArrayTest::removeUnorderedZero() {
     setTestCaseTemplateName(TypeName<T>::name());
 
     {
-        Array<T> a{3};
+        Array<T> a{Corrade::ValueInit, 3};
         T* prev = a.data();
         a[0] = 2;
         a[1] = 7;
@@ -2478,7 +2478,7 @@ template<class T> void GrowableArrayTest::removeSuffixZero() {
     setTestCaseTemplateName(TypeName<T>::name());
 
     {
-        Array<T> a{3};
+        Array<T> a{Corrade::ValueInit, 3};
         T* prev = a.data();
         a[0] = 2;
         a[1] = 7;
@@ -2509,7 +2509,7 @@ template<class T> void GrowableArrayTest::removeNonGrowable() {
     setTestCaseTemplateName(TypeName<T>::name());
 
     {
-        Array<T> a{4};
+        Array<T> a{Corrade::ValueInit, 4};
         T* prev = a.data();
         a[0] = 2;
         a[1] = 7;
@@ -2550,7 +2550,7 @@ template<class T> void GrowableArrayTest::removeUnorderedNonGrowable() {
     setTestCaseTemplateName(TypeName<T>::name());
 
     {
-        Array<T> a{4};
+        Array<T> a{Corrade::ValueInit, 4};
         T* prev = a.data();
         a[0] = 2;
         a[1] = 7;
@@ -2593,7 +2593,7 @@ template<class T> void GrowableArrayTest::removeSuffixNonGrowable() {
     setTestCaseTemplateName(TypeName<T>::name());
 
     {
-        Array<T> a{4};
+        Array<T> a{Corrade::ValueInit, 4};
         T* prev = a.data();
         a[0] = 2;
         a[1] = 7;
@@ -2664,7 +2664,7 @@ template<class T> void GrowableArrayTest::removeAllNonGrowable() {
             +-----------+-----------------+-----+-----+-----+-----+-----+
                         ^                 ^
                         new data pointer  old data pointer                  */
-        Array<T> a{5};
+        Array<T> a{Corrade::ValueInit, 5};
         T* prev = a.data();
         a[0] = 2;
         a[1] = 3;
@@ -2708,7 +2708,7 @@ template<class T> void GrowableArrayTest::removeUnorderedAllNonGrowable() {
            zero-capacity growable allocation is placed right before the old
            allocation, resulting in a.data() == prev. See the comment in
            removeAllNonGrowable() for details. */
-        Array<T> a{5};
+        Array<T> a{Corrade::ValueInit, 5};
         T* prev = a.data();
         a[0] = 2;
         a[1] = 3;
@@ -2754,7 +2754,7 @@ template<class T> void GrowableArrayTest::removeSuffixAllNonGrowable() {
            zero-capacity growable allocation is placed right before the old
            allocation, resulting in a.data() == prev. See the comment in
            removeAllNonGrowable() for details. */
-        Array<T> a{5};
+        Array<T> a{Corrade::ValueInit, 5};
         T* prev = a.data();
         a[0] = 2;
         a[1] = 3;
@@ -3211,7 +3211,7 @@ void GrowableArrayTest::removeUnorderedShiftOperationOrderNoOverlap() {
 void GrowableArrayTest::removeInvalid() {
     CORRADE_SKIP_IF_NO_DEBUG_ASSERT();
 
-    Array<int> a{4};
+    Array<int> a{Corrade::ValueInit, 4};
 
     Containers::String out;
     Error redirectOutput{&out};
@@ -3232,7 +3232,7 @@ template<class T> void GrowableArrayTest::clearNonGrowable() {
     setTestCaseTemplateName(TypeName<T>::name());
 
     {
-        Array<T> a{2};
+        Array<T> a{Corrade::ValueInit, 2};
         a[0] = 2;
         a[1] = 3;
 
@@ -3423,7 +3423,7 @@ template<class T> void GrowableArrayTest::shrinkNonGrowableNoInit() {
     setTestCaseTemplateName(TypeName<T>::name());
 
     {
-        Array<T> a{3};
+        Array<T> a{Corrade::ValueInit, 3};
         T* prev = a.data();
         a[0] = 2;
         a[1] = 7;
@@ -3454,7 +3454,7 @@ template<class T> void GrowableArrayTest::shrinkNonGrowableDefaultInit() {
     setTestCaseTemplateName(TypeName<T>::name());
 
     {
-        Array<T> a{3};
+        Array<T> a{Corrade::ValueInit, 3};
         T* prev = a.data();
         a[0] = 2;
         a[1] = 7;
@@ -3487,7 +3487,7 @@ template<class T> void GrowableArrayTest::shrinkNonGrowableValueInit() {
     setTestCaseTemplateName(TypeName<T>::name());
 
     {
-        Array<T> a{3};
+        Array<T> a{Corrade::ValueInit, 3};
         T* prev = a.data();
         a[0] = 2;
         a[1] = 7;
@@ -3712,7 +3712,7 @@ template<class T> void GrowableArrayTest::move() {
         CORRADE_COMPARE(Movable::destructed, 0);
     }
 
-    Array<T> c{10};
+    Array<T> c{Corrade::ValueInit, 10};
     c = Utility::move(b);
     CORRADE_VERIFY(arrayIsGrowable(c));
     CORRADE_VERIFY(!arrayIsGrowable(b));
@@ -3773,7 +3773,7 @@ void GrowableArrayTest::castNonTrivial() {
 void GrowableArrayTest::castNonGrowable() {
     CORRADE_SKIP_IF_NO_ASSERT();
 
-    Array<char> a{10};
+    Array<char> a{Corrade::ValueInit, 10};
 
     Containers::String out;
     Error redirectError{&out};

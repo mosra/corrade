@@ -136,14 +136,11 @@ non @cpp const @ce overloads.
 
 @subsection Containers-Array-usage-initialization Array initialization
 
-The array is by default *value-initialized*, which means that trivial types
-are zero-initialized and the default constructor is called on other types. It
-is possible to initialize the array in a different way using so-called *tags*:
+It is possible to initialize the array in different ways using so-called *tags*:
 
--   @ref Array(ValueInitT, std::size_t) is equivalent to the default case,
-    zero-initializing trivial types and calling the default constructor
-    elsewhere. Useful when you want to make the choice appear explicit. In
-    other words, @cpp new T[size]{} @ce.
+-   @ref Array(ValueInitT, std::size_t), used in the snippet above, is the
+    go-to default, zero-initializing trivial types and calling the default
+    constructor elsewhere. In other words, @cpp new T[size]{} @ce.
 -   @ref Array(DirectInitT, std::size_t, Args&&... args) constructs all
     elements of the array using provided arguments. In other words,
     @cpp new T[size]{T{args...}, T{args...}, …} @ce.
@@ -152,7 +149,7 @@ is possible to initialize the array in a different way using so-called *tags*:
     @ref array(ArrayView<const T>) / @ref array(std::initializer_list<T>)
     shorthand allocates unitialized memory and then copy-constructs all
     elements from the list. In other words, @cpp new T[size]{args...} @ce. The
-    class deliberately *doesn't* provide an implicit @ref std::initializer_list
+    class currently *doesn't* provide an implicit @ref std::initializer_list
     constructor due to @ref Containers-Array-initializer-list "reasons described below".
 -   @ref Array(NoInitT, std::size_t) does not initialize anything. Useful for
     trivial types when you'll be overwriting the contents anyway, for
@@ -312,14 +309,20 @@ Corrade type                    | ↭ | STL type
 @m_class{m-block m-warning}
 
 @par Conversion from std::initializer_list
-    The class deliberately *doesn't* provide a @ref std::initializer_list
+    The class currently *doesn't* provide a @ref std::initializer_list
     constructor to prevent the same usability issues as with @ref std::vector
     --- see the snippet below. Instead you're expected to use either the
     @ref Array(InPlaceInitT, std::initializer_list<T>) constructor or the
-    @ref array(std::initializer_list<T>) shorthand, which are both more
-    explicit and thus should prevent accidental use:
+    @ref array(std::initializer_list<T>) shorthand:
 @par
     @snippet Containers-stl.cpp Array-initializer-list
+@par
+    This is considered to be a design error and the @ref Array(std::size_t)
+    constructor is being deprecated in favor of @ref Array(ValueInitT, std::size_t)
+    for this reason. Once the deprecated constructor is removed and enough time
+    passes to ensure no code is accidentally using it anymore, an initializer
+    list constructor --- no longer ambiguous in certain cases --- will be
+    added.
 
 <b></b>
 
@@ -494,15 +497,16 @@ class Array {
         /** @overload */
         /*implicit*/ Array(Corrade::InPlaceInitT, std::initializer_list<T> list);
 
+        #ifdef CORRADE_BUILD_DEPRECATED
         /**
          * @brief Construct a value-initialized array
+         * @m_deprecated_since_latest Use @ref Array(ValueInitT, std::size_t)
+         *      instead.
          *
          * Alias to @ref Array(ValueInitT, std::size_t).
-         * @see @ref Array(NoInitT, std::size_t),
-         *      @ref Array(DirectInitT, std::size_t, Args&&... args),
-         *      @ref Array(InPlaceInitT, ArrayView<const T>)
          */
-        explicit Array(std::size_t size): Array{Corrade::ValueInit, size} {}
+        explicit CORRADE_DEPRECATED("use Array(ValueInitT, std::size_t) instead") Array(std::size_t size): Array{Corrade::ValueInit, size} {}
+        #endif
 
         /**
          * @brief Wrap an existing array with an explicit deleter
