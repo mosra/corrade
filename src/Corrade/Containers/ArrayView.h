@@ -783,7 +783,7 @@ template<> class ArrayView<void> {
             #ifndef DOXYGEN_GENERATING_OUTPUT
             , typename std::enable_if<!std::is_const<T>::value, int>::type = 0
             #endif
-        > constexpr /*implicit*/ ArrayView(const StaticArrayView<size, T>& array) noexcept: _data{array.data()}, _size{size*sizeof(T)} {}
+        > constexpr /*implicit*/ ArrayView(StaticArrayView<size, T> array) noexcept: _data{array.data()}, _size{size*sizeof(T)} {}
 
         /**
          * @brief Construct a view on an external type / from an external representation
@@ -932,7 +932,7 @@ template<> class ArrayView<const void> {
         template<class T> constexpr /*implicit*/ ArrayView(ArrayView<T> array) noexcept: _data(array.data()), _size(array.size()*sizeof(T)) {}
 
         /** @brief Construct a const void view on any @ref StaticArrayView */
-        template<std::size_t size, class T> constexpr /*implicit*/ ArrayView(const StaticArrayView<size, T>& array) noexcept: _data{array.data()}, _size{size*sizeof(T)} {}
+        template<std::size_t size, class T> constexpr /*implicit*/ ArrayView(StaticArrayView<size, T> array) noexcept: _data{array.data()}, _size{size*sizeof(T)} {}
 
         /**
          * @brief Construct a view on an external type / from an external representation
