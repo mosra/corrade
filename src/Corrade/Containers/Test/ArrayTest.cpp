@@ -72,7 +72,6 @@ struct ArrayTest: TestSuite::Tester {
     void resetCounters();
 
     void constructDefault();
-    void constructEmpty();
     void construct();
     void constructZeroSize();
     #ifdef CORRADE_BUILD_DEPRECATED
@@ -153,7 +152,6 @@ typedef Containers::ArrayView<const void> ConstVoidArrayView;
 
 ArrayTest::ArrayTest() {
     addTests({&ArrayTest::constructDefault,
-              &ArrayTest::constructEmpty,
               &ArrayTest::construct,
               &ArrayTest::constructZeroSize,
               #ifdef CORRADE_BUILD_DEPRECATED
@@ -283,14 +281,6 @@ void ArrayTest::constructDefault() {
     CORRADE_VERIFY(a2.isEmpty());
     CORRADE_COMPARE(a1.size(), 0);
     CORRADE_COMPARE(a2.size(), 0);
-}
-
-void ArrayTest::constructEmpty() {
-    /* Zero-length should not call new */
-    const std::size_t size = 0;
-    const Array b(size);
-    CORRADE_COMPARE(b.data(), nullptr);
-    CORRADE_COMPARE(b.size(), 0);
 }
 
 void ArrayTest::construct() {
