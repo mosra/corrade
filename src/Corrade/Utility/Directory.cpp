@@ -66,11 +66,7 @@ std::string join(const std::string& path, const std::string& filename) {
 }
 
 std::string join(const std::initializer_list<std::string> paths) {
-    const auto pathsView = Containers::arrayView(paths);
-    Containers::Array<Containers::StringView> pathViews{paths.size()};
-    for(std::size_t i = 0; i != pathsView.size(); ++i)
-        pathViews[i] = pathsView[i];
-    return Path::join(pathViews);
+    return Path::join(Containers::arrayView(paths));
 }
 
 bool mkpath(const std::string& path) {

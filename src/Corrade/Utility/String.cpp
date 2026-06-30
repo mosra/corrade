@@ -45,6 +45,7 @@
 #include <string>
 #include <vector>
 
+#include "Corrade/Containers/ArrayViewStl.h"
 #include "Corrade/Containers/StaticArray.h"
 #include "Corrade/Containers/StringIterable.h"
 #include "Corrade/Containers/StringStl.h"
@@ -1417,13 +1418,7 @@ std::string trim(std::string string, const std::string& characters) {
 }
 
 std::string join(const std::vector<std::string>& strings, const std::string& delimiter) {
-    /* IDGAF that this has two extra allocations due to the Array being created
-       and then the String converted to a std::string vector, the input
-       std::string instances are MUCH worse */
-    Containers::Array<Containers::StringView> stringViews{strings.size()};
-    for(std::size_t i = 0; i != strings.size(); ++i)
-        stringViews[i] = strings[i];
-    return Containers::StringView{delimiter}.join(stringViews);
+    return Containers::StringView{delimiter}.join(Containers::arrayView(strings));
 }
 
 std::string join(const std::vector<std::string>& strings, char delimiter) {
@@ -1434,13 +1429,7 @@ std::string join(const std::vector<std::string>& strings, char delimiter) {
 }
 
 std::string joinWithoutEmptyParts(const std::vector<std::string>& strings, const std::string& delimiter) {
-    /* IDGAF that this has two extra allocations due to the Array being created
-       and then the String converted to a std::string vector, the input
-       std::string instances are MUCH worse */
-    Containers::Array<Containers::StringView> stringViews{strings.size()};
-    for(std::size_t i = 0; i != strings.size(); ++i)
-        stringViews[i] = strings[i];
-    return Containers::StringView{delimiter}.joinWithoutEmptyParts(stringViews);
+    return Containers::StringView{delimiter}.joinWithoutEmptyParts(Containers::arrayView(strings));
 }
 
 std::string joinWithoutEmptyParts(const std::vector<std::string>& strings, char delimiter) {
