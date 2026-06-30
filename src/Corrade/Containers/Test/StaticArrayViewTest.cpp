@@ -151,8 +151,8 @@ StaticArrayViewTest::StaticArrayViewTest() {
 void StaticArrayViewTest::constructDefault() {
     StaticArrayView<5> a;
     StaticArrayView<5> b = nullptr;
-    CORRADE_VERIFY(a == nullptr);
-    CORRADE_VERIFY(b == nullptr);
+    CORRADE_COMPARE(a.data(), nullptr);
+    CORRADE_COMPARE(b.data(), nullptr);
     CORRADE_VERIFY(!a.isEmpty());
     CORRADE_VERIFY(!b.isEmpty());
     CORRADE_COMPARE(a.size(), StaticArrayView<5>::Size);
@@ -168,8 +168,8 @@ void StaticArrayViewTest::constructDefault() {
     constexpr bool emptyB = cb.isEmpty();
     constexpr std::size_t sizeA = ca.size();
     constexpr std::size_t sizeB = cb.size();
-    CORRADE_VERIFY(dataA == nullptr);
-    CORRADE_VERIFY(dataB == nullptr);
+    CORRADE_COMPARE(dataA, nullptr);
+    CORRADE_COMPARE(dataB, nullptr);
     CORRADE_VERIFY(!emptyA);
     CORRADE_VERIFY(!emptyB);
     CORRADE_COMPARE(sizeA, StaticArrayView<5>::Size);
@@ -188,28 +188,28 @@ void StaticArrayViewTest::construct() {
 
     {
         const StaticArrayView<5> b{a};
-        CORRADE_VERIFY(b == a);
+        CORRADE_COMPARE(b.data(), &a[0]);
     } {
         auto b = staticArrayView<5>(a);
         CORRADE_VERIFY(std::is_same<decltype(b), StaticArrayView<5>>::value);
-        CORRADE_VERIFY(b == a);
+        CORRADE_COMPARE(b.data(), &a[0]);
 
         auto c = staticArrayView(b);
         CORRADE_VERIFY(std::is_same<decltype(c), StaticArrayView<5>>::value);
-        CORRADE_VERIFY(c == a);
+        CORRADE_COMPARE(c.data(), &a[0]);
     }
 
     {
         constexpr ConstStaticArrayView<5> b{Array30};
-        CORRADE_VERIFY(b == Array30);
+        CORRADE_COMPARE(b.data(), &Array30[0]);
     } {
         constexpr auto b = staticArrayView<5>(Array30);
         CORRADE_VERIFY(std::is_same<decltype(b), const ConstStaticArrayView<5>>::value);
-        CORRADE_VERIFY(b == Array30);
+        CORRADE_COMPARE(b.data(), &Array30[0]);
 
         constexpr auto c = staticArrayView(b);
         CORRADE_VERIFY(std::is_same<decltype(c), const ConstStaticArrayView<5>>::value);
-        CORRADE_VERIFY(c == Array30);
+        CORRADE_COMPARE(c.data(), &Array30[0]);
     }
 
     CORRADE_VERIFY(std::is_nothrow_constructible<StaticArrayView<5>, int*>::value);
@@ -225,20 +225,20 @@ void StaticArrayViewTest::constructFixedSize() {
 
     {
         StaticArrayView<13> b = a;
-        CORRADE_VERIFY(b == a);
+        CORRADE_COMPARE(b.data(), &a[0]);
     } {
         auto b = staticArrayView(a);
         CORRADE_VERIFY(std::is_same<decltype(b), StaticArrayView<13>>::value);
-        CORRADE_VERIFY(b == a);
+        CORRADE_COMPARE(b.data(), &a[0]);
     }
 
     {
         constexpr ConstStaticArrayView<13> b = Array13;
-        CORRADE_VERIFY(b == Array13);
+        CORRADE_COMPARE(b.data(), &Array13[0]);
     } {
         constexpr auto b = staticArrayView(Array13);
         CORRADE_VERIFY(std::is_same<decltype(b), const ConstStaticArrayView<13>>::value);
-        CORRADE_VERIFY(b == Array13);
+        CORRADE_COMPARE(b.data(), &Array13[0]);
     }
 
     CORRADE_VERIFY(std::is_nothrow_constructible<StaticArrayView<15>, int[15]>::value);
@@ -268,8 +268,8 @@ void StaticArrayViewTest::constructDerived() {
     Containers::StaticArrayView<5, Base> a{b};
     Containers::StaticArrayView<5, Base> av{bv};
 
-    CORRADE_VERIFY(a == &b[0]);
-    CORRADE_VERIFY(av == &b[0]);
+    CORRADE_COMPARE(a.data(), &b[0]);
+    CORRADE_COMPARE(av.data(), &b[0]);
 
     constexpr Containers::StaticArrayView<5, const Derived> cbv{DerivedArray};
     #ifndef CORRADE_MSVC2015_COMPATIBILITY
@@ -281,8 +281,8 @@ void StaticArrayViewTest::constructDerived() {
     #endif
     Containers::StaticArrayView<5, const Base> cav{cbv};
 
-    CORRADE_VERIFY(ca == &DerivedArray[0]);
-    CORRADE_VERIFY(cav == &DerivedArray[0]);
+    CORRADE_COMPARE(ca.data(), &DerivedArray[0]);
+    CORRADE_COMPARE(cav.data(), &DerivedArray[0]);
 
     CORRADE_VERIFY(std::is_nothrow_constructible<Containers::StaticArrayView<5, Base>, Derived[5]>::value);
     CORRADE_VERIFY(std::is_nothrow_constructible<Containers::StaticArrayView<5, Base>, Containers::StaticArrayView<5, Derived>>::value);
@@ -374,7 +374,7 @@ void StaticArrayViewTest::convertConst() {
     int a[3];
     StaticArrayView<3> b = a;
     ConstArrayView c = b;
-    CORRADE_VERIFY(c == a);
+    CORRADE_COMPARE(c.data(), a);
 }
 
 void StaticArrayViewTest::convertExternalView() {
@@ -470,7 +470,7 @@ void StaticArrayViewTest::access() {
     for(std::size_t i = 0; i != 7; ++i)
         b[i] = i;
 
-    CORRADE_VERIFY(b.data() == a);
+    CORRADE_COMPARE(b.data(), &a[0]);
     CORRADE_COMPARE(b.size(), 7);
     CORRADE_COMPARE(b.front(), 0);
     CORRADE_COMPARE(b.back(), 6);
@@ -501,7 +501,7 @@ void StaticArrayViewTest::access() {
         #if defined(CORRADE_TARGET_CLANG) && defined(_CORRADE_ASAN_ENABLED) && __clang_major__ == 14
         CORRADE_EXPECT_FAIL("Clang 14 with AddressSanitizer enabled seems to make a copy of the referenced array in this case, but not in case of begin() and end() below.");
         #endif
-        CORRADE_VERIFY(data == OneToSeven);
+        CORRADE_COMPARE(data, OneToSeven);
     }
 
     constexpr std::size_t size = cb.size();

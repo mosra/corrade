@@ -368,7 +368,7 @@ void BitArrayTest::constructMove() {
     CORRADE_COMPARE(b.offset(), 7);
     CORRADE_COMPARE(b.size(), 31);
     CORRADE_VERIFY(!a.deleter());
-    CORRADE_VERIFY(b.deleter() == myDeleter);
+    CORRADE_COMPARE(b.deleter(), myDeleter);
 
     auto noDeleter = [](char*, std::size_t) {};
     BitArray c{reinterpret_cast<char*>(0x3), 2, 3, noDeleter};
@@ -379,8 +379,8 @@ void BitArrayTest::constructMove() {
     CORRADE_COMPARE(c.offset(), 7);
     CORRADE_COMPARE(b.size(), 3);
     CORRADE_COMPARE(c.size(), 31);
-    CORRADE_VERIFY(b.deleter() == noDeleter);
-    CORRADE_VERIFY(c.deleter() == myDeleter);
+    CORRADE_COMPARE(b.deleter(), noDeleter);
+    CORRADE_COMPARE(c.deleter(), myDeleter);
 
     CORRADE_VERIFY(std::is_nothrow_move_constructible<BitArray>::value);
     CORRADE_VERIFY(std::is_nothrow_move_assignable<BitArray>::value);
@@ -624,7 +624,7 @@ void BitArrayTest::release() {
 
 void BitArrayTest::defaultDeleter() {
     BitArray a{Corrade::ValueInit, 97};
-    CORRADE_VERIFY(a.deleter() == nullptr);
+    CORRADE_COMPARE(a.deleter(), nullptr);
 }
 
 int CustomDeleterCallCount = 0;

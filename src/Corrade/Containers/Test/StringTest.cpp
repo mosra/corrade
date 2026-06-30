@@ -2984,7 +2984,7 @@ void StringTest::releaseDeleterSmall() {
 void StringTest::defaultDeleter() {
     String a{Corrade::ValueInit, 50};
     CORRADE_VERIFY(!a.isSmall());
-    CORRADE_VERIFY(a.deleter() == nullptr);
+    CORRADE_COMPARE(a.deleter(), nullptr);
 }
 
 int CustomDeleterCallCount = 0;

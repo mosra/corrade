@@ -273,8 +273,8 @@ void ArrayTest::constructDefault() {
     #else
     const Array a2 = nullptr;
     #endif
-    CORRADE_VERIFY(a1 == nullptr);
-    CORRADE_VERIFY(a2 == nullptr);
+    CORRADE_COMPARE(a1.data(), nullptr);
+    CORRADE_COMPARE(a2.data(), nullptr);
     CORRADE_VERIFY(a1.isEmpty());
     CORRADE_VERIFY(a2.isEmpty());
     CORRADE_COMPARE(a1.size(), 0);
@@ -285,7 +285,7 @@ void ArrayTest::constructEmpty() {
     /* Zero-length should not call new */
     const std::size_t size = 0;
     const Array b(size);
-    CORRADE_VERIFY(b == nullptr);
+    CORRADE_COMPARE(b.data(), nullptr);
     CORRADE_COMPARE(b.size(), 0);
 }
 
@@ -316,7 +316,7 @@ void ArrayTest::constructZeroSize() {
 void ArrayTest::constructFromExisting() {
     int* a = new int[25];
     Array b{a, 25};
-    CORRADE_VERIFY(b == a);
+    CORRADE_COMPARE(b.data(), a);
     CORRADE_VERIFY(!b.isEmpty());
     CORRADE_COMPARE(b.size(), 25);
 }
@@ -536,22 +536,22 @@ void ArrayTest::constructMove() {
     const int* const ptr = a;
 
     Array b(Utility::move(a));
-    CORRADE_VERIFY(a == nullptr);
-    CORRADE_VERIFY(b == ptr);
+    CORRADE_COMPARE(a.data(), nullptr);
+    CORRADE_COMPARE(b.data(), ptr);
     CORRADE_COMPARE(a.size(), 0);
     CORRADE_COMPARE(b.size(), 5);
-    CORRADE_VERIFY(a.deleter() == nullptr);
-    CORRADE_VERIFY(b.deleter() == myDeleter);
+    CORRADE_COMPARE(a.deleter(), nullptr);
+    CORRADE_COMPARE(b.deleter(), myDeleter);
 
     auto noDeleter = [](int*, std::size_t) {};
     Array c{reinterpret_cast<int*>(0x3), 3, noDeleter};
     c = Utility::move(b);
-    CORRADE_VERIFY(b == reinterpret_cast<int*>(0x3));
-    CORRADE_VERIFY(c == ptr);
+    CORRADE_COMPARE(b.data(), reinterpret_cast<int*>(0x3));
+    CORRADE_COMPARE(c.data(), ptr);
     CORRADE_COMPARE(b.size(), 3);
     CORRADE_COMPARE(c.size(), 5);
-    CORRADE_VERIFY(b.deleter() == noDeleter);
-    CORRADE_VERIFY(c.deleter() == myDeleter);
+    CORRADE_COMPARE(b.deleter(), noDeleter);
+    CORRADE_COMPARE(c.deleter(), myDeleter);
 
     CORRADE_VERIFY(std::is_nothrow_move_constructible<Array>::value);
     CORRADE_VERIFY(std::is_nothrow_move_assignable<Array>::value);
@@ -648,10 +648,10 @@ void ArrayTest::convertView() {
         const ConstArrayView cb = ca;
         const ConstArrayView bc = ac;
         const ConstArrayView cbc = cac;
-        CORRADE_VERIFY(b.begin() == a.begin());
-        CORRADE_VERIFY(bc.begin() == ac.begin());
-        CORRADE_VERIFY(cb.begin() == ca.begin());
-        CORRADE_VERIFY(cbc.begin() == cac.begin());
+        CORRADE_COMPARE(b.begin(), a.begin());
+        CORRADE_COMPARE(bc.begin(), ac.begin());
+        CORRADE_COMPARE(cb.begin(), ca.begin());
+        CORRADE_COMPARE(cbc.begin(), cac.begin());
         CORRADE_COMPARE(b.size(), 5);
         CORRADE_COMPARE(cb.size(), 5);
         CORRADE_COMPARE(bc.size(), 5);
@@ -669,10 +669,10 @@ void ArrayTest::convertView() {
         CORRADE_VERIFY(std::is_same<decltype(cb), const ConstArrayView>::value);
         CORRADE_VERIFY(std::is_same<decltype(bc), const ConstArrayView>::value);
         CORRADE_VERIFY(std::is_same<decltype(cbc), const ConstArrayView>::value);
-        CORRADE_VERIFY(b.begin() == a.begin());
-        CORRADE_VERIFY(bc.begin() == ac.begin());
-        CORRADE_VERIFY(cb.begin() == ca.begin());
-        CORRADE_VERIFY(cbc.begin() == cac.begin());
+        CORRADE_COMPARE(b.begin(), a.begin());
+        CORRADE_COMPARE(bc.begin(), ac.begin());
+        CORRADE_COMPARE(cb.begin(), ca.begin());
+        CORRADE_COMPARE(cbc.begin(), cac.begin());
         CORRADE_COMPARE(b.size(), 5);
         CORRADE_COMPARE(cb.size(), 5);
         CORRADE_COMPARE(bc.size(), 5);
@@ -695,7 +695,7 @@ void ArrayTest::convertViewDerived() {
     Containers::Array<B> b{5};
     Containers::ArrayView<A> a = b;
 
-    CORRADE_VERIFY(a == b);
+    CORRADE_COMPARE(a.data(), b.data());
     CORRADE_COMPARE(a.size(), 5);
 }
 
@@ -717,7 +717,7 @@ void ArrayTest::convertViewOverload() {
 void ArrayTest::convertVoid() {
     Array a(6);
     VoidArrayView b = a;
-    CORRADE_VERIFY(b == a);
+    CORRADE_COMPARE(b.data(), a.data());
     CORRADE_COMPARE(b.size(), a.size()*sizeof(int));
 }
 
@@ -726,8 +726,8 @@ void ArrayTest::convertConstVoid() {
     const Array ca(6);
     ConstVoidArrayView b = a;
     ConstVoidArrayView cb = ca;
-    CORRADE_VERIFY(b == a);
-    CORRADE_VERIFY(cb == ca);
+    CORRADE_COMPARE(b.data(), a.data());
+    CORRADE_COMPARE(cb.data(), ca.data());
     CORRADE_COMPARE(b.size(), a.size()*sizeof(int));
     CORRADE_COMPARE(cb.size(), ca.size()*sizeof(int));
 }
@@ -1096,12 +1096,12 @@ void ArrayTest::release() {
     #endif
     CORRADE_COMPARE(a.begin(), nullptr);
     CORRADE_COMPARE(a.size(), 0);
-    CORRADE_VERIFY(a.deleter() == nullptr);
+    CORRADE_COMPARE(a.deleter(), nullptr);
 }
 
 void ArrayTest::defaultDeleter() {
     Array a{5};
-    CORRADE_VERIFY(a.deleter() == nullptr);
+    CORRADE_COMPARE(a.deleter(), nullptr);
 }
 
 int CustomDeleterCallCount = 0;
@@ -1118,7 +1118,7 @@ void ArrayTest::customDeleter() {
             CORRADE_COMPARE(size, 25);
             ++CustomDeleterCallCount;
         }};
-        CORRADE_VERIFY(a == data);
+        CORRADE_COMPARE(a.data(), &data[0]);
         CORRADE_COMPARE(a.size(), 25);
         CORRADE_COMPARE(CustomDeleterCallCount, 0);
     }
@@ -1138,7 +1138,7 @@ void ArrayTest::customDeleterArrayView() {
             CORRADE_COMPARE(size, 25);
             ++CustomDeleterCallCount;
         }};
-        CORRADE_VERIFY(a == data);
+        CORRADE_COMPARE(a.data(), &data[0]);
         CORRADE_COMPARE(a.size(), 25);
         CORRADE_COMPARE(CustomDeleterCallCount, 0);
     }
@@ -1156,7 +1156,7 @@ void ArrayTest::customDeleterNullData() {
             CORRADE_COMPARE(size, 25);
             ++CustomDeleterCallCount;
         }};
-        CORRADE_VERIFY(a == nullptr);
+        CORRADE_COMPARE(a.data(), nullptr);
         CORRADE_COMPARE(a.size(), 25);
         CORRADE_COMPARE(CustomDeleterCallCount, 0);
     }
@@ -1180,7 +1180,7 @@ void ArrayTest::customDeleterZeroSize() {
             CORRADE_COMPARE(size, 0);
             ++CustomDeleterCallCount;
         }};
-        CORRADE_VERIFY(a == data);
+        CORRADE_COMPARE(a.data(), &data[0]);
         CORRADE_COMPARE(a.size(), 0);
         CORRADE_COMPARE(CustomDeleterCallCount, 0);
     }
@@ -1228,7 +1228,7 @@ void ArrayTest::customDeleterType() {
 
     {
         Containers::Array<int, CustomDeleter> a{data, 25, CustomDeleter{deletedCount}};
-        CORRADE_VERIFY(a == data);
+        CORRADE_COMPARE(a.data(), &data[0]);
         CORRADE_COMPARE(a.size(), 25);
         CORRADE_COMPARE(deletedCount, 0);
     }
@@ -1280,7 +1280,7 @@ void ArrayTest::customDeleterTypeNullData() {
 
     {
         Containers::Array<int, CustomDeleter> a{nullptr, 25, CustomDeleter{deletedCount}};
-        CORRADE_VERIFY(a == nullptr);
+        CORRADE_COMPARE(a.data(), nullptr);
         CORRADE_COMPARE(a.size(), 25);
         CORRADE_COMPARE(deletedCount, 0);
     }
@@ -1308,7 +1308,7 @@ void ArrayTest::customDeleterTypeZeroSize() {
 
     {
         Containers::Array<int, CustomDeleter> a{data, 0, CustomDeleter{deletedCount}};
-        CORRADE_VERIFY(a == data);
+        CORRADE_COMPARE(a.data(), &data[0]);
         CORRADE_COMPARE(a.size(), 0);
         CORRADE_COMPARE(deletedCount, 0);
     }

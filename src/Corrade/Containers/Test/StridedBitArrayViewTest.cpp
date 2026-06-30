@@ -2407,9 +2407,9 @@ void StridedBitArrayViewTest::flipped() {
     CORRADE_VERIFY(!b[0]);
 
     /* Flipping twice results in the same thing */
-    CORRADE_VERIFY(a.flipped<0>().flipped<0>().data() == a.data());
-    CORRADE_VERIFY(a.flipped<0>().flipped<0>().offset() == a.offset());
-    CORRADE_VERIFY(a.flipped<0>().flipped<0>().stride() == a.stride());
+    CORRADE_COMPARE(a.flipped<0>().flipped<0>().data(), a.data());
+    CORRADE_COMPARE(a.flipped<0>().flipped<0>().offset(), a.offset());
+    CORRADE_COMPARE(a.flipped<0>().flipped<0>().stride(), a.stride());
 }
 
 void StridedBitArrayViewTest::flippedZeroSize() {

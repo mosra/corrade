@@ -843,7 +843,7 @@ void ArrayTupleTest::constructTriviallyDestructibleStatelessDeleter() {
 
         /* The stateless deleter is used directly, as there's nothing to
            non-trivially destruct */
-        CORRADE_VERIFY(data.deleter() == deleter);
+        CORRADE_COMPARE(data.deleter(), deleter);
 
         /* And no metadata at the front here either */
         CORRADE_COMPARE(static_cast<void*>(ints.data()), data.data());
@@ -1019,7 +1019,7 @@ void ArrayTupleTest::constructMove() {
     CORRADE_VERIFY(!a.deleter());
     CORRADE_COMPARE(b.data(), static_cast<void*>(preallocated));
     CORRADE_COMPARE(b.size(), 20);
-    CORRADE_VERIFY(b.deleter() == deleter);
+    CORRADE_COMPARE(b.deleter(), deleter);
 
     ArrayTuple c;
     c = Utility::move(b);
@@ -1028,7 +1028,7 @@ void ArrayTupleTest::constructMove() {
     CORRADE_VERIFY(!b.deleter());
     CORRADE_COMPARE(c.data(), static_cast<void*>(preallocated));
     CORRADE_COMPARE(c.size(), 20);
-    CORRADE_VERIFY(c.deleter() == deleter);
+    CORRADE_COMPARE(c.deleter(), deleter);
 
     CORRADE_VERIFY(std::is_nothrow_move_constructible<ArrayTuple>::value);
     CORRADE_VERIFY(std::is_nothrow_move_assignable<ArrayTuple>::value);
@@ -1202,8 +1202,8 @@ void ArrayTupleTest::convertArray() {
         );
 
         /* The stateless deleter is used directly, as there's nothing to
-        non-trivially destruct */
-        CORRADE_VERIFY(data.deleter() == deleter);
+           non-trivially destruct */
+        CORRADE_COMPARE(data.deleter(), deleter);
     }
 
     /* Check the deleter was called just once */

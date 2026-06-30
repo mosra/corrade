@@ -1283,10 +1283,10 @@ void StaticArrayTest::convertView() {
         const ArrayView<const int> cb = ca;
         const ArrayView<const int> bc = ac;
         const ArrayView<const int> cbc = cac;
-        CORRADE_VERIFY(b.begin() == a.begin());
-        CORRADE_VERIFY(bc.begin() == ac.begin());
-        CORRADE_VERIFY(cb.begin() == ca.begin());
-        CORRADE_VERIFY(cbc.begin() == cac.begin());
+        CORRADE_COMPARE(b.begin(), a.begin());
+        CORRADE_COMPARE(bc.begin(), ac.begin());
+        CORRADE_COMPARE(cb.begin(), ca.begin());
+        CORRADE_COMPARE(cbc.begin(), cac.begin());
         CORRADE_COMPARE(b.size(), 5);
         CORRADE_COMPARE(cb.size(), 5);
         CORRADE_COMPARE(bc.size(), 5);
@@ -1294,8 +1294,8 @@ void StaticArrayTest::convertView() {
     } {
         constexpr ArrayView<const int> cb = Array5;
         constexpr ArrayView<const int> cbc = Array5C;
-        CORRADE_VERIFY(cb.begin() == Array5.begin());
-        CORRADE_VERIFY(cbc.begin() == Array5C.begin());
+        CORRADE_COMPARE(cb.begin(), Array5.begin());
+        CORRADE_COMPARE(cbc.begin(), Array5C.begin());
         CORRADE_COMPARE(cb.size(), 5);
         CORRADE_COMPARE(cbc.size(), 5);
     } {
@@ -1307,10 +1307,10 @@ void StaticArrayTest::convertView() {
         CORRADE_VERIFY(std::is_same<decltype(cb), const ArrayView<const int>>::value);
         CORRADE_VERIFY(std::is_same<decltype(bc), const ArrayView<const int>>::value);
         CORRADE_VERIFY(std::is_same<decltype(cbc), const ArrayView<const int>>::value);
-        CORRADE_VERIFY(b.begin() == a.begin());
-        CORRADE_VERIFY(bc.begin() == ac.begin());
-        CORRADE_VERIFY(cb.begin() == ca.begin());
-        CORRADE_VERIFY(cbc.begin() == cac.begin());
+        CORRADE_COMPARE(b.begin(), a.begin());
+        CORRADE_COMPARE(bc.begin(), ac.begin());
+        CORRADE_COMPARE(cb.begin(), ca.begin());
+        CORRADE_COMPARE(cbc.begin(), cac.begin());
         CORRADE_COMPARE(b.size(), 5);
         CORRADE_COMPARE(cb.size(), 5);
         CORRADE_COMPARE(bc.size(), 5);
@@ -1320,8 +1320,8 @@ void StaticArrayTest::convertView() {
         constexpr auto cbc = arrayView(Array5C);
         CORRADE_VERIFY(std::is_same<decltype(cb), const ArrayView<const int>>::value);
         CORRADE_VERIFY(std::is_same<decltype(cbc), const ArrayView<const int>>::value);
-        CORRADE_VERIFY(cb.begin() == Array5.begin());
-        CORRADE_VERIFY(cbc.begin() == Array5C.begin());
+        CORRADE_COMPARE(cb.begin(), Array5.begin());
+        CORRADE_COMPARE(cbc.begin(), Array5C.begin());
         CORRADE_COMPARE(cb.size(), 5);
         CORRADE_COMPARE(cbc.size(), 5);
     }
@@ -1341,14 +1341,14 @@ void StaticArrayTest::convertViewDerived() {
 
     StaticArray<5, B> b;
     ArrayView<A> a = b;
-    CORRADE_VERIFY(a == b);
+    CORRADE_COMPARE(a.data(), b.data());
     CORRADE_COMPARE(a.size(), 5);
 
     #ifndef CORRADE_MSVC2015_COMPATIBILITY
     constexpr /* No idea, and who cares */
     #endif
     ArrayView<const A> ca = ArrayB5;
-    CORRADE_VERIFY(ca == ArrayB5);
+    CORRADE_COMPARE(ca.data(), &ArrayB5[0]);
     CORRADE_COMPARE(ca.size(), 5);
 }
 
@@ -1378,10 +1378,10 @@ void StaticArrayTest::convertStaticView() {
         const StaticArrayView<5, const int> cb = ca;
         const StaticArrayView<5, const int> bc = ac;
         const StaticArrayView<5, const int> cbc = cac;
-        CORRADE_VERIFY(b.begin() == a.begin());
-        CORRADE_VERIFY(bc.begin() == ac.begin());
-        CORRADE_VERIFY(cb.begin() == ca.begin());
-        CORRADE_VERIFY(cbc.begin() == cac.begin());
+        CORRADE_COMPARE(b.begin(), a.begin());
+        CORRADE_COMPARE(bc.begin(), ac.begin());
+        CORRADE_COMPARE(cb.begin(), ca.begin());
+        CORRADE_COMPARE(cbc.begin(), cac.begin());
         CORRADE_COMPARE(b.size(), 5);
         CORRADE_COMPARE(cb.size(), 5);
         CORRADE_COMPARE(bc.size(), 5);
@@ -1389,8 +1389,8 @@ void StaticArrayTest::convertStaticView() {
     } {
         constexpr StaticArrayView<5, const int> cb = Array5;
         constexpr StaticArrayView<5, const int> cbc = Array5C;
-        CORRADE_VERIFY(cb.begin() == Array5.begin());
-        CORRADE_VERIFY(cbc.begin() == Array5C.begin());
+        CORRADE_COMPARE(cb.begin(), Array5.begin());
+        CORRADE_COMPARE(cbc.begin(), Array5C.begin());
         CORRADE_COMPARE(cb.size(), 5);
         CORRADE_COMPARE(cbc.size(), 5);
     } {
@@ -1398,8 +1398,8 @@ void StaticArrayTest::convertStaticView() {
         constexpr auto cbc = staticArrayView(Array5C);
         CORRADE_VERIFY(std::is_same<decltype(cb), const StaticArrayView<5, const int>>::value);
         CORRADE_VERIFY(std::is_same<decltype(cbc), const StaticArrayView<5, const int>>::value);
-        CORRADE_VERIFY(cb.begin() == Array5.begin());
-        CORRADE_VERIFY(cbc.begin() == Array5C.begin());
+        CORRADE_COMPARE(cb.begin(), Array5.begin());
+        CORRADE_COMPARE(cbc.begin(), Array5C.begin());
         CORRADE_COMPARE(cb.size(), 5);
         CORRADE_COMPARE(cbc.size(), 5);
     }
@@ -1412,14 +1412,14 @@ void StaticArrayTest::convertStaticViewDerived() {
 
     StaticArray<5, B> b;
     StaticArrayView<5, A> a = b;
-    CORRADE_VERIFY(a == b);
+    CORRADE_COMPARE(a.data(), b.data());
     CORRADE_COMPARE(a.size(), 5);
 
     #ifndef CORRADE_MSVC2015_COMPATIBILITY
     constexpr /* No idea, and who cares */
     #endif
     StaticArrayView<5, const A> ca = ArrayB5;
-    CORRADE_VERIFY(ca == ArrayB5);
+    CORRADE_COMPARE(ca.data(), ArrayB5.data());
     CORRADE_COMPARE(ca.size(), 5);
 }
 
@@ -1441,7 +1441,7 @@ void StaticArrayTest::convertStaticViewOverload() {
 void StaticArrayTest::convertVoid() {
     StaticArray<5, int> a;
     ArrayView<void> b = a;
-    CORRADE_VERIFY(b == a);
+    CORRADE_COMPARE(b.data(), a.data());
     CORRADE_COMPARE(b.size(), 5*sizeof(int));
 }
 
@@ -1452,13 +1452,13 @@ void StaticArrayTest::convertConstVoid() {
     {
         ArrayView<const void> b = a;
         ArrayView<const void> cb = ca;
-        CORRADE_VERIFY(b == a);
-        CORRADE_VERIFY(cb == ca);
+        CORRADE_COMPARE(b.data(), a.data());
+        CORRADE_COMPARE(cb.data(), ca.data());
         CORRADE_COMPARE(b.size(), 5*sizeof(int));
         CORRADE_COMPARE(cb.size(), 5*sizeof(int));
     } {
         constexpr ArrayView<const void> cb = Array5;
-        CORRADE_VERIFY(cb == Array5);
+        CORRADE_COMPARE(cb.data(), Array5.data());
         CORRADE_COMPARE(cb.size(), 5*sizeof(int));
     }
 }

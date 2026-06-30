@@ -728,7 +728,7 @@ template<class T> void GrowableArrayTest::reserveFromNonGrowableNoOp() {
         /* Not growable, no ASan annotation check */
 
         CORRADE_COMPARE(arrayReserve(a, 3), 3);
-        CORRADE_VERIFY(a == prev);
+        CORRADE_COMPARE(a.data(), prev);
         CORRADE_VERIFY(!arrayIsGrowable(a));
         CORRADE_COMPARE(a.size(), 3);
         CORRADE_COMPARE(arrayCapacity(a), 3);
@@ -828,7 +828,7 @@ template<class T> void GrowableArrayTest::reserveFromGrowableNoOp() {
         VERIFY_SANITIZED_PROPERLY(a, ArrayAllocator<T>);
 
         CORRADE_COMPARE(arrayReserve(a, 99), 100);
-        CORRADE_VERIFY(a == prev);
+        CORRADE_COMPARE(a.data(), prev);
         CORRADE_VERIFY(arrayIsGrowable(a));
         CORRADE_COMPARE(a.size(), 3);
         CORRADE_COMPARE(arrayCapacity(a), 100);
@@ -924,7 +924,7 @@ template<class T> void GrowableArrayTest::resizeFromNonGrowableNoOp() {
         /* Not growable, no ASan annotation check */
 
         arrayResize(a, 3);
-        CORRADE_VERIFY(a == prev);
+        CORRADE_COMPARE(a.data(), prev);
         CORRADE_VERIFY(!arrayIsGrowable(a));
         CORRADE_COMPARE(a.size(), 3);
         CORRADE_COMPARE(arrayCapacity(a), 3);
@@ -1006,7 +1006,7 @@ template<class T> void GrowableArrayTest::resizeFromGrowableNoOp() {
         VERIFY_SANITIZED_PROPERLY(a, ArrayAllocator<T>);
 
         arrayResize(a, 3);
-        CORRADE_VERIFY(a == prev);
+        CORRADE_COMPARE(a.data(), prev);
         CORRADE_VERIFY(arrayIsGrowable(a));
         CORRADE_COMPARE(a.size(), 3);
         CORRADE_COMPARE(arrayCapacity(a), 3);
@@ -1038,7 +1038,7 @@ template<class T> void GrowableArrayTest::resizeFromGrowableNoRealloc() {
         CORRADE_VERIFY(arrayIsGrowable(a));
         a[0] = 1;
         a[1] = 2;
-        CORRADE_VERIFY(a == prev);
+        CORRADE_COMPARE(a.data(), prev);
         CORRADE_VERIFY(arrayIsGrowable(a));
         CORRADE_COMPARE(a.size(), 2);
         CORRADE_COMPARE(arrayCapacity(a), 4);
@@ -1051,7 +1051,7 @@ template<class T> void GrowableArrayTest::resizeFromGrowableNoRealloc() {
         VERIFY_SANITIZED_PROPERLY(a, ArrayAllocator<T>);
 
         arrayResize(a, 4);
-        CORRADE_VERIFY(a == prev);
+        CORRADE_COMPARE(a.data(), prev);
         CORRADE_VERIFY(arrayIsGrowable(a));
         CORRADE_COMPARE(a.size(), 4);
         CORRADE_COMPARE(arrayCapacity(a), 4);
@@ -1229,7 +1229,7 @@ template<class T, class Init> void GrowableArrayTest::resizeFromGrowableToLess()
         #ifdef CORRADE_BUILD_DEPRECATED
         CORRADE_IGNORE_DEPRECATED_POP
         #endif
-        CORRADE_VERIFY(a == prev);
+        CORRADE_COMPARE(a.data(), prev);
         CORRADE_VERIFY(arrayIsGrowable(a));
         CORRADE_COMPARE(a.size(), 2);
         CORRADE_COMPARE(arrayCapacity(a), 4);
@@ -1505,7 +1505,7 @@ template<class T> void GrowableArrayTest::appendFromGrowableNoRealloc() {
         VERIFY_SANITIZED_PROPERLY(a, ArrayAllocator<T>);
         a[0] = 28;
         T& appended = arrayAppend(a, T{37});
-        CORRADE_VERIFY(a == prev);
+        CORRADE_COMPARE(a.data(), prev);
         CORRADE_VERIFY(arrayIsGrowable(a));
         CORRADE_COMPARE(a.size(), 2);
         CORRADE_COMPARE(arrayCapacity(a), 2);
@@ -1539,7 +1539,7 @@ template<class T> void GrowableArrayTest::insertFromGrowableNoRealloc() {
         a[1] = 42;
         a[2] = 56;
         T& inserted = arrayInsert(a, 1, T{37});
-        CORRADE_VERIFY(a == prev);
+        CORRADE_COMPARE(a.data(), prev);
         CORRADE_VERIFY(arrayIsGrowable(a));
         CORRADE_COMPARE(a.size(), 4);
         CORRADE_COMPARE(arrayCapacity(a), 4);
@@ -1580,7 +1580,7 @@ template<class T> void GrowableArrayTest::insertFromGrowableNoReallocNoInit() {
         a[2] = 56;
         T& inserted = arrayInsert(a, 1, Corrade::NoInit, 1).front();
         new(&inserted) T{37};
-        CORRADE_VERIFY(a == prev);
+        CORRADE_COMPARE(a.data(), prev);
         CORRADE_VERIFY(arrayIsGrowable(a));
         CORRADE_COMPARE(a.size(), 4);
         CORRADE_COMPARE(arrayCapacity(a), 4);
@@ -2426,7 +2426,7 @@ template<class T> void GrowableArrayTest::removeZero() {
         arrayRemove(a, 3, 0);
         CORRADE_VERIFY(!arrayIsGrowable(a));
         CORRADE_COMPARE(a.size(), 3);
-        CORRADE_VERIFY(a.data() == prev);
+        CORRADE_COMPARE(a.data(), prev);
         CORRADE_COMPARE(int(a[0]), 2);
         CORRADE_COMPARE(int(a[1]), 7);
         CORRADE_COMPARE(int(a[2]), -1);
@@ -2457,7 +2457,7 @@ template<class T> void GrowableArrayTest::removeUnorderedZero() {
         arrayRemoveUnordered(a, 3, 0);
         CORRADE_VERIFY(!arrayIsGrowable(a));
         CORRADE_COMPARE(a.size(), 3);
-        CORRADE_VERIFY(a.data() == prev);
+        CORRADE_COMPARE(a.data(), prev);
         CORRADE_COMPARE(int(a[0]), 2);
         CORRADE_COMPARE(int(a[1]), 7);
         CORRADE_COMPARE(int(a[2]), -1);
@@ -2488,7 +2488,7 @@ template<class T> void GrowableArrayTest::removeSuffixZero() {
         arrayRemoveSuffix(a, 0);
         CORRADE_VERIFY(!arrayIsGrowable(a));
         CORRADE_COMPARE(a.size(), 3);
-        CORRADE_VERIFY(a.data() == prev);
+        CORRADE_COMPARE(a.data(), prev);
         CORRADE_COMPARE(int(a[0]), 2);
         CORRADE_COMPARE(int(a[1]), 7);
         CORRADE_COMPARE(int(a[2]), -1);
@@ -2807,7 +2807,7 @@ template<class T> void GrowableArrayTest::removeGrowable() {
         CORRADE_VERIFY(arrayIsGrowable(a));
         CORRADE_COMPARE(a.size(), 2);
         CORRADE_COMPARE(arrayCapacity(a), 10);
-        CORRADE_VERIFY(a.data() == prev);
+        CORRADE_COMPARE(a.data(), prev);
         CORRADE_COMPARE(int(a[0]), 2);
         CORRADE_COMPARE(int(a[1]), 5786);
         VERIFY_SANITIZED_PROPERLY(a, ArrayAllocator<T>);
@@ -2851,7 +2851,7 @@ template<class T> void GrowableArrayTest::removeUnorderedGrowable() {
         CORRADE_VERIFY(arrayIsGrowable(a));
         CORRADE_COMPARE(a.size(), 4);
         CORRADE_COMPARE(arrayCapacity(a), 10);
-        CORRADE_VERIFY(a.data() == prev);
+        CORRADE_COMPARE(a.data(), prev);
         CORRADE_COMPARE(int(a[0]), 2);
         CORRADE_COMPARE(int(a[1]), 4);
         CORRADE_COMPARE(int(a[2]), 5786);
@@ -2895,7 +2895,7 @@ template<class T> void GrowableArrayTest::removeSuffixGrowable() {
         CORRADE_VERIFY(arrayIsGrowable(a));
         CORRADE_COMPARE(a.size(), 2);
         CORRADE_COMPARE(arrayCapacity(a), 10);
-        CORRADE_VERIFY(a.data() == prev);
+        CORRADE_COMPARE(a.data(), prev);
         CORRADE_COMPARE(int(a[0]), 2);
         CORRADE_COMPARE(int(a[1]), 7);
         VERIFY_SANITIZED_PROPERLY(a, ArrayAllocator<T>);
@@ -2934,7 +2934,7 @@ template<class T> void GrowableArrayTest::removeAllGrowable() {
         CORRADE_VERIFY(arrayIsGrowable(a));
         CORRADE_COMPARE(a.size(), 0);
         CORRADE_COMPARE(arrayCapacity(a), 10);
-        CORRADE_VERIFY(a.data() == prev);
+        CORRADE_COMPARE(a.data(), prev);
         VERIFY_SANITIZED_PROPERLY(a, ArrayAllocator<T>);
 
         /* The two items are constructed in-place. Then, all are destructed. */
@@ -2970,7 +2970,7 @@ template<class T> void GrowableArrayTest::removeUnorderedAllGrowable() {
         CORRADE_VERIFY(arrayIsGrowable(a));
         CORRADE_COMPARE(a.size(), 0);
         CORRADE_COMPARE(arrayCapacity(a), 10);
-        CORRADE_VERIFY(a.data() == prev);
+        CORRADE_COMPARE(a.data(), prev);
         VERIFY_SANITIZED_PROPERLY(a, ArrayAllocator<T>);
 
         /* The two items are constructed in-place. Then, all are destructed. */
@@ -3006,7 +3006,7 @@ template<class T> void GrowableArrayTest::removeSuffixAllGrowable() {
         CORRADE_VERIFY(arrayIsGrowable(a));
         CORRADE_COMPARE(a.size(), 0);
         CORRADE_COMPARE(arrayCapacity(a), 10);
-        CORRADE_VERIFY(a.data() == prev);
+        CORRADE_COMPARE(a.data(), prev);
         VERIFY_SANITIZED_PROPERLY(a, ArrayAllocator<T>);
 
         /* The two items are constructed in-place. Then, all are destructed. */
@@ -3277,7 +3277,7 @@ template<class T> void GrowableArrayTest::clearGrowable() {
         CORRADE_VERIFY(arrayIsGrowable(a));
         CORRADE_COMPARE(a.size(), 0);
         CORRADE_COMPARE(arrayCapacity(a), 10);
-        CORRADE_VERIFY(a.data() == prev);
+        CORRADE_COMPARE(a.data(), prev);
         VERIFY_SANITIZED_PROPERLY(a, ArrayAllocator<T>);
 
         /* The two items are constructed in-place. Then, all are destructed. */
@@ -3433,7 +3433,7 @@ template<class T> void GrowableArrayTest::shrinkNonGrowableNoInit() {
         arrayShrink(a);
         CORRADE_VERIFY(!arrayIsGrowable(a));
         CORRADE_COMPARE(a.size(), 3);
-        CORRADE_VERIFY(a.data() == prev);
+        CORRADE_COMPARE(a.data(), prev);
         CORRADE_COMPARE(int(a[0]), 2);
         CORRADE_COMPARE(int(a[1]), 7);
         CORRADE_COMPARE(int(a[2]), -1);
@@ -3466,7 +3466,7 @@ template<class T> void GrowableArrayTest::shrinkNonGrowableDefaultInit() {
         CORRADE_IGNORE_DEPRECATED_POP
         CORRADE_VERIFY(!arrayIsGrowable(a));
         CORRADE_COMPARE(a.size(), 3);
-        CORRADE_VERIFY(a.data() == prev);
+        CORRADE_COMPARE(a.data(), prev);
         CORRADE_COMPARE(int(a[0]), 2);
         CORRADE_COMPARE(int(a[1]), 7);
         CORRADE_COMPARE(int(a[2]), -1);
@@ -3497,7 +3497,7 @@ template<class T> void GrowableArrayTest::shrinkNonGrowableValueInit() {
         arrayShrink(a, Corrade::ValueInit);
         CORRADE_VERIFY(!arrayIsGrowable(a));
         CORRADE_COMPARE(a.size(), 3);
-        CORRADE_VERIFY(a.data() == prev);
+        CORRADE_COMPARE(a.data(), prev);
         CORRADE_COMPARE(int(a[0]), 2);
         CORRADE_COMPARE(int(a[1]), 7);
         CORRADE_COMPARE(int(a[2]), -1);
