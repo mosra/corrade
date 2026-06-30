@@ -1343,9 +1343,9 @@ constexpr Derived DerivedArray[5]
     ;
 
 void StridedArrayViewTest::constructDerived() {
-    /* Valid use case: constructing Containers::StridedArrayView<Math::Vector<3, Float>>
-       from Containers::StridedArrayView<Color3> because the data have the same size
-       and data layout */
+    /* Valid use case: constructing Containers::StridedArrayView<Vector3> from
+       Containers::StridedArrayView<Color3> because the data have the same size
+       and layout */
 
     Derived b[5];
     Containers::StridedArrayView1D<Derived> bv{b};
@@ -1904,9 +1904,9 @@ void StridedArrayViewTest::construct3DFromStaticViewConstVoid() {
 }
 
 void StridedArrayViewTest::construct3DDerived() {
-    /* Valid use case: constructing Containers::StridedArrayView<Math::Vector<3, Float>>
-       from Containers::StridedArrayView<Color3> because the data have the same size
-       and data layout */
+    /* Valid use case: constructing Containers::StridedArrayView<Vector3> from
+       Containers::StridedArrayView<Color3> because the data have the same size
+       and layout */
 
     Derived b[5];
     Containers::StridedArrayView2D<Derived> bv{b, {5, 1}};
