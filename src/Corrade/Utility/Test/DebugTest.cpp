@@ -961,7 +961,8 @@ void DebugTest::valueAsColor() {
     {
         Debug d{Debug::Flag::Color|Debug::Flag::NoSpace};
         /* *not* 255 as that would be an infinite loop */
-        for(unsigned char i = 0; i < 250; i += 7) d << i;
+        for(unsigned char i = 0; i < 250; i += 7)
+            d << i;
     }
 
     /* The modifier should work only for the immediately following value */
@@ -980,7 +981,8 @@ void DebugTest::valueAsColorColorsDisabled() {
     {
         Debug d{Debug::Flag::Color|Debug::Flag::DisableColors|Debug::Flag::NoSpace};
         /* *not* 255 as that would be an infinite loop */
-        for(unsigned char i = 0; i < 250; i += 7) d << i;
+        for(unsigned char i = 0; i < 250; i += 7)
+            d << i;
     }
 
     /* The modifier should work only for the immediately following value */

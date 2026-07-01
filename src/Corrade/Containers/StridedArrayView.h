@@ -2284,7 +2284,8 @@ template<unsigned dimensions, class T> ArrayView<T> StridedArrayView<dimensions,
     CORRADE_DEBUG_ASSERT(isContiguous(),
         "Containers::StridedArrayView::asContiguous(): the view is not contiguous", {});
     std::size_t size = 1;
-    for(std::size_t i = 0; i != dimensions; ++i) size *= _size._data[i];
+    for(std::size_t i = 0; i != dimensions; ++i)
+        size *= _size._data[i];
     return {static_cast<T*>(_data), size};
 }
 
@@ -2581,7 +2582,8 @@ template<unsigned dimensions, class T> template<unsigned newDimensions> StridedA
 template<unsigned dimensions, class T> StridedArrayView<dimensions, T> StridedArrayView<dimensions, T>::every(const std::ptrdiff_t step) const {
     Containers::Stride<dimensions> steps;
     steps[0] = step;
-    for(std::size_t i = 1; i != dimensions; ++i) steps[i] = 1;
+    for(std::size_t i = 1; i != dimensions; ++i)
+        steps[i] = 1;
     return every(steps);
 }
 

@@ -195,7 +195,8 @@ template<class T> struct ArrayNewAllocator {
      * @ref deallocate().
      */
     static void deleter(T* data, std::size_t size) {
-        for(T *it = data, *end = data + size; it != end; ++it) it->~T();
+        for(T *it = data, *end = data + size; it != end; ++it)
+            it->~T();
         deallocate(data);
     }
 };
@@ -1915,7 +1916,8 @@ template<class T, typename std::enable_if<std::is_trivially_destructible<T>::val
 
 template<class T, typename std::enable_if<!std::is_trivially_destructible<T>::value, int>::type = 0> inline void arrayDestruct(T* begin, T* const end) {
     /* Needs to be < because sometimes begin > end */
-    for(; begin < end; ++begin) begin->~T();
+    for(; begin < end; ++begin)
+        begin->~T();
 }
 
 template<class T> inline std::size_t arrayGrowth(const std::size_t currentCapacity, const std::size_t desiredCapacity) {
@@ -1953,7 +1955,8 @@ template<class T> void ArrayNewAllocator<T>::reallocate(T*& array, const std::si
         #else
         new(dst) T{Utility::move(*src)};
         #endif
-    for(T *it = array, *end = array + prevSize; it < end; ++it) it->~T();
+    for(T *it = array, *end = array + prevSize; it < end; ++it)
+        it->~T();
     deallocate(array);
     array = newArray;
 }

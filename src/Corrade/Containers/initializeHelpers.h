@@ -80,7 +80,8 @@ template<class T, typename std::enable_if<!
 , int>::type = 0> inline void arrayConstruct(Corrade::DefaultInitT, T* begin, T* const end) {
     /* Needs to be < because sometimes begin > end. No {}, we want trivial
        types non-initialized */
-    for(; begin < end; ++begin) new(begin) T;
+    for(; begin < end; ++begin)
+        new(begin) T;
 }
 #endif
 
@@ -115,7 +116,8 @@ template<class T, typename std::enable_if<!
        around a featurebug in C++ where new T{} doesn't work for an explicit
        defaulted constructor. For details see constructHelpers.h and
        GrowableArrayTest::constructorExplicitInCopyInitialization(). */
-    for(; begin < end; ++begin) new(begin) T();
+    for(; begin < end; ++begin)
+        new(begin) T();
 }
 
 }}}

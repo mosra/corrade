@@ -2048,7 +2048,8 @@ void DirectoryTest::prepareFileToCopy() {
         return;
 
     Containers::Array<int> data{NoInit, 150000};
-    for(std::size_t i = 0; i != data.size(); ++i) data[i] = 4678641 + i;
+    for(std::size_t i = 0; i != data.size(); ++i)
+        data[i] = 4678641 + i;
 
     Directory::write(Directory::join(_writeTestDir, "copySource.dat"), data);
 }
@@ -2218,7 +2219,8 @@ void DirectoryTest::prepareFileToBenchmarkCopy() {
 
     /* Append a megabyte file 50 times to create a 50MB file */
     Containers::Array<int> data{ValueInit, 256*1024};
-    for(std::size_t i = 0; i != data.size(); ++i) data[i] = 4678641 + i;
+    for(std::size_t i = 0; i != data.size(); ++i)
+        data[i] = 4678641 + i;
 
     for(std::size_t i = 0; i != 50; ++i)
         Directory::append(Directory::join(_writeTestDir, "copyBenchmarkSource.dat"), data);
