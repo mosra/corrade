@@ -207,12 +207,14 @@ const struct {
     {Cpu::Sse2|Cpu::Popcnt, "64bit popcnt (default)", nullptr},
     #endif
     #endif
-    #if defined(CORRADE_ENABLE_AVX2) && defined(CORRADE_ENABLE_POPCNT) && !defined(CORRADE_TARGET_32BIT)
+    #if defined(CORRADE_ENABLE_AVX2) && defined(CORRADE_ENABLE_POPCNT)
     #ifdef CORRADE_UTILITY_FORCE_CPU_POINTER_DISPATCH
     {Cpu::Avx2|Cpu::Popcnt, "32bit popcnt",
         stringCountCharacterImplementationAvx2Popcnt32},
     #endif
+    #ifndef CORRADE_TARGET_32BIT
     {Cpu::Avx2|Cpu::Popcnt, "64bit popcnt (default)", nullptr},
+    #endif
     #endif
     #ifdef CORRADE_ENABLE_SIMD128
     {Cpu::Simd128, nullptr, nullptr},
