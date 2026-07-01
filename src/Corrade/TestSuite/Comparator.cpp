@@ -27,6 +27,7 @@
 #include "Comparator.h"
 
 #include "Corrade/Containers/EnumSet.hpp"
+#include "Corrade/Containers/StringView.h"
 
 namespace Corrade { namespace TestSuite {
 
@@ -55,6 +56,24 @@ Utility::Debug& operator<<(Utility::Debug& debug, const ComparisonStatusFlags va
         ComparisonStatusFlag::Verbose,
         ComparisonStatusFlag::Diagnostic,
         ComparisonStatusFlag::VerboseDiagnostic});
+}
+
+namespace Implementation {
+
+void ComparatorBase::printMessage(ComparisonStatusFlags, Utility::Debug& out, const char* const actual, const char* const expected, void(*printer)(Utility::Debug&, const void*)) const {
+    CORRADE_INTERNAL_ASSERT(actualValue && expectedValue);
+    out << "Values" << actual << "and" << expected << "are not the same, actual is\n       ";
+    printer(out, actualValue);
+    out << Utility::Debug::newline << "        but expected\n       ";
+    printer(out, expectedValue);
+}
+
+/* LCOV_EXCL_START */
+void ComparatorBase::saveDiagnostic(ComparisonStatusFlags, Utility::Debug&, Containers::StringView) {
+    CORRADE_INTERNAL_ASSERT_UNREACHABLE();
+}
+/* LCOV_EXCL_STOP */
+
 }
 
 }}
