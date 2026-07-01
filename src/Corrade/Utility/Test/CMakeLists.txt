@@ -531,9 +531,11 @@ corrade_add_test(UtilityResourceCompileTest
         ResourceTestFiles/resources-alignment-larger-than-data-size.conf
         ResourceTestFiles/resources-empty-alias.conf
         ResourceTestFiles/resources-empty-filename.conf
+        ResourceTestFiles/resources-empty-file-filename.conf
         ResourceTestFiles/resources-empty-group.conf
         ResourceTestFiles/resources-no-group.conf
         ResourceTestFiles/resources-nonexistent.conf
+        ResourceTestFiles/resources-file-nonexistent.conf
         ResourceTestFiles/resources-nothing.conf
         ResourceTestFiles/resources-npot-align.conf
         ResourceTestFiles/resources-npot-global-align.conf

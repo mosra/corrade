@@ -83,13 +83,18 @@ const struct {
 } CompileFromInvalidData[]{
     {"nonexistent resource file", "/nonexistent.conf",
         "file /nonexistent.conf does not exist"},
-    {"nonexistent file", "resources-nonexistent.conf",
+    {"nonexistent filename", "resources-nonexistent.conf",
+        /* There's an error message from Path::read() before */
+        "\n    Error: cannot open file /nonexistent.dat of file 1 in group name\n"},
+    {"nonexistent [file] filename", "resources-file-nonexistent.conf",
         /* There's an error message from Path::read() before */
         "\n    Error: cannot open file /nonexistent.dat of file 1 in group name\n"},
     /* Empty group= option is allowed, tested in compileFromEmptyGroup() */
     {"empty group", "resources-no-group.conf",
         "group name is not specified"},
     {"empty filename", "resources-empty-filename.conf",
+        "filename 2 in group name is empty"},
+    {"empty [file] filename", "resources-empty-file-filename.conf",
         "filename or alias of file 1 in group name is empty"},
     {"empty alias", "resources-empty-alias.conf",
         "filename or alias of file 1 in group name is empty"},

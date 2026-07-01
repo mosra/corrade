@@ -347,9 +347,28 @@ Containers::String resourceCompileFrom(const Containers::StringView name, const 
     }
 
     /* Load all files */
+    std::vector<Containers::StringView> filenames = conf.values<Containers::StringView>("filename");
     std::vector<const ConfigurationGroup*> files = conf.groups("file");
     Containers::Array<FileData> fileData;
-    arrayReserve(fileData, files.size());
+    arrayReserve(fileData, filenames.size() + files.size());
+
+    /* Process loose filename options -- they have no aliases and always
+       inherit the global options */
+    for(const Containers::StringView filename: filenames) {
+        if(filename.isEmpty()) {
+            Error() << "    Error: filename" << fileData.size() + 1 << "in group" << group << "is empty";
+            return {};
+        }
+
+        Containers::Optional<Containers::Array<char>> contents = Path::read(Path::join(path, filename));
+        if(!contents) {
+            Error() << "    Error: cannot open file" << filename << "of file" << fileData.size()+1 << "in group" << group;
+            return {};
+        }
+        arrayAppend(fileData, InPlaceInit, filename, globalNullTerminated, globalAlign, *std::move(contents));
+    }
+
+    /* Process [file] groups */
     for(const ConfigurationGroup* const file: files) {
         const Containers::StringView filename = file->value<Containers::StringView>("filename");
         const Containers::StringView alias = file->hasValue("alias") ? file->value<Containers::StringView>("alias") : filename;
