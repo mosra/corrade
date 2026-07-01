@@ -31,6 +31,7 @@ cmake .. ^
     -DCORRADE_UTILITY_USE_ANSI_COLORS=%ANSI_COLORS% ^
     -DCORRADE_BUILD_TESTS=ON ^
     -DCORRADE_BUILD_STATIC=%BUILD_STATIC% ^
+    -DCORRADE_BUILD_DEPRECATED=OFF ^
     %COMPILER_EXTRA% -G Ninja || exit /b
 cmake --build . || exit /b
 

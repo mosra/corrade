@@ -19,6 +19,7 @@ cmake .. \
     `# next time emsdk is bumped).` \
     -DCMAKE_CXX_FLAGS="-D_LIBCPP_REMOVE_TRANSITIVE_INCLUDES" \
     $EXTRA_OPTS \
+    -DCORRADE_BUILD_DEPRECATED=OFF \
     -G Ninja
 ninja $NINJA_JOBS
 

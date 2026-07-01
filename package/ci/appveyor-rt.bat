@@ -28,6 +28,7 @@ cmake .. ^
     -DCMAKE_SYSTEM_NAME=WindowsStore ^
     -DCMAKE_SYSTEM_VERSION=10.0 ^
     -DCORRADE_BUILD_STATIC=ON ^
+    -DCORRADE_BUILD_DEPRECATED=OFF ^
     -G "%GENERATOR%" || exit /b
 cmake --build . --config Release -- /m /v:m  || exit /b
 

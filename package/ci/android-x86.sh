@@ -31,6 +31,7 @@ cmake .. \
     -DCMAKE_CXX_FLAGS="-D_LIBCPP_REMOVE_TRANSITIVE_INCLUDES" \
     -DCORRADE_RC_EXECUTABLE=$HOME/deps-native/bin/corrade-rc \
     -DCORRADE_BUILD_TESTS=ON \
+    -DCORRADE_BUILD_DEPRECATED=OFF \
     -G Ninja
 ninja
 
