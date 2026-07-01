@@ -240,14 +240,16 @@ On compilers other than GCC, Clang and MSVC the macro does nothing.
     @ref CORRADE_DEPRECATED_FILE()
 */
 #ifndef CORRADE_DEPRECATED_MACRO
-#ifdef CORRADE_TARGET_CLANG
-#define CORRADE_DEPRECATED_MACRO(macro,message) _Pragma(_CORRADE_HELPER_STR(GCC warning ("this macro is deprecated: " message)))
+#if defined(CORRADE_TARGET_CLANG) && __clang_major__ >= 14
+#define CORRADE_DEPRECATED_MACRO(macro, message) _Pragma(_CORRADE_HELPER_STR(clang deprecated(macro, message)))
+#elif defined(CORRADE_TARGET_CLANG)
+#define CORRADE_DEPRECATED_MACRO(macro, message) _Pragma(_CORRADE_HELPER_STR(GCC warning ("this macro is deprecated: " message)))
 #elif defined(CORRADE_TARGET_GCC)
-#define CORRADE_DEPRECATED_MACRO(macro,message) _Pragma(_CORRADE_HELPER_STR(GCC warning message))
+#define CORRADE_DEPRECATED_MACRO(macro, message) _Pragma(_CORRADE_HELPER_STR(GCC warning message))
 #elif defined(CORRADE_TARGET_MSVC)
-#define CORRADE_DEPRECATED_MACRO(macro,_message) __pragma(message (__FILE__ ": warning: " _CORRADE_HELPER_STR(macro) " is deprecated: " _message))
+#define CORRADE_DEPRECATED_MACRO(macro, _message) __pragma(message (__FILE__ ": warning: " _CORRADE_HELPER_STR(macro) " is deprecated: " _message))
 #else
-#define CORRADE_DEPRECATED_MACRO(macro,message)
+#define CORRADE_DEPRECATED_MACRO(macro, message)
 #endif
 #endif
 
