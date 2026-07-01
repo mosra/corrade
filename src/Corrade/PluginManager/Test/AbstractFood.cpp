@@ -26,6 +26,8 @@
 
 #include "AbstractFood.h"
 
+#include "Corrade/Containers/StringView.h"
+
 #ifndef CORRADE_PLUGINMANAGER_NO_DYNAMIC_PLUGIN_SUPPORT
 #include "Corrade/Containers/Array.h"
 #include "Corrade/Containers/String.h"
