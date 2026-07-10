@@ -28,8 +28,8 @@ class CorradeConan(ConanFile):
     name = "corrade"
     version = "2020.06"
     description = "Corrade is a multiplatform utility library written \
-                    in C++11/C++14. It's used as a base for the Magnum \
-                    graphics engine, among other things."
+                    in C++11. It's used as a base for the Magnum graphics \
+                    engine, among other things."
     # topics can get used for searches, GitHub topics, Bintray tags etc. Add here keywords about the library
     topics = ("conan", "corrad", "magnum", "filesystem", "console", "environment", "os")
     url = "https://github.com/mosra/corrade"

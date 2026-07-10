@@ -30,7 +30,7 @@ namespace Corrade {
 > *corrade* (v.) --- “To scrape together, to gather together from various sources”
 
 This is a documentation for Corrade, a multiplatform utility library written in
-C++11/C++14, that's used as a base for the [Magnum Project](https://magnum.graphics).
+C++11, that's used as a base for the [Magnum Project](https://magnum.graphics).
 To see high-level feature overview, project goals or read the developer blog,
 head over to the [project homepage](https://magnum.graphics/corrade/).
 
