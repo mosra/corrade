@@ -58,6 +58,7 @@
 #include "Corrade/Utility/Resource.h"
 #include "Corrade/Utility/Sha1.h"
 #include "Corrade/Utility/StlMath.h"
+#include "Corrade/Utility/String.h"
 
 #define DOXYGEN_ELLIPSIS(...) __VA_ARGS__
 
@@ -1226,6 +1227,123 @@ Utility::Resource rs{"game-data"};
 Containers::StringView licenseText = rs.getString("license.txt");
 /* [Resource-override] */
 static_cast<void>(licenseText);
+}
+
+{
+/* [ParseResult-enum-conversion] */
+std::int32_t value;
+if(Utility::String::parseDecimal(DOXYGEN_ELLIPSIS(""), value) !=
+   Utility::String::ParseState::Failed)
+{
+    DOXYGEN_ELLIPSIS()
+}
+/* [ParseResult-enum-conversion] */
+}
+
+{
+/* [parseDecimal-unsigned] */
+std::uint32_t value;
+Utility::String::ParseResult result = Utility::String::parseDecimal(DOXYGEN_ELLIPSIS(""), value);
+if(result == Utility::String::ParseState::Failed) {
+    // handle a parsing failure ...
+} else if(result == Utility::String::ParseState::Clamped) {
+    // handle value out of bounds ...
+} else {
+    // handle success ...
+}
+/* [parseDecimal-unsigned] */
+}
+
+{
+Containers::StringView string;
+/* [parseDecimal-unsigned-trimmed] */
+std::uint32_t value;
+if(Utility::String::parseDecimal(string.trimmed(), value) !=
+   Utility::String::ParseState::Failed)
+{
+    DOXYGEN_ELLIPSIS()
+}
+/* [parseDecimal-unsigned-trimmed] */
+}
+
+{
+/* [parseDecimal-signed] */
+std::int32_t value;
+Utility::String::ParseResult result = Utility::String::parseDecimal(DOXYGEN_ELLIPSIS(""), value);
+if(result == Utility::String::ParseState::Failed) {
+    // handle a parsing failure ...
+} else if(result == Utility::String::ParseState::Clamped) {
+    // handle value out of bounds ...
+} else {
+    // handle success ...
+}
+/* [parseDecimal-signed] */
+}
+
+{
+Containers::StringView string;
+/* [parseDecimal-signed-trimmed] */
+std::int32_t value;
+if(Utility::String::parseDecimal(string.trimmed(), value) !=
+   Utility::String::ParseState::Failed)
+{
+    DOXYGEN_ELLIPSIS()
+}
+/* [parseDecimal-signed-trimmed] */
+}
+
+{
+/* [parseHexadecimal-unsigned] */
+std::uint32_t value;
+Utility::String::ParseResult result = Utility::String::parseHexadecimal(DOXYGEN_ELLIPSIS(""), value,
+    Utility::String::ParseHexadecimalFlag::AllowBasePrefix);
+if(result == Utility::String::ParseState::Failed) {
+    // handle a parsing failure ...
+} else if(result == Utility::String::ParseState::Clamped) {
+    // handle value out of bounds ...
+} else {
+    // handle success ...
+}
+/* [parseHexadecimal-unsigned] */
+}
+
+{
+Containers::StringView string;
+/* [parseHexadecimal-unsigned-trimmed] */
+std::uint32_t value;
+if(Utility::String::parseHexadecimal(string.trimmed(), value) !=
+   Utility::String::ParseState::Failed)
+{
+    DOXYGEN_ELLIPSIS()
+}
+/* [parseHexadecimal-unsigned-trimmed] */
+}
+
+{
+/* [parseHexadecimal-signed] */
+std::int32_t value;
+Utility::String::ParseResult result = Utility::String::parseHexadecimal(DOXYGEN_ELLIPSIS(""), value,
+    Utility::String::ParseHexadecimalFlag::AllowBasePrefix);
+if(result == Utility::String::ParseState::Failed) {
+    // handle a parsing failure ...
+} else if(result == Utility::String::ParseState::Clamped) {
+    // handle value out of bounds ...
+} else {
+    // handle success ...
+}
+/* [parseHexadecimal-signed] */
+}
+
+{
+Containers::StringView string;
+/* [parseHexadecimal-signed-trimmed] */
+std::int32_t value;
+if(Utility::String::parseHexadecimal(string.trimmed(), value) !=
+   Utility::String::ParseState::Failed)
+{
+    DOXYGEN_ELLIPSIS()
+}
+/* [parseHexadecimal-signed-trimmed] */
 }
 
 {

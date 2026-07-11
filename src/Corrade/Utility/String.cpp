@@ -26,6 +26,7 @@
 
 #include "String.h"
 
+#include "Corrade/Containers/EnumSet.hpp"
 #include "Corrade/Containers/GrowableArray.h"
 #include "Corrade/Containers/Optional.h"
 #include "Corrade/Containers/String.h"
@@ -1288,6 +1289,338 @@ CORRADE_UTILITY_CPU_DISPATCHED(replaceAllInPlaceCharacterImplementation, void CO
     return replaceAllInPlaceCharacterImplementation(Cpu::DefaultBase)(data, size, search, replace);
 })
 
+}
+
+Utility::Debug& operator<<(Utility::Debug& debug, const ParseState value) {
+    debug << "Utility::String::ParseState" << Utility::Debug::nospace;
+
+    switch(value) {
+        /* LCOV_EXCL_START */
+        #define _c(v) case ParseState::v: return debug << "::" #v;
+        _c(Success)
+        _c(Clamped)
+        _c(Failed)
+        #undef _c
+        /* LCOV_EXCL_STOP */
+    }
+
+    return debug << "(" << Utility::Debug::nospace << Utility::Debug::hex << std::uint8_t(value) << Utility::Debug::nospace << ")";
+}
+
+Utility::Debug& operator<<(Utility::Debug& debug, const ParseDecimalFlag value) {
+    debug << "Utility::String::ParseDecimalFlag" << Utility::Debug::nospace;
+
+    switch(value) {
+        /* LCOV_EXCL_START */
+        #define _c(v) case ParseDecimalFlag::v: return debug << "::" #v;
+        _c(DisallowSign)
+        #undef _c
+        /* LCOV_EXCL_STOP */
+    }
+
+    return debug << "(" << Utility::Debug::nospace << Utility::Debug::hex << std::uint8_t(value) << Utility::Debug::nospace << ")";
+}
+
+Utility::Debug& operator<<(Utility::Debug& debug, const ParseDecimalFlags value) {
+    return Containers::enumSetDebugOutput(debug, value, "Utility::String::ParseDecimalFlags{}", {
+        ParseDecimalFlag::DisallowSign,
+    });
+}
+
+Utility::Debug& operator<<(Utility::Debug& debug, const ParseHexadecimalFlag value) {
+    debug << "Utility::String::ParseHexadecimalFlag" << Utility::Debug::nospace;
+
+    switch(value) {
+        /* LCOV_EXCL_START */
+        #define _c(v) case ParseHexadecimalFlag::v: return debug << "::" #v;
+        _c(DisallowSign)
+        _c(AllowBasePrefix)
+        _c(AllowHashPrefix)
+        #undef _c
+        /* LCOV_EXCL_STOP */
+    }
+
+    return debug << "(" << Utility::Debug::nospace << Utility::Debug::hex << std::uint8_t(value) << Utility::Debug::nospace << ")";
+}
+
+Utility::Debug& operator<<(Utility::Debug& debug, const ParseHexadecimalFlags value) {
+    return Containers::enumSetDebugOutput(debug, value, "Utility::String::ParseHexadecimalFlags{}", {
+        ParseHexadecimalFlag::DisallowSign,
+        ParseHexadecimalFlag::AllowBasePrefix,
+        ParseHexadecimalFlag::AllowHashPrefix,
+    });
+}
+
+namespace {
+
+ParseResult parseDecimal(const char* const data, const std::size_t size, std::uint64_t& out) {
+    /* The caller should delegate here only if there's actually anything to
+       parse */
+    CORRADE_INTERNAL_DEBUG_ASSERT(data && size);
+
+    /* Eat leading zeros, as for those we don't need to do any checks or
+       multiplication. Initialize the output to zero. */
+    out = 0;
+    std::size_t i = 0;
+    while(i < size && data[i] == '0')
+        ++i;
+
+    /* The largest unsigned 64-bit decimal value (18446744073709551615) with no
+       leading zeros has 20 digits, so we can use 19 as an upper bound for a
+       parsing loop without any overflow checks, delaying them to the 20th
+       iteration, if there is any. The number can also have leading zeros, so
+       the overflow can happen much later. The general 99% case is however
+       without leading zeros, with less than 20 digits and with no overflow,
+       which this makes as fast as code with no bounds checks at all. */
+    constexpr std::size_t MaxDecimalLength = 20;
+    /* Compile-time verification. The `- 4` is for `ull\0` at the end. Looks
+       silly, yes, I know.    12345678901234567890 */
+    #define MAX_DECIMAL_VALUE 18446744073709551615ull
+    static_assert(MAX_DECIMAL_VALUE == ~std::uint64_t{} &&
+        sizeof(_CORRADE_HELPER_STR2(MAX_DECIMAL_VALUE)) - 4 == MaxDecimalLength,
+        "invalid hardcoded max 64-bit decimal value");
+    #undef MAX_DECIMAL_VALUE
+
+    /* Tight loop for as long as we're sure no 64-bit overflow can happen. If
+       the number was just zeros, this loop won't be entered at all. */
+    const std::size_t sizeUntilOverflow = min(size, i + MaxDecimalLength - 1);
+    for(; i != sizeUntilOverflow; ++i) {
+        const char c = data[i];
+        if(c < '0' || c > '9')
+            return {ParseState::Failed, i};
+        out = out*10 + c - '0';
+    }
+
+    /* If there's still some characters left, the very next character can still
+       fit, the others after will not. In most cases this branch won't be
+       entered at all, with all input being eaten by the above branches. */
+    if(size > sizeUntilOverflow) {
+        CORRADE_INTERNAL_DEBUG_ASSERT(i == sizeUntilOverflow);
+        for(; i != size; ++i) {
+            const char c = data[i];
+            if(c < '0' || c > '9')
+                return {ParseState::Failed, i};
+        }
+
+        /* If there is more than one characters after, or if multiplication or
+           addition for the last potentially fitting character would overflow,
+           return a clamped value */
+        const char c = data[sizeUntilOverflow];
+        if(size > sizeUntilOverflow + 1 || out > ~std::uint64_t{}/10 || out*10 > ~std::uint64_t{} - (c - '0')) {
+            out = ~std::uint64_t{};
+            return ParseState::Clamped;
+        }
+
+        /* If it won't overflow, add it to the output */
+        out = out*10 + c - '0';
+    }
+
+    /* All good */
+    return ParseState::Success;
+}
+
+ParseResult parseHexadecimal(const char* const data, const std::size_t size, std::uint64_t& out) {
+    /* The caller should delegate here only if there's actually anything to
+       parse */
+    CORRADE_INTERNAL_DEBUG_ASSERT(data && size);
+
+    /* Eat leading zeros, as for those we don't need to do any checks or
+       multiplication. Initialize the output to zero. */
+    out = 0;
+    std::size_t i = 0;
+    while(i < size && data[i] == '0')
+        ++i;
+
+    /* The largest unsigned hexadecimal value with no leading zeros has exactly
+       16 chars (each char representing four bits). Anything longer is an
+       overflow, so we can just go through at most 16 chars without any bounds
+       check, and unconditionally report overflow if there's more. */
+    const std::size_t sizeUntilOverflow = min(size, i + std::size_t{64/4});
+    for(; i != sizeUntilOverflow; ++i) {
+        out = out << 4;
+        const char c = data[i];
+        if(c >= '0' && c <= '9')
+            out += c - '0';
+        else if(c >= 'a' && c <= 'f')
+            out += c - 'a' + 10;
+        else if(c >= 'A' && c <= 'F')
+            out += c - 'A' + 10;
+        else
+            return {ParseState::Failed, i};
+    }
+
+    /* If there are any characters after, they can at best overflow, but may
+       also generate a parsing failure. In most cases this branch won't be
+       entered at all, with all input being eaten by the above branches. */
+    if(size > sizeUntilOverflow) {
+        CORRADE_INTERNAL_DEBUG_ASSERT(i == sizeUntilOverflow);
+        for(; i != size; ++i) {
+            const char c = data[i];
+            if(!(c >= '0' && c <= '9') &&
+               !(c >= 'a' && c <= 'f') &&
+               !(c >= 'A' && c <= 'F'))
+                return {ParseState::Failed, i};
+        }
+
+        out = ~std::uint64_t{};
+        return ParseState::Clamped;
+    }
+
+    /* Otherwise all good */
+    return ParseState::Success;
+}
+
+std::size_t skipDecimalPrefix(const char*, std::size_t, ParseDecimalFlags) {
+    return 0;
+}
+
+std::size_t skipHexadecimalPrefix(const char* const data, const std::size_t size, const ParseHexadecimalFlags flags) {
+    if(flags >= ParseHexadecimalFlag::AllowBasePrefix && size >= 2 && data[0] == '0' && (data[1] == 'X' || data[1] == 'x'))
+        return 2;
+    if(flags >= ParseHexadecimalFlag::AllowHashPrefix && size >= 1 && data[0] == '#')
+        return 1;
+    return 0;
+}
+
+template<class Flag, ParseResult(*parse)(const char*, std::size_t, std::uint64_t&), std::size_t(*skipPrefix)(const char*, std::size_t, Containers::EnumSet<Flag>)> ParseResult parseInteger(const char* const data, const std::size_t size, std::uint64_t& value, const std::uint64_t min, const std::uint64_t max, const Containers::EnumSet<Flag> flags) {
+    /* Fail if the string is empty. Each condition is a separate branch here to
+       make sure they're all covered properly. */
+    if(!size)
+        return {ParseState::Failed, 0};
+    /* Negative numbers are invalid for an unsigned value. This is notably
+       different from std::strtoull() which does something stupid instead. */
+    if(data[0] == '-')
+        return {ParseState::Failed, 0};
+
+    /* Explicitly positive number */
+    std::size_t i = 0;
+    if(data[0] == '+') {
+        /* Fail if the flags don't allow it */
+        if(flags >= Flag::DisallowSign)
+            return {ParseState::Failed, 0};
+
+        /* Skip the sign, and fail if there's nothing after */
+        ++i;
+        if(i == size)
+            return {ParseState::Failed, i};
+    }
+
+    /* Skip any prefixes, and again fail if there's nothing after */
+    i += skipPrefix(data + i, size - i, flags);
+    if(i == size)
+        return {ParseState::Failed, i};
+
+    /* Parse the (non-empty) rest of the string. If it failed, it means there
+       are non-numeric characters. */
+    std::uint64_t parsed;
+    const ParseResult result = parse(data + i, size - i, parsed);
+    if(result == ParseState::Failed)
+        return {ParseState::Failed, result.index() + i};
+
+    /* If the result didn't fit into 64 bits or if it's outside our limits,
+       clamp it appropriately and report that */
+    if(result == ParseState::Clamped || parsed < min || parsed > max) {
+        value = Utility::min(Utility::max(parsed, min), max);
+        return ParseState::Clamped;
+    }
+
+    /* Otherwise it's a pure success. All Failed nad Clamped cases from the
+       delegated parse() should have been handled above. */
+    CORRADE_INTERNAL_DEBUG_ASSERT(result == ParseState::Success);
+    value = parsed;
+    return ParseState::Success;
+}
+
+template<class Flag, ParseResult(*parse)(const char*, std::size_t, std::uint64_t&), std::size_t(*skipPrefix)(const char*, std::size_t, Containers::EnumSet<Flag>)> ParseResult parseInteger(const char* const data, const std::size_t size, std::int64_t& value, const std::int64_t min, const std::int64_t max, const Containers::EnumSet<Flag> flags) {
+    /* Fail if the string is empty */
+    if(!size)
+        return {ParseState::Failed, 0};
+
+    /* Decide if the number is positive or negative */
+    bool positive = true;
+    std::size_t i = 0;
+    if(data[0] == '-' || data[0] == '+') {
+        /* Fail if the flags don't allow a sign */
+        if(flags >= Flag::DisallowSign)
+            return {ParseState::Failed, 0};
+
+        /* Skip the sign, and fail if there's nothing after */
+        positive = data[0] == '+';
+        ++i;
+        if(i == size)
+            return {ParseState::Failed, i};
+    }
+
+    /* Skip any prefixes, and again fail if there's nothing after */
+    i += skipPrefix(data + i, size - i, flags);
+    if(i == size)
+        return {ParseState::Failed, i};
+
+    /* Parse the (non-empty) rest of the string as an unsigned number. If it
+       failed, it means there are non-numeric characters. */
+    std::uint64_t parsed;
+    const ParseResult result = parse(data + i, size - i, parsed);
+    if(result == ParseState::Failed)
+        return {ParseState::Failed, result.index() + i};
+
+    /* Make the parsed value signed, clamp and report overflow if it doesn't
+       fit into a signed type. This handles also the case where parse() above
+       returned Clamped as in that case it'll return UINT64_MAX which is larger
+       than INT64_MAX. */
+    if(positive && parsed > INT64_MAX) {
+        value = INT64_MAX;
+        return ParseState::Clamped;
+    }
+    /* Can't just negate INT64_MIN because that's one larger than a max
+       representable value. So instead add one to make it fit, then negate,
+       then convert to an unsigned type, and then add one. Could also use
+       `std::uint64_t(INT64_MAX) + 1` but this is more symmetrical I guess? */
+    if(!positive && parsed > std::uint64_t(-(INT64_MIN + 1)) + 1) {
+        value = INT64_MIN;
+        return ParseState::Clamped;
+    }
+
+    /* If the signed value is outside our limits, clamp and report as well */
+    value = positive ? parsed : -parsed;
+    if(value < min || value > max) {
+        value = Utility::min(Utility::max(value, min), max);
+        return ParseState::Clamped;
+    }
+
+    /* Otherwise it's a pure success. All Failed nad Clamped cases from the
+       delegated parse() should have been handled above. */
+    CORRADE_INTERNAL_DEBUG_ASSERT(result == ParseState::Success);
+    return ParseState::Success;
+}
+
+}
+
+ParseResult parseDecimal(Containers::StringView string, std::uint64_t& value, std::uint64_t min, std::uint64_t max, ParseDecimalFlags flags) {
+    /* Debug-only assert to avoid expensive checks in release builds */
+    CORRADE_DEBUG_ASSERT(min <= max,
+        "Utility::String::parseDecimal(): expected min to be not greater than max but got" << min << "and" << max, ParseState{});
+    return parseInteger<ParseDecimalFlag, parseDecimal, skipDecimalPrefix>(string.data(), string.size(), value, min, max, flags);
+}
+
+ParseResult parseDecimal(Containers::StringView string, std::int64_t& value, std::int64_t min, std::int64_t max, ParseDecimalFlags flags) {
+    /* Debug-only assert to avoid expensive checks in release builds */
+    CORRADE_DEBUG_ASSERT(min <= max,
+        "Utility::String::parseDecimal(): expected min to be not greater than max but got" << min << "and" << max, ParseState{});
+    return parseInteger<ParseDecimalFlag, parseDecimal, skipDecimalPrefix>(string.data(), string.size(), value, min, max, flags);
+}
+
+ParseResult parseHexadecimal(Containers::StringView string, std::uint64_t& value, std::uint64_t min, std::uint64_t max, ParseHexadecimalFlags flags) {
+    /* Debug-only assert to avoid expensive checks in release builds */
+    CORRADE_DEBUG_ASSERT(min <= max,
+        "Utility::String::parseHexadecimal(): expected min to be not greater than max but got" << min << "and" << max, ParseState{});
+    return parseInteger<ParseHexadecimalFlag, parseHexadecimal, skipHexadecimalPrefix>(string.data(), string.size(), value, min, max, flags);
+}
+
+ParseResult parseHexadecimal(Containers::StringView string, std::int64_t& value, std::int64_t min, std::int64_t max, ParseHexadecimalFlags flags) {
+    /* Debug-only assert to avoid expensive checks in release builds */
+    CORRADE_DEBUG_ASSERT(min <= max,
+        "Utility::String::parseHexadecimal(): expected min to be not greater than max but got" << min << "and" << max, ParseState{});
+    return parseInteger<ParseHexadecimalFlag, parseHexadecimal, skipHexadecimalPrefix>(string.data(), string.size(), value, min, max, flags);
 }
 
 Containers::Optional<Containers::Array<std::uint32_t>> parseNumberSequence(const Containers::StringView string, const std::uint32_t min, const std::uint32_t max) {

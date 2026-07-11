@@ -290,6 +290,11 @@ endif()
 
 corrade_add_test(UtilityMathTest MathTest.cpp)
 
+corrade_add_test(UtilityStringBenchmark StringBenchmark.cpp
+    LIBRARIES CorradeTestSuiteTestLib
+    FILES ${PROJECT_SOURCE_DIR}/src/Corrade/Containers/Test/StringTestFiles/lorem-ipsum.txt)
+target_include_directories(UtilityStringBenchmark PRIVATE ${CMAKE_CURRENT_BINARY_DIR})
+
 # Build these only if there's no explicit -std= passed in the flags
 if(NOT CMAKE_CXX_FLAGS MATCHES "-std=")
     # Copied verbatim from src/Corrade/Test/CMakeLists.txt, please keep in sync
@@ -325,6 +330,10 @@ if(NOT CMAKE_CXX_FLAGS MATCHES "-std=")
             UtilityMacrosCpp17Test
             PROPERTIES CORRADE_CXX_STANDARD 17)
         target_include_directories(UtilityFormatStlStringViewTest PRIVATE ${CMAKE_CURRENT_BINARY_DIR})
+
+        # Build the Utility::String benchmark with C++17 if we can to test also
+        # std::from_chars
+        set_target_properties(UtilityStringBenchmark PROPERTIES CORRADE_CXX_STANDARD 17)
     endif()
 
     # Copied verbatim from src/Corrade/Test/CMakeLists.txt, please keep in sync
@@ -424,11 +433,6 @@ if((CMAKE_CXX_COMPILER_ID STREQUAL "GNU" AND NOT CMAKE_CXX_COMPILER_VERSION VERS
 endif()
 
 corrade_add_test(UtilityStringTest StringTest.cpp LIBRARIES CorradeTestSuiteTestLib)
-
-corrade_add_test(UtilityStringBenchmark StringBenchmark.cpp
-    LIBRARIES CorradeTestSuiteTestLib
-    FILES ${PROJECT_SOURCE_DIR}/src/Corrade/Containers/Test/StringTestFiles/lorem-ipsum.txt)
-target_include_directories(UtilityStringBenchmark PRIVATE ${CMAKE_CURRENT_BINARY_DIR})
 
 corrade_add_test(UtilitySystemTest SystemTest.cpp)
 corrade_add_test(UtilityTweakableParserTest TweakableParserTest.cpp)

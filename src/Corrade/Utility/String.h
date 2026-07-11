@@ -206,6 +206,603 @@ inline void replaceAllInPlace(const Containers::MutableStringView string, const 
 }
 
 /**
+@brief String parse state
+@m_since_latest
+
+Returned as part of @ref ParseResult from @ref parseDecimal() and
+@ref parseHexadecimal().
+*/
+enum class ParseState: std::uint8_t {
+    /**
+     * Parsing succeeded with no information loss, i.e. the value can fit into
+     * the desired range without being clamped.
+     */
+    Success,
+
+    /**
+     * Parsing succeeded but the parsed value had to be clamped to fit into the
+     * desired range. The output value is set to the appropriate min or max
+     * value of given range.
+     */
+    Clamped,
+
+    /**
+     * Parsing the value failed, for example because it contains invalid
+     * characters. The output value is left in an unspecified state in this
+     * case, @ref ParseResult::index() contains the index of a byte on which a
+     * parsing failure happened.
+     */
+    Failed
+};
+
+/**
+@debugoperatorenum{ParseState}
+@m_since_latest
+*/
+CORRADE_UTILITY_EXPORT Utility::Debug& operator<<(Utility::Debug& debug, ParseState value);
+
+/**
+@brief String parse result
+@m_since_latest
+
+Stores a @ref ParseState and an optional byte index of where a parsing failure
+happened, returned from @ref parseDecimal() and @ref parseHexadecimal(). The
+instance is implicitly convertible to a @ref ParseState, allowing you to use
+just the enum if details about parsing failure aren't needed for anything:
+
+@snippet Utility.cpp ParseResult-enum-conversion
+*/
+class ParseResult {
+    public:
+        /** @brief Constructor */
+        /*implicit*/ ParseResult(ParseState state, std::size_t index = 0): _state{state}, _index{index} {}
+
+        /** @brief Parse state */
+        ParseState state() const { return _state; }
+
+        /** @brief Parse state */
+        /*implicit*/ operator ParseState() const { return _state; }
+
+        /**
+         * @brief Parse failure byte index
+         *
+         * Index of a byte in the parsed string on which a parsing failure
+         * happened. Has a meaningful value only for @ref ParseState::Failed,
+         * otherwise the value is @cpp 0 @ce.
+         */
+        std::size_t index() const { return _index; }
+
+    private:
+        ParseState _state;
+        std::size_t _index;
+};
+
+/**
+@brief Decimal string parse flag
+@m_since_latest
+
+@see @ref ParseDecimalFlags, @ref parseDecimal(), @ref ParseHexadecimalFlag
+*/
+enum class ParseDecimalFlag: std::uint8_t {
+    /**
+     * Disallow `-` and `+` sign in front of the number. Note that, unlike with
+     * @ref std::strtoull(), which silently accepts negative numbers and wraps
+     * them around, for an unsigned output type a `-` is never allowed
+     * regardless of this flag being present.
+     */
+    DisallowSign = 1 << 0
+};
+
+/**
+@debugoperatorenum{ParseDecimalFlag}
+@m_since_latest
+*/
+CORRADE_UTILITY_EXPORT Utility::Debug& operator<<(Utility::Debug& debug, ParseDecimalFlag value);
+
+/**
+@brief Decimal string parse flags
+@m_since_latest
+
+@see @ref parseDecimal(), @ref ParseHexadecimalFlags
+*/
+typedef Containers::EnumSet<ParseDecimalFlag> ParseDecimalFlags;
+
+CORRADE_ENUMSET_OPERATORS(ParseDecimalFlags)
+
+/**
+@debugoperatorenum{ParseDecimalFlags}
+@m_since_latest
+*/
+CORRADE_UTILITY_EXPORT Utility::Debug& operator<<(Utility::Debug& debug, ParseDecimalFlags value);
+
+/**
+@brief Parse a string containing an unsigned decimal number
+@param[in]  string      Input string
+@param[out] value       Output value
+@param[in]  min         Minimal allowed value
+@param[in]  max         Maximal allowed value
+@param[in]  flags       Flags
+@return Parse state
+@m_since_latest
+
+If the @p string is a decimal numeric value, optionally prepended with a `+`
+sign unless @ref ParseDecimalFlag::DisallowSign is set, parses it into
+@p value and returns @ref ParseState::Success if the value fits into the range
+defined by @p min and @p max. If the value doesn't fit into the range defined
+by @p min and @p max, returns @ref ParseState::Clamped and @p value is set to
+either @p min or @p max as appropriate. If the string isn't a valid number or
+has non-numeric characters before or after, returns @ref ParseState::Failed,
+with @ref ParseResult::index() pointing to the byte at which a parsing failure
+happened, and @p value left in an unspecified state.
+
+The string can have any number of leading zeros after the sign, unlike
+@ref std::strtoull() a leading zero *never* causes the number to be interpreted
+as octal, and a `0x` or `0X` prefix is treated as a parsing failure.
+
+Expects that @p min is less or equal to @p max. Common usage is through one of
+the type-specific overloads such as @ref parseDecimal(Containers::StringView, std::uint32_t&, ParseDecimalFlags)
+which have the min and max values implicit based on the type. Example usage:
+
+@snippet Utility.cpp parseDecimal-unsigned
+
+If clamping / overflow doesn't need to be handled, it's enough to check that
+the function doesn't return @ref ParseState::Failed.
+
+Note that in comparison to @ref std::strtoull(), which accepts negative numbers
+and wraps them around, this function returns @ref ParseState::Failed for any
+number with a `-` sign. Furthermore, the function *does not* discard any
+whitespace characters around the number --- if you need to do so, pass the
+@p string as @relativeref{Containers::BasicStringView,trimmed()}, with
+@relativeref{Containers::BasicStringView,trimmedPrefix()} or with
+@relativeref{Containers::BasicStringView,trimmedSuffix()}:
+
+@snippet Utility.cpp parseDecimal-unsigned-trimmed
+
+@see @ref parseHexadecimal(Containers::StringView, std::uint64_t&, std::uint64_t, std::uint64_t, ParseHexadecimalFlags)
+*/
+CORRADE_UTILITY_EXPORT ParseResult parseDecimal(Containers::StringView string, std::uint64_t& value, std::uint64_t min, std::uint64_t max, ParseDecimalFlags flags = {});
+
+/**
+@brief Parse a string containing a signed decimal number
+@param[in]  string      Input string
+@param[out] value       Output value
+@param[in]  min         Minimal allowed value
+@param[in]  max         Maximal allowed value
+@param[in]  flags       Flags
+@return Parse state
+@m_since_latest
+
+If the @p string is a decimal numeric value, optionally prepended with a `+` or
+`-` sign unless @ref ParseDecimalFlag::DisallowSign is set, parses it into
+@p value and returns @ref ParseState::Success if the value fits into the range
+defined by @p min and @p max. If the value doesn't fit into the range defined
+by @p min and @p max, returns @ref ParseState::Clamped and @p value is set to
+either @p min or @p max as appropriate. If the string isn't a valid number or
+has non-numeric characters before or after, returns @ref ParseState::Failed,
+with @ref ParseResult::index() pointing to the byte at which a parsing failure
+happened, and @p value left in an unspecified state.
+
+The string can have any number of leading zeros after the sign, if any, unlike
+@ref std::strtoull() a leading zero *never* causes the number to be interpreted
+as octal, and a `0x` or `0X` prefix is treated as a parsing failure.
+
+Expects that @p min is less or equal to @p max. Common usage is through one of
+the type-specific overloads such as @ref parseDecimal(Containers::StringView, std::int32_t&, ParseDecimalFlags)
+which have the min and max values implicit based on the type. Example usage:
+
+@snippet Utility.cpp parseDecimal-signed
+
+If clamping / overflow doesn't need to be handled, it's enough to check that
+the function doesn't return @ref ParseState::Failed.
+
+Note that in comparison to @ref std::strtoll(), the function *does not* discard
+any whitespace characters around the number --- if you need to do so, pass the
+@p string as @relativeref{Containers::BasicStringView,trimmed()}, with
+@relativeref{Containers::BasicStringView,trimmedPrefix()} or with
+@relativeref{Containers::BasicStringView,trimmedSuffix()}:
+
+@snippet Utility.cpp parseDecimal-signed-trimmed
+
+@see @ref parseHexadecimal(Containers::StringView, std::int64_t&, std::int64_t, std::int64_t, ParseHexadecimalFlags)
+*/
+CORRADE_UTILITY_EXPORT ParseResult parseDecimal(Containers::StringView string, std::int64_t& value, std::int64_t min, std::int64_t max, ParseDecimalFlags flags = {});
+
+/**
+@brief Parse a string containing an unsigned 8-bit decimal number
+@m_since_latest
+
+Equivalent to calling @ref parseDecimal(Containers::StringView, std::uint64_t&, std::uint64_t, std::uint64_t, ParseDecimalFlags)
+with @p min set to @cpp 0 @ce and @p max set to @cpp 255 @ce and converting the
+@p value to a 8-bit type.
+*/
+inline ParseResult parseDecimal(Containers::StringView string, std::uint8_t& value, ParseDecimalFlags flags = {}) {
+    std::uint64_t parsed;
+    const ParseResult result = parseDecimal(string, parsed, 0, UINT8_MAX, flags);
+    value = parsed;
+    return result;
+}
+
+/**
+@brief Parse a string containing a signed 8-bit decimal number
+@m_since_latest
+
+Equivalent to calling @ref parseDecimal(Containers::StringView, std::int64_t&, std::int64_t, std::int64_t, ParseDecimalFlags)
+with @p min set to @cpp -128 @ce and @p max set to @cpp 127 @ce and converting
+the @p value to a 8-bit type.
+*/
+inline ParseResult parseDecimal(Containers::StringView string, std::int8_t& value, ParseDecimalFlags flags = {}) {
+    std::int64_t parsed;
+    const ParseResult result = parseDecimal(string, parsed, INT8_MIN, INT8_MAX, flags);
+    value = parsed;
+    return result;
+}
+
+/**
+@brief Parse a string containing an unsigned 16-bit decimal number
+@m_since_latest
+
+Equivalent to calling @ref parseDecimal(Containers::StringView, std::uint64_t&, std::uint64_t, std::uint64_t, ParseDecimalFlags)
+with @p min set to @cpp 0 @ce and @p max set to @cpp 65535 @ce and converting
+the @p value to a 16-bit type.
+*/
+inline ParseResult parseDecimal(Containers::StringView string, std::uint16_t& value, ParseDecimalFlags flags = {}) {
+    std::uint64_t parsed;
+    const ParseResult result = parseDecimal(string, parsed, 0, UINT16_MAX, flags);
+    value = parsed;
+    return result;
+}
+
+/**
+@brief Parse a string containing a signed 16-bit decimal number
+@m_since_latest
+
+Equivalent to calling @ref parseDecimal(Containers::StringView, std::int64_t&, std::int64_t, std::int64_t, ParseDecimalFlags)
+with @p min set to @cpp -32768 @ce and @p max set to @cpp 32767 @ce and
+converting the @p value to a 16-bit type.
+*/
+inline ParseResult parseDecimal(Containers::StringView string, std::int16_t& value, ParseDecimalFlags flags = {}) {
+    std::int64_t parsed;
+    const ParseResult result = parseDecimal(string, parsed, INT16_MIN, INT16_MAX, flags);
+    value = parsed;
+    return result;
+}
+
+/**
+@brief Parse a string containing an unsigned 32-bit decimal number
+@m_since_latest
+
+Equivalent to calling @ref parseDecimal(Containers::StringView, std::uint64_t&, std::uint64_t, std::uint64_t, ParseDecimalFlags)
+with @p min set to @cpp 0 @ce and @p max set to a max representable unsigned
+32-bit value and converting the @p value to a 32-bit type.
+*/
+inline ParseResult parseDecimal(Containers::StringView string, std::uint32_t& value, ParseDecimalFlags flags = {}) {
+    std::uint64_t parsed;
+    const ParseResult result = parseDecimal(string, parsed, 0, UINT32_MAX, flags);
+    value = parsed;
+    return result;
+}
+
+/**
+@brief Parse a string containing a signed 32-bit decimal number
+@m_since_latest
+
+Equivalent to calling @ref parseDecimal(Containers::StringView, std::int64_t&, std::int64_t, std::int64_t, ParseDecimalFlags)
+with @p min and @p max set to a min and max representable signed 32-bit value
+and converting the @p value to a 32-bit type.
+*/
+inline ParseResult parseDecimal(Containers::StringView string, std::int32_t& value, ParseDecimalFlags flags = {}) {
+    std::int64_t parsed;
+    const ParseResult result = parseDecimal(string, parsed, INT32_MIN, INT32_MAX, flags);
+    value = parsed;
+    return result;
+}
+
+/**
+@brief Parse a string containing an unsigned 64-bit decimal number
+@m_since_latest
+
+Equivalent to calling @ref parseDecimal(Containers::StringView, std::uint64_t&, std::uint64_t, std::uint64_t, ParseDecimalFlags)
+with @p min set to @cpp 0 @ce and @p max set to a max representable unsigned
+64-bit value.
+*/
+inline ParseResult parseDecimal(Containers::StringView string, std::uint64_t& value, ParseDecimalFlags flags = {}) {
+    std::uint64_t parsed;
+    const ParseResult result = parseDecimal(string, parsed, 0, UINT64_MAX, flags);
+    value = parsed;
+    return result;
+}
+
+/**
+@brief Parse a string containing a signed 64-bit decimal number
+@m_since_latest
+
+Equivalent to calling @ref parseDecimal(Containers::StringView, std::int64_t&, std::int64_t, std::int64_t, ParseDecimalFlags)
+with @p min and @p max set to a min and max representable signed 64-bit value.
+*/
+inline ParseResult parseDecimal(Containers::StringView string, std::int64_t& value, ParseDecimalFlags flags = {}) {
+    std::int64_t parsed;
+    const ParseResult result = parseDecimal(string, parsed, INT64_MIN, INT64_MAX, flags);
+    value = parsed;
+    return result;
+}
+
+/**
+@brief Hexadecimal string parse flag
+@m_since_latest
+
+@see @ref ParseHexadecimalFlags, @ref parseHexadecimal(), @ref ParseDecimalFlag
+*/
+enum class ParseHexadecimalFlag: std::uint8_t {
+    /**
+     * Disallow `-` and `+` sign in front of the number. Note that, unlike with
+     * @ref std::strtoull(), which silently accepts negative numbers and wraps
+     * them around, for an unsigned output type a `-` is never allowed
+     * regardless of this flag being present.
+     */
+    DisallowSign = 1 << 0,
+
+    /**
+     * Allow also a `0x` or `0X` prefix in front of the number and after the
+     * sign, if any. If neither @ref ParseHexadecimalFlag::AllowBasePrefix nor
+     * @relativeref{ParseHexadecimalFlag,AllowHashPrefix} is set, no prefix is
+     * allowed.
+     */
+    AllowBasePrefix = 1 << 1,
+
+    /**
+     * Allow also a `#` prefix in front of the number and after the sign, if
+     * any, such as for a hexadecimal color representation. If neither
+     * @ref ParseHexadecimalFlag::AllowBasePrefix nor
+     * @relativeref{ParseHexadecimalFlag,AllowHashPrefix} is set, no prefix is
+     * allowed.
+     */
+    AllowHashPrefix = 1 << 2,
+};
+
+/**
+@debugoperatorenum{ParseHexadecimalFlag}
+@m_since_latest
+*/
+CORRADE_UTILITY_EXPORT Utility::Debug& operator<<(Utility::Debug& debug, ParseHexadecimalFlag value);
+
+/**
+@brief Hexadecimal string parse flags
+@m_since_latest
+
+@see @ref parseHexadecimal(), @ref ParseDecimalFlags
+*/
+typedef Containers::EnumSet<ParseHexadecimalFlag> ParseHexadecimalFlags;
+
+CORRADE_ENUMSET_OPERATORS(ParseHexadecimalFlags)
+
+/**
+@debugoperatorenum{ParseHexadecimalFlags}
+@m_since_latest
+*/
+CORRADE_UTILITY_EXPORT Utility::Debug& operator<<(Utility::Debug& debug, ParseHexadecimalFlags value);
+
+/**
+@brief Parse a string containing an unsigned hexadecimal number
+@param[in]  string      Input string
+@param[out] value       Output value
+@param[in]  min         Minimal allowed value
+@param[in]  max         Maximal allowed value
+@param[in]  flags       Flags
+@return Parse state
+@m_since_latest
+
+If the @p string is a hexadecimal numeric value, optionally prepended with a
+`+` sign unless @ref ParseHexadecimalFlag::DisallowSign is set, parses it into
+@p value and returns @ref ParseState::Success if the value fits into the range
+defined by @p min and @p max. If the value doesn't fit into the range defined
+by @p min and @p max, returns @ref ParseState::Clamped and @p value is set to
+either @p min or @p max as appropriate. If the string isn't a valid number or
+has non-hexadecimal characters before or after, returns
+@ref ParseState::Failed, with @ref ParseResult::index() pointing to the byte at
+which a parsing failure happened, and @p value left in an unspecified state.
+
+Both lowercase and uppercase hexadecimal characters are accepted. By default no
+prefix is allowed, pass @ref ParseHexadecimalFlag::AllowBasePrefix to accept
+also numbers prefixed with `0x` or `0X` after the sign, if any, and
+@ref ParseHexadecimalFlag::AllowHashPrefix to accept also numbers prefixed with
+a `#` character after the sign, if any, such as for a hexadecimal color
+representation. The string can have any number of leading zeros after the sign
+and prefix, if any, unlike @ref std::strtoull() an omitted prefix or a leading
+zero *never* causes the number to be interpreted as decimal or octal.
+
+Expects that @p min is less or equal to @p max. Common usage is through one of
+the type-specific overloads such as @ref parseHexadecimal(Containers::StringView, std::uint32_t&, ParseHexadecimalFlags)
+which have the min and max values implicit based on the type. Example usage:
+
+@snippet Utility.cpp parseHexadecimal-unsigned
+
+If clamping / overflow doesn't need to be handled, it's enough to check that
+the function doesn't return @ref ParseState::Failed.
+
+Note that in comparison to @ref std::strtoull(), which accepts negative numbers
+and wraps them around, this function returns @ref ParseState::Failed for any
+number with a `-` sign. Furthermore, the function *does not* discard any
+whitespace characters around the number --- if you need to do so, pass the
+@p string as @relativeref{Containers::BasicStringView,trimmed()}, with
+@relativeref{Containers::BasicStringView,trimmedPrefix()} or with
+@relativeref{Containers::BasicStringView,trimmedSuffix()}:
+
+@snippet Utility.cpp parseHexadecimal-unsigned-trimmed
+
+@see @ref parseDecimal(Containers::StringView, std::uint64_t&, std::uint64_t, std::uint64_t, ParseDecimalFlags)
+*/
+CORRADE_UTILITY_EXPORT ParseResult parseHexadecimal(Containers::StringView string, std::uint64_t& value, std::uint64_t min, std::uint64_t max, ParseHexadecimalFlags flags = {});
+
+/**
+@brief Parse a string containing a signed hexadecimal number
+@param[in]  string      Input string
+@param[out] value       Output value
+@param[in]  min         Minimal allowed value
+@param[in]  max         Maximal allowed value
+@param[in]  flags       Flags
+@return Parse state
+@m_since_latest
+
+If the @p string is a hexadecimal numeric value, optionally prepended with a
+`+` or `-` sign unless @ref ParseDecimalFlag::DisallowSign is set, parses it
+into @p value and returns @ref ParseState::Success if the value fits into the
+range defined by @p min and @p max. If the value doesn't fit into the range
+defined by @p min and @p max, returns @ref ParseState::Clamped and @p value is
+set to either @p min or @p max as appropriate. If the string isn't a valid
+number or has non-hexadecimal characters before or after, returns
+@ref ParseState::Failed, with @ref ParseResult::index() pointing to the byte at
+which a parsing failure happened, and @p value left in an unspecified state.
+
+Both lowercase and uppercase hexadecimal characters are accepted. By default no
+prefix is allowed, pass @ref ParseHexadecimalFlag::AllowBasePrefix to accept
+also numbers prefixed with `0x` or `0X` after the sign, and
+@ref ParseHexadecimalFlag::AllowHashPrefix to accept also numbers prefixed with
+a `#` character after the sign, such as for hexadecimal color representation.
+The string can have any number of leading zeros after the sign and prefix,
+unlike @ref std::strtoull() an omitted prefix or a leading zero *never* causes
+the number to be interpreted as decimal or octal.
+
+Expects that @p min is less or equal to @p max. Common usage is through one of
+the type-specific overloads such as @ref parseHexadecimal(Containers::StringView, std::int32_t&, ParseHexadecimalFlags)
+which have the min and max values implicit based on the type. Example usage:
+
+@snippet Utility.cpp parseHexadecimal-signed
+
+If clamping / overflow doesn't need to be handled, it's enough to check that
+the function doesn't return @ref ParseState::Failed.
+
+Note that in comparison to @ref std::strtoll(), the function *does not* discard
+any whitespace characters around the number --- if you need to do so, pass the
+@p string as @relativeref{Containers::BasicStringView,trimmed()}, with
+@relativeref{Containers::BasicStringView,trimmedPrefix()} or with
+@relativeref{Containers::BasicStringView,trimmedSuffix()}:
+
+@snippet Utility.cpp parseHexadecimal-signed-trimmed
+
+@see @ref parseDecimal(Containers::StringView, std::int64_t&, std::int64_t, std::int64_t, ParseDecimalFlags)
+*/
+CORRADE_UTILITY_EXPORT ParseResult parseHexadecimal(Containers::StringView string, std::int64_t& value, std::int64_t min, std::int64_t max, ParseHexadecimalFlags flags = {});
+
+/**
+@brief Parse a string containing an unsigned 8-bit hexadecimal number
+@m_since_latest
+
+Equivalent to calling @ref parseHexadecimal(Containers::StringView, std::uint64_t&, std::uint64_t, std::uint64_t, ParseHexadecimalFlags)
+with @p min set to @cpp 0 @ce and @p max set to @cpp 255 @ce and converting the
+@p value to a 8-bit type.
+*/
+inline ParseResult parseHexadecimal(Containers::StringView string, std::uint8_t& value, ParseHexadecimalFlags flags = {}) {
+    std::uint64_t parsed;
+    const ParseResult result = parseHexadecimal(string, parsed, 0, UINT8_MAX, flags);
+    value = parsed;
+    return result;
+}
+
+/**
+@brief Parse a string containing a signed 8-bit hexadecimal number
+@m_since_latest
+
+Equivalent to calling @ref parseHexadecimal(Containers::StringView, std::int64_t&, std::int64_t, std::int64_t, ParseHexadecimalFlags)
+with @p min set to @cpp -128 @ce and @p max set to @cpp 127 @ce and converting
+the @p value to a 8-bit type.
+*/
+inline ParseResult parseHexadecimal(Containers::StringView string, std::int8_t& value, ParseHexadecimalFlags flags = {}) {
+    std::int64_t parsed;
+    const ParseResult result = parseHexadecimal(string, parsed, INT8_MIN, INT8_MAX, flags);
+    value = parsed;
+    return result;
+}
+
+/**
+@brief Parse a string containing an unsigned 16-bit hexadecimal number
+@m_since_latest
+
+Equivalent to calling @ref parseHexadecimal(Containers::StringView, std::uint64_t&, std::uint64_t, std::uint64_t, ParseHexadecimalFlags)
+with @p min set to @cpp 0 @ce and @p max set to @cpp 65535 @ce and converting
+the @p value to a 16-bit type.
+*/
+inline ParseResult parseHexadecimal(Containers::StringView string, std::uint16_t& value, ParseHexadecimalFlags flags = {}) {
+    std::uint64_t parsed;
+    const ParseResult result = parseHexadecimal(string, parsed, 0, UINT16_MAX, flags);
+    value = parsed;
+    return result;
+}
+
+/**
+@brief Parse a string containing a signed 16-bit hexadecimal number
+@m_since_latest
+
+Equivalent to calling @ref parseHexadecimal(Containers::StringView, std::int64_t&, std::int64_t, std::int64_t, ParseHexadecimalFlags)
+with @p min set to @cpp -32768 @ce and @p max set to @cpp 32767 @ce and
+converting the @p value to a 16-bit type.
+*/
+inline ParseResult parseHexadecimal(Containers::StringView string, std::int16_t& value, ParseHexadecimalFlags flags = {}) {
+    std::int64_t parsed;
+    const ParseResult result = parseHexadecimal(string, parsed, INT16_MIN, INT16_MAX, flags);
+    value = parsed;
+    return result;
+}
+
+/**
+@brief Parse a string containing an unsigned 32-bit hexadecimal number
+@m_since_latest
+
+Equivalent to calling @ref parseHexadecimal(Containers::StringView, std::uint64_t&, std::uint64_t, std::uint64_t, ParseHexadecimalFlags)
+with @p min set to @cpp 0 @ce and @p max set to a max representable unsigned
+32-bit value and converting the @p value to a 32-bit type.
+*/
+inline ParseResult parseHexadecimal(Containers::StringView string, std::uint32_t& value, ParseHexadecimalFlags flags = {}) {
+    std::uint64_t parsed;
+    const ParseResult result = parseHexadecimal(string, parsed, 0, UINT32_MAX, flags);
+    value = parsed;
+    return result;
+}
+
+/**
+@brief Parse a string containing a signed 32-bit hexadecimal number
+@m_since_latest
+
+Equivalent to calling @ref parseHexadecimal(Containers::StringView, std::int64_t&, std::int64_t, std::int64_t, ParseHexadecimalFlags)
+with @p min and @p max set to a min and max representable signed 32-bit value
+and converting the @p value to a 32-bit type.
+*/
+inline ParseResult parseHexadecimal(Containers::StringView string, std::int32_t& value, ParseHexadecimalFlags flags = {}) {
+    std::int64_t parsed;
+    const ParseResult result = parseHexadecimal(string, parsed, INT32_MIN, INT32_MAX, flags);
+    value = parsed;
+    return result;
+}
+
+/**
+@brief Parse a string containing an unsigned 64-bit hexadecimal number
+@m_since_latest
+
+Equivalent to calling @ref parseHexadecimal(Containers::StringView, std::uint64_t&, std::uint64_t, std::uint64_t, ParseHexadecimalFlags)
+with @p min set to @cpp 0 @ce and @p max set to a max representable unsigned
+64-bit value.
+*/
+inline ParseResult parseHexadecimal(Containers::StringView string, std::uint64_t& value, ParseHexadecimalFlags flags = {}) {
+    std::uint64_t parsed;
+    const ParseResult result = parseHexadecimal(string, parsed, 0, UINT64_MAX, flags);
+    value = parsed;
+    return result;
+}
+
+/**
+@brief Parse a string containing a signed 64-bit hexadecimal number
+@m_since_latest
+
+Equivalent to calling @ref parseHexadecimal(Containers::StringView, std::int64_t&, std::int64_t, std::int64_t, ParseHexadecimalFlags)
+with @p min and @p max set to a min and max representable signed 64-bit value.
+*/
+inline ParseResult parseHexadecimal(Containers::StringView string, std::int64_t& value, ParseHexadecimalFlags flags = {}) {
+    std::int64_t parsed;
+    const ParseResult result = parseHexadecimal(string, parsed, INT64_MIN, INT64_MAX, flags);
+    value = parsed;
+    return result;
+}
+
+/**
 @brief Parse a number sequence
 @m_since_latest
 
