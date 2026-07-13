@@ -47,8 +47,17 @@
 #include <algorithm> /* std::transform(), std::replace() */
 #include <random>
 
+/* That a compiler advertises C++17 support doesn't necessarily mean it uses a
+   STL implementation that implements all its features (such as using a new
+   Clang with an old libstdc++). So check for presence of the header as
+   well. */
 #ifdef CORRADE_TARGET_CXX17
+#ifdef __has_include
+#if __has_include(<charconv>)
 #include <charconv> /* std::from_chars() */
+#define CAN_USE_STL_FROM_CHARS
+#endif
+#endif
 #endif
 
 #include "configure.h"
@@ -109,7 +118,7 @@ struct StringBenchmark: TestSuite::Tester {
     template<Containers::Array<Containers::String> StringBenchmark::*numbers> void parseDecimalStl();
     template<Containers::Array<Containers::String> StringBenchmark::*numbers> void parseDecimalStlNonNullTerminated();
     template<Containers::Array<Containers::String> StringBenchmark::*numbers> void parseDecimalStlStream();
-    #ifdef CORRADE_TARGET_CXX17
+    #ifdef CAN_USE_STL_FROM_CHARS
     template<Containers::Array<Containers::String> StringBenchmark::*numbers> void parseDecimalStlFromChars();
     #endif
     template<Containers::Array<Containers::String> StringBenchmark::*numbers> void parseHexadecimal();
@@ -117,7 +126,7 @@ struct StringBenchmark: TestSuite::Tester {
     template<Containers::Array<Containers::String> StringBenchmark::*numbers> void parseHexadecimalStl();
     template<Containers::Array<Containers::String> StringBenchmark::*numbers> void parseHexadecimalStlNonNullTerminated();
     template<Containers::Array<Containers::String> StringBenchmark::*numbers> void parseHexadecimalStlStream();
-    #ifdef CORRADE_TARGET_CXX17
+    #ifdef CAN_USE_STL_FROM_CHARS
     template<Containers::Array<Containers::String> StringBenchmark::*numbers> void parseHexadecimalStlFromChars();
     #endif
 
@@ -484,7 +493,7 @@ StringBenchmark::StringBenchmark() {
         &StringBenchmark::parseDecimalStl<&StringBenchmark::_numbers>,
         &StringBenchmark::parseDecimalStlNonNullTerminated<&StringBenchmark::_numbers>,
         &StringBenchmark::parseDecimalStlStream<&StringBenchmark::_numbers>,
-        #ifdef CORRADE_TARGET_CXX17
+        #ifdef CAN_USE_STL_FROM_CHARS
         &StringBenchmark::parseDecimalStlFromChars<&StringBenchmark::_numbers>,
         #endif
 
@@ -493,7 +502,7 @@ StringBenchmark::StringBenchmark() {
         &StringBenchmark::parseDecimalStl<&StringBenchmark::_numbersLeadingZeros>,
         &StringBenchmark::parseDecimalStlNonNullTerminated<&StringBenchmark::_numbersLeadingZeros>,
         &StringBenchmark::parseDecimalStlStream<&StringBenchmark::_numbersLeadingZeros>,
-        #ifdef CORRADE_TARGET_CXX17
+        #ifdef CAN_USE_STL_FROM_CHARS
         &StringBenchmark::parseDecimalStlFromChars<&StringBenchmark::_numbersLeadingZeros>,
         #endif
 
@@ -502,7 +511,7 @@ StringBenchmark::StringBenchmark() {
         &StringBenchmark::parseHexadecimalStl<&StringBenchmark::_numbersHex>,
         &StringBenchmark::parseHexadecimalStlNonNullTerminated<&StringBenchmark::_numbersHex>,
         &StringBenchmark::parseHexadecimalStlStream<&StringBenchmark::_numbersHex>,
-        #ifdef CORRADE_TARGET_CXX17
+        #ifdef CAN_USE_STL_FROM_CHARS
         &StringBenchmark::parseHexadecimalStlFromChars<&StringBenchmark::_numbersHex>,
         #endif
 
@@ -511,7 +520,7 @@ StringBenchmark::StringBenchmark() {
         &StringBenchmark::parseHexadecimalStl<&StringBenchmark::_numbersHexLeadingZeros>,
         &StringBenchmark::parseHexadecimalStlNonNullTerminated<&StringBenchmark::_numbersHexLeadingZeros>,
         &StringBenchmark::parseHexadecimalStlStream<&StringBenchmark::_numbersHexLeadingZeros>,
-        #ifdef CORRADE_TARGET_CXX17
+        #ifdef CAN_USE_STL_FROM_CHARS
         &StringBenchmark::parseHexadecimalStlFromChars<&StringBenchmark::_numbersHexLeadingZeros>,
         #endif
     }, 50);
@@ -1334,7 +1343,7 @@ template<Containers::Array<Containers::String> StringBenchmark::*numbers> void S
     CORRADE_COMPARE(sum, _numbersSum);
 }
 
-#ifdef CORRADE_TARGET_CXX17
+#ifdef CAN_USE_STL_FROM_CHARS
 template<Containers::Array<Containers::String> StringBenchmark::*numbers> void StringBenchmark::parseDecimalStlFromChars() {
     if(numbers == &StringBenchmark::_numbersLeadingZeros)
         setTestCaseDescription("leading zeros");
@@ -1439,7 +1448,7 @@ template<Containers::Array<Containers::String> StringBenchmark::*numbers> void S
     CORRADE_COMPARE(sum, _numbersSum);
 }
 
-#ifdef CORRADE_TARGET_CXX17
+#ifdef CAN_USE_STL_FROM_CHARS
 template<Containers::Array<Containers::String> StringBenchmark::*numbers> void StringBenchmark::parseHexadecimalStlFromChars() {
     if(numbers == &StringBenchmark::_numbersHexLeadingZeros)
         setTestCaseDescription("leading zeros");
