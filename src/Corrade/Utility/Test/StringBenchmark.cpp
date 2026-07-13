@@ -27,7 +27,6 @@
 #include <cctype> /* std::ctype */
 #include <cstring> /* std::memchr */
 #include <locale> /* std::locale::classic() */
-#include <random>
 
 #include "Corrade/Containers/Array.h"
 #include "Corrade/Containers/Optional.h"
@@ -42,10 +41,11 @@
 #include "Corrade/Utility/Test/cpuVariantHelpers.h"
 #include "Corrade/Utility/Test/StringTest.h"
 
-/* On GCC 4.8 has to be included after StringTest.h which includes the AVX
-   intrinsics headers, otherwise __m256i and other types don't get defined for
-   some reason */
+/* On GCC 4.8 these have to be included after StringTest.h which includes the
+   AVX intrinsics headers, otherwise __m256i and other types don't get defined
+   for some reason */
 #include <algorithm> /* std::transform(), std::replace() */
+#include <random>
 
 #ifdef CORRADE_TARGET_CXX17
 #include <charconv> /* std::from_chars() */
