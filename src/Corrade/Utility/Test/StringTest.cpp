@@ -2777,8 +2777,26 @@ void StringTest::parseFloat() {
     double valueDouble;
     String::ParseResult result = String::parseFloat(data.string, value);
     String::ParseResult resultDouble = String::parseFloat(data.string, valueDouble);
-    CORRADE_COMPARE(Containers::pair(result.state(), result.index()), Containers::pair(data.state, std::size_t{}));
-    CORRADE_COMPARE(Containers::pair(resultDouble.state(), resultDouble.index()), Containers::pair(data.stateDouble, std::size_t{}));
+    {
+        #if defined(__GLIBC__) && __GLIBC__*1000 + __GLIBC_MINOR__ < 2028
+        /* https://github.com/bminor/glibc/commit/fcd6b5ac36a49e83e27e9186ded04329d3b0b0d9,
+           or so I think. The 32-bit Clamped cases are picked to be the
+           smallest possible single-digit change triggering it, they work on
+           2.42, on MSVC and on Emscripten as well. Only large 64-bit values
+           get detected correctly. */
+        CORRADE_EXPECT_FAIL_IF(data.state == String::ParseState::Clamped && Containers::StringView{data.name}.contains("32-bit"),
+            "glibc before version 2.28 has an off-by-one error in overflow detection and doesn't set the errno correctly");
+        #endif
+        CORRADE_COMPARE(Containers::pair(result.state(), result.index()), Containers::pair(data.state, std::size_t{}));
+    } {
+        #if defined(__GLIBC__) && __GLIBC__*1000 + __GLIBC_MINOR__ < 2028
+        /* Similar to above, here it fails to produce Clamped in all cases
+           where a 64-bit value is meant to overflow */
+        CORRADE_EXPECT_FAIL_IF(data.stateDouble == String::ParseState::Clamped,
+            "glibc before version 2.28 has an off-by-one error in overflow detection and doesn't set the errno correctly");
+        #endif
+        CORRADE_COMPARE(Containers::pair(resultDouble.state(), resultDouble.index()), Containers::pair(data.stateDouble, std::size_t{}));
+    }
     CORRADE_COMPARE(value, data.value);
     CORRADE_COMPARE(valueDouble, data.valueDouble);
 }
