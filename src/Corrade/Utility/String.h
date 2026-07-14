@@ -281,7 +281,8 @@ class ParseResult {
 @brief Decimal string parse flag
 @m_since_latest
 
-@see @ref ParseDecimalFlags, @ref parseDecimal(), @ref ParseHexadecimalFlag
+@see @ref ParseDecimalFlags, @ref parseDecimal(), @ref ParseHexadecimalFlag,
+    @ref ParseFloatFlag
 */
 enum class ParseDecimalFlag: std::uint8_t {
     /**
@@ -303,7 +304,7 @@ CORRADE_UTILITY_EXPORT Utility::Debug& operator<<(Utility::Debug& debug, ParseDe
 @brief Decimal string parse flags
 @m_since_latest
 
-@see @ref parseDecimal(), @ref ParseHexadecimalFlags
+@see @ref parseDecimal(), @ref ParseHexadecimalFlags, @ref ParseFloatFlags
 */
 typedef Containers::EnumSet<ParseDecimalFlag> ParseDecimalFlags;
 
@@ -358,7 +359,8 @@ whitespace characters around the number --- if you need to do so, pass the
 
 @snippet Utility.cpp parseDecimal-unsigned-trimmed
 
-@see @ref parseHexadecimal(Containers::StringView, std::uint64_t&, std::uint64_t, std::uint64_t, ParseHexadecimalFlags)
+@see @ref parseHexadecimal(Containers::StringView, std::uint64_t&, std::uint64_t, std::uint64_t, ParseHexadecimalFlags),
+    @ref parseFloat()
 */
 CORRADE_UTILITY_EXPORT ParseResult parseDecimal(Containers::StringView string, std::uint64_t& value, std::uint64_t min, std::uint64_t max, ParseDecimalFlags flags = {});
 
@@ -403,7 +405,8 @@ any whitespace characters around the number --- if you need to do so, pass the
 
 @snippet Utility.cpp parseDecimal-signed-trimmed
 
-@see @ref parseHexadecimal(Containers::StringView, std::int64_t&, std::int64_t, std::int64_t, ParseHexadecimalFlags)
+@see @ref parseHexadecimal(Containers::StringView, std::int64_t&, std::int64_t, std::int64_t, ParseHexadecimalFlags),
+    @ref parseFloat()
 */
 CORRADE_UTILITY_EXPORT ParseResult parseDecimal(Containers::StringView string, std::int64_t& value, std::int64_t min, std::int64_t max, ParseDecimalFlags flags = {});
 
@@ -530,7 +533,8 @@ inline ParseResult parseDecimal(Containers::StringView string, std::int64_t& val
 @brief Hexadecimal string parse flag
 @m_since_latest
 
-@see @ref ParseHexadecimalFlags, @ref parseHexadecimal(), @ref ParseDecimalFlag
+@see @ref ParseHexadecimalFlags, @ref parseHexadecimal(),
+    @ref ParseDecimalFlag, @ref ParseFloatFlag
 */
 enum class ParseHexadecimalFlag: std::uint8_t {
     /**
@@ -569,7 +573,7 @@ CORRADE_UTILITY_EXPORT Utility::Debug& operator<<(Utility::Debug& debug, ParseHe
 @brief Hexadecimal string parse flags
 @m_since_latest
 
-@see @ref parseHexadecimal(), @ref ParseDecimalFlags
+@see @ref parseHexadecimal(), @ref ParseDecimalFlags, @ref ParseFloatFlags
 */
 typedef Containers::EnumSet<ParseHexadecimalFlag> ParseHexadecimalFlags;
 
@@ -629,7 +633,8 @@ whitespace characters around the number --- if you need to do so, pass the
 
 @snippet Utility.cpp parseHexadecimal-unsigned-trimmed
 
-@see @ref parseDecimal(Containers::StringView, std::uint64_t&, std::uint64_t, std::uint64_t, ParseDecimalFlags)
+@see @ref parseDecimal(Containers::StringView, std::uint64_t&, std::uint64_t, std::uint64_t, ParseDecimalFlags),
+    @ref parseFloat()
 */
 CORRADE_UTILITY_EXPORT ParseResult parseHexadecimal(Containers::StringView string, std::uint64_t& value, std::uint64_t min, std::uint64_t max, ParseHexadecimalFlags flags = {});
 
@@ -679,7 +684,8 @@ any whitespace characters around the number --- if you need to do so, pass the
 
 @snippet Utility.cpp parseHexadecimal-signed-trimmed
 
-@see @ref parseDecimal(Containers::StringView, std::int64_t&, std::int64_t, std::int64_t, ParseDecimalFlags)
+@see @ref parseDecimal(Containers::StringView, std::int64_t&, std::int64_t, std::int64_t, ParseDecimalFlags),
+    @ref parseFloat()
 */
 CORRADE_UTILITY_EXPORT ParseResult parseHexadecimal(Containers::StringView string, std::int64_t& value, std::int64_t min, std::int64_t max, ParseHexadecimalFlags flags = {});
 
@@ -801,6 +807,85 @@ inline ParseResult parseHexadecimal(Containers::StringView string, std::int64_t&
     value = parsed;
     return result;
 }
+
+/**
+@brief Float string parse flag
+@m_since_latest
+
+@see @ref ParseFloatFlags, @ref parseFloat(), @ref ParseDecimalFlag,
+    @ref ParseHexadecimalFlag
+*/
+enum class ParseFloatFlag: std::uint8_t {
+    /** Disallow `-` and `+` sign in front of the number */
+    DisallowSign = 1 << 0
+};
+
+/**
+@debugoperatorenum{ParseFloatFlag}
+@m_since_latest
+*/
+CORRADE_UTILITY_EXPORT Utility::Debug& operator<<(Utility::Debug& debug, ParseFloatFlag value);
+
+/**
+@brief Float string parse flags
+@m_since_latest
+
+@see @ref parseFloat(), @ref ParseDecimalFlags, @ref ParseHexadecimalFlags
+*/
+typedef Containers::EnumSet<ParseFloatFlag> ParseFloatFlags;
+
+CORRADE_ENUMSET_OPERATORS(ParseFloatFlags)
+
+/**
+@debugoperatorenum{ParseFloatFlags}
+@m_since_latest
+*/
+CORRADE_UTILITY_EXPORT Utility::Debug& operator<<(Utility::Debug& debug, ParseFloatFlags value);
+
+/**
+@brief Parse a string containing a floating-point number
+@param[in]  string      Input string
+@param[out] value       Output value
+@param[in]  flags       Flags
+@return Parse state
+@m_since_latest
+
+If the @p string is a floating-point numberic value, optionally prepended with
+a `+` or `-` sign unless @ref ParseDecimalFlag::DisallowSign is set, and
+optionally with an exponent, parses it into @p value and returns
+@ref ParseState::Success if the value fits into the output type. If the value
+doesn't fit into the output type, returns @ref ParseState::Clamped and @p value
+is set to either positive or negative infinity as appropriate. If the input
+string is a literal `inf` or `nan`, optionally with a sign, it results in
+@ref ParseState::Success, not @ref ParseState::Clamped, and @p value set to
+either infinity or NaN with an appropriate sign. If the string isn't a valid
+floating-point number, returns @ref ParseState::Failed, with
+@ref ParseResult::index() pointing to the byte at which a parsing failure
+happened, and @p value left in an unspecified state. Example usage:
+
+@snippet Utility.cpp parseFloat
+
+If clamping / overflow doesn't need to be handled, it's enough to check that
+the function doesn't return @ref ParseState::Failed.
+
+Note that in comparison to @ref std::strtof(), which accepts also a hexadecimal
+float representation, this function returns @ref ParseState::Failed for those.
+Furthermore, the function *does not* discard any whitespace characters around
+the number --- if you need to do so, pass the @p string as
+@relativeref{Containers::BasicStringView,trimmed()}, with
+@relativeref{Containers::BasicStringView,trimmedPrefix()} or with
+@relativeref{Containers::BasicStringView,trimmedSuffix()}:
+
+@snippet Utility.cpp parseFloat-trimmed
+
+@see @ref parseDecimal(), @ref parseHexadecimal()
+*/
+CORRADE_UTILITY_EXPORT ParseResult parseFloat(Containers::StringView string, float& value, ParseFloatFlags flags = {});
+/**
+@overload
+@m_since_latest
+*/
+CORRADE_UTILITY_EXPORT ParseResult parseFloat(Containers::StringView string, double& value, ParseFloatFlags flags = {});
 
 /**
 @brief Parse a number sequence

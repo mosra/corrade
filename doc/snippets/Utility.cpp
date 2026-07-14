@@ -1347,6 +1347,32 @@ if(Utility::String::parseHexadecimal(string.trimmed(), value) !=
 }
 
 {
+/* [parseFloat] */
+float value;
+Utility::String::ParseResult result = Utility::String::parseFloat(DOXYGEN_ELLIPSIS(""), value);
+if(result == Utility::String::ParseState::Failed) {
+    // handle a parsing failure ...
+} else if(result == Utility::String::ParseState::Clamped) {
+    // handle value out of bounds ...
+} else {
+    // handle success ...
+}
+/* [parseFloat] */
+}
+
+{
+Containers::StringView string;
+/* [parseFloat-trimmed] */
+float value;
+if(Utility::String::parseFloat(string.trimmed(), value) !=
+   Utility::String::ParseState::Failed)
+{
+    DOXYGEN_ELLIPSIS()
+}
+/* [parseFloat-trimmed] */
+}
+
+{
 /* [Tweakable-define] */
 #define _ CORRADE_TWEAKABLE
 /* [Tweakable-define] */

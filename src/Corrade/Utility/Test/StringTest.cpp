@@ -37,6 +37,7 @@
 #include "Corrade/Utility/Algorithms.h"
 #include "Corrade/Utility/Format.h"
 #include "Corrade/Utility/Memory.h"
+#include "Corrade/Utility/StlMath.h" /* NAN, HUGE_VAL */
 #include "Corrade/Utility/String.h"
 #include "Corrade/Utility/Test/cpuVariantHelpers.h"
 #include "Corrade/Utility/Test/StringTest.h"
@@ -58,6 +59,8 @@ struct StringTest: TestSuite::Tester {
     void debugParseDecimalFlags();
     void debugParseHexadecimalFlag();
     void debugParseHexadecimalFlags();
+    void debugParseFloatFlag();
+    void debugParseFloatFlags();
 
     void captureImplementations();
     void restoreImplementations();
@@ -108,9 +111,13 @@ struct StringTest: TestSuite::Tester {
     void parseHexadecimalUnsignedFailed();
     void parseHexadecimalSigned();
     void parseHexadecimalSignedFailed();
+
+    void parseFloat();
+    void parseFloatFailed();
+
     template<class T> void parseDecimalHexadecimalUnsignedLimits();
     template<class T> void parseDecimalHexadecimalSignedLimits();
-    void parseDecimalHexadecimalNonNullTerminated();
+    void parseDecimalHexadecimalFloatNonNullTerminated();
     void parseDecimalHexadecimalInvalid();
 
     void parseNumberSequence();
@@ -826,6 +833,225 @@ const struct {
         "10000000000000000000000000000000000000000000g", {}, 44},
 };
 
+/* Yeah, sure, undefined behavior and all. Do I care? No. */
+union FloatFromBits {
+    explicit FloatFromBits(std::uint32_t bits): bits{bits} {}
+    std::uint32_t bits;
+    float value;
+};
+union DoubleFromBits {
+    explicit DoubleFromBits(std::uint64_t bits): bits{bits} {}
+    std::uint64_t bits;
+    double value;
+};
+
+const struct {
+    TestSuite::TestCaseDescriptionSourceLocation name;
+    const char* string;
+    String::ParseState state;
+    float value;
+    String::ParseState stateDouble;
+    double valueDouble;
+} ParseFloatData[]{
+    {"zero", "0",
+        String::ParseState::Success, 0.0f,
+        String::ParseState::Success, 0.0},
+    {"very many zeros",
+        "000000000000000000000000000000000000000000000000000000000000"
+        "000000000000000000000000000000000000000000000000000000000000"
+        "000000000000000000000000000000000000000000000000000000000000"
+        "000000000000000000000000000000000000000000000000000000000000"
+        "000000000000000000000000000000000000000000000000000000000000"
+        "000000000000000000000000000000000000000000000000000000000000e100",
+        String::ParseState::Success, 0.0f,
+        String::ParseState::Success, 0.0},
+    {"positive zero", "+0",
+        String::ParseState::Success, 0.0f,
+        String::ParseState::Success, 0.0},
+    {"negative zero", "-0",
+        String::ParseState::Success, -0.0f,
+        String::ParseState::Success, -0.0},
+    {"negative zero with an exponent", "-0e-100",
+        String::ParseState::Success, -0.0f,
+        String::ParseState::Success, -0.0},
+    {"value", "1337.420",
+        String::ParseState::Success, 1337.420f,
+        String::ParseState::Success, 1337.420},
+    {"leading zeros", "000000000000001337.420",
+        String::ParseState::Success, 1337.420f,
+        String::ParseState::Success, 1337.420},
+    /** @todo make this fail? if yes, then disallow also +. and -. */
+    {"leading zero omitted", ".420",
+        String::ParseState::Success, 0.420f,
+        String::ParseState::Success, 0.420},
+    {"leading zero omitted, positive", "+.420",
+        String::ParseState::Success, 0.420f,
+        String::ParseState::Success, 0.420},
+    {"leading zero omitted, negative", "-.420",
+        String::ParseState::Success, -0.420f,
+        String::ParseState::Success, -0.420},
+    {"positive value", "+1337.420",
+        String::ParseState::Success, 1337.420f,
+        String::ParseState::Success, 1337.420},
+    {"negative value", "-1337.420",
+        String::ParseState::Success, -1337.420f,
+        String::ParseState::Success, -1337.420},
+    {"exponent", "1.33742e3",
+        String::ParseState::Success, 1337.420f,
+        String::ParseState::Success, 1337.420},
+    {"uppercase exponent", "1.33742E3",
+        String::ParseState::Success, 1337.420f,
+        String::ParseState::Success, 1337.420},
+    {"exponent with positive sign", "1.33742e+3",
+        String::ParseState::Success, 1337.420f,
+        String::ParseState::Success, 1337.420},
+    {"exponent with negative sign", "1337420e-3",
+        String::ParseState::Success, 1337.420f,
+        String::ParseState::Success, 1337.420},
+
+    /* Overflow to positive/negative infinity */
+    {"largest 32-bit value", "340282346638528859811704183484516925440",
+        /* https://en.wikipedia.org/wiki/Single-precision_floating-point_format */
+        String::ParseState::Success, FloatFromBits{0x7f7fffffu}.value,
+        String::ParseState::Success, 340282346638528859811704183484516925440.0},
+                      /* value changed here ---v to 6 from 4 */
+    {"largest 32-bit value plus some", "340282366638528859811704183484516925440",
+        String::ParseState::Clamped, HUGE_VALF,
+        String::ParseState::Success, 340282366638528859811704183484516925440.0},
+    {"smallest 32-bit value", "-340282346638528859811704183484516925440",
+        /* Like above, but flipping the highest sign bit */
+        String::ParseState::Success, FloatFromBits{0xff7fffffu}.value,
+        String::ParseState::Success, -340282346638528859811704183484516925440.0},
+                         /* value changed here ---v to 6 from 4 */
+    {"smallest 32-bit value minus some", "-340282366638528859811704183484516925440",
+        String::ParseState::Clamped, -HUGE_VALF,
+        String::ParseState::Success, -340282366638528859811704183484516925440.0},
+
+    {"largest 64-bit value",
+        "179769313486231570814527423731704356798070567525844996598917476803157260780028538760589558632766878171540458953514382464234321326889464182768467546703537516986049910576551282076245490090389328944075868508455133942304583236903222948165808559332123348274797826204144723168738177180919299881250404026184124858368",
+        String::ParseState::Clamped, HUGE_VALF,
+        /* https://en.wikipedia.org/wiki/Double-precision_floating-point_format */
+        String::ParseState::Success, DoubleFromBits{0x7fefffffffffffffull}.value},
+    {"largest 64-bit value plus some",
+                      /* v--- value changed here to 8 from 7 */
+        "179769313486231580814527423731704356798070567525844996598917476803157260780028538760589558632766878171540458953514382464234321326889464182768467546703537516986049910576551282076245490090389328944075868508455133942304583236903222948165808559332123348274797826204144723168738177180919299881250404026184124858368",
+        String::ParseState::Clamped, HUGE_VALF,
+        String::ParseState::Clamped, HUGE_VAL},
+    {"smallest 64-bit value",
+        "-179769313486231570814527423731704356798070567525844996598917476803157260780028538760589558632766878171540458953514382464234321326889464182768467546703537516986049910576551282076245490090389328944075868508455133942304583236903222948165808559332123348274797826204144723168738177180919299881250404026184124858368",
+        String::ParseState::Clamped, -HUGE_VALF,
+        /* Like above, but flipping the highest sign bit */
+        String::ParseState::Success, DoubleFromBits{0xffefffffffffffffull}.value},
+    {"smallest 64-bit value plus one",
+                       /* v--- value changed here to 8 from 7 */
+        "-179769313486231580814527423731704356798070567525844996598917476803157260780028538760589558632766878171540458953514382464234321326889464182768467546703537516986049910576551282076245490090389328944075868508455133942304583236903222948165808559332123348274797826204144723168738177180919299881250404026184124858368",
+        String::ParseState::Clamped, -HUGE_VALF,
+        String::ParseState::Clamped, -HUGE_VAL},
+
+    /* The string `infinity` is supported by std::strtof() as well but I don't
+       intend to claim that as being supported so don't even test for that */
+    {"infinity", "inf",
+        /* It should *not* claim that a clamp happened since that's what we
+           want to enter */
+        String::ParseState::Success, HUGE_VALF,
+        String::ParseState::Success, HUGE_VAL},
+    {"positive infinity, mixed case", "+iNF",
+        String::ParseState::Success, HUGE_VALF,
+        String::ParseState::Success, HUGE_VAL},
+    {"negative infinity, mixed case", "-Inf",
+        String::ParseState::Success, -HUGE_VALF,
+        String::ParseState::Success, -HUGE_VAL},
+    /* Positive / negative NaN is ignored for practical purposes, so comparing
+       to just NaN always */
+    {"NaN", "nan",
+        String::ParseState::Success, NAN,
+        String::ParseState::Success, double(NAN)},
+    {"negative NaN, mixed case", "-nAn",
+        String::ParseState::Success, NAN,
+        String::ParseState::Success, double(NAN)},
+};
+
+const struct {
+    TestSuite::TestCaseDescriptionSourceLocation name;
+    const char* string;
+    String::ParseFloatFlags flags;
+    std::size_t expected;
+} ParseFloatFailedData[]{
+    {"empty string",
+        "", {}, 0},
+    {"null string",
+        nullptr, {}, 0},
+    {"positive sign alone",
+        "+", {}, 1},
+    {"negative sign alone",
+        "-", {}, 1},
+    {"positive sign disallowed",
+        "+33", String::ParseFloatFlag::DisallowSign, 0},
+    {"negative sign disallowed",
+        "-666", String::ParseFloatFlag::DisallowSign, 0},
+    /* These two likely just pass with std::strtof() */
+    {"trailing whitespace",
+        "12\t", {}, 2},
+    {"leading whitespace",
+        "  12", {}, 0},
+    {"whitespace in the middle",
+        "1 2", {}, 1},
+    {"non-numeric character at the front",
+        "f13.42", {}, 0},
+    {"non-numeric character after a sign",
+        "-f13.42", {}, 1},
+    {"non-numeric character after a decimal point",
+        "13.f42", {}, 3},
+    {"non-numeric character at the end",
+        "13.42f", {}, 5},
+    {"duplicated minus sign",
+        "--13.37", {}, 1},
+    {"duplicated plus sign",
+        "++13.37", {}, 1},
+    {"plus and minus sign",
+        "+-13.37", {}, 1},
+    {"minus and plus sign",
+        "-+13.37", {}, 1},
+
+    /* I don't intend to support this weird hex representation once Corrade has
+       own float parsers so disallowing it here already. (A hex representation
+       of a float/double bit pattern is something else, supporting that makes
+       sense, but that doesn't need a complex float parser.) Checking all
+       possible variants that should fail. */
+    {"hex representation",
+        "0xfeed.beef", {}, 1},
+    {"hex representation, negative",
+        "-0xfeed.beef", {}, 2},
+    {"hex representation, positive",
+        "+0xfeed.beef", {}, 2},
+    {"hex representation, uppercase",
+        "0XFEED.BEEF", {}, 1},
+    {"hex representation, negative uppercase",
+        "-0XFEED.BEEF", {}, 2},
+    {"hex representation, positive uppercase",
+        "+0XFEED.BEEF", {}, 2},
+    {"hex representation with an exponent and spaces around",
+        /* It fails on the space already */
+        "   -0x1.bc70a3d70a3d7p+6 ", {}, 0},
+    {"hex representation with an exponent and spaces around, uppercase",
+        /* It fails on the space already */
+        "\t\b0X1.BC70A3D70A3D7P6  ", {}, 0},
+
+    /* Cases that currently fail but maybe eventually shouldn't? */
+    {"space in the middle",
+        "420 69", {}, 3},
+    {"space after a plus sign",
+        "+ 420.1337", {}, 1},
+    {"space after a minus sign",
+        "- 420.1337", {}, 1},
+    {"space before an exponent",
+        /** @todo interestingly enough here it points to the exponent, not to
+            the space after */
+        "+4.201337e +2", {}, 9},
+    {"comma as a decimal separator",
+        "13,37", {}, 2},
+};
+
 const struct {
     const char* name;
     Containers::StringView string;
@@ -900,7 +1126,9 @@ StringTest::StringTest() {
               &StringTest::debugParseDecimalFlag,
               &StringTest::debugParseDecimalFlags,
               &StringTest::debugParseHexadecimalFlag,
-              &StringTest::debugParseHexadecimalFlags});
+              &StringTest::debugParseHexadecimalFlags,
+              &StringTest::debugParseFloatFlag,
+              &StringTest::debugParseFloatFlags});
 
     addInstancedTests({&StringTest::commonPrefix,
                        &StringTest::commonPrefixAligned,
@@ -973,6 +1201,12 @@ StringTest::StringTest() {
     addInstancedTests({&StringTest::parseHexadecimalSignedFailed},
         Containers::arraySize(ParseHexadecimalSignedFailedData));
 
+    addInstancedTests({&StringTest::parseFloat},
+        Containers::arraySize(ParseFloatData));
+
+    addInstancedTests({&StringTest::parseFloatFailed},
+        Containers::arraySize(ParseFloatFailedData));
+
     addTests<StringTest>({
         &StringTest::parseDecimalHexadecimalUnsignedLimits<std::uint8_t>,
         &StringTest::parseDecimalHexadecimalUnsignedLimits<std::uint16_t>,
@@ -985,7 +1219,7 @@ StringTest::StringTest() {
         &StringTest::parseDecimalHexadecimalSignedLimits<std::int32_t>,
         &StringTest::parseDecimalHexadecimalSignedLimits<std::int64_t>});
 
-    addTests({&StringTest::parseDecimalHexadecimalNonNullTerminated,
+    addTests({&StringTest::parseDecimalHexadecimalFloatNonNullTerminated,
               &StringTest::parseDecimalHexadecimalInvalid});
 
     addInstancedTests({&StringTest::parseNumberSequence},
@@ -1049,6 +1283,18 @@ void StringTest::debugParseHexadecimalFlags() {
     Containers::String out;
     Debug{&out} << (String::ParseHexadecimalFlag::DisallowSign|String::ParseHexadecimalFlag::AllowBasePrefix|String::ParseHexadecimalFlag(0xe0)) << String::ParseHexadecimalFlags{};
     CORRADE_COMPARE(out, "Utility::String::ParseHexadecimalFlag::DisallowSign|Utility::String::ParseHexadecimalFlag::AllowBasePrefix|Utility::String::ParseHexadecimalFlag(0xe0) Utility::String::ParseHexadecimalFlags{}\n");
+}
+
+void StringTest::debugParseFloatFlag() {
+    Containers::String out;
+    Debug{&out} << String::ParseFloatFlag::DisallowSign << String::ParseFloatFlag(0xef);
+    CORRADE_COMPARE(out, "Utility::String::ParseFloatFlag::DisallowSign Utility::String::ParseFloatFlag(0xef)\n");
+}
+
+void StringTest::debugParseFloatFlags() {
+    Containers::String out;
+    Debug{&out} << (String::ParseFloatFlag::DisallowSign|String::ParseFloatFlag(0xe0)) << String::ParseFloatFlags{};
+    CORRADE_COMPARE(out, "Utility::String::ParseFloatFlag::DisallowSign|Utility::String::ParseFloatFlag(0xe0) Utility::String::ParseFloatFlags{}\n");
 }
 
 void StringTest::captureImplementations() {
@@ -2523,6 +2769,48 @@ void StringTest::parseHexadecimalSignedFailed() {
     }
 }
 
+void StringTest::parseFloat() {
+    auto&& data = ParseFloatData[testCaseInstanceId()];
+    setTestCaseDescription(data.name);
+
+    float value;
+    double valueDouble;
+    String::ParseResult result = String::parseFloat(data.string, value);
+    String::ParseResult resultDouble = String::parseFloat(data.string, valueDouble);
+    CORRADE_COMPARE(Containers::pair(result.state(), result.index()), Containers::pair(data.state, std::size_t{}));
+    CORRADE_COMPARE(Containers::pair(resultDouble.state(), resultDouble.index()), Containers::pair(data.stateDouble, std::size_t{}));
+    CORRADE_COMPARE(value, data.value);
+    CORRADE_COMPARE(valueDouble, data.valueDouble);
+}
+
+void StringTest::parseFloatFailed() {
+    auto&& data = ParseFloatFailedData[testCaseInstanceId()];
+    setTestCaseDescription(data.name);
+
+    float value;
+    double valueDouble;
+    String::ParseResult result = String::parseFloat(data.string, value, data.flags);
+    String::ParseResult resultDouble = String::parseFloat(data.string, valueDouble, data.flags);
+    CORRADE_COMPARE(Containers::pair(result.state(), result.index()), Containers::pair(String::ParseState::Failed, data.expected));
+    CORRADE_COMPARE(Containers::pair(resultDouble.state(), resultDouble.index()), Containers::pair(String::ParseState::Failed, data.expected));
+
+    /* The failure index should point either to string end or to a non-numeric,
+       non-exponent or non-decimal-point character inside, those can never be a
+       failure */
+    CORRADE_VERIFY(result.index() <= Containers::StringView{data.string}.size());
+    if(data.string) {
+        CORRADE_ITERATION(data.string);
+        CORRADE_FAIL_IF(
+            result.index() != Containers::StringView{data.string}.size() &&
+            ((data.string[result.index()] >= '0' && data.string[result.index()] <= '9') ||
+             /** @todo strtof() points to the `e` / `E` if there's a space
+                 after, so that's currently accepted, update once we have saner
+                 parsing */
+             data.string[result.index()] == '.'),
+            "Failure points to an unexpected character" << (Containers::StringView{data.string + result.index(), 1}) << "at index" << result.index());
+    }
+}
+
 template<class T> struct ParseLimitsTraits;
 template<> struct ParseLimitsTraits<std::uint8_t> {
     static const char* name() { return "std::uint8_t"; }
@@ -2636,11 +2924,13 @@ template<class T> void StringTest::parseDecimalHexadecimalSignedLimits() {
     CORRADE_COMPARE(actual, max);
 }
 
-void StringTest::parseDecimalHexadecimalNonNullTerminated() {
+void StringTest::parseDecimalHexadecimalFloatNonNullTerminated() {
     std::uint64_t valueUnsigned;
     std::int64_t valueSigned;
     std::uint64_t valueHexUnsigned;
     std::int64_t valueHexSigned;
+    float valueFloat;
+    double valueDouble;
 
     /* Parsing this should not leak over to the 3s at the end */
     Containers::StringView nonNullTerminated = "999333"_s.prefix(3);
@@ -2648,10 +2938,14 @@ void StringTest::parseDecimalHexadecimalNonNullTerminated() {
     CORRADE_COMPARE(String::parseDecimal(nonNullTerminated, valueSigned), String::ParseState::Success);
     CORRADE_COMPARE(String::parseHexadecimal(nonNullTerminated, valueHexUnsigned), String::ParseState::Success);
     CORRADE_COMPARE(String::parseHexadecimal(nonNullTerminated, valueHexSigned), String::ParseState::Success);
+    CORRADE_COMPARE(String::parseFloat(nonNullTerminated, valueFloat), String::ParseState::Success);
+    CORRADE_COMPARE(String::parseFloat(nonNullTerminated, valueDouble), String::ParseState::Success);
     CORRADE_COMPARE(valueUnsigned, 999);
     CORRADE_COMPARE(valueSigned, 999);
     CORRADE_COMPARE(valueHexUnsigned, 0x999);
     CORRADE_COMPARE(valueHexSigned, 0x999);
+    CORRADE_COMPARE(valueFloat, 999.0f);
+    CORRADE_COMPARE(valueDouble, 999.0);
 
     /* Parsing this should not just abort at the null terminator. In other
        words, this would pass if the string length wouldn't be correctly
@@ -2662,6 +2956,8 @@ void StringTest::parseDecimalHexadecimalNonNullTerminated() {
     CORRADE_COMPARE(String::parseDecimal(nullInTheMiddle, valueSigned), String::ParseState::Failed);
     CORRADE_COMPARE(String::parseHexadecimal(nullInTheMiddle, valueHexUnsigned), String::ParseState::Failed);
     CORRADE_COMPARE(String::parseHexadecimal(nullInTheMiddle, valueHexSigned), String::ParseState::Failed);
+    CORRADE_COMPARE(String::parseFloat(nullInTheMiddle, valueFloat), String::ParseState::Failed);
+    CORRADE_COMPARE(String::parseFloat(nullInTheMiddle, valueDouble), String::ParseState::Failed);
 }
 
 void StringTest::parseDecimalHexadecimalInvalid() {

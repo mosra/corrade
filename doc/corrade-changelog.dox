@@ -238,10 +238,11 @@ namespace Corrade {
 -   New @ref Utility::String::parseNumberSequence() utility for parsing number
     sequences such as `1-3,5,17`, useful especially for convenient command-line
     APIs
--   New @ref Utility::String::parseDecimal() and
-    @relativeref{Utility::String,parseHexadecimal()} utilities for number
-    parsing, intended to provide better and faster alternatives to
-    @ref std::strtoull() and @ref std::strtoll()
+-   New @ref Utility::String::parseDecimal(),
+    @relativeref{Utility::String,parseHexadecimal()} and
+    @relativeref{Utility::String,parseFloat()} utilities for number parsing,
+    intended to provide better and faster alternatives to @ref std::strtoull(),
+    @ref std::strtoll() and @ref std::strtof()
 -   New @ref Utility::Unicode::currentChar() utility for finding a start of a
     UTF-8 sequence
 -   New @ref CORRADE_INTERNAL_ASSERT_EXPRESSION() macro for assertions that can

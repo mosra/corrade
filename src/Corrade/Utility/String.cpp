@@ -26,6 +26,8 @@
 
 #include "String.h"
 
+#include <cerrno> /** @todo throw away once there's a better float parser */
+
 #include "Corrade/Containers/EnumSet.hpp"
 #include "Corrade/Containers/GrowableArray.h"
 #include "Corrade/Containers/Optional.h"
@@ -1610,32 +1612,150 @@ template<class Flag, ParseResult(*parse)(const char*, std::size_t, std::uint64_t
 
 }
 
-ParseResult parseDecimal(Containers::StringView string, std::uint64_t& value, std::uint64_t min, std::uint64_t max, ParseDecimalFlags flags) {
+ParseResult parseDecimal(const Containers::StringView string, std::uint64_t& value, const std::uint64_t min, const std::uint64_t max, const ParseDecimalFlags flags) {
     /* Debug-only assert to avoid expensive checks in release builds */
     CORRADE_DEBUG_ASSERT(min <= max,
         "Utility::String::parseDecimal(): expected min to be not greater than max but got" << min << "and" << max, ParseState{});
     return parseInteger<ParseDecimalFlag, parseDecimal, skipDecimalPrefix>(string.data(), string.size(), value, min, max, flags);
 }
 
-ParseResult parseDecimal(Containers::StringView string, std::int64_t& value, std::int64_t min, std::int64_t max, ParseDecimalFlags flags) {
+ParseResult parseDecimal(const Containers::StringView string, std::int64_t& value, const std::int64_t min, const std::int64_t max, const ParseDecimalFlags flags) {
     /* Debug-only assert to avoid expensive checks in release builds */
     CORRADE_DEBUG_ASSERT(min <= max,
         "Utility::String::parseDecimal(): expected min to be not greater than max but got" << min << "and" << max, ParseState{});
     return parseInteger<ParseDecimalFlag, parseDecimal, skipDecimalPrefix>(string.data(), string.size(), value, min, max, flags);
 }
 
-ParseResult parseHexadecimal(Containers::StringView string, std::uint64_t& value, std::uint64_t min, std::uint64_t max, ParseHexadecimalFlags flags) {
+ParseResult parseHexadecimal(const Containers::StringView string, std::uint64_t& value, const std::uint64_t min, const std::uint64_t max, const ParseHexadecimalFlags flags) {
     /* Debug-only assert to avoid expensive checks in release builds */
     CORRADE_DEBUG_ASSERT(min <= max,
         "Utility::String::parseHexadecimal(): expected min to be not greater than max but got" << min << "and" << max, ParseState{});
     return parseInteger<ParseHexadecimalFlag, parseHexadecimal, skipHexadecimalPrefix>(string.data(), string.size(), value, min, max, flags);
 }
 
-ParseResult parseHexadecimal(Containers::StringView string, std::int64_t& value, std::int64_t min, std::int64_t max, ParseHexadecimalFlags flags) {
+ParseResult parseHexadecimal(const Containers::StringView string, std::int64_t& value, const std::int64_t min, const std::int64_t max, const ParseHexadecimalFlags flags) {
     /* Debug-only assert to avoid expensive checks in release builds */
     CORRADE_DEBUG_ASSERT(min <= max,
         "Utility::String::parseHexadecimal(): expected min to be not greater than max but got" << min << "and" << max, ParseState{});
     return parseInteger<ParseHexadecimalFlag, parseHexadecimal, skipHexadecimalPrefix>(string.data(), string.size(), value, min, max, flags);
+}
+
+Utility::Debug& operator<<(Utility::Debug& debug, const ParseFloatFlag value) {
+    debug << "Utility::String::ParseFloatFlag" << Utility::Debug::nospace;
+
+    switch(value) {
+        /* LCOV_EXCL_START */
+        #define _c(v) case ParseFloatFlag::v: return debug << "::" #v;
+        _c(DisallowSign)
+        #undef _c
+        /* LCOV_EXCL_STOP */
+    }
+
+    return debug << "(" << Utility::Debug::nospace << Utility::Debug::hex << std::uint8_t(value) << Utility::Debug::nospace << ")";
+}
+
+Utility::Debug& operator<<(Utility::Debug& debug, const ParseFloatFlags value) {
+    return Containers::enumSetDebugOutput(debug, value, "Utility::String::ParseFloatFlags{}", {
+        ParseFloatFlag::DisallowSign,
+    });
+}
+
+namespace {
+
+template<class T, T(*parse)(const char*, char**)> ParseResult parseFloat(const Containers::StringView string, T& value, ParseFloatFlags flags) {
+    /* Make a null-terminated copy because that's what std::strtof() needs and
+       it's just sad. In some cases, such as with argc/argv parsing, the input
+       will be null terminated already, in most other cases the number could
+       hopefully fit into the SSO. Don't want to assert / fail for too long
+       literals, so just allocating in that case. Sorry. Frankly, std::strtof()
+       performance is likely so mediocre that this extra string creation is
+       not going to make it significantly worse. (And it's not unlikely that
+       std::strtof() itself allocates for some strange reason.)
+
+       Alternatively std::strtof() *could* work with a non-null-terminated
+       output if we assumed there was something non-numeric after, but that's
+       basically impossible to check from here, and would fail miserably if the
+       string was a slice of a memory block containing just digits and nothing
+       else -- then it'd continue forever after.
+
+       I also cannot reliably opt into using std::from_chars() if C++17 is
+       available because it doesn't properly distinguish out-of-range inputs
+       and is thus a functionality regression from std::strtof(). Sigh. Details
+       here: https://isocpp.org/files/papers/P4168R0.html */
+    /** @todo revisit once there's a chance to do reasonable float parsing */
+    const Containers::String nullTerminated = Containers::String::nullTerminatedView(string);
+    /* Cache the data and size to speed up debug builds */
+    const char* const data = nullTerminated.data();
+    const std::size_t size = nullTerminated.size();
+
+    /* Fail if the string is empty */
+    if(!size)
+        return {ParseState::Failed, 0};
+
+    /* Decide if the number is positive or negative */
+    bool positive = true;
+    std::size_t i = 0;
+    if(data[0] == '-' || data[0] == '+') {
+        /* Fail if the flags don't allow a sign */
+        if(flags >= ParseFloatFlag::DisallowSign)
+            return {ParseState::Failed, 0};
+
+        /* Skip the sign, and fail if there's nothing after */
+        positive = data[0] == '+';
+        ++i;
+        if(i == size)
+            return {ParseState::Failed, i};
+    }
+
+    /* Verify there's an actual number or an infinity / NaN right after --
+       std::strtof() discards leading whitespace and this implementation should
+       not silently allow it */
+    const char c = data[i];
+    if(!(c >= '0' && c <= '9') &&   /* Digit */
+       c != '.' &&                  /* Period because .5 is valid apparently */
+       c != 'i' && c != 'I' &&      /* inf, INF, infinity, ... */
+       c != 'n' && c != 'N')        /* nan, NaN, NAN(...), ... */
+        return {ParseState::Failed, i};
+
+    /* I don't intend to support this weird hex representation once Corrade has
+       own float parsers so disallowing it here already. (A hex representation
+       of a float/double bit pattern is something else, supporting that makes
+       sense, but that doesn't need a complex float parser.) The value can have
+       a p / P character denoting the exponent but that's optional so I have to
+       check for the prefix. */
+    if(i + 1 < size && c == '0') {
+        const char d = data[i + 1];
+        if(d == 'x' || d == 'X')
+            return {ParseState::Failed, i + 1};
+    }
+
+    /* Reset errno before so we can detect an overflow and delegate to
+       std::strtof() / std::strtod(). If the parsing didn't consume everything
+       until the end, it failed. */
+    errno = 0;
+    char* end{};
+    value = parse(data + i, &end);
+    if(end != data + size)
+        return {ParseState::Failed, std::size_t(end - data)};
+
+    /* Apply the sign. It might have overflown, in which case the value is now
+       positive or negative infinity. */
+    value = positive ? value : -value;
+    if(errno == ERANGE)
+        return ParseState::Clamped;
+
+    /* Otherwise it's a success */
+    return ParseState::Success;
+}
+
+}
+
+ParseResult parseFloat(const Containers::StringView string, float& value, const ParseFloatFlags flags) {
+    return parseFloat<float, std::strtof>(string, value, flags);
+}
+
+ParseResult parseFloat(const Containers::StringView string, double& value, const ParseFloatFlags flags) {
+    return parseFloat<double, std::strtod>(string, value, flags);
 }
 
 Containers::Optional<Containers::Array<std::uint32_t>> parseNumberSequence(const Containers::StringView string, const std::uint32_t min, const std::uint32_t max) {

@@ -56,6 +56,15 @@
 #if __has_include(<charconv>)
 #include <charconv> /* std::from_chars() */
 #define CAN_USE_STL_FROM_CHARS
+/* The floating-point std::from_chars() variants are available only since
+   libstdc++ 11.1 and libc++ 20. With the MSVC STL it's available since MSVC
+   2017, which is also the first version that advertises C++17 support, so
+   there it doesn't need any special handling.
+    https://github.com/gcc-mirror/gcc/commit/932fbc868ad429167a3d4d5625aa9d6dc0b4506b
+    https://github.com/llvm/llvm-project/commit/6c4267fb1779bc5550bb413f33250f9365acfbc6 */
+#if (defined(CORRADE_TARGET_LIBSTDCXX) && _GLIBCXX_RELEASE >= 11) || (defined(CORRADE_TARGET_LIBCXX) && _LIBCPP_VERSION >= 200000) || defined(CORRADE_TARGET_DINKUMWARE)
+#define CAN_USE_STL_FROM_CHARS_FLOAT
+#endif
 #endif
 #endif
 #endif
@@ -129,6 +138,13 @@ struct StringBenchmark: TestSuite::Tester {
     #ifdef CAN_USE_STL_FROM_CHARS
     template<Containers::Array<Containers::String> StringBenchmark::*numbers> void parseHexadecimalStlFromChars();
     #endif
+    template<class T> void parseFloat();
+    template<class T, T(*parse)(const char*, char**)> void parseFloatStl();
+    template<class T, T(*parse)(const char*, char**)> void parseFloatStlNonNullTerminated();
+    template<class T> void parseFloatStlStream();
+    #ifdef CAN_USE_STL_FROM_CHARS_FLOAT
+    template<class T> void parseFloatStlFromChars();
+    #endif
 
     private:
         Containers::Optional<Containers::String> _text;
@@ -144,6 +160,7 @@ struct StringBenchmark: TestSuite::Tester {
             _numbersHex,
             _numbersHexLeadingZeros;
         std::uint64_t _numbersSum;
+        double _numbersSumFloat;
 };
 
 using namespace Containers::Literals;
@@ -523,6 +540,22 @@ StringBenchmark::StringBenchmark() {
         #ifdef CAN_USE_STL_FROM_CHARS
         &StringBenchmark::parseHexadecimalStlFromChars<&StringBenchmark::_numbersHexLeadingZeros>,
         #endif
+
+        &StringBenchmark::parseFloat<float>,
+        &StringBenchmark::parseFloatStl<float, std::strtof>,
+        &StringBenchmark::parseFloatStlNonNullTerminated<float, std::strtof>,
+        &StringBenchmark::parseFloatStlStream<float>,
+        #ifdef CAN_USE_STL_FROM_CHARS_FLOAT
+        &StringBenchmark::parseFloatStlFromChars<float>,
+        #endif
+
+        &StringBenchmark::parseFloat<double>,
+        &StringBenchmark::parseFloatStl<double, std::strtod>,
+        &StringBenchmark::parseFloatStlNonNullTerminated<double, std::strtod>,
+        &StringBenchmark::parseFloatStlStream<double>,
+        #ifdef CAN_USE_STL_FROM_CHARS_FLOAT
+        &StringBenchmark::parseFloatStlFromChars<double>,
+        #endif
     }, 50);
 
     _text = Path::readString(Path::join(CONTAINERS_STRING_TEST_DIR, "lorem-ipsum.txt"));
@@ -545,15 +578,18 @@ StringBenchmark::StringBenchmark() {
         _numbersHex = Containers::Array<Containers::String>{ValueInit, count};
         _numbersHexLeadingZeros = Containers::Array<Containers::String>{ValueInit, count};
         _numbersSum = 0;
+        _numbersSumFloat = 0.0;
         for(std::size_t i = 0; i != count; ++i) {
             std::uint64_t value = distrib(gen);
             _numbersSum += value;
+            _numbersSumFloat += value;
             _numbers[i] = Utility::format("{}", value);
             _numbersLeadingZeros[i] = Utility::format("{:.40}", value);
             _numbersHex[i] = Utility::format("{:x}", value);
             _numbersHexLeadingZeros[i] = Utility::format("{:.32x}", value);
         }
         CORRADE_INTERNAL_ASSERT(_numbersSum);
+        CORRADE_INTERNAL_ASSERT(!std::isinf(float(_numbersSumFloat)));
     }
 }
 
@@ -1463,6 +1499,80 @@ template<Containers::Array<Containers::String> StringBenchmark::*numbers> void S
     }
 
     CORRADE_COMPARE(sum, _numbersSum);
+}
+#endif
+
+template<class T> void StringBenchmark::parseFloat() {
+    setTestCaseTemplateName(std::is_same<T, float>::value ? "float" : "double");
+
+    std::size_t i = 0;
+    T sum = 0;
+    CORRADE_BENCHMARK(_numbers.size()) {
+        T value{};
+        String::parseFloat(_numbers[i++], value);
+        sum += value;
+    }
+
+    CORRADE_COMPARE(sum, T(_numbersSumFloat));
+}
+
+template<class T, T(*parse)(const char*, char**)> void StringBenchmark::parseFloatStl() {
+    setTestCaseTemplateName(std::is_same<T, float>::value ? "float" : "double");
+
+    std::size_t i = 0;
+    T sum = 0;
+    CORRADE_BENCHMARK(_numbers.size())
+        sum += parse(_numbers[i++].data(), nullptr);
+
+    CORRADE_COMPARE(sum, T(_numbersSumFloat));
+}
+
+template<class T, T(*parse)(const char*, char**)> void StringBenchmark::parseFloatStlNonNullTerminated() {
+    setTestCaseTemplateName(std::is_same<T, float>::value ? "float" : "double");
+
+    std::size_t i = 0;
+    T sum = 0;
+    CORRADE_BENCHMARK(_numbers.size())
+        /* Does a copy compared to the above, but likely fitting into SSO */
+        sum += parse(_numbers[i++].data(), nullptr);
+
+    CORRADE_COMPARE(sum, T(_numbersSumFloat));
+}
+
+template<class T> void StringBenchmark::parseFloatStlStream() {
+    setTestCaseTemplateName(std::is_same<T, float>::value ? "float" : "double");
+
+    std::size_t i = 0;
+    T sum = 0;
+    std::istringstream in;
+    CORRADE_BENCHMARK(_numbers.size()) {
+        /* Lol, calling str() doesn't clear the eofbit on this damn thing?! */
+        in.clear();
+        /* This uses the String -> std::string conversion instead of passing
+           .data() to avoid calling strlen() for each number */
+        in.str(_numbers[i++]);
+        T value{};
+        in >> value;
+        sum += value;
+    }
+
+    CORRADE_COMPARE(sum, T(_numbersSumFloat));
+}
+
+#ifdef CAN_USE_STL_FROM_CHARS_FLOAT
+template<class T> void StringBenchmark::parseFloatStlFromChars() {
+    setTestCaseTemplateName(std::is_same<T, float>::value ? "float" : "double");
+
+    std::size_t i = 0;
+    T sum = 0;
+    CORRADE_BENCHMARK(_numbers.size()) {
+        const Containers::String& string = _numbers[i++];
+        T value{};
+        std::from_chars(string.begin(), string.end(), value);
+        sum += value;
+    }
+
+    CORRADE_COMPARE(sum, T(_numbersSumFloat));
 }
 #endif
 
