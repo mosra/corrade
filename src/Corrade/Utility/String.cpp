@@ -1580,8 +1580,23 @@ template<class Flag, ParseResult(*parse)(const char*, std::size_t, std::uint64_t
         return ParseState::Clamped;
     }
 
-    /* If the signed value is outside our limits, clamp and report as well */
+    /* Convert to a signed value. On MSVC this causes a "C4146: unary minus
+       operator applied to unsigned type, result still unsigned" warning which
+       is irrelevant because the result *is* correct. And working around that
+       by doing a cast to std::int64_t first would make it unclear what
+       happens with INT64_MIN, as -INT64_MIN (a positive value) is
+       unrepresentable in a signed type (same case as in the above comment
+       basically). So, fuck off with that warning. */
+    #if defined(CORRADE_TARGET_MSVC) && !defined(CORRADE_TARGET_CLANG_CL)
+    #pragma warning(push)
+    #pragma warning(disable: 4146)
+    #endif
     value = positive ? parsed : -parsed;
+    #if defined(CORRADE_TARGET_MSVC) && !defined(CORRADE_TARGET_CLANG_CL)
+    #pragma warning(pop)
+    #endif
+
+    /* If the signed value is outside our limits, clamp and report as well */
     if(value < min || value > max) {
         value = Utility::min(Utility::max(value, min), max);
         return ParseState::Clamped;
