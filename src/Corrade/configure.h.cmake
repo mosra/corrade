@@ -229,6 +229,39 @@
 #define CORRADE_BIG_ENDIAN
 #endif
 
+/* Emscripten version detection crap that shouldn't be needed at all but here
+   we are. The __EMSCRIPTEN_major__ etc macros used to be passed implicitly,
+   version 3.1.4 moved them to a version header and version 3.1.23 dropped the
+   backwards compatibility. Furthermore, in version 5.0.1 the macros were
+   renamed to uppercase, with the old variants now producing deprecation
+   warnings on every use, even inside #ifdef, which makes this whole thing even
+   more shitty than it used to be. To avoid extreme headaches in all places
+   that need to check for Emscripten version, the version header is included
+   implicitly (if it exists) and the uppercase macros are defined on all
+   versions.
+    https://github.com/emscripten-core/emscripten/commit/f99af02045357d3d8b12e63793cef36dfde4530a
+    https://github.com/emscripten-core/emscripten/commit/f76ddc702e4956aeedb658c49790cc352f892e4c
+    https://github.com/emscripten-core/emscripten/commit/4cce5e9a4a245713df7fc5bf4ad1e6d7463cbf4b */
+#ifdef CORRADE_TARGET_EMSCRIPTEN
+/* We cannot do `#ifndef __EMSCRIPTEN_major__` as that produces a deprecation
+   warning, so instead attempt to include the version header. If it isn't there
+   (or if __has_include isn't even a thing), we have an old Emscripten which
+   defines the lowercase macros implicitly. If it's there and the uppercase
+   macros are defined, we're done. If the uppercase macros are not defined,
+   we're on an older version and can alias them to the lowercase without
+   triggering a deprecation warning. */
+#ifdef __has_include
+#if __has_include(<emscripten/version.h>)
+#include <emscripten/version.h>
+#endif
+#endif
+#ifndef __EMSCRIPTEN_MAJOR__
+#define __EMSCRIPTEN_MAJOR__ __EMSCRIPTEN_major__
+#define __EMSCRIPTEN_MINOR__ __EMSCRIPTEN_minor__
+#define __EMSCRIPTEN_TINY__ __EMSCRIPTEN_tiny__
+#endif
+#endif
+
 /* Compile-time CPU feature detection */
 #ifdef CORRADE_TARGET_X86
 
@@ -396,17 +429,7 @@
    well :(
     https://github.com/emscripten-core/emscripten/commit/deab7783df407b260f46352ffad2a77ca8fb0a4c */
 #elif defined(CORRADE_TARGET_WASM)
-/* The __EMSCRIPTEN_major__ etc macros used to be passed implicitly, version
-   3.1.4 moved them to a version header and version 3.1.23 dropped the
-   backwards compatibility. To work consistently on all versions, including the
-   header only if the version macros aren't present.
-   https://github.com/emscripten-core/emscripten/commit/f99af02045357d3d8b12e63793cef36dfde4530a
-   https://github.com/emscripten-core/emscripten/commit/f76ddc702e4956aeedb658c49790cc352f892e4c */
-/** @todo remove the include once we no longer need to check for 2.0.18 */
-#if defined(CORRADE_TARGET_EMSCRIPTEN) && !defined(__EMSCRIPTEN_major__)
-#include <emscripten/version.h>
-#endif
-#if defined(__wasm_simd128__) && __clang_major__ >= 13 && __EMSCRIPTEN_major__*10000 + __EMSCRIPTEN_minor__*100 + __EMSCRIPTEN_tiny__ >= 20018
+#if defined(__wasm_simd128__) && __clang_major__ >= 13 && __EMSCRIPTEN_MAJOR__*10000 + __EMSCRIPTEN_MINOR__*100 + __EMSCRIPTEN_TINY__ >= 20018
 #define CORRADE_TARGET_SIMD128
 #endif
 #endif

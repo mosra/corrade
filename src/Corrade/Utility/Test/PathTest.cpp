@@ -54,16 +54,6 @@
 #include <unistd.h>
 #endif
 
-/* The __EMSCRIPTEN_major__ etc macros used to be passed implicitly, version
-   3.1.4 moved them to a version header and version 3.1.23 dropped the
-   backwards compatibility. To work consistently on all versions, including the
-   header only if the version macros aren't present.
-   https://github.com/emscripten-core/emscripten/commit/f99af02045357d3d8b12e63793cef36dfde4530a
-   https://github.com/emscripten-core/emscripten/commit/f76ddc702e4956aeedb658c49790cc352f892e4c */
-#if defined(CORRADE_TARGET_EMSCRIPTEN) && !defined(__EMSCRIPTEN_major__)
-#include <emscripten/version.h>
-#endif
-
 #include "configure.h"
 
 namespace Corrade { namespace Utility { namespace Test { namespace {
@@ -1100,7 +1090,7 @@ void PathTest::existsNonNullTerminated() {
 }
 
 void PathTest::existsUtf8() {
-    #if defined(CORRADE_TARGET_EMSCRIPTEN) && __EMSCRIPTEN_major__*10000 + __EMSCRIPTEN_minor__*100 + __EMSCRIPTEN_tiny__ >= 30103
+    #if defined(CORRADE_TARGET_EMSCRIPTEN) && __EMSCRIPTEN_MAJOR__*10000 + __EMSCRIPTEN_MINOR__*100 + __EMSCRIPTEN_TINY__ >= 30103
     /* Emscripten 3.1.3 changed the way files are bundled, putting them
        directly to WASM instead of Base64'd to the JS file. However, it broke
        UTF-8 handling, causing both a compile error (due to a syntax error in
@@ -1197,7 +1187,7 @@ void PathTest::isDirectoryNonNullTerminated() {
 }
 
 void PathTest::isDirectoryUtf8() {
-    #if defined(CORRADE_TARGET_EMSCRIPTEN) && __EMSCRIPTEN_major__*10000 + __EMSCRIPTEN_minor__*100 + __EMSCRIPTEN_tiny__ >= 30103
+    #if defined(CORRADE_TARGET_EMSCRIPTEN) && __EMSCRIPTEN_MAJOR__*10000 + __EMSCRIPTEN_MINOR__*100 + __EMSCRIPTEN_TINY__ >= 30103
     /* Emscripten 3.1.3 changed the way files are bundled, putting them
        directly to WASM instead of Base64'd to the JS file. However, it broke
        UTF-8 handling, causing both a compile error (due to a syntax error in
@@ -1267,7 +1257,7 @@ void PathTest::makeExistsAsAFile() {
        directory" (54), for some reason. Fixed in an absolutely unrelated PR at
        https://github.com/emscripten-core/emscripten/pull/21136. */
     #ifdef CORRADE_TARGET_EMSCRIPTEN
-    #if __EMSCRIPTEN_major__*10000 + __EMSCRIPTEN_minor__*100 + __EMSCRIPTEN_tiny__ >= 30153
+    #if __EMSCRIPTEN_MAJOR__*10000 + __EMSCRIPTEN_MINOR__*100 + __EMSCRIPTEN_TINY__ >= 30153
     CORRADE_COMPARE_AS(out, format(
         "Utility::Path::make(): {0} exists but is not a directory\n"
         "Utility::Path::make(): can't create {0}/sub: error 54 (",
@@ -1327,7 +1317,7 @@ void PathTest::makeDotDotDot() {
     CORRADE_VERIFY(Path::exists("."));
     {
         /* https://github.com/emscripten-core/emscripten/pull/23136 */
-        #if defined(CORRADE_TARGET_EMSCRIPTEN) && __EMSCRIPTEN_major__ < 4
+        #if defined(CORRADE_TARGET_EMSCRIPTEN) && __EMSCRIPTEN_MAJOR__ < 4
         CORRADE_EXPECT_FAIL("Emscripten before 4.0.0 doesn't return EEXIST on mkdir(\".\") but fails instead.");
         #endif
         CORRADE_VERIFY(Path::make("."));
@@ -1337,7 +1327,7 @@ void PathTest::makeDotDotDot() {
     CORRADE_VERIFY(Path::exists(".."));
     {
         /* https://github.com/emscripten-core/emscripten/pull/23136 */
-        #if defined(CORRADE_TARGET_EMSCRIPTEN) && __EMSCRIPTEN_major__ < 4
+        #if defined(CORRADE_TARGET_EMSCRIPTEN) && __EMSCRIPTEN_MAJOR__ < 4
         CORRADE_EXPECT_FAIL("Emscripten before 4.0.0 doesn't return EEXIST on mkdir(\"..\") but fails instead.");
         #endif
         CORRADE_VERIFY(Path::make(".."));
@@ -2482,7 +2472,7 @@ void PathTest::listTrailingSlash() {
 }
 
 void PathTest::listUtf8Result() {
-    #if defined(CORRADE_TARGET_EMSCRIPTEN) && __EMSCRIPTEN_major__*10000 + __EMSCRIPTEN_minor__*100 + __EMSCRIPTEN_tiny__ >= 30103
+    #if defined(CORRADE_TARGET_EMSCRIPTEN) && __EMSCRIPTEN_MAJOR__*10000 + __EMSCRIPTEN_MINOR__*100 + __EMSCRIPTEN_TINY__ >= 30103
     /* Emscripten 3.1.3 changed the way files are bundled, putting them
        directly to WASM instead of Base64'd to the JS file. However, it broke
        UTF-8 handling, causing both a compile error (due to a syntax error in
@@ -2529,7 +2519,7 @@ void PathTest::listUtf8Result() {
 }
 
 void PathTest::listUtf8Path() {
-    #if defined(CORRADE_TARGET_EMSCRIPTEN) && __EMSCRIPTEN_major__*10000 + __EMSCRIPTEN_minor__*100 + __EMSCRIPTEN_tiny__ >= 30103
+    #if defined(CORRADE_TARGET_EMSCRIPTEN) && __EMSCRIPTEN_MAJOR__*10000 + __EMSCRIPTEN_MINOR__*100 + __EMSCRIPTEN_TINY__ >= 30103
     /* Emscripten 3.1.3 changed the way files are bundled, putting them
        directly to WASM instead of Base64'd to the JS file. However, it broke
        UTF-8 handling, causing both a compile error (due to a syntax error in
@@ -2568,7 +2558,7 @@ void PathTest::sizeEmpty() {
     Containers::String empty = Path::join(_testDir, "dir/dummy");
     CORRADE_VERIFY(Path::exists(empty));
 
-    #if defined(CORRADE_TARGET_EMSCRIPTEN) && __EMSCRIPTEN_major__*10000 + __EMSCRIPTEN_minor__*100 + __EMSCRIPTEN_tiny__ >= 20026 && __EMSCRIPTEN_major__*10000 + __EMSCRIPTEN_minor__*100 + __EMSCRIPTEN_tiny__ < 30103
+    #if defined(CORRADE_TARGET_EMSCRIPTEN) && __EMSCRIPTEN_MAJOR__*10000 + __EMSCRIPTEN_MINOR__*100 + __EMSCRIPTEN_TINY__ >= 20026 && __EMSCRIPTEN_MAJOR__*10000 + __EMSCRIPTEN_MINOR__*100 + __EMSCRIPTEN_TINY__ < 30103
     /* Emscripten 2.0.26+ has a problem in the file embedder, where zero-size
        files are reported as having 3 bytes. The changelog between 2.0.25 and
        2.0.26 doesn't mention anything related, the only related change I found
@@ -2680,7 +2670,7 @@ void PathTest::sizeNonNullTerminated() {
 }
 
 void PathTest::sizeUtf8() {
-    #if defined(CORRADE_TARGET_EMSCRIPTEN) && __EMSCRIPTEN_major__*10000 + __EMSCRIPTEN_minor__*100 + __EMSCRIPTEN_tiny__ >= 30103
+    #if defined(CORRADE_TARGET_EMSCRIPTEN) && __EMSCRIPTEN_MAJOR__*10000 + __EMSCRIPTEN_MINOR__*100 + __EMSCRIPTEN_TINY__ >= 30103
     /* Emscripten 3.1.3 changed the way files are bundled, putting them
        directly to WASM instead of Base64'd to the JS file. However, it broke
        UTF-8 handling, causing both a compile error (due to a syntax error in
@@ -2843,7 +2833,7 @@ void PathTest::readEmpty() {
     Containers::Optional<Containers::Array<char>> data = Path::read(empty);
     CORRADE_VERIFY(data);
 
-    #if defined(CORRADE_TARGET_EMSCRIPTEN) && __EMSCRIPTEN_major__*10000 + __EMSCRIPTEN_minor__*100 + __EMSCRIPTEN_tiny__ >= 20026 && __EMSCRIPTEN_major__*10000 + __EMSCRIPTEN_minor__*100 + __EMSCRIPTEN_tiny__ < 30103
+    #if defined(CORRADE_TARGET_EMSCRIPTEN) && __EMSCRIPTEN_MAJOR__*10000 + __EMSCRIPTEN_MINOR__*100 + __EMSCRIPTEN_TINY__ >= 20026 && __EMSCRIPTEN_MAJOR__*10000 + __EMSCRIPTEN_MINOR__*100 + __EMSCRIPTEN_TINY__ < 30103
     /* Emscripten 2.0.26+ has a problem in the file embedder, where zero-size
        files are reported as having 3 bytes. The changelog between 2.0.25 and
        2.0.26 doesn't mention anything related, the only related change I found
@@ -2872,7 +2862,7 @@ void PathTest::readEmptyString() {
     CORRADE_VERIFY(string);
 
     {
-        #if defined(CORRADE_TARGET_EMSCRIPTEN) && __EMSCRIPTEN_major__*10000 + __EMSCRIPTEN_minor__*100 + __EMSCRIPTEN_tiny__ >= 20026 && __EMSCRIPTEN_major__*10000 + __EMSCRIPTEN_minor__*100 + __EMSCRIPTEN_tiny__ < 30103
+        #if defined(CORRADE_TARGET_EMSCRIPTEN) && __EMSCRIPTEN_MAJOR__*10000 + __EMSCRIPTEN_MINOR__*100 + __EMSCRIPTEN_TINY__ >= 20026 && __EMSCRIPTEN_MAJOR__*10000 + __EMSCRIPTEN_MINOR__*100 + __EMSCRIPTEN_TINY__ < 30103
         /* Emscripten 2.0.26+ has a problem in the file embedder, where
            zero-size files are reported as having 3 bytes. The changelog
            between 2.0.25 and 2.0.26 doesn't mention anything related, the only
@@ -3030,7 +3020,7 @@ void PathTest::readNonNullTerminated() {
 }
 
 void PathTest::readUtf8() {
-    #if defined(CORRADE_TARGET_EMSCRIPTEN) && __EMSCRIPTEN_major__*10000 + __EMSCRIPTEN_minor__*100 + __EMSCRIPTEN_tiny__ >= 30103
+    #if defined(CORRADE_TARGET_EMSCRIPTEN) && __EMSCRIPTEN_MAJOR__*10000 + __EMSCRIPTEN_MINOR__*100 + __EMSCRIPTEN_TINY__ >= 30103
     /* Emscripten 3.1.3 changed the way files are bundled, putting them
        directly to WASM instead of Base64'd to the JS file. However, it broke
        UTF-8 handling, causing both a compile error (due to a syntax error in
@@ -3168,7 +3158,7 @@ void PathTest::writeNonNullTerminated() {
 }
 
 void PathTest::writeUtf8() {
-    #if defined(CORRADE_TARGET_EMSCRIPTEN) && __EMSCRIPTEN_major__*10000 + __EMSCRIPTEN_minor__*100 + __EMSCRIPTEN_tiny__ >= 30103
+    #if defined(CORRADE_TARGET_EMSCRIPTEN) && __EMSCRIPTEN_MAJOR__*10000 + __EMSCRIPTEN_MINOR__*100 + __EMSCRIPTEN_TINY__ >= 30103
     /* Emscripten 3.1.3 changed the way files are bundled, putting them
        directly to WASM instead of Base64'd to the JS file. However, it broke
        UTF-8 handling, causing both a compile error (due to a syntax error in
@@ -3328,7 +3318,7 @@ void PathTest::appendNonNullTerminated() {
 }
 
 void PathTest::appendUtf8() {
-    #if defined(CORRADE_TARGET_EMSCRIPTEN) && __EMSCRIPTEN_major__*10000 + __EMSCRIPTEN_minor__*100 + __EMSCRIPTEN_tiny__ >= 30103
+    #if defined(CORRADE_TARGET_EMSCRIPTEN) && __EMSCRIPTEN_MAJOR__*10000 + __EMSCRIPTEN_MINOR__*100 + __EMSCRIPTEN_TINY__ >= 30103
     /* Emscripten 3.1.3 changed the way files are bundled, putting them
        directly to WASM instead of Base64'd to the JS file. However, it broke
        UTF-8 handling, causing both a compile error (due to a syntax error in
@@ -3384,7 +3374,7 @@ void PathTest::copyEmpty() {
 
     CORRADE_VERIFY(Path::copy(source, destination));
 
-    #if defined(CORRADE_TARGET_EMSCRIPTEN) && __EMSCRIPTEN_major__*10000 + __EMSCRIPTEN_minor__*100 + __EMSCRIPTEN_tiny__ >= 20026 && __EMSCRIPTEN_major__*10000 + __EMSCRIPTEN_minor__*100 + __EMSCRIPTEN_tiny__ < 30103
+    #if defined(CORRADE_TARGET_EMSCRIPTEN) && __EMSCRIPTEN_MAJOR__*10000 + __EMSCRIPTEN_MINOR__*100 + __EMSCRIPTEN_TINY__ >= 20026 && __EMSCRIPTEN_MAJOR__*10000 + __EMSCRIPTEN_MINOR__*100 + __EMSCRIPTEN_TINY__ < 30103
     /* Emscripten 2.0.26+ has a problem in the file embedder, where zero-size
        files are reported as having 3 bytes. The changelog between 2.0.25 and
        2.0.26 doesn't mention anything related, the only related change I found
@@ -3519,7 +3509,7 @@ void PathTest::copyNonNullTerminated() {
 }
 
 void PathTest::copyUtf8() {
-    #if defined(CORRADE_TARGET_EMSCRIPTEN) && __EMSCRIPTEN_major__*10000 + __EMSCRIPTEN_minor__*100 + __EMSCRIPTEN_tiny__ >= 30103
+    #if defined(CORRADE_TARGET_EMSCRIPTEN) && __EMSCRIPTEN_MAJOR__*10000 + __EMSCRIPTEN_MINOR__*100 + __EMSCRIPTEN_TINY__ >= 30103
     /* Emscripten 3.1.3 changed the way files are bundled, putting them
        directly to WASM instead of Base64'd to the JS file. However, it broke
        UTF-8 handling, causing both a compile error (due to a syntax error in

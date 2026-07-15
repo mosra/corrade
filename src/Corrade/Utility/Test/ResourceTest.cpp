@@ -43,16 +43,6 @@
 #include "Corrade/Utility/Test/nodeJsVersionHelpers.h"
 #endif
 
-/* The __EMSCRIPTEN_major__ etc macros used to be passed implicitly, version
-   3.1.4 moved them to a version header and version 3.1.23 dropped the
-   backwards compatibility. To work consistently on all versions, including the
-   header only if the version macros aren't present.
-   https://github.com/emscripten-core/emscripten/commit/f99af02045357d3d8b12e63793cef36dfde4530a
-   https://github.com/emscripten-core/emscripten/commit/f76ddc702e4956aeedb658c49790cc352f892e4c */
-#if defined(CORRADE_TARGET_EMSCRIPTEN) && !defined(__EMSCRIPTEN_major__)
-#include <emscripten/version.h>
-#endif
-
 #include "configure.h"
 
 /* Compiled using corrade_add_resource(... SINGLE), tested with
@@ -440,7 +430,7 @@ void ResourceTest::nullTerminatedAligned() {
     } {
         Containers::StringView file = rs.getString("3-align4-empty.bin");
         {
-            #if defined(CORRADE_TARGET_EMSCRIPTEN) && __EMSCRIPTEN_major__*10000 + __EMSCRIPTEN_minor__*100 + __EMSCRIPTEN_tiny__ >= 20026 && __EMSCRIPTEN_major__*10000 + __EMSCRIPTEN_minor__*100 + __EMSCRIPTEN_tiny__ < 30103
+            #if defined(CORRADE_TARGET_EMSCRIPTEN) && __EMSCRIPTEN_MAJOR__*10000 + __EMSCRIPTEN_MINOR__*100 + __EMSCRIPTEN_TINY__ >= 20026 && __EMSCRIPTEN_MAJOR__*10000 + __EMSCRIPTEN_MINOR__*100 + __EMSCRIPTEN_TINY__ < 30103
             /* Emscripten 2.0.26+ has a problem in the file embedder, where
                zero-size files are reported as having 3 bytes. The changelog
                between 2.0.25 and 2.0.26 doesn't mention anything related, the
@@ -470,7 +460,7 @@ void ResourceTest::nullTerminatedAligned() {
     } {
         Containers::StringView file = rs.getString("4-null-terminated-empty.bin");
         {
-            #if defined(CORRADE_TARGET_EMSCRIPTEN) && __EMSCRIPTEN_major__*10000 + __EMSCRIPTEN_minor__*100 + __EMSCRIPTEN_tiny__ >= 20026 && __EMSCRIPTEN_major__*10000 + __EMSCRIPTEN_minor__*100 + __EMSCRIPTEN_tiny__ < 30103
+            #if defined(CORRADE_TARGET_EMSCRIPTEN) && __EMSCRIPTEN_MAJOR__*10000 + __EMSCRIPTEN_MINOR__*100 + __EMSCRIPTEN_TINY__ >= 20026 && __EMSCRIPTEN_MAJOR__*10000 + __EMSCRIPTEN_MINOR__*100 + __EMSCRIPTEN_TINY__ < 30103
             /* See above */
             CORRADE_EXPECT_FAIL_IF(nodeJsVersionLess(18),
                 "Emscripten 2.0.26 to 3.1.3 with Node.js < 18 reports empty files as having 3 bytes.");
@@ -484,7 +474,7 @@ void ResourceTest::nullTerminatedAligned() {
     } {
         Containers::StringView file = rs.getString("5-null-terminated-align8-empty.bin");
         {
-            #if defined(CORRADE_TARGET_EMSCRIPTEN) && __EMSCRIPTEN_major__*10000 + __EMSCRIPTEN_minor__*100 + __EMSCRIPTEN_tiny__ >= 20026 && __EMSCRIPTEN_major__*10000 + __EMSCRIPTEN_minor__*100 + __EMSCRIPTEN_tiny__ < 30103
+            #if defined(CORRADE_TARGET_EMSCRIPTEN) && __EMSCRIPTEN_MAJOR__*10000 + __EMSCRIPTEN_MINOR__*100 + __EMSCRIPTEN_TINY__ >= 20026 && __EMSCRIPTEN_MAJOR__*10000 + __EMSCRIPTEN_MINOR__*100 + __EMSCRIPTEN_TINY__ < 30103
             /* See above */
             CORRADE_EXPECT_FAIL_IF(nodeJsVersionLess(18),
                 "Emscripten 2.0.26 to 3.1.3 with Node.js < 18 reports empty files as having 3 bytes.");
@@ -566,7 +556,7 @@ void ResourceTest::alignmentLargerThanDataSize() {
     } {
         Containers::StringView file = rs.getString("2-align2-empty.bin");
         {
-            #if defined(CORRADE_TARGET_EMSCRIPTEN) && __EMSCRIPTEN_major__*10000 + __EMSCRIPTEN_minor__*100 + __EMSCRIPTEN_tiny__ >= 20026 && __EMSCRIPTEN_major__*10000 + __EMSCRIPTEN_minor__*100 + __EMSCRIPTEN_tiny__ < 30103
+            #if defined(CORRADE_TARGET_EMSCRIPTEN) && __EMSCRIPTEN_MAJOR__*10000 + __EMSCRIPTEN_MINOR__*100 + __EMSCRIPTEN_TINY__ >= 20026 && __EMSCRIPTEN_MAJOR__*10000 + __EMSCRIPTEN_MINOR__*100 + __EMSCRIPTEN_TINY__ < 30103
             /* Emscripten 2.0.26+ has a problem in the file embedder, where
                zero-size files are reported as having 3 bytes. The changelog
                between 2.0.25 and 2.0.26 doesn't mention anything related, the
@@ -701,7 +691,7 @@ void ResourceTest::single() {
 }
 
 void ResourceTest::singleEmpty() {
-    #if defined(CORRADE_TARGET_EMSCRIPTEN) && __EMSCRIPTEN_major__*10000 + __EMSCRIPTEN_minor__*100 + __EMSCRIPTEN_tiny__ >= 20026 && __EMSCRIPTEN_major__*10000 + __EMSCRIPTEN_minor__*100 + __EMSCRIPTEN_tiny__ < 30103
+    #if defined(CORRADE_TARGET_EMSCRIPTEN) && __EMSCRIPTEN_MAJOR__*10000 + __EMSCRIPTEN_MINOR__*100 + __EMSCRIPTEN_TINY__ >= 20026 && __EMSCRIPTEN_MAJOR__*10000 + __EMSCRIPTEN_MINOR__*100 + __EMSCRIPTEN_TINY__ < 30103
     /* Emscripten 2.0.26+ has a problem in the file embedder, where zero-size
        files are reported as having 3 bytes. The changelog between 2.0.25 and
        2.0.26 doesn't mention anything related, the only related change I found
