@@ -277,6 +277,13 @@ information.
     as well.
 */
 /* All member functions are const because the view doesn't own the data */
+#if defined(CORRADE_TARGET_GCC) && !defined(CORRADE_TARGET_CLANG) && __GNUC__ >= 16
+/* This supresses a warning when StringView.h is included before ArrayView.h
+   due to ArrayView appearing in a rather nasty SFINAE expression in a
+   StringView constructor. See there for details. */
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wsfinae-incomplete"
+#endif
 template<class T> class ArrayView {
     public:
         typedef T Type;     /**< @brief Element type */
@@ -697,6 +704,9 @@ template<class T> class ArrayView {
         T* _data;
         std::size_t _size;
 };
+#if defined(CORRADE_TARGET_GCC) && !defined(CORRADE_TARGET_CLANG) && __GNUC__ >= 16
+#pragma GCC diagnostic pop
+#endif
 
 /**
 @brief Void array view

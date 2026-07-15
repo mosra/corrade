@@ -474,7 +474,19 @@ BasicStringView {
            convertible to an ArrayView), because those should be picking the T*
            overload and rely on strlen(), consistently with how C string
            literals work; and disallowing construction from a StringView
-           because it'd get preferred over the implicit copy constructor. */
+           because it'd get preferred over the implicit copy constructor.
+
+           Note that on GCC 16, the `decltype(ArrayView<T>{...})` below causes
+           a -Wsfinae-incomplete warning to be fired for the ArrayView
+           definition if ArrayView.h is included after StringView.h.
+           Unfortunately I couldn't figure out a different way that would work
+           (std::is_convertible or is_constructible both require ArrayView to
+           be defined), and including ArrayView.h here just to fix one stupid
+           warning that nobody asked for on a single compiler seems like an
+           overkill. Furthermore, it's not enough to add a warning suppression
+           here, it has to be done on the ArrayView definition, which makes
+           things rather nasty. I DID NOT ASK FOR ANY OF THIS, DO YOU HEAR ME,
+           GCC?! */
         /** @todo even though the implicit copy constructor would be overriden
             without the is_same part, is_trivially_copyable still says yes?! */
         template<class U, class = typename std::enable_if<!std::is_array<typename std::remove_reference<U&&>::type>::value && !std::is_same<typename std::decay<U&&>::type, BasicStringView<T>>::value && !std::is_same<typename std::decay<U&&>::type, std::nullptr_t>::value, decltype(ArrayView<T>{std::declval<U&&>()})>::type> constexpr /*implicit*/ BasicStringView(U&& data, StringViewFlags flags = {}) noexcept: BasicStringView{flags, ArrayView<T>(data)} {}
