@@ -420,7 +420,8 @@
 #endif
 #endif
 
-/* Undocumented, checked via `echo | em++ -x c++ -dM -E - -msimd128`.
+/* __wasm_simd128__ is undocumented, discovered via the following command:
+    echo | em++ -x c++ -dM -E - -msimd128
    Restricting to the finalized SIMD variant, which is since Clang 13:
     https://github.com/llvm/llvm-project/commit/502f54049d17f5a107f833596fb2c31297a99773
    Emscripten 2.0.13 sets Clang 13 as the minimum, however it doesn't imply
