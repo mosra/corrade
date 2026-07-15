@@ -391,6 +391,15 @@ instance of the class exists when this macro is used. If the tweakable is not
 enabled, simply passes the value through.
 */
 #ifndef CORRADE_TWEAKABLE
+/* Clang 22+ warns that __COUNTER__ is a C2y extension, and unfortunately
+   suppressing the warning via a _Pragma inside the macro itself doesn't work:
+    https://github.com/llvm/llvm-project/issues/189645
+   So instead suppress it globally with a #pragma for everyone who includes
+   this header. At the time of writing (June 2026) the issue is still open. */
+/** @todo revisit once fixed, use global suppression for older versions only */
+#if defined(CORRADE_TARGET_CLANG) && __clang_major__ >= 22
+#pragma clang diagnostic ignored "-Wc2y-extensions"
+#endif
 #define CORRADE_TWEAKABLE(...) Corrade::Utility::Tweakable::instance()(__FILE__, __LINE__, __COUNTER__, __VA_ARGS__)
 #endif
 
