@@ -145,11 +145,22 @@ template<unsigned dimensions, class T> void copy(const Containers::StridedArrayV
 
 namespace Implementation {
 
-/* Vaguely inspired by the Utility::IsIterable type trait */
+/* Vaguely inspired by the Utility::IsIterable type trait. Clang since version
+   23 includes -Wunused-template in -Wall, and warns for those declarations.
+   The templates are used inside a decltype() expression below (and commenting
+   them out obviously makes the test fail to compile) so this is yet another
+   completely pointless warning that just wastes my time. */
+#ifdef CORRADE_TARGET_CLANG
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wunused-template"
+#endif
 template<class T, class View = decltype(Containers::Implementation::ErasedArrayViewConverter<typename std::remove_reference<T&&>::type>::from(std::declval<T&&>()))> static Containers::ArrayView<typename View::Type> arrayViewTypeFor(T&&);
 template<class T> static Containers::ArrayView<T> arrayViewTypeFor(const Containers::ArrayView<T>&);
 template<std::size_t size, class T> static Containers::ArrayView<T> arrayViewTypeFor(T(&)[size]);
 template<unsigned dimensions, class T> static Containers::StridedArrayView<dimensions, T> arrayViewTypeFor(const Containers::StridedArrayView<dimensions, T>&);
+#ifdef CORRADE_TARGET_CLANG
+#pragma clang diagnostic pop
+#endif
 
 }
 
