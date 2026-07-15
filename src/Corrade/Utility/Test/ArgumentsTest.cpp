@@ -24,6 +24,7 @@
     DEALINGS IN THE SOFTWARE.
 */
 
+#include <cstdlib> /* std::getenv() */
 #include <algorithm> /* std::find_if() */
 #include <vector>
 
