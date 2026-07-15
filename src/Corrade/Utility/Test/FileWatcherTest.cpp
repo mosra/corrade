@@ -289,7 +289,17 @@ void FileWatcherTest::changedCleared() {
     System::sleep(10);
     #endif
     CORRADE_VERIFY(Path::write(_filename, {}));
-    CORRADE_VERIFY(watcher.hasChanged());
+    {
+        /* New Emscripten versions seem to not update the timestamp when
+           writing an empty file. Not sure what that's about. Happens in
+           version 6, I think it happpened with version 4 as well, version 3
+           is alright. Sorry that it's so coarse, I don't have the patience to
+           dig up what changed and when. */
+        #if defined(CORRADE_TARGET_EMSCRIPTEN) && __EMSCRIPTEN_MAJOR__ >= 4
+        CORRADE_EXPECT_FAIL("Emscripten 4+ doesn't seem to update a timestamp when writing an empty file.");
+        #endif
+        CORRADE_VERIFY(watcher.hasChanged());
+    }
 
     /* A change right after should not get detected, since it's too soon */
     CORRADE_VERIFY(Path::write(_filename, "some content again"_s));
@@ -300,6 +310,10 @@ void FileWatcherTest::changedCleared() {
         10.2 image on 2021-06-15, previously this was linux-specific. Maybe the
         timer resolution got better there? Needs further investigation. */
         CORRADE_EXPECT_FAIL_IF(changed, "Gah! Your system is too fast.");
+        #endif
+        /* As a consequence of the XFAIL above, this now reports a change */
+        #if defined(CORRADE_TARGET_EMSCRIPTEN) && __EMSCRIPTEN_MAJOR__ >= 4
+        CORRADE_EXPECT_FAIL("Emscripten 4+ doesn't seem to update a timestamp when writing an empty file.");
         #endif
         CORRADE_VERIFY(!changed); /* Nothing changed second time */
     }
