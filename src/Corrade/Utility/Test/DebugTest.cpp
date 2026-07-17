@@ -346,34 +346,34 @@ template<class> struct FloatsData;
 template<> struct FloatsData<float> {
     static const char* name() { return "float"; }
     static const char* expected() {
-        #ifndef __MINGW32__
-        return "3.14159 -12345.7 1.23457e-12 3.14159\n";
-        #else
+        #if defined(CORRADE_TARGET_MINGW) && !defined(_UCRT)
         return "3.14159 -12345.7 1.23457e-012 3.14159\n";
+        #else
+        return "3.14159 -12345.7 1.23457e-12 3.14159\n";
         #endif
     }
 };
 template<> struct FloatsData<double> {
     static const char* name() { return "double"; }
     static const char* expected() {
-        #ifndef __MINGW32__
-        return "3.14159265358979 -12345.6789012346 1.23456789012346e-12 3.14159\n";
-        #else
+        #if defined(CORRADE_TARGET_MINGW) && !defined(_UCRT)
         return "3.14159265358979 -12345.6789012346 1.23456789012346e-012 3.14159\n";
+        #else
+        return "3.14159265358979 -12345.6789012346 1.23456789012346e-12 3.14159\n";
         #endif
     }
 };
 template<> struct FloatsData<long double> {
     static const char* name() { return "long double"; }
     static const char* expected() {
-        #ifndef __MINGW32__
+        #if defined(CORRADE_TARGET_MINGW) && !defined(_UCRT)
+        return "3.14159265358979324 -12345.6789012345679 1.23456789012345679e-012 3.14159\n";
+        #else
         #ifndef CORRADE_LONG_DOUBLE_SAME_AS_DOUBLE
         return "3.14159265358979324 -12345.6789012345679 1.23456789012345679e-12 3.14159\n";
         #else
         return "3.14159265358979 -12345.6789012346 1.23456789012346e-12 3.14159\n";
         #endif
-        #else
-        return "3.14159265358979324 -12345.6789012345679 1.23456789012345679e-012 3.14159\n";
         #endif
     }
 };

@@ -296,10 +296,10 @@ void ConfigurationValueTest::floatingPointScientific() {
     {
         float a = 2.1e7f;
         std::string value{
-            #ifndef __MINGW32__
-            "2.1e+07"
-            #else
+            #if defined(CORRADE_TARGET_MINGW) && !defined(_UCRT)
             "2.1e+007"
+            #else
+            "2.1e+07"
             #endif
         };
 
@@ -313,17 +313,17 @@ void ConfigurationValueTest::floatingPointScientific() {
     } {
         float a = 2.1e+7f;
         std::string value{
-            #ifndef __MINGW32__
-            "2.1e+07"
-            #else
+            #if defined(CORRADE_TARGET_MINGW) && !defined(_UCRT)
             "2.1e+007"
+            #else
+            "2.1e+07"
             #endif
         };
         std::string valueSci{
-            #ifndef __MINGW32__
-            "2.100000e+07"
-            #else
+            #if defined(CORRADE_TARGET_MINGW) && !defined(_UCRT)
             "2.100000e+007"
+            #else
+            "2.100000e+07"
             #endif
         };
 
@@ -340,10 +340,10 @@ void ConfigurationValueTest::floatingPointScientific() {
     } {
         float a = -2.1e7f;
         std::string value{
-            #ifndef __MINGW32__
-            "-2.1e+07"
-            #else
+            #if defined(CORRADE_TARGET_MINGW) && !defined(_UCRT)
             "-2.1e+007"
+            #else
+            "-2.1e+07"
             #endif
         };
 
@@ -356,10 +356,10 @@ void ConfigurationValueTest::floatingPointScientific() {
     } {
         float a = 2.1e-7f;
         std::string value{
-            #ifndef __MINGW32__
-            "2.1e-07"
-            #else
+            #if defined(CORRADE_TARGET_MINGW) && !defined(_UCRT)
             "2.1e-007"
+            #else
+            "2.1e-07"
             #endif
         };
 
@@ -372,17 +372,17 @@ void ConfigurationValueTest::floatingPointScientific() {
     } {
         float a = 2.1E7f;
         std::string value{
-            #ifndef __MINGW32__
-            "2.1E+07"
-            #else
+            #if defined(CORRADE_TARGET_MINGW) && !defined(_UCRT)
             "2.1E+007"
+            #else
+            "2.1E+07"
             #endif
         };
         std::string valueSci{
-            #ifndef __MINGW32__
-            "2.100000E+07"
-            #else
+            #if defined(CORRADE_TARGET_MINGW) && !defined(_UCRT)
             "2.100000E+007"
+            #else
+            "2.100000E+07"
             #endif
         };
 

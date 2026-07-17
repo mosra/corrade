@@ -345,28 +345,28 @@ void FormatTest::integerPrecision() {
 
 void FormatTest::floatingFloat() {
     CORRADE_COMPARE(format("{}", 12.34f), "12.34");
-    #ifndef __MINGW32__
-    CORRADE_COMPARE(format("{}", -1.32e+07f), "-1.32e+07");
-    #else
+    #if defined(CORRADE_TARGET_MINGW) && !defined(_UCRT)
     CORRADE_COMPARE(format("{}", -1.32e+07f), "-1.32e+007");
+    #else
+    CORRADE_COMPARE(format("{}", -1.32e+07f), "-1.32e+07");
     #endif
 }
 
 void FormatTest::floatingDouble() {
     CORRADE_COMPARE(format("{}", 12.3404), "12.3404");
-    #ifndef __MINGW32__
-    CORRADE_COMPARE(format("{}", -1.32e+37), "-1.32e+37");
-    #else
+    #if defined(CORRADE_TARGET_MINGW) && !defined(_UCRT)
     CORRADE_COMPARE(format("{}", -1.32e+37), "-1.32e+037");
+    #else
+    CORRADE_COMPARE(format("{}", -1.32e+37), "-1.32e+37");
     #endif
 }
 
 void FormatTest::floatingLongDouble() {
     CORRADE_COMPARE(format("{}", 12.3404l), "12.3404");
-    #ifndef __MINGW32__
-    CORRADE_COMPARE(format("{}", -1.32e+67l), "-1.32e+67");
-    #else
+    #if defined(CORRADE_TARGET_MINGW) && !defined(_UCRT)
     CORRADE_COMPARE(format("{}", -1.32e+67l), "-1.32e+067");
+    #else
+    CORRADE_COMPARE(format("{}", -1.32e+67l), "-1.32e+67");
     #endif
 }
 
@@ -374,34 +374,34 @@ template<class> struct FloatingPrecisionData;
 template<> struct FloatingPrecisionData<float> {
     static const char* name() { return "float"; }
     static const char* expected() {
-        #ifndef __MINGW32__
-        return "3.14159 -12345.7 1.23457e-12 3.14159";
-        #else
+        #if defined(CORRADE_TARGET_MINGW) && !defined(_UCRT)
         return "3.14159 -12345.7 1.23457e-012 3.14159";
+        #else
+        return "3.14159 -12345.7 1.23457e-12 3.14159";
         #endif
     }
 };
 template<> struct FloatingPrecisionData<double> {
     static const char* name() { return "double"; }
     static const char* expected() {
-        #ifndef __MINGW32__
-        return "3.14159265358979 -12345.6789012346 1.23456789012346e-12 3.14159";
-        #else
+        #if defined(CORRADE_TARGET_MINGW) && !defined(_UCRT)
         return "3.14159265358979 -12345.6789012346 1.23456789012346e-012 3.14159";
+        #else
+        return "3.14159265358979 -12345.6789012346 1.23456789012346e-12 3.14159";
         #endif
     }
 };
 template<> struct FloatingPrecisionData<long double> {
     static const char* name() { return "long double"; }
     static const char* expected() {
-        #ifndef __MINGW32__
+        #if defined(CORRADE_TARGET_MINGW) && !defined(_UCRT)
+        return "3.14159265358979324 -12345.6789012345679 1.23456789012345679e-012 3.14159";
+        #else
         #ifndef CORRADE_LONG_DOUBLE_SAME_AS_DOUBLE
         return "3.14159265358979324 -12345.6789012345679 1.23456789012345679e-12 3.14159";
         #else
         return "3.14159265358979 -12345.6789012346 1.23456789012346e-12 3.14159";
         #endif
-        #else
-        return "3.14159265358979324 -12345.6789012345679 1.23456789012345679e-012 3.14159";
         #endif
     }
 };
@@ -422,18 +422,18 @@ template<class T> void FormatTest::floatingPrecision() {
 }
 
 void FormatTest::floatGeneric() {
-    #ifndef __MINGW32__
-    CORRADE_COMPARE(format("{}", 1234.0e5f), "1.234e+08");
-    #else
+    #if defined(CORRADE_TARGET_MINGW) && !defined(_UCRT)
     CORRADE_COMPARE(format("{}", 1234.0e5f), "1.234e+008");
+    #else
+    CORRADE_COMPARE(format("{}", 1234.0e5f), "1.234e+08");
     #endif
     CORRADE_COMPARE(format("{}", 1234.0e5), "123400000");
     CORRADE_COMPARE(format("{}", 1234.0e5l), "123400000");
 
-    #ifndef __MINGW32__
-    CORRADE_COMPARE(format("{:g}", 1234.0e5f), "1.234e+08");
-    #else
+    #if defined(CORRADE_TARGET_MINGW) && !defined(_UCRT)
     CORRADE_COMPARE(format("{:g}", 1234.0e5f), "1.234e+008");
+    #else
+    CORRADE_COMPARE(format("{:g}", 1234.0e5f), "1.234e+08");
     #endif
     CORRADE_COMPARE(format("{:g}", 1234.0e5), "123400000");
     CORRADE_COMPARE(format("{:g}", 1234.0e5l), "123400000");
@@ -454,10 +454,10 @@ void FormatTest::floatGeneric() {
 }
 
 void FormatTest::floatGenericUppercase() {
-    #ifndef __MINGW32__
-    CORRADE_COMPARE(format("{:G}", 1234.0e5f), "1.234E+08");
-    #else
+    #if defined(CORRADE_TARGET_MINGW) && !defined(_UCRT)
     CORRADE_COMPARE(format("{:G}", 1234.0e5f), "1.234E+008");
+    #else
+    CORRADE_COMPARE(format("{:G}", 1234.0e5f), "1.234E+08");
     #endif
     CORRADE_COMPARE(format("{:G}", 1234.0e5), "123400000");
     CORRADE_COMPARE(format("{:G}", 1234.0e5l), "123400000");
@@ -471,7 +471,11 @@ void FormatTest::floatGenericUppercase() {
 }
 
 void FormatTest::floatExponent() {
-    #ifndef __MINGW32__
+    #if defined(CORRADE_TARGET_MINGW) && !defined(_UCRT)
+    CORRADE_COMPARE(format("{:e}", 1234.0e5f), "1.234000e+008");
+    CORRADE_COMPARE(format("{:e}", 1234.0e5), "1.234000000000000e+008");
+    CORRADE_COMPARE(format("{:e}", 1234.0e5l), "1.234000000000000000e+008");
+    #else
     CORRADE_COMPARE(format("{:e}", 1234.0e5f), "1.234000e+08");
     CORRADE_COMPARE(format("{:e}", 1234.0e5), "1.234000000000000e+08");
     #ifndef CORRADE_LONG_DOUBLE_SAME_AS_DOUBLE
@@ -479,31 +483,31 @@ void FormatTest::floatExponent() {
     #else
     CORRADE_COMPARE(format("{:e}", 1234.0e5l), "1.234000000000000e+08");
     #endif
-    #else
-    CORRADE_COMPARE(format("{:e}", 1234.0e5f), "1.234000e+008");
-    CORRADE_COMPARE(format("{:e}", 1234.0e5), "1.234000000000000e+008");
-    CORRADE_COMPARE(format("{:e}", 1234.0e5l), "1.234000000000000000e+008");
     #endif
 
-    #ifndef __MINGW32__
-    CORRADE_COMPARE(format("{:.3e}", 1.0f), "1.000e+00");
-    CORRADE_COMPARE(format("{:.3e}", 1.0), "1.000e+00");
-    CORRADE_COMPARE(format("{:.3e}", 1.0l), "1.000e+00");
-    CORRADE_COMPARE(format("{:.3e}", 12.34567f), "1.235e+01");
-    CORRADE_COMPARE(format("{:.3e}", 12.34567), "1.235e+01");
-    CORRADE_COMPARE(format("{:.3e}", 12.34567l), "1.235e+01");
-    #else
+    #if defined(CORRADE_TARGET_MINGW) && !defined(_UCRT)
     CORRADE_COMPARE(format("{:.3e}", 1.0f), "1.000e+000");
     CORRADE_COMPARE(format("{:.3e}", 1.0), "1.000e+000");
     CORRADE_COMPARE(format("{:.3e}", 1.0l), "1.000e+000");
     CORRADE_COMPARE(format("{:.3e}", 12.34567f), "1.235e+001");
     CORRADE_COMPARE(format("{:.3e}", 12.34567), "1.235e+001");
     CORRADE_COMPARE(format("{:.3e}", 12.34567l), "1.235e+001");
+    #else
+    CORRADE_COMPARE(format("{:.3e}", 1.0f), "1.000e+00");
+    CORRADE_COMPARE(format("{:.3e}", 1.0), "1.000e+00");
+    CORRADE_COMPARE(format("{:.3e}", 1.0l), "1.000e+00");
+    CORRADE_COMPARE(format("{:.3e}", 12.34567f), "1.235e+01");
+    CORRADE_COMPARE(format("{:.3e}", 12.34567), "1.235e+01");
+    CORRADE_COMPARE(format("{:.3e}", 12.34567l), "1.235e+01");
     #endif
 }
 
-void FormatTest::floatExponentUppercase() {
-    #ifndef __MINGW32__
+    void FormatTest::floatExponentUppercase() {
+    #if defined(CORRADE_TARGET_MINGW) && !defined(_UCRT)
+    CORRADE_COMPARE(format("{:E}", 1234.0e5f), "1.234000E+008");
+    CORRADE_COMPARE(format("{:E}", 1234.0e5), "1.234000000000000E+008");
+    CORRADE_COMPARE(format("{:E}", 1234.0e5l), "1.234000000000000000E+008");
+    #else
     CORRADE_COMPARE(format("{:E}", 1234.0e5f), "1.234000E+08");
     CORRADE_COMPARE(format("{:E}", 1234.0e5), "1.234000000000000E+08");
     #ifndef CORRADE_LONG_DOUBLE_SAME_AS_DOUBLE
@@ -511,26 +515,22 @@ void FormatTest::floatExponentUppercase() {
     #else
     CORRADE_COMPARE(format("{:E}", 1234.0e5l), "1.234000000000000E+08");
     #endif
-    #else
-    CORRADE_COMPARE(format("{:E}", 1234.0e5f), "1.234000E+008");
-    CORRADE_COMPARE(format("{:E}", 1234.0e5), "1.234000000000000E+008");
-    CORRADE_COMPARE(format("{:E}", 1234.0e5l), "1.234000000000000000E+008");
     #endif
 
-    #ifndef __MINGW32__
-    CORRADE_COMPARE(format("{:.3E}", 1.0f), "1.000E+00");
-    CORRADE_COMPARE(format("{:.3E}", 1.0), "1.000E+00");
-    CORRADE_COMPARE(format("{:.3E}", 1.0l), "1.000E+00");
-    CORRADE_COMPARE(format("{:.3E}", 12.34567f), "1.235E+01");
-    CORRADE_COMPARE(format("{:.3E}", 12.34567), "1.235E+01");
-    CORRADE_COMPARE(format("{:.3E}", 12.34567l), "1.235E+01");
-    #else
+    #if defined(CORRADE_TARGET_MINGW) && !defined(_UCRT)
     CORRADE_COMPARE(format("{:.3E}", 1.0f), "1.000E+000");
     CORRADE_COMPARE(format("{:.3E}", 1.0), "1.000E+000");
     CORRADE_COMPARE(format("{:.3E}", 1.0l), "1.000E+000");
     CORRADE_COMPARE(format("{:.3E}", 12.34567f), "1.235E+001");
     CORRADE_COMPARE(format("{:.3E}", 12.34567), "1.235E+001");
     CORRADE_COMPARE(format("{:.3E}", 12.34567l), "1.235E+001");
+    #else
+    CORRADE_COMPARE(format("{:.3E}", 1.0f), "1.000E+00");
+    CORRADE_COMPARE(format("{:.3E}", 1.0), "1.000E+00");
+    CORRADE_COMPARE(format("{:.3E}", 1.0l), "1.000E+00");
+    CORRADE_COMPARE(format("{:.3E}", 12.34567f), "1.235E+01");
+    CORRADE_COMPARE(format("{:.3E}", 12.34567), "1.235E+01");
+    CORRADE_COMPARE(format("{:.3E}", 12.34567l), "1.235E+01");
     #endif
 }
 
