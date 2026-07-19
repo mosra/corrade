@@ -110,6 +110,13 @@ template<> char formatTypeChar<unsigned long long>(const FormatType type) {
     return formatTypeChar<unsigned int>(type);
 }
 
+template<> char formatTypeChar<bool>(const FormatType type) {
+    /* Return some reasonable default so we can test for the assert */
+    CORRADE_ASSERT(type != FormatType::Character,
+        "Utility::format(): character type used for a boolean value", 'i');
+    return formatTypeChar<unsigned int>(type);
+}
+
 template<> char formatTypeChar<float>(FormatType type) {
     switch(type) {
         case FormatType::Unspecified:
@@ -183,6 +190,19 @@ void Formatter<unsigned long long>::format(std::FILE* const file, const unsigned
         precision = 1;
     const char format[]{ '%', '.', '*', 'l', 'l', formatTypeChar<unsigned long long>(type), 0 };
     std::fprintf(file, format, precision, value);
+}
+
+std::size_t Formatter<bool>::format(const Containers::MutableStringView& buffer, const bool value, int precision, const FormatType type) {
+    if(precision == -1)
+        precision = 1;
+    const char format[]{ '%', '.', '*', formatTypeChar<bool>(type), 0 };
+    return std::snprintf(buffer.data(), buffer.size(), format, precision, static_cast<unsigned int>(value));
+}
+void Formatter<bool>::format(std::FILE* const file, const bool value, int precision, const FormatType type) {
+    if(precision == -1)
+        precision = 1;
+    const char format[]{ '%', '.', '*', formatTypeChar<bool>(type), 0 };
+    std::fprintf(file, format, precision, static_cast<unsigned int>(value));
 }
 
 std::size_t Formatter<float>::format(const Containers::MutableStringView& buffer, const float value, int precision, const FormatType type) {

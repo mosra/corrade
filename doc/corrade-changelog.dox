@@ -439,6 +439,8 @@ namespace Corrade {
     contained in a resource group
 -   @ref Utility::format() now supports printing integers as characters using
     the @cpp "{:c}" @ce modifier
+-   @ref Utility::format() now supports printing the @cpp bool @ce type,
+    treating it simply as a 1-bit integer
 -   @ref Utility::format() now accepts also a C++17 @ref std::string_view if
     you include @ref Corrade/Utility/FormatStlStringView.h
 -   Added a @ref Utility::String::replaceAll(Containers::String, char, char)

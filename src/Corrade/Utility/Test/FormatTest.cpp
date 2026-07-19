@@ -55,7 +55,7 @@ struct FormatTest: TestSuite::Tester {
     void integerLongLong();
 
     void character();
-    void characterLong();
+    void characterBoolLong();
     void characterPrecision();
 
     void octal();
@@ -128,7 +128,7 @@ FormatTest::FormatTest() {
               &FormatTest::integerLongLong,
 
               &FormatTest::character,
-              &FormatTest::characterLong,
+              &FormatTest::characterBoolLong,
               &FormatTest::characterPrecision,
 
               &FormatTest::octal,
@@ -254,7 +254,7 @@ void FormatTest::character() {
     }
 }
 
-void FormatTest::characterLong() {
+void FormatTest::characterBoolLong() {
     CORRADE_SKIP_IF_NO_ASSERT();
 
     Containers::String out;
@@ -263,9 +263,11 @@ void FormatTest::characterLong() {
     /* Using formatInto() instead of format() to avoid all errors being printed
        twice due to the extra pass with size calculation */
     char buffer[128]{};
+    formatInto(buffer, "{:c}", true);
     formatInto(buffer, "{:c}", 97ll);
     formatInto(buffer, "{:c}", 97ull);
     CORRADE_COMPARE(out,
+        "Utility::format(): character type used for a boolean value\n"
         "Utility::format(): character type used for a 64-bit value\n"
         "Utility::format(): character type used for a 64-bit value\n");
 }
@@ -282,21 +284,25 @@ void FormatTest::characterPrecision() {
 }
 
 void FormatTest::octal() {
+    CORRADE_COMPARE(format("{:o}", true), "1");
     CORRADE_COMPARE(format("{:o}", 0777), "777");
     CORRADE_COMPARE(format("{:o}", 0777ull), "777");
 }
 
 void FormatTest::decimal() {
+    CORRADE_COMPARE(format("{:d}", true), "1");
     CORRADE_COMPARE(format("{:d}", 1234), "1234");
     CORRADE_COMPARE(format("{:d}", 1234ull), "1234");
 }
 
 void FormatTest::hexadecimal() {
+    CORRADE_COMPARE(format("{:x}", true), "1");
     CORRADE_COMPARE(format("{:x}", 0xdead), "dead");
     CORRADE_COMPARE(format("{:x}", 0xdeadbeefcafebabeull), "deadbeefcafebabe");
 }
 
 void FormatTest::hexadecimalUppercase() {
+    CORRADE_COMPARE(format("{:X}", false), "0");
     CORRADE_COMPARE(format("{:X}", 0xDEAD), "DEAD");
     CORRADE_COMPARE(format("{:X}", 0xDEADBEEFCAFEBABEULL), "DEADBEEFCAFEBABE");
 }
@@ -310,33 +316,41 @@ void FormatTest::integerFloat() {
     /* Using formatInto() instead of format() to avoid all errors being printed
        twice due to the extra pass with size calculation */
     char buffer[128]{};
+    formatInto(buffer, "{:g}", true);
     formatInto(buffer, "{:g}", 123456);
     formatInto(buffer, "{:g}", 123456ull);
     CORRADE_COMPARE(out,
+        /* Internally the bool delegates to a unsigned int helper, so it prints
+           the same assert as for integers */
+        "Utility::format(): floating-point type used for an integral value\n"
         "Utility::format(): floating-point type used for an integral value\n"
         "Utility::format(): floating-point type used for an integral value\n");
 }
 
 void FormatTest::integerPrecision() {
     /* Default should preserve the zero */
+    CORRADE_COMPARE(format("{}!", false), "0!");
     CORRADE_COMPARE(format("{}!", 0), "0!");
     CORRADE_COMPARE(format("{}!", 0u), "0!");
     CORRADE_COMPARE(format("{}!", 0ll), "0!");
     CORRADE_COMPARE(format("{}!", 0ull), "0!");
 
     /* Zero should not preserve the zero */
+    CORRADE_COMPARE(format("{:.0}!", false), "!");
     CORRADE_COMPARE(format("{:.0}!", 0), "!");
     CORRADE_COMPARE(format("{:.0}!", 0u), "!");
     CORRADE_COMPARE(format("{:.0}!", 0ll), "!");
     CORRADE_COMPARE(format("{:.0}!", 0ull), "!");
 
     /* Smaller should overflow */
+    CORRADE_COMPARE(format("{:.0}", true), "1");
     CORRADE_COMPARE(format("{:.2}", 1536), "1536");
     CORRADE_COMPARE(format("{:.2}", 1536u), "1536");
     CORRADE_COMPARE(format("{:.2}", 1536ll), "1536");
     CORRADE_COMPARE(format("{:.2}", 1536ull), "1536");
 
     /* Larger should pad from left */
+    CORRADE_COMPARE(format("{:.15}", true), "000000000000001");
     CORRADE_COMPARE(format("{:.15}", 1536), "000000000001536");
     CORRADE_COMPARE(format("{:.15}", 1536u), "000000000001536");
     CORRADE_COMPARE(format("{:.15}", 1536ll), "000000000001536");
@@ -730,11 +744,11 @@ void FormatTest::file() {
         FILE* f = std::fopen(filename.data(), "w");
         CORRADE_VERIFY(f);
         Containers::ScopeGuard e{f, fclose};
-        formatInto(f, "A {} {} {} {} {} {} + ({}) {}",
-            "string", Containers::StringView{"file"}, -2000123, 4025136u, -12345678901234ll, 24568780984912ull, 12.3404f, 1.52);
+        formatInto(f, "A {} {} {} {} {} {} {} + ({}) {}",
+            "string", Containers::StringView{"file"}, false, -2000123, 4025136u, -12345678901234ll, 24568780984912ull, 12.3404f, 1.52);
     }
     CORRADE_COMPARE_AS(filename,
-        "A string file -2000123 4025136 -12345678901234 24568780984912 + (12.3404) 1.52",
+        "A string file 0 -2000123 4025136 -12345678901234 24568780984912 + (12.3404) 1.52",
         TestSuite::Compare::FileToString);
 }
 
