@@ -27,6 +27,8 @@
 #   DEALINGS IN THE SOFTWARE.
 #
 
+message(DEPRECATION "The CorradeLibSuffix module and the LIB_SUFFIX variable is deprecated. Use the CMAKE_INSTALL_LIBDIR variable provided by CMake's builtin GNUInstallDirs module instead.")
+
 if(NOT DEFINED LIB_SUFFIX)
     # Android. Given a CMAKE_INSTALL_PREFIX, check if the expected lib
     # subdirectory exists. If it does, we assume CMAKE_INSTALL_PREFIX is

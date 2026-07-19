@@ -653,15 +653,12 @@ these is enabled, Corrade will refuse to build (or be used) with a compiler
 that doesn't match given compatibility mode.
 
 Particular platforms have additional requirements when it comes to location of
-installed files. The following variables are supported:
+installed files. The following special cases are recognized:
 
--   `LIB_SUFFIX` --- Setting this variable to `64` can be used to tell CMake to
-    install to `lib64/` instead of `lib/`. In most cases this variable is
-    autodetected, so you don't need to set it yourself. On
-    @ref CORRADE_TARGET_ANDROID "Android", if `CMAKE_INSTALL_PREFIX` points to
-    the NDK sysroot, it gets automatically set to
-    `/${CMAKE_ANDROID_ARCH_TRIPLE}/${CMAKE_SYSTEM_VERSION}` to put the binaries
-    to correct location for given architecture and API level version.
+-   On @ref CORRADE_TARGET_ANDROID "Android", if `CMAKE_INSTALL_PREFIX` points
+    to the NDK sysroot, `CMAKE_INSTALL_LIBDIR` gets adjusted to point to a
+    `${CMAKE_ANDROID_ARCH_TRIPLE}/${CMAKE_SYSTEM_VERSION}` subdir to put the
+    binaries to correct location for given architecture and API level version.
 
 The following variables are deprecated and provided only for backwards
 compatibility if `CORRADE_BUILD_DEPRECATED` isn't disabled.
@@ -972,12 +969,13 @@ through `PATH`. Note that `CORRADE_BUILD_STATIC` is implicitly enabled, because
 manually loading all depending shared libraries using JNI would be too
 inconvenient.
 
-If you set `CMAKE_INSTALL_PREFIX` to `/usr` subdirectory of the particular
-Android platform sysroot (as shown below), Corrade's buildsystem will also pick
-a `LIB_SUFFIX` corresponding to a particular ABI and version, which in turn
-makes the package automatically discoverable when compiling depending projects,
-both with vanilla CMake and with Gradle. Another option is to explicitly set
-`CMAKE_PREFIX_PATH` to the install location in depending projects.
+If you set `CMAKE_INSTALL_PREFIX` to the `/usr` subdirectory of the particular
+Android platform sysroot (as shown below), Corrade's buildsystem will also
+adjust `CMAKE_INSTALL_LIBDIR` to a subdirectory corresponding to a particular
+ABI and version, which in turn makes the package automatically discoverable
+when compiling depending projects, both with vanilla CMake and with Gradle.
+Another option is to explicitly set `CMAKE_PREFIX_PATH` to the install location
+in depending projects.
 
 <b></b>
 

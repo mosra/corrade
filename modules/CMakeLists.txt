@@ -26,9 +26,12 @@
 
 set(Corrade_MODULES
     CorradeConfig.cmake
-    CorradeLibSuffix.cmake
     FindCorrade.cmake
     UseCorrade.cmake)
+if(CORRADE_BUILD_DEPRECATED)
+    list(APPEND Corrade_MODULES
+        CorradeLibSuffix.cmake)
+endif()
 
 set(Corrade_DEPENDENCY_MODULES )
 if(CORRADE_TARGET_EMSCRIPTEN)

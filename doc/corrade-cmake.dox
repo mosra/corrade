@@ -125,14 +125,16 @@ This module tries to find the base Corrade library and then defines the
 following:
 
 -   `Corrade_FOUND` --- Whether the base library was found
--   `CORRADE_LIB_SUFFIX_MODULE` --- Path to `CorradeLibSuffix.cmake` module,
-    which tries to autodetect the `LIB_SUFFIX` variable
+-   `CORRADE_LIB_SUFFIX_MODULE` @m_class{m-label m-danger} **deprecated** ---
+    Path to the `CorradeLibSuffix.cmake` module, which tries to autodetect the
+    `LIB_SUFFIX` variable. Obsoleted by the `CMAKE_INSTALL_LIBDIR` variable
+    provided by CMake's builtin `GNUInstallDirs` module.
 
 This command will try to find only the base library, not the optional
 components, which are:
 
 -   `Containers` --- @ref Containers library
--   `Interconnect`  @m_class{m-label m-danger} **deprecated** ---
+-   `Interconnect` @m_class{m-label m-danger} **deprecated** ---
     @ref Interconnect library
 -   `Main` --- @ref main "Main" library
 -   `PluginManager` --- @ref PluginManager library

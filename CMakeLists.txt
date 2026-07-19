@@ -532,12 +532,21 @@ endif()
 include(UseCorrade)
 
 # Installation paths
-include(CorradeLibSuffix)
-set(CORRADE_BINARY_INSTALL_DIR bin)
-set(CORRADE_LIBRARY_INSTALL_DIR lib${LIB_SUFFIX})
-set(CORRADE_DATA_INSTALL_DIR share/corrade)
-set(CORRADE_CMAKE_MODULE_INSTALL_DIR share/cmake/Corrade)
-set(CORRADE_INCLUDE_INSTALL_DIR include/Corrade)
+include(GNUInstallDirs)
+# On Android, if we're using CMake's builtin support and not the NDK  toolchain
+# (i.e., with CMAKE_ANDROID_ARCH_TRIPLE defined), point CMAKE_INSTALL_LIBDIR to
+# a subdirectory based on the target. If the subdirectory doesn't exist, don't
+# adjust anything -- in that case the  assumption is that it's being installed
+# in some other place that doesn't match the NDK layout.
+# TODO could GNUInstallDirs do this on their own? Ugh...
+if(CORRADE_TARGET_ANDROID AND CMAKE_ANDROID_ARCH_TRIPLE AND EXISTS "${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_LIBDIR}/${CMAKE_ANDROID_ARCH_TRIPLE}/${CMAKE_SYSTEM_VERSION}")
+    set(CMAKE_INSTALL_LIBDIR "${CMAKE_INSTALL_LIBDIR}/${CMAKE_ANDROID_ARCH_TRIPLE}/${CMAKE_SYSTEM_VERSION}")
+endif()
+set(CORRADE_BINARY_INSTALL_DIR ${CMAKE_INSTALL_BINDIR})
+set(CORRADE_LIBRARY_INSTALL_DIR ${CMAKE_INSTALL_LIBDIR})
+set(CORRADE_DATA_INSTALL_DIR ${CMAKE_INSTALL_DATADIR}/corrade)
+set(CORRADE_CMAKE_MODULE_INSTALL_DIR ${CMAKE_INSTALL_DATADIR}/cmake/Corrade)
+set(CORRADE_INCLUDE_INSTALL_DIR ${CMAKE_INSTALL_INCLUDEDIR}/Corrade)
 # Prefix the non-binary paths with the obsolete CORRADE_INCLUDE_INSTALL_PREFIX,
 # if set
 if(CORRADE_BUILD_DEPRECATED AND CORRADE_INCLUDE_INSTALL_PREFIX AND NOT CORRADE_INCLUDE_INSTALL_PREFIX STREQUAL ".")
