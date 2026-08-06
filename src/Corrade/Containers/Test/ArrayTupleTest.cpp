@@ -250,8 +250,19 @@ template<int align> struct alignas(align) Aligned {
         ++destructed;
     }
 
+    /* https://github.com/llvm/llvm-project/commit/fd11cf430e5a9fd11f93bdcc929a1ce8dfa60f37
+       looks like it cannot see that all actual instantiations of this template
+       are both setting *and* using the variable? Ugh. */
+    /** @todo revisit with newer Clang versions */
+    #if defined(CORRADE_TARGET_CLANG) && __clang_major__ >= 23
+    #pragma clang diagnostic push
+    #pragma clang diagnostic ignored "-Wunused-but-set-global"
+    #endif
     static int constructed;
     static int destructed;
+    #if defined(CORRADE_TARGET_CLANG) && __clang_major__ >= 23
+    #pragma clang diagnostic pop
+    #endif
 };
 
 template<int align> int Aligned<align>::constructed = 0;
