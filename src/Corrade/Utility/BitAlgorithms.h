@@ -78,19 +78,11 @@ template<class T> void copyMasked(const Containers::StridedArrayView1D<const T>&
 
 namespace Implementation {
 
-/* Adapted from Algorithms.h and restricted to 1D strided array views. Adding
-   the same Clang warning suppression, see Algorithms.h for details. */
-#ifdef CORRADE_TARGET_CLANG
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wunused-template"
-#endif
-template<class T, class View = decltype(Containers::Implementation::ErasedArrayViewConverter<typename std::remove_reference<T&&>::type>::from(std::declval<T&&>()))> static Containers::StridedArrayView1D<typename View::Type> stridedArrayView1DTypeFor(T&&);
-template<class T> static Containers::StridedArrayView1D<T> stridedArrayView1DTypeFor(const Containers::ArrayView<T>&);
-template<std::size_t size, class T> static Containers::StridedArrayView1D<T> stridedArrayView1DTypeFor(T(&)[size]);
-template<class T> static Containers::StridedArrayView1D<T> stridedArrayView1DTypeFor(const Containers::StridedArrayView1D<T>&);
-#ifdef CORRADE_TARGET_CLANG
-#pragma clang diagnostic pop
-#endif
+/* Adapted from Algorithms.h and restricted to 1D strided array views */
+template<class T, class View = decltype(Containers::Implementation::ErasedArrayViewConverter<typename std::remove_reference<T&&>::type>::from(std::declval<T&&>()))> Containers::StridedArrayView1D<typename View::Type> stridedArrayView1DTypeFor(T&&);
+template<class T> Containers::StridedArrayView1D<T> stridedArrayView1DTypeFor(const Containers::ArrayView<T>&);
+template<std::size_t size, class T> Containers::StridedArrayView1D<T> stridedArrayView1DTypeFor(T(&)[size]);
+template<class T> Containers::StridedArrayView1D<T> stridedArrayView1DTypeFor(const Containers::StridedArrayView1D<T>&);
 
 }
 
