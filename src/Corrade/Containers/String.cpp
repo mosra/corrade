@@ -307,8 +307,9 @@ String::String(Corrade::ValueInitT, const std::size_t size): _large{} {
 }
 
 String::String(Corrade::NoInitT, const std::size_t size)
-    #ifdef CORRADE_GRACEFUL_ASSERT
-    /* Zero-init the contents so the destructor doesn't crash if we assert here */
+    #if defined(CORRADE_TARGET_32BIT) && defined(CORRADE_GRACEFUL_ASSERT)
+    /* Zero-init the contents so the destructor doesn't crash if we assert
+       here. The assert is only on 32-bit, we don't need to do it otherwise. */
     : _large{}
     #endif
 {
@@ -326,8 +327,9 @@ String::String(Corrade::NoInitT, const std::size_t size)
 }
 
 String::String(Corrade::DirectInitT, const std::size_t size, const char c): String{Corrade::NoInit, size} {
-    #ifdef CORRADE_GRACEFUL_ASSERT
-    /* If the NoInit constructor asserted, don't attempt to memset */
+    #if defined(CORRADE_TARGET_32BIT) && defined(CORRADE_GRACEFUL_ASSERT)
+    /* If the NoInit constructor asserted, don't attempt to memset. The assert
+       is only on 32-bit, we don't need to do this otherwise. */
     if(size >= Implementation::SmallStringSize && !_large.data)
         return;
     #endif
