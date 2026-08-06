@@ -70,6 +70,29 @@
 
 namespace Corrade { namespace Containers {
 
+#ifndef CORRADE_SINGLES_NO_DEBUG
+Utility::Debug& operator<<(Utility::Debug& debug, const StringViewFlag value) {
+    debug << "Containers::StringViewFlag" << Utility::Debug::nospace;
+
+    switch(value) {
+        /* LCOV_EXCL_START */
+        #define _c(v) case StringViewFlag::v: return debug << "::" #v;
+        _c(Global)
+        _c(NullTerminated)
+        #undef _c
+        /* LCOV_EXCL_STOP */
+    }
+
+    return debug << "(" << Utility::Debug::nospace << Utility::Debug::hex << std::size_t(value) << Utility::Debug::nospace << ")";
+}
+
+Utility::Debug& operator<<(Utility::Debug& debug, const StringViewFlags value) {
+    return enumSetDebugOutput(debug, value, "Containers::StringViewFlags{}", {
+        StringViewFlag::Global,
+        StringViewFlag::NullTerminated});
+}
+#endif
+
 template<class T> BasicStringView<T>::BasicStringView(T* const data, const StringViewFlags flags, std::nullptr_t) noexcept: BasicStringView{data,
     data ? std::strlen(data) : 0,
     flags|(data ? StringViewFlag::NullTerminated : StringViewFlag::Global)} {}
@@ -1568,29 +1591,6 @@ String operator*(const StringView string, const std::size_t count) {
 String operator*(const std::size_t count, const StringView string) {
     return string*count;
 }
-
-#ifndef CORRADE_SINGLES_NO_DEBUG
-Utility::Debug& operator<<(Utility::Debug& debug, const StringViewFlag value) {
-    debug << "Containers::StringViewFlag" << Utility::Debug::nospace;
-
-    switch(value) {
-        /* LCOV_EXCL_START */
-        #define _c(v) case StringViewFlag::v: return debug << "::" #v;
-        _c(Global)
-        _c(NullTerminated)
-        #undef _c
-        /* LCOV_EXCL_STOP */
-    }
-
-    return debug << "(" << Utility::Debug::nospace << Utility::Debug::hex << std::size_t(value) << Utility::Debug::nospace << ")";
-}
-
-Utility::Debug& operator<<(Utility::Debug& debug, const StringViewFlags value) {
-    return enumSetDebugOutput(debug, value, "Containers::StringViewFlags{}", {
-        StringViewFlag::Global,
-        StringViewFlag::NullTerminated});
-}
-#endif
 
 #ifndef CORRADE_SINGLES_NO_ADVANCED_STRING_APIS
 namespace Implementation {

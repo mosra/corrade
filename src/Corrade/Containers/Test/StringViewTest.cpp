@@ -104,6 +104,9 @@ namespace Test { namespace {
 struct StringViewTest: TestSuite::Tester {
     explicit StringViewTest();
 
+    void debugFlag();
+    void debugFlags();
+
     void captureImplementations();
     void restoreImplementations();
 
@@ -231,8 +234,6 @@ struct StringViewTest: TestSuite::Tester {
     void countCharacterUnalignedLessThanTwoVectors();
     void countCharacterUnalignedLessThanOneVector();
 
-    void debugFlag();
-    void debugFlags();
     void debug();
 
     private:
@@ -321,7 +322,10 @@ const struct {
 };
 
 StringViewTest::StringViewTest() {
-    addTests({&StringViewTest::constructDefault<const char>,
+    addTests({&StringViewTest::debugFlag,
+              &StringViewTest::debugFlags,
+
+              &StringViewTest::constructDefault<const char>,
               &StringViewTest::constructDefault<char>,
               &StringViewTest::constructDefaultConstexpr,
               &StringViewTest::construct<const char>,
@@ -455,9 +459,21 @@ StringViewTest::StringViewTest() {
         &StringViewTest::captureImplementations,
         &StringViewTest::restoreImplementations);
 
-    addTests({&StringViewTest::debugFlag,
-              &StringViewTest::debugFlags,
-              &StringViewTest::debug});
+    addTests({&StringViewTest::debug});
+}
+
+void StringViewTest::debugFlag() {
+    Containers::String out;
+
+    Debug{&out} << StringViewFlag::Global << StringViewFlag(0xf0f0u);
+    CORRADE_COMPARE(out, "Containers::StringViewFlag::Global Containers::StringViewFlag(0xf0f0)\n");
+}
+
+void StringViewTest::debugFlags() {
+    Containers::String out;
+
+    Debug{&out} << (StringViewFlag::Global|StringViewFlag::NullTerminated) << StringViewFlags{};
+    CORRADE_COMPARE(out, "Containers::StringViewFlag::Global|Containers::StringViewFlag::NullTerminated Containers::StringViewFlags{}\n");
 }
 
 using namespace Literals;
@@ -3548,20 +3564,6 @@ void StringViewTest::countCharacterUnalignedLessThanOneVector() {
     for(char& i: string)
         i = 'X';
     CORRADE_COMPARE(string.count('X'), string.size());
-}
-
-void StringViewTest::debugFlag() {
-    Containers::String out;
-
-    Debug{&out} << StringViewFlag::Global << StringViewFlag(0xf0f0u);
-    CORRADE_COMPARE(out, "Containers::StringViewFlag::Global Containers::StringViewFlag(0xf0f0)\n");
-}
-
-void StringViewTest::debugFlags() {
-    Containers::String out;
-
-    Debug{&out} << (StringViewFlag::Global|StringViewFlag::NullTerminated) << StringViewFlags{};
-    CORRADE_COMPARE(out, "Containers::StringViewFlag::Global|Containers::StringViewFlag::NullTerminated Containers::StringViewFlags{}\n");
 }
 
 void StringViewTest::debug() {
