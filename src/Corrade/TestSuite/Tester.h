@@ -38,7 +38,7 @@
 #include "Corrade/TestSuite/Compare/FloatingPoint.h"
 #include "Corrade/TestSuite/visibility.h"
 #include "Corrade/Utility/Debug.h"
-#include "Corrade/Utility/Macros.h"
+#include "Corrade/Utility/Macros.h" /* CORRADE_FUNCTION, _CORRADE_HELPER_PASTE */
 
 #ifdef CORRADE_BUILD_DEPRECATED
 /* Some arguments used to be a std::string, so provide implicit conversion to a
