@@ -59,58 +59,65 @@ template<class> class Container {};
 
 }
 
+namespace Implementation {
+
+class CORRADE_TESTSUITE_EXPORT ContainerComparatorBase {
+    protected:
+        void printMessage(ComparisonStatusFlags status, Utility::Debug& out, const char* actual, const char* expected, void(*printer)(Utility::Debug&, const void*), void(*itemPrinter)(Utility::Debug&, const void*, std::size_t)) const;
+
+        const void* _actualContents{};
+        const void* _expectedContents{};
+        std::size_t _actualContentsSize{};
+        std::size_t _expectedContentsSize{};
+        std::size_t _firstDifferent{};
+};
+
+}
+
 #ifndef DOXYGEN_GENERATING_OUTPUT
-template<class T> class Comparator<Compare::Container<T>> {
+template<class T> class Comparator<Compare::Container<T>>: public Implementation::ContainerComparatorBase {
     public:
         ComparisonStatusFlags operator()(const T& actual, const T& expected);
 
         void printMessage(ComparisonStatusFlags, Utility::Debug& out, const char* actual, const char* expected) const;
-
-    private:
-        const T* _actualContents;
-        const T* _expectedContents;
 };
 
 template<class T> ComparisonStatusFlags Comparator<Compare::Container<T>>::operator()(const T& actual, const T& expected) {
     _actualContents = &actual;
     _expectedContents = &expected;
+    _actualContentsSize = actual.size();
+    _expectedContentsSize = expected.size();
 
-    if(_actualContents->size() != _expectedContents->size())
-        return ComparisonStatusFlag::Failed;
+    ComparisonStatusFlags status;
+    if(_actualContentsSize != _expectedContentsSize)
+        status = ComparisonStatusFlag::Failed;
 
-    /* Recursively use comparator on the values */
-    Comparator<typename std::decay<decltype((*_actualContents)[0])>::type> comparator;
-    for(std::size_t i = 0; i != _actualContents->size(); ++i)
-        if(comparator((*_actualContents)[i], (*_expectedContents)[i]) & ComparisonStatusFlag::Failed)
-            return ComparisonStatusFlag::Failed;
+    /* Recursively use the comparator on the values, find the first different
+       item in the common prefix. If there's none, then the first different
+       item is right after the common prefix, and if both have the same size
+       then it means the containers are the same. */
+    Comparator<typename std::decay<decltype(actual[0])>::type> comparator;
+    const std::size_t commonPrefixSize = Utility::min(_actualContentsSize, _expectedContentsSize);
+    _firstDifferent = commonPrefixSize;
+    for(std::size_t i = 0; i != commonPrefixSize; ++i) {
+        if(comparator(actual[i], expected[i]) & ComparisonStatusFlag::Failed) {
+            _firstDifferent = i;
+            status = ComparisonStatusFlag::Failed;
+            break;
+        }
+    }
 
-    return {};
+    return status;
 }
 
-template<class T> void Comparator<Compare::Container<T>>::printMessage(ComparisonStatusFlags, Utility::Debug& out, const char* actual, const char* expected) const {
-    out << "Containers" << actual << "and" << expected << "have different";
-    if(_actualContents->size() != _expectedContents->size())
-        out << "size, actual" << _actualContents->size() << "but" << _expectedContents->size() << "expected. Actual contents:\n       ";
-    else
-        out << "contents, actual:\n       ";
-
-    out << *_actualContents << Utility::Debug::newline << "        but expected\n       " << *_expectedContents << Utility::Debug::newline << "       ";
-
-    Comparator<typename std::decay<decltype((*_actualContents)[0])>::type> comparator;
-    for(std::size_t i = 0, end = Utility::max(_actualContents->size(), _expectedContents->size()); i != end; ++i) {
-        if(_actualContents->size() > i && _expectedContents->size() > i &&
-            !(comparator((*_actualContents)[i], (*_expectedContents)[i]) & ComparisonStatusFlag::Failed)) continue;
-
-        if(_actualContents->size() <= i)
-            out << "Expected has" << (*_expectedContents)[i];
-        else if(_expectedContents->size() <= i)
-            out << "Actual has" << (*_actualContents)[i];
-        else
-            out << "Actual" << (*_actualContents)[i] << "but" << (*_expectedContents)[i] << "expected";
-
-        out << "on position" << i << Utility::Debug::nospace << ".";
-        break;
-    }
+template<class T> void Comparator<Compare::Container<T>>::printMessage(const ComparisonStatusFlags status, Utility::Debug& out, const char* actual, const char* expected) const {
+    Implementation::ContainerComparatorBase::printMessage(status, out, actual, expected,
+        [](Utility::Debug& out, const void* contents) {
+            out << *static_cast<const T*>(contents);
+        },
+        [](Utility::Debug& out, const void* contents, std::size_t i) {
+            out << (*static_cast<const T*>(contents))[i];
+        });
 }
 #endif
 
