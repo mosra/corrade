@@ -87,7 +87,7 @@ namespace CORRADE_DEPRECATED_NAMESPACE("use Namespace instead") DeprecatedNamesp
 }
 #define MACRO(foo) do {} while(false)
 #define DEPRECATED_MACRO(foo) \
-    CORRADE_DEPRECATED_MACRO(DEPRECATED_MACRO(),"ignore me, I'm just testing the CORRADE_DEPRECATED_MACRO() macro") MACRO(foo)
+    CORRADE_DEPRECATED_MACRO(DEPRECATED_MACRO, "ignore me, I'm just testing the CORRADE_DEPRECATED_MACRO() macro") MACRO(foo)
 
 /* Uncomment to test various subsets of deprecation warnings */
 // #define ENABLE_DEPRECATION_WARNINGS
@@ -174,6 +174,8 @@ void DeprecationMacrosTest::deprecatedMacro() {
     /* Warning on MSVC, GCC, Clang. Can only be disabled with
        CORRADE_IGNORE_DEPRECATED_PUSH on Clang, not on GCC or MSVC. */
     DEPRECATED_MACRO(hello?);
+    // TODO argh the above doesn't warn, only a subsequent use of the same macro, what to do?!
+    DEPRECATED_MACRO(now it does);
 
     CORRADE_VERIFY(true);
 }
