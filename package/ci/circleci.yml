@@ -20,11 +20,10 @@ executors:
   ubuntu-20_04:
     machine:
       image: ubuntu-2004:2024.11.1
-  # As of November 7, 2025, M4 is the default, and the oldest version there is
-  # 14.3.1.
-  xcode-14_3:
+  # As of October 2026 the oldest version there is 15.4.0
+  xcode-15_4:
     macos:
-      xcode: 14.3.1
+      xcode: 15.4.0
   emscripten2:
     docker:
     # 2.0.16 is the oldest on Docker that isn't based on Debian Buster which
@@ -458,12 +457,11 @@ jobs:
         script: unix-desktop.sh
 
   macos:
-    executor: xcode-14_3
+    executor: xcode-15_4
     environment:
       # Make libc++ remove transitive includes, both for faster build times and
       # to detect if we're missing a transitive include. Works with libc++ 16+,
-      # which is used by Xcode 15 (i.e., will get used on the next CircleCI
-      # executor update).
+      # which is used by Xcode 15.
       CMAKE_CXX_FLAGS: --coverage -D_LIBCPP_REMOVE_TRANSITIVE_INCLUDES
       CONFIGURATION: Debug
     steps:
@@ -476,14 +474,13 @@ jobs:
         extra: --ignore-errors inconsistent
 
   macos-static:
-    executor: xcode-14_3
+    executor: xcode-15_4
     environment:
       # STUPID yml interprets unquoted ON as a boolean
       BUILD_STATIC: "ON"
       # Make libc++ remove transitive includes, both for faster build times and
       # to detect if we're missing a transitive include. Works with libc++ 16+,
-      # which is used by Xcode 15 (i.e., will get used on the next CircleCI
-      # executor update).
+      # which is used by Xcode 15.
       CMAKE_CXX_FLAGS: --coverage -D_LIBCPP_REMOVE_TRANSITIVE_INCLUDES
       CONFIGURATION: Debug
     steps:
@@ -544,7 +541,7 @@ jobs:
         script: android-x86.sh
 
   ios:
-    executor: xcode-14_3
+    executor: xcode-15_4
     environment:
       # Yep, xcodebuild is beyond stupid and just DOESN'T build in parallel by
       # default. The default M4 medium resource class has 6 CPUs and Ninja uses
