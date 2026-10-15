@@ -29,6 +29,7 @@ namespace Corrade {
 @brief Creating automated unit tests, integration tests and benchmarks.
 
 @m_footernavigation
+@m_keywords{TestSuite}
 
 Corrade's @ref TestSuite took its initial inspiration in the QtTest framework.
 Unlike most other test libraries out there, it is not designed around opaque
