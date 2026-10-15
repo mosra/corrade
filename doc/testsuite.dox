@@ -121,8 +121,8 @@ each other so one can immediately see the difference:
 @until }
 
 Lastly, we create the @cpp main() @ce function using the @ref CORRADE_TEST_MAIN()
-macro. It conveniently abstracts platform differences and takes care of
-command-line argument parsing for us.
+macro, closing the unnamed namespace before. It conveniently abstracts platform
+differences and takes care of command-line argument parsing for us.
 
 @code{.cpp}
 }
