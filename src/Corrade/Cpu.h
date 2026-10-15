@@ -3272,7 +3272,24 @@ inline Features runtimeFeatures() {
             unsigned int ax, bx, cx, dx;
         } e;
         int data[4];
-    } cpuid{};
+    /* Specifically *not* zero-initializing the struct because it gets fully
+       overwritten from the cpuid() call below anyway. Moreover, on Clang 22
+       with -O0 doing `cpuid{};` may generate a memset() call, which if IFUNC
+       dispatch is enabled leads to a cyclic dependency where the memset()
+       implementation itself is implemented through IFUNC and thus attempting
+       to call it from an IFUNC resolver may -- depending on used linker --
+       result in memset() not being resolved yet, leading to a crash. Other
+       compilers (and Clang with higher optimization levels) don't generate a
+       memset() call but direct instructions. Unfortunately there's no easy way
+       to reproduce this, nor there seems to be a way to force a function to
+       fully inline its contents without calling elsewhere, so there's also no
+       reliable way to avoid further similar regressions without brittle things
+       like grepping for memset in a disassembly of this function. Sigh. More
+       details here: https://github.com/mosra/corrade/issues/209 Potentially
+       related: https://sourceware.org/bugzilla/show_bug.cgi?id=28218 where
+       glibc 2.44 (on which I cannot reproduce) changes the order in which
+       IFUNC dispatchers get resolved. */
+    } cpuid;
 
     Implementation::cpuid(cpuid.data, 1, 0);
 

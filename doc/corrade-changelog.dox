@@ -628,6 +628,11 @@ namespace Corrade {
 -   The buildsystem now uses CMake's `GNUInstallDirs` module for a standardized
     way to specify installation location of binaries, libraries, include files
     and other data (see [mosra/magnum#696](https://github.com/mosra/magnum/issues/696))
+-   On certain compiler, linker and glibc combinations the IFUNC CPU dispatch
+    could  lead to @ref std::memset() being called from within an IFUNC
+    resolver,resulting in a crash if @ref std::memset(), which itself is
+    implemented through IFUNC dispatch, happens to not be resolved at that
+    point yet (see [mosra/corrade#209](https://github.com/mosra/corrade/issues/209))
 
 @subsection corrade-changelog-latest-bugfixes Bug fixes
 
