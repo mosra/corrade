@@ -134,9 +134,12 @@ CORRADE_TEST_MAIN(MyTest)
 
 Now we can compile and run our test using CMake and the
 @ref corrade-cmake-add-test "corrade_add_test()" macro. It compiles the
-executable and links it to all required libraries so we don't have to care
-about that ourselves. Don't forget to call @cmake enable_testing() @ce first so
-`ctest` is able to collect and run all the tests.
+executable and links it to required Corrade libraries so we don't have to care
+about that ourselves. For additional libraries to link, instead of calling
+@cmake target_link_libraries() @ce you can pass them in a `LIBRARIES` argument,
+see the macro documentation for more information. Don't forget to call
+@cmake enable_testing() @ce first so `ctest` is able to collect and run all the
+tests.
 
 @dontinclude testsuite/CMakeLists.txt
 @skip find_package
