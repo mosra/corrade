@@ -328,9 +328,11 @@ int main() { return foo() - 42; }\
     if(_CORRADE_CPU_CAN_USE_IFUNC)
         set(_CORRADE_CPU_USE_IFUNC_DEFAULT ON)
         # On GCC 4.8, if --coverage or -fprofile-arcs is enabled, the ifunc
-        # dispatchers cause a segfault. On Ubuntu 20.04 at least. Not the case
-        # with GCC 5 there, not the case with GCC 4.8 on Arch. Can't find any
-        # upstream bug report or commit that would be related to this.
+        # dispatchers cause a segfault. On Ubuntu 20.04 and a static build at
+        # least (corrade-rc execution during the build crashing), however
+        # apparently not with regular static corrade-rc on a dynamic build. Not
+        # the case with GCC 5 there, not the case with GCC 4.8 on Arch. Can't
+        # find any upstream bug report or commit that would be related to this.
         if(CMAKE_CXX_COMPILER_ID AND CMAKE_CXX_COMPILER_VERSION VERSION_LESS "4.9" AND CMAKE_CXX_FLAGS MATCHES "(--coverage|-fprofile-arcs)")
             if(NOT DEFINED CORRADE_CPU_USE_IFUNC)
                 message(WARNING "Disabling CORRADE_CPU_USE_IFUNC by default as it may crash when used together with --coverage on GCC 4.8.")
