@@ -26,11 +26,8 @@
     DEALINGS IN THE SOFTWARE.
 */
 
-#include <sstream>
-
 #include "Corrade/Cpu.h"
 #include "Corrade/Containers/String.h"
-#include "Corrade/Containers/StringStl.h"
 #include "Corrade/Utility/Assert.h"
 
 namespace Corrade { namespace Utility { namespace Test {
@@ -44,9 +41,9 @@ template<class T, std::size_t size> constexpr std::size_t cpuVariantCount(T(&)[s
 }
 
 template<class T> inline Containers::String cpuVariantName(T& data) {
-    std::ostringstream out;
+    Containers::String out;
     Utility::Debug{&out, Utility::Debug::Flag::NoNewlineAtTheEnd} << Utility::Debug::packed << data.features;
-    return out.str();
+    return out;
 }
 
 template<class T, std::size_t size> inline const T& cpuVariantCompiled(const T(&data)[size]) {

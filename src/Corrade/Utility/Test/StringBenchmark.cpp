@@ -27,6 +27,7 @@
 #include <cctype> /* std::ctype */
 #include <cstring> /* std::memchr */
 #include <locale> /* std::locale::classic() */
+#include <sstream> /* for parseFloatStlStream() */
 
 #include "Corrade/Containers/Array.h"
 #include "Corrade/Containers/Optional.h"
