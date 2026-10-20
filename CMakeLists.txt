@@ -370,10 +370,17 @@ else()
 endif()
 cmake_dependent_option(CORRADE_CPU_USE_IFUNC "Allow using GNU IFUNC for runtime CPU dispatch" ${_CORRADE_CPU_USE_IFUNC_DEFAULT} "_CORRADE_CPU_CAN_USE_IFUNC" OFF)
 
-# Runtime CPU dispatch. Because going through a function pointer may have
-# negative perf consequences, enable it by default only on platforms that have
-# IFUNC, and thus can avoid the function pointer indirection.
-option(CORRADE_BUILD_CPU_RUNTIME_DISPATCH "Build with runtime dispatch for CPU-dependent functionality" ${_CORRADE_CPU_CAN_USE_IFUNC})
+# Runtime CPU dispatch. Enabled by default everywhere except on Emscripten
+# because there a dispatch through a function pointer is prohibitely slow.
+# Elsewhere dispatch through a function pointer or through IFUNC adds only
+# a minimal overhead over a compile-time dispatch, and the benefits of being
+# able to use optimized routines are significant.
+if(CORRADE_TARGET_EMSCRIPTEN)
+    set(_CORRADE_BUILD_CPU_RUNTIME_DISPATCH_DEFAULT OFF)
+else()
+    set(_CORRADE_BUILD_CPU_RUNTIME_DISPATCH_DEFAULT ON)
+endif()
+option(CORRADE_BUILD_CPU_RUNTIME_DISPATCH "Build with runtime dispatch for CPU-dependent functionality" ${_CORRADE_BUILD_CPU_RUNTIME_DISPATCH_DEFAULT})
 # Enabled by default and independent of CORRADE_BUILD_CPU_RUNTIME_DISPATCH as
 # correctness is important. It can however negatively affect performance
 # compared to IFUNC or compile-time dispatch, so make it possible to disable
