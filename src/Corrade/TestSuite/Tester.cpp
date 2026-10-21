@@ -458,11 +458,11 @@ benchmark types:
                     #ifndef CORRADE_TARGET_ANDROID
                     out << "Use\n"
                         "         sudo cpupower frequency-set --governor performance\n"
-                        "       to get more stable results.";
+                        "       to get more stable results. Set back to" << governor << "after.";
                     #else
                     out << "Use\n"
                         "         echo performance | tee /sys/devices/system/cpu/cpu*/cpufreq/scaling_governor\n"
-                        "       on a rooted device to get more stable results.";
+                        "       on a rooted device to get more stable results. Set back to" << governor << "after.";
                     #endif
                 }
                 break;
