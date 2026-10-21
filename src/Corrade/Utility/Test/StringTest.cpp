@@ -1322,7 +1322,7 @@ void StringTest::commonPrefix() {
     #else
     auto&& data = cpuVariantCompiled(CommonPrefixData);
     #endif
-    setTestCaseDescription(Utility::Test::cpuVariantName(data));
+    setTestCaseDescription(cpuVariantName(data));
 
     Containers::StringView a = "path/to/somewhere!"_s.exceptSuffix(1);
     CORRADE_COMPARE(a.flags(), Containers::StringViewFlag::Global);
@@ -1395,7 +1395,7 @@ void StringTest::commonPrefixAligned() {
     #else
     auto&& data = cpuVariantCompiled(CommonPrefixData);
     #endif
-    setTestCaseDescription(Utility::Test::cpuVariantName(data));
+    setTestCaseDescription(cpuVariantName(data));
 
     /* Like StringViewTest::findCharacterAligned(), but instead of finding a
        concrete character there are two strings with one getting changed at
@@ -1500,7 +1500,7 @@ void StringTest::commonPrefixUnaligned() {
     #else
     auto&& data = cpuVariantCompiled(CommonPrefixData);
     #endif
-    setTestCaseDescription(Utility::Test::cpuVariantName(data));
+    setTestCaseDescription(cpuVariantName(data));
 
     /* Like StringViewTest::findCharacterUnaligned(), but instead of finding a
        concrete character there are two strings with one getting changed at
@@ -1600,7 +1600,7 @@ void StringTest::commonPrefixUnalignedLessThanTwoVectors() {
     #else
     auto&& data = cpuVariantCompiled(CommonPrefixData);
     #endif
-    setTestCaseDescription(Utility::Test::cpuVariantName(data));
+    setTestCaseDescription(cpuVariantName(data));
 
     /* Like StringViewTest::findCharacterUnalignedLessThanTwoVectors(), but
        instead of finding a concrete character there are two strings with one
@@ -1714,7 +1714,7 @@ void StringTest::commonPrefixUnalignedLessThanOneVector() {
     #else
     auto&& data = cpuVariantCompiled(CommonPrefixData);
     #endif
-    setTestCaseDescription(Utility::Test::cpuVariantName(data));
+    setTestCaseDescription(cpuVariantName(data));
 
     /* Like StringViewTest::findCharacterUnalignedLessThanTwoVectors(), but
        instead of finding a concrete character there are two strings with one
@@ -1891,7 +1891,7 @@ void StringTest::lowercaseUppercase() {
     #endif
     setTestCaseDescription(Utility::format(
         data.extra ? "{}, {}" : "{}",
-        Utility::Test::cpuVariantName(data), data.extra));
+        cpuVariantName(data), data.extra));
 
     if(!isCpuVariantSupported(data))
         CORRADE_SKIP("CPU features not supported");
@@ -1977,7 +1977,7 @@ void StringTest::lowercaseUppercaseAligned() {
     #endif
     setTestCaseDescription(Utility::format(
         data.extra ? "{}, {}" : "{}",
-        Utility::Test::cpuVariantName(data), data.extra));
+        cpuVariantName(data), data.extra));
 
     if(!isCpuVariantSupported(data))
         CORRADE_SKIP("CPU features not supported");
@@ -2043,7 +2043,7 @@ void StringTest::lowercaseUppercaseUnaligned() {
     #endif
     setTestCaseDescription(Utility::format(
         data.extra ? "{}, {}" : "{}",
-        Utility::Test::cpuVariantName(data), data.extra));
+        cpuVariantName(data), data.extra));
 
     if(!isCpuVariantSupported(data))
         CORRADE_SKIP("CPU features not supported");
@@ -2113,7 +2113,7 @@ void StringTest::lowercaseUppercaseLessThanTwoVectors() {
     #endif
     setTestCaseDescription(Utility::format(
         data.extra ? "{}, {}" : "{}",
-        Utility::Test::cpuVariantName(data), data.extra));
+        cpuVariantName(data), data.extra));
 
     if(!isCpuVariantSupported(data))
         CORRADE_SKIP("CPU features not supported");
@@ -2198,7 +2198,7 @@ void StringTest::lowercaseUppercaseLessThanOneVector() {
     #endif
     setTestCaseDescription(Utility::format(
         data.extra ? "{}, {}" : "{}",
-        Utility::Test::cpuVariantName(data), data.extra));
+        cpuVariantName(data), data.extra));
 
     if(!Utility::Test::isCpuVariantSupported(data))
         CORRADE_SKIP("CPU features not supported");
@@ -2391,7 +2391,7 @@ void StringTest::replaceAllInPlaceCharacter() {
     #endif
     setTestCaseDescription(Utility::format(
         data.extra ? "{}, {}" : "{}",
-        Utility::Test::cpuVariantName(data), data.extra));
+        cpuVariantName(data), data.extra));
 
     if(!isCpuVariantSupported(data))
         CORRADE_SKIP("CPU features not supported");
@@ -2411,7 +2411,7 @@ void StringTest::replaceAllInPlaceCharacterAligned() {
     #endif
     setTestCaseDescription(Utility::format(
         data.extra ? "{}, {}" : "{}",
-        Utility::Test::cpuVariantName(data), data.extra));
+        cpuVariantName(data), data.extra));
 
     if(!isCpuVariantSupported(data))
         CORRADE_SKIP("CPU features not supported");
@@ -2460,7 +2460,7 @@ void StringTest::replaceAllInPlaceCharacterUnaligned() {
     #endif
     setTestCaseDescription(Utility::format(
         data.extra ? "{}, {}" : "{}",
-        Utility::Test::cpuVariantName(data), data.extra));
+        cpuVariantName(data), data.extra));
 
     if(!isCpuVariantSupported(data))
         CORRADE_SKIP("CPU features not supported");
@@ -2512,7 +2512,7 @@ void StringTest::replaceAllInPlaceCharacterLessThanTwoVectors() {
     #endif
     setTestCaseDescription(Utility::format(
         data.extra ? "{}, {}" : "{}",
-        Utility::Test::cpuVariantName(data), data.extra));
+        cpuVariantName(data), data.extra));
 
     if(!isCpuVariantSupported(data))
         CORRADE_SKIP("CPU features not supported");
@@ -2578,7 +2578,7 @@ void StringTest::replaceAllInPlaceCharacterLessThanOneVector() {
     #endif
     setTestCaseDescription(Utility::format(
         data.extra ? "{}, {}" : "{}",
-        Utility::Test::cpuVariantName(data), data.extra));
+        cpuVariantName(data), data.extra));
 
     if(!isCpuVariantSupported(data))
         CORRADE_SKIP("CPU features not supported");
