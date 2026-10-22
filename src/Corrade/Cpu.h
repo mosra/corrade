@@ -2448,7 +2448,7 @@ may need to specify it together with others. See
 @m_class{m-note m-info}
 
 @par
-    If you target GCC 4.8 or Clang < 7, you may also want to use
+    If you target Clang < 7, you may also want to use
     @ref Corrade/Utility/IntrinsicsSse4.h instead of
     @cpp #include <nmmintrin.h> @ce to be able to access the intrinsics on this
     compiler.
@@ -2493,15 +2493,6 @@ compilers.
 Neither a superset nor implied by any other `CORRADE_ENABLE_*` macro, so you
 may need to specify it together with others. See
 @ref Cpu-usage-target-attributes for more information and usage example.
-
-@m_class{m-note m-info}
-
-@par
-    If you target GCC 4.8, you may also want to use
-    @ref Corrade/Utility/IntrinsicsAvx.h instead of
-    @cpp #include <immintrin.h> @ce to be able to access the intrinsics on this
-    compiler.
-
 @see @relativeref{Corrade,Cpu::Lzcnt}, @ref CORRADE_ENABLE()
 */
 #if defined(CORRADE_TARGET_LZCNT) || defined(DOXYGEN_GENERATING_OUTPUT)
@@ -2548,15 +2539,6 @@ Neither a superset nor implied by any other `CORRADE_ENABLE_*` macro (not even
 @ref CORRADE_TARGET_BMI2, although the name would suggest that), so you may
 need to specify it together with others. See @ref Cpu-usage-target-attributes
 for more information and usage example.
-
-@m_class{m-note m-info}
-
-@par
-    If you target GCC 4.8, you may also want to use
-    @ref Corrade/Utility/IntrinsicsAvx.h instead of
-    @cpp #include <immintrin.h> @ce to be able to access the intrinsics on this
-    compiler.
-
 @see @relativeref{Corrade,Cpu::Bmi1}, @ref CORRADE_ENABLE()
 */
 #if defined(CORRADE_TARGET_BMI1) || defined(DOXYGEN_GENERATING_OUTPUT)
@@ -2603,15 +2585,6 @@ Neither a superset nor implied by any other `CORRADE_ENABLE_*` macro (not even
 @ref CORRADE_TARGET_BMI1, although the name would suggest that), so you may
 need to specify it together with others. See @ref Cpu-usage-target-attributes
 for more information and usage example.
-
-@m_class{m-note m-info}
-
-@par
-    If you target GCC 4.8, you may also want to use
-    @ref Corrade/Utility/IntrinsicsAvx.h instead of
-    @cpp #include <immintrin.h> @ce to be able to access the intrinsics on this
-    compiler.
-
 @see @relativeref{Corrade,Cpu::Bmi2}, @ref CORRADE_ENABLE()
 */
 #if defined(CORRADE_TARGET_BMI2) || defined(DOXYGEN_GENERATING_OUTPUT)
@@ -2710,15 +2683,6 @@ Superset of @ref CORRADE_ENABLE_AVX on both GCC and Clang. However not
 portably implied by any other `CORRADE_ENABLE_*` macro so you may need to
 specify it together with others. See @ref Cpu-usage-target-attributes for more
 information and usage example.
-
-@m_class{m-note m-info}
-
-@par
-    If you target GCC 4.8, you may also want to use
-    @ref Corrade/Utility/IntrinsicsAvx.h instead of
-    @cpp #include <immintrin.h> @ce to be able to access the intrinsics on this
-    compiler.
-
 @see @relativeref{Corrade,Cpu::AvxF16c}, @ref CORRADE_ENABLE()
 */
 #if defined(CORRADE_TARGET_AVX_F16C) || defined(DOXYGEN_GENERATING_OUTPUT)
