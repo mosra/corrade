@@ -698,8 +698,8 @@ Building of tests is controlled by the following options:
     the tests use the same compilation flags as the rest of the library.
 
 The tests use Corrade's own @relativeref{Corrade,TestSuite} framework and can
-be run either manually (the binaries are located in `Test/` subdirectories in
-the build directory) or using
+be run either manually (test binaries, all suffixed with `*Test`, are in the
+`bin/` subdirectory of the build directory) or using
 
 @code{.sh}
 ctest --output-on-failure
