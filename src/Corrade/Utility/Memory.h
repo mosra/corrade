@@ -187,18 +187,18 @@ template<class T, typename std::enable_if<!std::is_trivially_destructible<T>::va
 }
 #ifndef CORRADE_TARGET_UNIX
 template<class T, typename std::enable_if<std::is_trivially_destructible<T>::value, int>::type = 0> void alignedOffsetDeleter(T* const data, std::size_t) {
-    /* Using a unsigned byte in order to be able to represent a 255 byte offset
-       as well */
-    std::uint8_t* const dataChar = reinterpret_cast<std::uint8_t*>(data);
+    /* Using an unsigned byte in order to be able to represent a 255 byte
+       offset as well */
+    unsigned char* const dataChar = reinterpret_cast<unsigned char*>(data);
     std::free(dataChar - *(dataChar -1));
 }
 template<class T, typename std::enable_if<!std::is_trivially_destructible<T>::value, int>::type = 0> void alignedOffsetDeleter(T* const data, std::size_t size) {
     for(std::size_t i = 0; i != size; ++i)
         data[i].~T();
 
-    /* Using a unsigned byte in order to be able to represent a 255 byte offset
-       as well */
-    std::uint8_t* const dataChar = reinterpret_cast<std::uint8_t*>(data);
+    /* Using an unsigned byte in order to be able to represent a 255 byte
+       offset as well */
+    unsigned char* const dataChar = reinterpret_cast<unsigned char*>(data);
     std::free(dataChar - dataChar[-1]);
 }
 #endif
@@ -257,15 +257,15 @@ template<class T, std::size_t alignment> Containers::Array<T> allocateAligned(No
     if(!size)
         return {};
 
-    /* Using a unsigned byte in order to be able to represent a 255 byte offset
-       as well */
-    std::uint8_t* pointer;
+    /* Using an unsigned byte in order to be able to represent a 255 byte
+       offset as well */
+    unsigned char* pointer;
     std::ptrdiff_t offset;
     if(alignment <= Containers::Implementation::DefaultAllocationAlignment) {
-        pointer = static_cast<std::uint8_t*>(std::malloc(size*sizeof(T)));
+        pointer = static_cast<unsigned char*>(std::malloc(size*sizeof(T)));
         offset = 0;
     } else {
-        pointer = static_cast<std::uint8_t*>(std::malloc(size*sizeof(T) + alignment - 1));
+        pointer = static_cast<unsigned char*>(std::malloc(size*sizeof(T) + alignment - 1));
         /* Ugh, I'm dumb. Can't this be calculated somehow sane? */
         if(reinterpret_cast<std::ptrdiff_t>(pointer) % alignment == 0)
             offset = 0;
