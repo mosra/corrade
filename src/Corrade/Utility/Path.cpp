@@ -615,6 +615,14 @@ Containers::Optional<Containers::String> executableLocation() {
     ssize_t size;
     while((size = readlink(self, path.data(), path.size())) == ssize_t(path.size()))
         arrayResize(path, NoInit, path.size()*2);
+    /* If this fails, /proc/self/exe is inaccessible. This might happen with
+       overly restrictive VMs such as used to be the case with Docker on Mac in
+       ~2024 (seemingly fixed since, but couldn't trace it to any actual
+       upstream bug report or a changelog entry). A fallback solution in that
+       case (that's done by Qt for example) could be to access `argv[0]`
+       somehow and then iterate `PATH` one by one, trying to guess which
+       location it could be. But that's very brittle and not 100% failproof
+       either, so I'm not doing that. */
     if(size == -1) {
         Error err;
         err << "Utility::Path::executableLocation(): can't read" << self << Debug::nospace << ":";

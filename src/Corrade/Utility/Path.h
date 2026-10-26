@@ -401,9 +401,10 @@ CORRADE_UTILITY_EXPORT Containers::Optional<Containers::String> libraryLocation(
 @brief Executable location
 @m_since_latest
 
-Returns location of the executable on Linux, Windows, non-sandboxed and
-sandboxed macOS and iOS. On other systems on on Linux if `/proc/self/exe` is
-inaccessible, prints a message to @ref Error and returns
+Returns location of the executable on Linux, FreeBSD, Windows, non-sandboxed
+and sandboxed macOS and iOS, and @ref CORRADE_TARGET_EMSCRIPTEN "Emscripten".
+On other systems on on Linux if `/proc/self/exe` is inaccessible (might happen
+with overly restrictive VMs), prints a message to @ref Error and returns
 @ref Containers::NullOpt.
 
 Returned value is encoded in UTF-8, on Windows it's first converted from a
