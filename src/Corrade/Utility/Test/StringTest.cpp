@@ -2602,15 +2602,26 @@ void StringTest::replaceAllInPlaceCharacterLessThanOneVector() {
 }
 
 void StringTest::parseResultConstruct() {
-    String::ParseResult a = {String::ParseState::Clamped, 1337};
+    String::ParseResult a = String::ParseState::Clamped;
     String::ParseResult b = String::ParseState::Success;
+    String::ParseResult c = {String::ParseState::Failed, 1337};
     CORRADE_COMPARE(a.state(), String::ParseState::Clamped);
     CORRADE_COMPARE(b.state(), String::ParseState::Success);
+    CORRADE_COMPARE(c.state(), String::ParseState::Failed);
     /* Implicit conversion */
     CORRADE_COMPARE(a, String::ParseState::Clamped);
     CORRADE_COMPARE(b, String::ParseState::Success);
-    CORRADE_COMPARE(a.index(), 1337);
+    CORRADE_COMPARE(c, String::ParseState::Failed);
+    /* Explicit bool conversion returns true only for Success */
+    CORRADE_VERIFY(!a);
+    CORRADE_VERIFY(b);
+    CORRADE_VERIFY(!c);
+    CORRADE_COMPARE(a.index(), 0);
     CORRADE_COMPARE(b.index(), 0);
+    CORRADE_COMPARE(c.index(), 1337);
+
+    /* Implicit bool conversion shouldn't be allowed */
+    CORRADE_VERIFY(!std::is_convertible<String::ParseResult, bool>::value);
 }
 
 void StringTest::parseResultConstructCopy() {

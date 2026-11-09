@@ -1239,6 +1239,15 @@ if(Utility::String::parseDecimal(DOXYGEN_ELLIPSIS(""), value) == Utility::String
 }
 
 {
+/* [ParseResult-bool-conversion] */
+std::int32_t value;
+if(!Utility::String::parseDecimal(DOXYGEN_ELLIPSIS(""), value)) {
+    // Handle parsing failure or value out of bounds ...
+}
+/* [ParseResult-bool-conversion] */
+}
+
+{
 /* [parseDecimal-unsigned] */
 std::uint32_t value;
 Utility::String::ParseResult result = Utility::String::parseDecimal(DOXYGEN_ELLIPSIS(""), value);

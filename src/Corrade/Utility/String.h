@@ -251,6 +251,12 @@ instance is implicitly convertible to a @ref ParseState, allowing you to use
 just the enum if details about parsing failure aren't needed for anything:
 
 @snippet Utility.cpp ParseResult-enum-conversion
+
+Furthermore, if your code treats @ref ParseState::Clamped the same way as
+@ref ParseState::Failed, you can use a @cpp bool @ce conversion that returns
+@cpp true @ce only for @link ParseState::Success @endlink:
+
+@snippet Utility.cpp ParseResult-bool-conversion
 */
 class ParseResult {
     public:
@@ -262,6 +268,17 @@ class ParseResult {
 
         /** @brief Parse state */
         /*implicit*/ operator ParseState() const { return _state; }
+
+        /**
+         * @brief Whether the result succeeded
+         *
+         * Returns @cpp true @ce if @ref state() is @ref ParseState::Success,
+         * @cpp false @ce if it's either @ref ParseState::Clamped or
+         * @ref ParseState::Failed.
+         */
+        explicit operator bool() const {
+            return _state == ParseState::Success;
+        }
 
         /**
          * @brief Parse failure byte index
