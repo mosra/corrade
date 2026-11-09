@@ -1232,10 +1232,8 @@ static_cast<void>(licenseText);
 {
 /* [ParseResult-enum-conversion] */
 std::int32_t value;
-if(Utility::String::parseDecimal(DOXYGEN_ELLIPSIS(""), value) !=
-   Utility::String::ParseState::Failed)
-{
-    DOXYGEN_ELLIPSIS()
+if(Utility::String::parseDecimal(DOXYGEN_ELLIPSIS(""), value) == Utility::String::ParseState::Failed) {
+    // Handle parsing failure ...
 }
 /* [ParseResult-enum-conversion] */
 }
