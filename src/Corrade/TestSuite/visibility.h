@@ -31,7 +31,7 @@
 
 #ifndef DOXYGEN_GENERATING_OUTPUT
 #ifndef CORRADE_BUILD_STATIC
-    #if defined(CorradeTestSuite_EXPORTS) || defined(CorradeTestSuiteObjects_EXPORTS) || defined(CorradeTestSuiteTestLib_EXPORTS)
+    #ifdef CorradeTestSuite_EXPORTS
         #define CORRADE_TESTSUITE_EXPORT CORRADE_VISIBILITY_EXPORT
     #else
         #define CORRADE_TESTSUITE_EXPORT CORRADE_VISIBILITY_IMPORT

@@ -31,7 +31,7 @@
 
 #ifndef DOXYGEN_GENERATING_OUTPUT
 #ifndef CORRADE_BUILD_STATIC
-    #if defined(CorradePluginManager_EXPORTS) || defined(CorradePluginManagerObjects_EXPORTS) || defined(CorradePluginManagerTestLib_EXPORTS)
+    #ifdef CorradePluginManager_EXPORTS
         #define CORRADE_PLUGINMANAGER_EXPORT CORRADE_VISIBILITY_EXPORT
     #else
         #define CORRADE_PLUGINMANAGER_EXPORT CORRADE_VISIBILITY_IMPORT
