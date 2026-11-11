@@ -293,7 +293,7 @@ if(CORRADE_TARGET_WINDOWS)
         #   the complicated logic from inside cmake_dependent_option() just for
         #   a single option.
         set(CORRADE_BUILD_STATIC_UNIQUE_GLOBALS_DLL_NAME ""
-            CACHE STRING "Name of a DLL in which to search for unique globals symbols if CORRADE_BUILD_STATIC_UNIQUE_GLOBALS is enabled")
+            CACHE STRING "Name of a DLL in which to search for unique global symbols if CORRADE_BUILD_STATIC_UNIQUE_GLOBALS is enabled")
     endif()
 endif()
 
