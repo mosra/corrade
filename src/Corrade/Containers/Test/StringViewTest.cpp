@@ -3103,7 +3103,7 @@ void StringViewTest::findAnyFlags() {
     /* Not found should be no flags, as the failed view isn't meant to be used
        for anything anyway */
     } {
-        StringView found = a.find("pub");
+        StringView found = a.findAny("pub");
         CORRADE_COMPARE(found.data(), static_cast<const void*>(nullptr));
         CORRADE_COMPARE(found.flags(), StringViewFlags{});
     }
