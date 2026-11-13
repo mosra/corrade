@@ -1151,8 +1151,8 @@ BasicStringView {
         /**
          * @brief Find a character
          *
-         * Faster than @ref find(StringView) const if the string has just one
-         * byte.
+         * Faster than @ref find(StringView) const if the string to find has
+         * just one byte.
          * @see @ref contains(char) const, @ref findOr(char, T*) const,
          *      @ref findLast(char) const, @ref count(char) const
          */
@@ -1186,8 +1186,8 @@ BasicStringView {
         /**
          * @brief Find a character with a custom failure pointer
          *
-         * Faster than @ref findOr(StringView, T*) const if the string has just
-         * one byte.
+         * Faster than @ref findOr(StringView, T*) const if the string to find
+         * has just one byte.
          * @see @ref find(char) const, @ref findLastOr(char, T*) const
          */
         BasicStringView<T> findOr(char character, T* fail) const;
@@ -1222,8 +1222,8 @@ BasicStringView {
         /**
          * @brief Find the last occurence of a character
          *
-         * Faster than @ref findLast(StringView) const if the string has just
-         * one byte.
+         * Faster than @ref findLast(StringView) const if the string to find
+         * has just one byte.
          * @see @ref find(char) const, @ref findLastOr(char, T*) const
          */
         /* Technically it would be enough to have just one overload with a
@@ -1246,8 +1246,8 @@ BasicStringView {
         /**
          * @brief Find the last occurence of a character with a custom failure pointer
          *
-         * Faster than @ref findLastOr(StringView, T*) const if the string has
-         * just one byte.
+         * Faster than @ref findLastOr(StringView, T*) const if the string to
+         * find has just one byte.
          * @see @ref findLast(char) const, @ref findOr(char, T*) const
          */
         BasicStringView<T> findLastOr(char character, T* fail) const;
@@ -1266,8 +1266,8 @@ BasicStringView {
         /**
          * @brief Whether the view contains a character
          *
-         * Faster than @ref contains(StringView) const if the string has just
-         * one byte.
+         * Faster than @ref contains(StringView) const if the string to find
+         * has just one byte.
          * @see @ref count(char) const
          */
         bool contains(char character) const;
