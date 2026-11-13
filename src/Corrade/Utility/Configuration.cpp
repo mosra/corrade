@@ -137,7 +137,7 @@ std::pair<Containers::StringView, const char*> Configuration::parse(Containers::
 
         /* Extract the line and ignore the newline character after it, if any */
         Containers::StringView buffer = in;
-        const Containers::StringView end = in.findOr('\n', in.end());
+        const Containers::StringView end = in.find('\n');
         buffer = in.prefix(end.begin());
         in = in.suffix(end.end());
 

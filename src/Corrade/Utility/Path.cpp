@@ -172,7 +172,7 @@ Containers::StringView toNativeSeparators(const Containers::StringView path) {
 #endif
 
 Containers::Pair<Containers::StringView, Containers::StringView> split(const Containers::StringView path) {
-    const Containers::StringView found = path.findLastOr('/', path.begin());
+    const Containers::StringView found = path.findLast('/');
 
     /* Strip the trailing / from path unless it's the root */
     const Containers::StringView head = path.prefix(found.end());
@@ -195,10 +195,13 @@ Containers::StringView filename(const Containers::StringView path) {
 Containers::Pair<Containers::StringView, Containers::StringView> splitExtension(const Containers::StringView path) {
     /* Take the suffix after the last slash as the filename, or the whole path
        if it's not there */
-    const Containers::StringView filename = path.suffix(path.findLastOr('/', path.begin()).end());
+    const Containers::StringView filename = path.suffix(path.findLast('/').end());
 
-    /* Find the last dot in the filename, or nothing if it's not there */
-    const Containers::StringView foundDot = filename.findLastOr('.', filename.end());
+    /* Find the last dot in the filename, or everything until the end if it's
+       not there */
+    Containers::StringView foundDot = filename.findLast('.');
+    if(!foundDot)
+        foundDot = filename.suffix(filename.end());
 
     /* As a special case, if there's dots are at the start of the filename
        (/root/.bashrc, dir/..), it's also an empty extension */
