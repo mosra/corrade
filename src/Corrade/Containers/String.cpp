@@ -841,84 +841,88 @@ StringView String::trimmedSuffix() const {
 }
 
 MutableStringView String::find(const StringView substring) {
-    /* Calling straight into the concrete implementation to reduce call stack
-       depth */
-    return MutableStringView{*this}.findOr(substring, nullptr);
+    return MutableStringView{*this}.find(substring);
 }
 
 StringView String::find(const StringView substring) const {
-    /* Calling straight into the concrete implementation to reduce call stack
-       depth */
-    return StringView{*this}.findOr(substring, nullptr);
+    return StringView{*this}.find(substring);
 }
 
 MutableStringView String::find(const char character) {
-    /* Calling straight into the concrete implementation to reduce call stack
-       depth */
-    return MutableStringView{*this}.findOr(character, nullptr);
+    return MutableStringView{*this}.find(character);
 }
 
 StringView String::find(const char character) const {
-    /* Calling straight into the concrete implementation to reduce call stack
-       depth */
-    return StringView{*this}.findOr(character, nullptr);
+    return StringView{*this}.find(character);
 }
 
+#ifdef CORRADE_BUILD_DEPRECATED
 MutableStringView String::findOr(const StringView substring, char* const fail) {
+    CORRADE_IGNORE_DEPRECATED_PUSH
     return MutableStringView{*this}.findOr(substring, fail);
+    CORRADE_IGNORE_DEPRECATED_POP
 }
 
 StringView String::findOr(const StringView substring, const char* const fail) const {
+    CORRADE_IGNORE_DEPRECATED_PUSH
     return StringView{*this}.findOr(substring, fail);
+    CORRADE_IGNORE_DEPRECATED_POP
 }
 
 MutableStringView String::findOr(const char character, char* const fail) {
+    CORRADE_IGNORE_DEPRECATED_PUSH
     return MutableStringView{*this}.findOr(character, fail);
+    CORRADE_IGNORE_DEPRECATED_POP
 }
 
 StringView String::findOr(const char character, const char* const fail) const {
+    CORRADE_IGNORE_DEPRECATED_PUSH
     return StringView{*this}.findOr(character, fail);
+    CORRADE_IGNORE_DEPRECATED_POP
 }
+#endif
 
 MutableStringView String::findLast(const StringView substring) {
-    /* Calling straight into the concrete implementation to reduce call stack
-       depth */
-    return MutableStringView{*this}.findLastOr(substring, nullptr);
+    return MutableStringView{*this}.findLast(substring);
 }
 
 StringView String::findLast(const StringView substring) const {
-    /* Calling straight into the concrete implementation to reduce call stack
-       depth */
-    return StringView{*this}.findLastOr(substring, nullptr);
+    return StringView{*this}.findLast(substring);
 }
 
 MutableStringView String::findLast(const char character) {
-    /* Calling straight into the concrete implementation to reduce call stack
-       depth */
-    return MutableStringView{*this}.findLastOr(character, nullptr);
+    return MutableStringView{*this}.findLast(character);
 }
 
 StringView String::findLast(const char character) const {
-    /* Calling straight into the concrete implementation to reduce call stack
-       depth */
-    return StringView{*this}.findLastOr(character, nullptr);
+    return StringView{*this}.findLast(character);
 }
 
+#ifdef CORRADE_BUILD_DEPRECATED
 MutableStringView String::findLastOr(const StringView substring, char* const fail) {
+    CORRADE_IGNORE_DEPRECATED_PUSH
     return MutableStringView{*this}.findLastOr(substring, fail);
+    CORRADE_IGNORE_DEPRECATED_POP
 }
 
 StringView String::findLastOr(const StringView substring, const char* const fail) const {
+    CORRADE_IGNORE_DEPRECATED_PUSH
     return StringView{*this}.findLastOr(substring, fail);
+    CORRADE_IGNORE_DEPRECATED_POP
 }
 
 MutableStringView String::findLastOr(const char character, char* const fail) {
+    CORRADE_IGNORE_DEPRECATED_PUSH
     return MutableStringView{*this}.findLastOr(character, fail);
+    CORRADE_IGNORE_DEPRECATED_POP
 }
 
 StringView String::findLastOr(const char character, const char* const fail) const {
+    CORRADE_IGNORE_DEPRECATED_PUSH
     return StringView{*this}.findLastOr(character, fail);
+    CORRADE_IGNORE_DEPRECATED_POP
 }
+#endif
 
 bool String::contains(const StringView substring) const {
     return StringView{*this}.contains(substring);
@@ -936,13 +940,19 @@ StringView String::findAny(const StringView characters) const {
     return StringView{*this}.findAny(characters);
 }
 
+#ifdef CORRADE_BUILD_DEPRECATED
 MutableStringView String::findAnyOr(const StringView characters, char* fail) {
+    CORRADE_IGNORE_DEPRECATED_PUSH
     return MutableStringView{*this}.findAnyOr(characters, fail);
+    CORRADE_IGNORE_DEPRECATED_POP
 }
 
 StringView String::findAnyOr(const StringView characters, const char* fail) const {
+    CORRADE_IGNORE_DEPRECATED_PUSH
     return StringView{*this}.findAnyOr(characters, fail);
+    CORRADE_IGNORE_DEPRECATED_POP
 }
+#endif
 
 MutableStringView String::findLastAny(const StringView characters) {
     return MutableStringView{*this}.findLastAny(characters);
@@ -952,13 +962,19 @@ StringView String::findLastAny(const StringView characters) const {
     return StringView{*this}.findLastAny(characters);
 }
 
+#ifdef CORRADE_BUILD_DEPRECATED
 MutableStringView String::findLastAnyOr(const StringView characters, char* fail) {
+    CORRADE_IGNORE_DEPRECATED_PUSH
     return MutableStringView{*this}.findLastAnyOr(characters, fail);
+    CORRADE_IGNORE_DEPRECATED_POP
 }
 
 StringView String::findLastAnyOr(const StringView characters, const char* fail) const {
+    CORRADE_IGNORE_DEPRECATED_PUSH
     return StringView{*this}.findLastAnyOr(characters, fail);
+    CORRADE_IGNORE_DEPRECATED_POP
 }
+#endif
 
 bool String::containsAny(const StringView substring) const {
     return StringView{*this}.containsAny(substring);

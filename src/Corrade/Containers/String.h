@@ -1268,22 +1268,46 @@ class CORRADE_UTILITY_EXPORT String {
         MutableStringView find(char character);
         StringView find(char character) const; /**< @overload */
 
+        #ifdef CORRADE_BUILD_DEPRECATED
         /**
          * @brief Find a substring with a custom failure pointer
          *
          * Equivalent to @ref BasicStringView::findOr(StringView, T*) const.
+         * @m_deprecated_since_latest Use @ref find(StringView) instead. If you
+         *      need to use a different failure value than @ref end(), which
+         *      should be rare, do it using a branch, for example:
+         *      @snippet Containers.cpp StringView-findOr
          */
-        MutableStringView findOr(StringView substring, char* fail);
-        StringView findOr(StringView substring, const char* fail) const; /**< @overload */
+        CORRADE_DEPRECATED("use find() instead") MutableStringView findOr(StringView substring, char* fail);
+        /**
+         * @overload
+         * @m_deprecated_since_latest Use @ref find(StringView) instead. If you
+         *      need to use a different failure value than @ref end(), which
+         *      should be rare, do it using a branch, for example:
+         *      @snippet Containers.cpp StringView-findOr
+         */
+        CORRADE_DEPRECATED("use find() instead") StringView findOr(StringView substring, const char* fail) const;
 
         /**
          * @brief Find a substring with a custom failure pointer
          *
          * Equivalent to @ref BasicStringView::findOr(char, T*) const, which in
          * turn is a specialization of @ref BasicStringView::findOr(StringView, T*) const.
+         * @m_deprecated_since_latest Use @ref find(char) instead. If you need
+         *      to use a different failure value than @ref end(), which should
+         *      be rare, do it using a branch, for example:
+         *      @snippet Containers.cpp StringView-findOr
          */
-        MutableStringView findOr(char character, char* fail);
-        StringView findOr(char character, const char* fail) const; /**< @overload */
+        CORRADE_DEPRECATED("use find() instead") MutableStringView findOr(char character, char* fail);
+        /**
+         * @overload
+         * @m_deprecated_since_latest Use @ref find(char) instead. If you need
+         *      to use a different failure value than @ref end(), which should
+         *      be rare, do it using a branch, for example:
+         *      @snippet Containers.cpp StringView-findOr
+         */
+        CORRADE_DEPRECATED("use find() instead") StringView findOr(char character, const char* fail) const;
+        #endif
 
         /**
          * @brief Find the last occurence of a substring
@@ -1302,22 +1326,48 @@ class CORRADE_UTILITY_EXPORT String {
         MutableStringView findLast(char character);
         StringView findLast(char character) const; /**< @overload */
 
+        #ifdef CORRADE_BUILD_DEPRECATED
         /**
          * @brief Find the last occurence of a substring with a custom failure pointer
          *
          * Equivalent to @ref BasicStringView::findLastOr(StringView, T*) const.
+         * @m_deprecated_since_latest Use @ref findLast(StringView) const
+         *      instead. If you need to use a different failure value than
+         *      @ref begin(), which should be rare, do it using a branch, for
+         *      example:
+         *      @snippet Containers.cpp StringView-findLastOr
          */
-        MutableStringView findLastOr(StringView substring, char* fail);
-        StringView findLastOr(StringView substring, const char* fail) const; /**< @overload */
+        CORRADE_DEPRECATED("use findLast() instead") MutableStringView findLastOr(StringView substring, char* fail);
+        /**
+         * @overload
+         * @m_deprecated_since_latest Use @ref findLast(StringView) const
+         *      instead. If you need to use a different failure value than
+         *      @ref begin(), which should be rare, do it using a branch, for
+         *      example:
+         *      @snippet Containers.cpp StringView-findLastOr
+         */
+        CORRADE_DEPRECATED("use findLast() instead") StringView findLastOr(StringView substring, const char* fail) const;
 
         /**
          * @brief Find the last occurence of a substring with a custom failure pointer
          *
          * Equivalent to @ref BasicStringView::findLastOr(char, T*) const,
          * which in turn is a specialization of @ref BasicStringView::findLastOr(StringView, T*) const.
+         * @m_deprecated_since_latest Use @ref findLast(char) const instead. If
+         *      you need to use a different failure value than @ref begin(),
+         *      which should be rare, do it using a branch, for example:
+         *      @snippet Containers.cpp StringView-findLastOr
          */
-        MutableStringView findLastOr(char character, char* fail);
-        StringView findLastOr(char character, const char* fail) const; /**< @overload */
+        CORRADE_DEPRECATED("use findLast() instead") MutableStringView findLastOr(char character, char* fail);
+        /**
+         * @overload
+         * @m_deprecated_since_latest Use @ref findLast(char) const instead. If
+         *      you need to use a different failure value than @ref begin(),
+         *      which should be rare, do it using a branch, for example:
+         *      @snippet Containers.cpp StringView-findLastOr
+         */
+        CORRADE_DEPRECATED("use findLast() instead") StringView findLastOr(char character, const char* fail) const;
+        #endif
 
         /**
          * @brief Whether the string contains a substring
@@ -1341,13 +1391,28 @@ class CORRADE_UTILITY_EXPORT String {
         MutableStringView findAny(StringView characters);
         StringView findAny(StringView characters) const; /**< @overload */
 
+        #ifdef CORRADE_BUILD_DEPRECATED
         /**
          * @brief Find any character from given set with a custom failure pointer
          *
          * Equivalent to @ref BasicStringView::findAnyOr().
+         * @m_deprecated_since_latest Use @ref findAny(StringView) const
+         *      instead. If you need to use a different failure value than
+         *      @ref end(), which should be rare, do it using a branch, for
+         *      example:
+         *      @snippet Containers.cpp StringView-findAnyOr
          */
-        MutableStringView findAnyOr(StringView characters, char* fail);
-        StringView findAnyOr(StringView characters, const char* fail) const; /**< @overload */
+        CORRADE_DEPRECATED("use findAny() instead") MutableStringView findAnyOr(StringView characters, char* fail);
+        /**
+         * @overload
+         * @m_deprecated_since_latest Use @ref findAny(StringView) const
+         *      instead. If you need to use a different failure value than
+         *      @ref end(), which should be rare, do it using a branch, for
+         *      example:
+         *      @snippet Containers.cpp StringView-findAnyOr
+         */
+        CORRADE_DEPRECATED("use findAny() instead") StringView findAnyOr(StringView characters, const char* fail) const;
+        #endif
 
         /**
          * @brief Find the last occurence of any character from given set
@@ -1357,13 +1422,28 @@ class CORRADE_UTILITY_EXPORT String {
         MutableStringView findLastAny(StringView characters);
         StringView findLastAny(StringView characters) const; /**< @overload */
 
+        #ifdef CORRADE_BUILD_DEPRECATED
         /**
          * @brief Find the last occurence of any character from given set with a custom failure pointer
          *
          * Equivalent to @ref BasicStringView::findLastAnyOr().
+         * @m_deprecated_since_latest Use @ref findLastAny(StringView) const
+         *      instead. If you need to use a different failure value than
+         *      @ref begin(), which should be rare, do it using a branch, for
+         *      example:
+         *      @snippet Containers.cpp StringView-findLastAnyOr
          */
-        MutableStringView findLastAnyOr(StringView characters, char* fail);
-        StringView findLastAnyOr(StringView characters, const char* fail) const; /**< @overload */
+        CORRADE_DEPRECATED("use findLastAny() instead") MutableStringView findLastAnyOr(StringView characters, char* fail);
+        /**
+         * @overload
+         * @m_deprecated_since_latest Use @ref findLastAny(StringView) const
+         *      instead. If you need to use a different failure value than
+         *      @ref begin(), which should be rare, do it using a branch, for
+         *      example:
+         *      @snippet Containers.cpp StringView-findLastAnyOr
+         */
+        CORRADE_DEPRECATED("use findLastAny() instead") StringView findLastAnyOr(StringView characters, const char* fail) const;
+        #endif
 
         /**
          * @brief Whether the string contains any character from given set

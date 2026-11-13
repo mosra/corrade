@@ -1433,6 +1433,43 @@ static_cast<void>(name);
 }
 
 {
+/* [StringView-usage-find-branch-begin] */
+Containers::StringView line = DOXYGEN_ELLIPSIS({});
+
+/* Strip C-style comments from the end of the line */
+if(Containers::StringView found = line.find("//"))
+    line = line.prefix(found.begin());
+/* [StringView-usage-find-branch-begin] */
+
+/* [StringView-usage-find-branch-end] */
+/* If there is a comment, subject its contents to further investigation */
+if(Containers::StringView found = line.find("//")) {
+    Containers::StringView commentContents = line.suffix(found.end());
+    DOXYGEN_ELLIPSIS(static_cast<void>(commentContents);)
+}
+/* [StringView-usage-find-branch-end] */
+
+/* [StringView-usage-find-no-branch] */
+/* Strip C-style comments from the end of the line, if there are any */
+line = line.prefix(line.find("//").begin());
+/* [StringView-usage-find-no-branch] */
+}
+
+{
+/* [StringView-usage-findLast-no-branch] */
+Containers::StringView path = DOXYGEN_ELLIPSIS({});
+Containers::StringView foundSlash = path.findLast('/');
+
+/* Directory is everything before the last found slash, or nothing  */
+Containers::StringView directory = path.prefix(foundSlash.begin());
+/* Filename is everything after the last found slash, or the whole path */
+Containers::StringView filename = path.suffix(foundSlash.end());
+/* [StringView-usage-findLast-no-branch] */
+static_cast<void>(directory);
+static_cast<void>(filename);
+}
+
+{
 /* [StringView-c-string-nullterminated] */
 Containers::StringView file = DOXYGEN_ELLIPSIS({});
 
@@ -1471,34 +1508,48 @@ Containers::String a = ", "_s.join({"hello", "world"});
 /* [StringView-join] */
 }
 
+/** @todo remove all these once the findOr() APIs, which use those, are gone */
+#ifdef CORRADE_BUILD_DEPRECATED
 {
+Containers::StringView string;
+const char* fail{};
 /* [StringView-findOr] */
-Containers::StringView path = DOXYGEN_ELLIPSIS({});
-
-/* Filename is everything after the last found slash, or the whole path if
-   there's no slash */
-Containers::StringView foundSlash = path.findLastOr('/', path.begin());
-Containers::StringView filename = path.suffix(foundSlash.end());
-
-/* Extension is the last found dot and everything after, or nothing if there's
-   no dot */
-Containers::StringView foundDot = filename.findLastOr('.', filename.end());
-Containers::StringView extension = filename.suffix(foundDot.begin());
+Containers::StringView found = string.find(DOXYGEN_ELLIPSIS(' '));
+if(!found)
+    found = Containers::StringView{fail, 0};
 /* [StringView-findOr] */
-static_cast<void>(extension);
 }
 
 {
-/* [StringView-findAnyOr] */
-Containers::StringView string = DOXYGEN_ELLIPSIS({});
-
-/* A word is everything until the next space character, or the whole string if
-   there's no space */
-Containers::StringView foundSpace = string.findAnyOr(" \n\r\t", string.end());
-Containers::StringView word = string.prefix(foundSpace.begin());
-/* [StringView-findAnyOr] */
-static_cast<void>(word);
+Containers::StringView string;
+const char* fail{};
+/* [StringView-findLastOr] */
+Containers::StringView found = string.findLast(DOXYGEN_ELLIPSIS(' '));
+if(!found)
+    found = Containers::StringView{fail, 0};
+/* [StringView-findLastOr] */
 }
+
+{
+Containers::StringView string;
+const char* fail{};
+/* [StringView-findAnyOr] */
+Containers::StringView found = string.findAny(DOXYGEN_ELLIPSIS(""));
+if(!found)
+    found = Containers::StringView{fail, 0};
+/* [StringView-findAnyOr] */
+}
+
+{
+Containers::StringView string;
+const char* fail{};
+/* [StringView-findLastAnyOr] */
+Containers::StringView found = string.findLastAny(DOXYGEN_ELLIPSIS(""));
+if(!found)
+    found = Containers::StringView{fail, 0};
+/* [StringView-findLastAnyOr] */
+}
+#endif
 
 {
 using namespace Containers::Literals;

@@ -208,7 +208,45 @@ checks that a view starts (or ends) with given string and then removes it:
 
 @subsection Containers-BasicStringView-usage-find Character and substring lookup
 
-@todoc document once also the findNotAny() and findLastNotAny() variants exist
+Compared to @ref std::string::find() that returns an index or a special value,
+@ref StringView::find() APIs return a view pointing to the found substring, or
+an empty view if nothing was found. Combined with @ref Containers-BasicStringView-usage-boolean-conversion "boolean conversion that was shown above",
+this makes the usage rather straightforward:
+
+@snippet Containers.cpp StringView-usage-find-branch-begin
+
+Depending on use case, both the @ref begin() and @ref end() of the found view
+may be useful. The code above was interested only in everything until the
+comment, here it takes just the comment contents alone instead:
+
+@snippet Containers.cpp StringView-usage-find-branch-end
+
+When nothing is found, the returned view is empty but it points to @ref end()
+of the original string, which is often helpful in simplifying various logic.
+The comment stripping from above could be rewritten simply as this --- if no
+comment is found, the code is equivalent to @cpp line.prefix(line.end()) @ce
+which keeps the line unmodified:
+
+@snippet Containers.cpp StringView-usage-find-no-branch
+
+For a lookup in the other direction, there's @ref findLast(). This one returns
+an empty view pointing to @ref begin() in case of a failure instead, and a
+common branch-less use cases look like below --- if no slash is found, the
+`directory` expression is equivalent to @cpp path.prefix(path.begin()) @ce,
+which is an empty string, and `filename` is @cpp path.suffix(path.begin()) @ce
+which is the whole string:
+
+@snippet Containers.cpp StringView-usage-findLast-no-branch
+
+In addition to a general substring lookup, there are @ref find(char) const and
+@ref findLast(char) const overloads that perform much faster if you need to
+look up just a single byte (as was the case with @cpp '/' @ce above).
+Conversely, @ref findAny() and @ref findLastAny() look for any character out of
+given set. Finally, @ref contains() / @ref containsAny() is a more optimal API
+if only presence of a substring or characters, not a position, is needed, and
+@ref count() returns number of occurences.
+
+@todoc ref also the findNotAny() and findLastNotAny() variants once they exist
 
 @subsection Containers-BasicStringView-usage-c-string-conversion Converting StringView instances to null-terminated C strings
 
@@ -1128,10 +1166,11 @@ BasicStringView {
          * @brief Find a substring
          *
          * Returns a view pointing to the first found substring. If not found,
-         * an empty @cpp nullptr @ce view is returned. The function uses
+         * an empty view pointing to @ref end() is returned. The function uses
          * @ref slice() internally, meaning it propagates the @ref flags() as
          * appropriate, except in case of a failure, where it always returns no
-         * @ref StringViewFlags.
+         * @ref StringViewFlags. See @ref Containers-BasicStringView-usage-find
+         * for an introduction to the API.
          *
          * Note that the function operates with a @f$ \mathcal{O}(nm) @f$
          * complexity and as such is meant mainly for one-time searches in
@@ -1146,70 +1185,71 @@ BasicStringView {
          *
          * This function is equivalent to calling @relativeref{std::string,find()}
          * on a @ref std::string or a @ref std::string_view.
-         * @see @ref contains(), @ref findLast(), @ref findOr(), @ref findAny()
+         * @see @ref contains(), @ref findLast(), @ref findAny()
          */
-        /* Technically it would be enough to have just one overload with a
-           default value for the fail parameter. But then `find(foo, pointer)`
-           would imply "find foo after pointer", because that's what the second
-           parameter does in most APIs. On the other hand, naming this findOr()
-           and documenting the custom failure handling would add extra
-           congitive load for people looking for find() and nothing else. */
-        BasicStringView<T> find(StringView substring) const {
-            return findOr(substring, nullptr);
-        }
+        BasicStringView<T> find(StringView substring) const;
 
         /**
          * @brief Find a character
          *
          * Faster than @ref find(StringView) const if the string to find has
          * just one byte.
-         * @see @ref contains(char) const, @ref findOr(char, T*) const,
-         *      @ref findLast(char) const, @ref count(char) const
+         * @see @ref contains(char) const, @ref findLast(char) const,
+         *      @ref count(char) const
          */
-        /* Technically it would be enough to have just one overload with a
-           default value for the fail parameter, see above why it's not */
-        BasicStringView<T> find(char character) const {
-            return findOr(character, nullptr);
-        }
+        BasicStringView<T> find(char character) const;
 
+        #ifdef CORRADE_BUILD_DEPRECATED
         /**
          * @brief Find a substring with a custom failure pointer
          *
          * Like @ref find(StringView) const, but returns an empty view pointing
-         * to the @p fail value instead of @cpp nullptr @ce, which is useful to
-         * avoid explicit handling of cases where the substring wasn't found.
-         *
-         * The @p fail value can be @cpp nullptr @ce or any other pointer, but
-         * commonly it's set to either @ref begin() or @ref end(). For example
-         * here when getting the basename and an extension from a file path,
-         * similarly to what @ref Utility::Path::split() and
-         * @relativeref{Utility::Path,splitExtension()} does:
-         *
-         * @snippet Containers.cpp StringView-findOr
-         *
-         * Consider using @ref findOr(char, T*) const for single-byte
-         * substrings.
-         * @see @ref findLastOr(), @ref findAnyOr()
+         * to the @p fail value instead of @ref end(). Consider using
+         * @ref findOr(char, T*) const for single-byte substrings.
+         * @m_deprecated_since_latest Use @ref find(StringView) const instead.
+         *      If you need to use a different failure value than @ref end(),
+         *      which should be rare, do it using a branch, for example:
+         *      @snippet Containers.cpp StringView-findOr
          */
-        BasicStringView<T> findOr(StringView substring, T* fail) const;
+        CORRADE_DEPRECATED("use find() instead") BasicStringView<T> findOr(StringView substring, T* fail) const {
+            if(BasicStringView<T> found = find(substring))
+                return found;
+            /* Using internal assert-less constructor, the public constructor
+               asserts would be redundant. Since it's a zero-sized view, it
+               doesn't really make sense to try to preserve any flags. */
+            return BasicStringView{fail, 0 /* empty, no flags */, nullptr};
+        }
 
         /**
          * @brief Find a character with a custom failure pointer
          *
          * Faster than @ref findOr(StringView, T*) const if the string to find
          * has just one byte.
-         * @see @ref find(char) const, @ref findLastOr(char, T*) const
+         * @m_deprecated_since_latest Use @ref find(char) const instead. If you
+         *      need to use a different failure value than @ref end(), which
+         *      should be rare, do it using a branch, for example:
+         *      @snippet Containers.cpp StringView-findOr
          */
-        BasicStringView<T> findOr(char character, T* fail) const;
+        CORRADE_DEPRECATED("use find() instead") BasicStringView<T> findOr(char character, T* fail) const {
+            if(BasicStringView<T> found = find(character))
+                return found;
+            /* Using internal assert-less constructor, the public constructor
+               asserts would be redundant. Since it's a zero-sized view, it
+               doesn't really make sense to try to preserve any flags. */
+            return BasicStringView{fail, 0 /* empty, no flags */, nullptr};
+        }
+        #endif
 
         /**
          * @brief Find the last occurence of a substring
          *
          * Returns a view pointing to the last found substring. If not found,
-         * an empty @cpp nullptr @ce view is returned. The function uses
+         * an empty view pointing to @ref begin() is returned (i.e., opposite
+         * from what @ref find() returns on failure). The function uses
          * @ref slice() internally, meaning it propagates the @ref flags() as
          * appropriate, except in case of a failure, where it always returns no
-         * @ref StringViewFlags.
+         * @ref StringViewFlags. See @ref Containers-BasicStringView-usage-find
+         * for an introduction to the API.
          *
          * Similarly as with @ref find(), note that the function operates with
          * a @f$ \mathcal{O}(nm) @f$ complexity and as such is meant mainly for
@@ -1221,46 +1261,60 @@ BasicStringView {
          * This function is equivalent to calling @relativeref{std::string,rfind()}
          * on a @ref std::string or a @ref std::string_view.
          * @m_keywords{rfind()}
-         * @see @ref findLastOr(), @ref findLastAny()
+         * @see @ref findLastAny()
          */
-        /* Technically it would be enough to have just one overload with a
-           default value for the fail parameter, see above why it's not */
-        BasicStringView<T> findLast(StringView substring) const {
-            return findLastOr(substring, nullptr);
-        }
+        BasicStringView<T> findLast(StringView substring) const;
 
         /**
          * @brief Find the last occurence of a character
          *
          * Faster than @ref findLast(StringView) const if the string to find
          * has just one byte.
-         * @see @ref find(char) const, @ref findLastOr(char, T*) const
+         * @see @ref find(char) const
          */
-        /* Technically it would be enough to have just one overload with a
-           default value for the fail parameter, see above why it's not */
-        BasicStringView<T> findLast(char character) const {
-            return findLastOr(character, nullptr);
-        }
+        BasicStringView<T> findLast(char character) const;
 
+        #ifdef CORRADE_BUILD_DEPRECATED
         /**
          * @brief Find the last occurence a substring with a custom failure pointer
          *
          * Like @ref findLast(StringView) const, but returns an empty view
-         * pointing to the @p fail value instead of @cpp nullptr @ce, which is
-         * useful to avoid explicit handling of cases where the substring
-         * wasn't found. See @ref findOr() for an example use case.
-         * @see @ref findLastAnyOr()
+         * pointing to the @p fail value instead of @ref begin(). Consider
+         * using @ref findLastOr(char, T*) const for single-byte substrings.
+         * @m_deprecated_since_latest Use @ref findLast(StringView) const
+         *      instead. If you need to use a different failure value than
+         *      @ref begin(), which should be rare, do it using a branch, for
+         *      example:
+         *      @snippet Containers.cpp StringView-findLastOr
          */
-        BasicStringView<T> findLastOr(StringView substring, T* fail) const;
+        CORRADE_DEPRECATED("use findLast() instead") BasicStringView<T> findLastOr(StringView substring, T* fail) const {
+            if(BasicStringView<T> found = findLast(substring))
+                return found;
+            /* Using internal assert-less constructor, the public constructor
+               asserts would be redundant. Since it's a zero-sized view, it
+               doesn't really make sense to try to preserve any flags. */
+            return BasicStringView{fail, 0 /* empty, no flags */, nullptr};
+        }
 
         /**
          * @brief Find the last occurence of a character with a custom failure pointer
          *
          * Faster than @ref findLastOr(StringView, T*) const if the string to
          * find has just one byte.
-         * @see @ref findLast(char) const, @ref findOr(char, T*) const
+         * @m_deprecated_since_latest Use @ref findLast(char) const instead. If
+         *      you need to use a different failure value than @ref begin(),
+         *      which should be rare, do it using a branch, for example:
+         *      @snippet Containers.cpp StringView-findLastOr
          */
-        BasicStringView<T> findLastOr(char character, T* fail) const;
+        CORRADE_DEPRECATED("use findLast() instead") BasicStringView<T> findLastOr(char character, T* fail) const {
+            if(BasicStringView<T> found = findLast(character))
+                return found;
+            /* Using internal assert-less constructor, the public constructor
+               asserts would be redundant. Since it's a zero-sized view, it
+               doesn't really make sense to try to preserve any flags. */
+            return BasicStringView{fail, 0 /* empty, no flags */, nullptr};
+        }
+        #endif
 
         /**
          * @brief Whether the view contains a substring
@@ -1286,69 +1340,82 @@ BasicStringView {
          * @brief Find any character from given set
          *
          * Returns a view pointing to the first found character from the set.
-         * If no characters from @p characters are found, an empty
-         * @cpp nullptr @ce view is returned. The function uses @ref slice()
+         * If no characters from @p characters are found, an empty view
+         * pointing to @ref end() is returned. The function uses @ref slice()
          * internally, meaning it propagates the @ref flags() as appropriate,
          * except in case of a failure, where it always returns no
-         * @ref StringViewFlags.
+         * @ref StringViewFlags. See @ref Containers-BasicStringView-usage-find
+         * for an introduction to the API.
          *
          * This function is equivalent to calling @relativeref{std::string,find_first_of()}
          * on a @ref std::string or a @ref std::string_view.
          * @m_keywords{find_first_of()}
-         * @see @ref containsAny(), @ref findLastAny(), @ref findAnyOr(),
-         *      @ref find()
+         * @see @ref containsAny(), @ref findLastAny(), @ref find()
          */
-        BasicStringView<T> findAny(StringView characters) const {
-            return findAnyOr(characters, nullptr);
-        }
+        BasicStringView<T> findAny(StringView characters) const;
 
+        #ifdef CORRADE_BUILD_DEPRECATED
         /**
          * @brief Find any character from given set with a custom failure pointer
          *
          * Like @ref findAny(StringView) const, but returns an empty view
-         * pointing to the @p fail value instead of @cpp nullptr @ce, which is
-         * useful to avoid explicit handling of cases where no character was
-         * found.
-         *
-         * The @p fail value can be @cpp nullptr @ce or any other pointer, but
-         * commonly it's set to either @ref begin() or @ref end(). For example
-         * here when getting everything until the next space character:
-         *
-         * @snippet Containers.cpp StringView-findAnyOr
-         *
-         * @see @ref findLastAnyOr(), @ref findOr()
+         * pointing to the @p fail value instead of @ref end().
+         * @m_deprecated_since_latest Use @ref findAny(StringView) const
+         *      instead. If you need to use a different failure value than
+         *      @ref end(), which should be rare, do it using a branch, for
+         *      example:
+         *      @snippet Containers.cpp StringView-findAnyOr
          */
-        BasicStringView<T> findAnyOr(StringView characters, T* fail) const;
+        CORRADE_DEPRECATED("use findAny() instead") BasicStringView<T> findAnyOr(StringView characters, T* fail) const {
+            if(BasicStringView<T> found = findAny(characters))
+                return found;
+            /* Using internal assert-less constructor, the public constructor
+               asserts would be redundant. Since it's a zero-sized view, it
+               doesn't really make sense to try to preserve any flags. */
+            return BasicStringView{fail, 0 /* empty, no flags */, nullptr};
+        }
+        #endif
 
         /**
          * @brief Find the last occurence of any character from given set
          *
          * Returns a view pointing to the last found character from the set.
-         * If no characters from @p characters are found, an empty
-         * @cpp nullptr @ce view is returned. The function uses
-         * @ref slice() internally, meaning it propagates the @ref flags() as
-         * appropriate, except in case of a failure, where it always returns no
-         * @ref StringViewFlags.
+         * If no characters from @p characters are found, an empty view
+         * pointing to @ref begin() is returned (i.e., opposite from what
+         * @ref findAny() returns on failure). The function uses @ref slice()
+         * internally, meaning it propagates the @ref flags() as appropriate,
+         * except in case of a failure, where it always returns no
+         * @ref StringViewFlags. See @ref Containers-BasicStringView-usage-find
+         * for an introduction to the API.
          *
          * This function is equivalent to calling @relativeref{std::string,find_last_of()}
          * on a @ref std::string or a @ref std::string_view.
          * @m_keywords{find_last_of()}
-         * @see @ref findLastAnyOr(), @ref findLast()
+         * @see @ref findLast()
          */
-        BasicStringView<T> findLastAny(StringView characters) const {
-            return findLastAnyOr(characters, nullptr);
-        }
+        BasicStringView<T> findLastAny(StringView characters) const;
 
+        #ifdef CORRADE_BUILD_DEPRECATED
         /**
          * @brief Find the last occurence of any character from given set with a custom failure pointer
          *
          * Like @ref findLastAny(StringView) const, but returns an empty view
-         * pointing to the @p fail value instead of @cpp nullptr @ce, which is
-         * useful to avoid explicit handling of cases where the substring
-         * wasn't found. See @ref findAnyOr() for an example use case.
-         * @see @ref findLastOr()
+         * pointing to the @p fail value instead of @ref begin(),
+         * @m_deprecated_since_latest Use @ref findLastAny(StringView) const
+         *      instead. If you need to use a different failure value than
+         *      @ref begin(), which should be rare, do it using a branch, for
+         *      example:
+         *      @snippet Containers.cpp StringView-findLastAnyOr
          */
-        BasicStringView<T> findLastAnyOr(StringView characters, T* fail) const;
+        CORRADE_DEPRECATED("use findLastAny() instead") BasicStringView<T> findLastAnyOr(StringView characters, T* fail) const {
+            if(BasicStringView<T> found = findLastAny(characters))
+                return found;
+            /* Using internal assert-less constructor, the public constructor
+               asserts would be redundant. Since it's a zero-sized view, it
+               doesn't really make sense to try to preserve any flags. */
+            return BasicStringView{fail, 0 /* empty, no flags */, nullptr};
+        }
+        #endif
 
         /**
          * @brief Whether the view contains any character from given set
@@ -1619,29 +1686,32 @@ template<class T> inline BasicStringView<T> BasicStringView<T>::trimmedSuffix(co
     return prefix(found ? found + 1 : _data);
 }
 
-template<class T> inline BasicStringView<T> BasicStringView<T>::findOr(const StringView substring, T* const fail) const {
+template<class T> inline BasicStringView<T> BasicStringView<T>::find(const StringView substring) const {
     /* Cache the getters to speed up debug builds */
+    const std::size_t size = this->size();
     const std::size_t substringSize = substring.size();
-    if(const char* const found = Implementation::stringFindString(_data, size(), substring._data, substringSize))
+    if(const char* const found = Implementation::stringFindString(_data, size, substring._data, substringSize))
         return slice(const_cast<T*>(found), const_cast<T*>(found + substringSize));
 
     /* Using an internal assert-less constructor, the public constructor
        asserts would be redundant. Since it's a zero-sized view, it doesn't
        really make sense to try to preserve any flags. */
-    return BasicStringView<T>{fail, 0 /* empty, no flags */, nullptr};
+    return BasicStringView<T>{_data + size, 0 /* empty, no flags */, nullptr};
 }
 
-template<class T> inline BasicStringView<T> BasicStringView<T>::findOr(const char character, T* const fail) const {
-    if(const char* const found = Implementation::stringFindCharacter(_data, size(), character))
+template<class T> inline BasicStringView<T> BasicStringView<T>::find(const char character) const {
+    /* Cache the getters to speed up debug builds */
+    const std::size_t size = this->size();
+    if(const char* const found = Implementation::stringFindCharacter(_data, size, character))
         return slice(const_cast<T*>(found), const_cast<T*>(found + 1));
 
     /* Using an internal assert-less constructor, the public constructor
        asserts would be redundant. Since it's a zero-sized view, it doesn't
        really make sense to try to preserve any flags. */
-    return BasicStringView<T>{fail, 0 /* empty, no flags */, nullptr};
+    return BasicStringView<T>{_data + size, 0 /* empty, no flags */, nullptr};
 }
 
-template<class T> inline BasicStringView<T> BasicStringView<T>::findLastOr(const StringView substring, T* const fail) const {
+template<class T> inline BasicStringView<T> BasicStringView<T>::findLast(const StringView substring) const {
     /* Cache the getters to speed up debug builds */
     const std::size_t substringSize = substring.size();
     if(const char* const found = Implementation::stringFindLastString(_data, size(), substring._data, substringSize))
@@ -1650,17 +1720,17 @@ template<class T> inline BasicStringView<T> BasicStringView<T>::findLastOr(const
     /* Using an internal assert-less constructor, the public constructor
        asserts would be redundant. Since it's a zero-sized view, it doesn't
        really make sense to try to preserve any flags. */
-    return BasicStringView<T>{fail, 0 /* empty, no flags */, nullptr};
+    return BasicStringView<T>{_data, 0 /* empty, no flags */, nullptr};
 }
 
-template<class T> inline BasicStringView<T> BasicStringView<T>::findLastOr(const char character, T* const fail) const {
+template<class T> inline BasicStringView<T> BasicStringView<T>::findLast(const char character) const {
     if(const char* const found = Implementation::stringFindLastCharacter(_data, size(), character))
         return slice(const_cast<T*>(found), const_cast<T*>(found + 1));
 
     /* Using an internal assert-less constructor, the public constructor
        asserts would be redundant. Since it's a zero-sized view, it doesn't
        really make sense to try to preserve any flags. */
-    return BasicStringView<T>{fail, 0 /* empty, no flags */, nullptr};
+    return BasicStringView<T>{_data, 0 /* empty, no flags */, nullptr};
 }
 
 template<class T> inline bool BasicStringView<T>::contains(const StringView substring) const {
@@ -1671,24 +1741,26 @@ template<class T> inline bool BasicStringView<T>::contains(const char character)
     return Implementation::stringFindCharacter(_data, size(), character);
 }
 
-template<class T> inline BasicStringView<T> BasicStringView<T>::findAnyOr(const StringView characters, T* const fail) const {
-    if(const char* const found = Implementation::stringFindAny(_data, size(), characters._data, characters.size()))
+template<class T> inline BasicStringView<T> BasicStringView<T>::findAny(const StringView characters) const {
+    /* Cache the getters to speed up debug builds */
+    const std::size_t size = this->size();
+    if(const char* const found = Implementation::stringFindAny(_data, size, characters._data, characters.size()))
         return slice(const_cast<T*>(found), const_cast<T*>(found + 1));
 
     /* Using an internal assert-less constructor, the public constructor
        asserts would be redundant. Since it's a zero-sized view, it doesn't
        really make sense to try to preserve any flags. */
-    return BasicStringView<T>{fail, 0 /* empty, no flags */, nullptr};
+    return BasicStringView<T>{_data + size, 0 /* empty, no flags */, nullptr};
 }
 
-template<class T> inline BasicStringView<T> BasicStringView<T>::findLastAnyOr(const StringView characters, T* const fail) const {
+template<class T> inline BasicStringView<T> BasicStringView<T>::findLastAny(const StringView characters) const {
     if(const char* const found = Implementation::stringFindLastAny(_data, size(), characters._data, characters.size()))
         return slice(const_cast<T*>(found), const_cast<T*>(found + 1));
 
     /* Using an internal assert-less constructor, the public constructor
        asserts would be redundant. Since it's a zero-sized view, it doesn't
        really make sense to try to preserve any flags. */
-    return BasicStringView<T>{fail, 0 /* empty, no flags */, nullptr};
+    return BasicStringView<T>{_data, 0 /* empty, no flags */, nullptr};
 }
 
 template<class T> inline bool BasicStringView<T>::containsAny(const StringView characters) const {

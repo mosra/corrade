@@ -208,7 +208,9 @@ struct StringViewTest: TestSuite::Tester {
     void findCharacterUnalignedLessThanOneVector();
     void findEmpty();
     void findFlags();
+    #ifdef CORRADE_BUILD_DEPRECATED
     void findOr();
+    #endif
 
     void findLastString();
     void findLastStringMultipleOccurences();
@@ -216,17 +218,23 @@ struct StringViewTest: TestSuite::Tester {
     void findLastCharacter();
     void findLastEmpty();
     void findLastFlags();
+    #ifdef CORRADE_BUILD_DEPRECATED
     void findLastOr();
+    #endif
 
     void findAny();
     void findAnyEmpty();
     void findAnyFlags();
+    #ifdef CORRADE_BUILD_DEPRECATED
     void findAnyOr();
+    #endif
 
     void findLastAny();
     void findLastAnyEmpty();
     void findLastAnyFlags();
+    #ifdef CORRADE_BUILD_DEPRECATED
     void findLastAnyOr();
+    #endif
 
     void countCharacter();
     void countCharacterAligned();
@@ -430,7 +438,9 @@ StringViewTest::StringViewTest() {
 
     addTests({&StringViewTest::findEmpty,
               &StringViewTest::findFlags,
+              #ifdef CORRADE_BUILD_DEPRECATED
               &StringViewTest::findOr,
+              #endif
 
               &StringViewTest::findLastString,
               &StringViewTest::findLastStringMultipleOccurences,
@@ -438,17 +448,24 @@ StringViewTest::StringViewTest() {
               &StringViewTest::findLastCharacter,
               &StringViewTest::findLastEmpty,
               &StringViewTest::findLastFlags,
+              #ifdef CORRADE_BUILD_DEPRECATED
               &StringViewTest::findLastOr,
+              #endif
 
               &StringViewTest::findAny,
               &StringViewTest::findAnyEmpty,
               &StringViewTest::findAnyFlags,
+              #ifdef CORRADE_BUILD_DEPRECATED
               &StringViewTest::findAnyOr,
+              #endif
 
               &StringViewTest::findLastAny,
               &StringViewTest::findLastAnyEmpty,
               &StringViewTest::findLastAnyFlags,
-              &StringViewTest::findLastAnyOr});
+              #ifdef CORRADE_BUILD_DEPRECATED
+              &StringViewTest::findLastAnyOr
+              #endif
+              });
 
     addInstancedTests({&StringViewTest::countCharacter,
                        &StringViewTest::countCharacterAligned,
@@ -2133,12 +2150,12 @@ void StringViewTest::findString() {
         CORRADE_COMPARE(found, "world!");
         CORRADE_COMPARE((static_cast<const void*>(found.data())), a.data() + 13);
 
-    /* Almost, but not quite */
+    /* Almost, but not quite, returns an empty view pointing to the end */
     } {
         CORRADE_VERIFY(!a.contains("world!!"));
 
         StringView found = a.find("world!!");
-        CORRADE_VERIFY(!found.data());
+        CORRADE_COMPARE(found.data(), static_cast<const void*>(found.end()));
         CORRADE_VERIFY(found.isEmpty());
 
     /* Should accept a null terminator in the middle */
@@ -2154,7 +2171,7 @@ void StringViewTest::findString() {
         CORRADE_VERIFY(!a.contains("cursed\0W"_s));
 
         StringView found = a.find("cursed\0W"_s);
-        CORRADE_VERIFY(!found.data());
+        CORRADE_COMPARE(found.data(), static_cast<const void*>(found.end()));
         CORRADE_VERIFY(found.isEmpty());
 
     /* And should not read the final null terminator either */
@@ -2162,7 +2179,7 @@ void StringViewTest::findString() {
         CORRADE_VERIFY(!a.contains("world!\0"_s));
 
         StringView found = a.find("world!\0"_s);
-        CORRADE_VERIFY(!found.data());
+        CORRADE_COMPARE(found.data(), static_cast<const void*>(found.end()));
         CORRADE_VERIFY(found.isEmpty());
     }
 }
@@ -2204,7 +2221,7 @@ void StringViewTest::findStringWhole() {
         CORRADE_VERIFY(!a.contains("hello"));
 
         StringView found = a.find("hello");
-        CORRADE_VERIFY(!found.data());
+        CORRADE_COMPARE(found.data(), static_cast<const void*>(found.end()));
         CORRADE_VERIFY(found.isEmpty());
     }
 }
@@ -2250,12 +2267,12 @@ void StringViewTest::findCharacter() {
         CORRADE_COMPARE(found, "!");
         CORRADE_COMPARE(static_cast<const void*>(found.data()), a.data() + 18);
 
-    /* No such character found */
+    /* No such character found, returns an empty view pointing to the end */
     } {
         CORRADE_VERIFY(!a.contains('a'));
 
         StringView found = a.find('a');
-        CORRADE_VERIFY(!found.data());
+        CORRADE_COMPARE(found.data(), static_cast<const void*>(found.end()));
         CORRADE_VERIFY(found.isEmpty());
 
     /* Should not read the null terminator character either */
@@ -2264,7 +2281,7 @@ void StringViewTest::findCharacter() {
         CORRADE_VERIFY(!a.exceptPrefix(15).contains('\0'));
 
         StringView found = a.exceptPrefix(15).find('\0');
-        CORRADE_VERIFY(!found.data());
+        CORRADE_COMPARE(found.data(), static_cast<const void*>(found.end()));
         CORRADE_VERIFY(found.isEmpty());
 
     /* Multiple occurrences */
@@ -2622,16 +2639,16 @@ void StringViewTest::findFlags() {
         CORRADE_COMPARE(found.flags(), StringViewFlag::Global|StringViewFlag::NullTerminated);
 
     /* Not found should be no flags, as the failed view isn't meant to be used
-       for anything anyway */
+       for anything except the begin/end pointers anyway */
     } {
         StringView found = a.find("world!");
-        CORRADE_COMPARE(found.data(), static_cast<const void*>(nullptr));
+        CORRADE_COMPARE(found.data(), static_cast<const void*>(found.end()));
         CORRADE_COMPARE(found.flags(), StringViewFlags{});
 
     /* Same for chars */
     } {
         StringView found = a.find('f');
-        CORRADE_COMPARE(found.data(), static_cast<const void*>(nullptr));
+        CORRADE_COMPARE(found.data(), static_cast<const void*>(found.end()));
         CORRADE_COMPARE(found.flags(), StringViewFlag{});
 
     /* Empty view should be global & null-terminated */
@@ -2651,40 +2668,52 @@ void StringViewTest::findFlags() {
     }
 }
 
+#ifdef CORRADE_BUILD_DEPRECATED
 void StringViewTest::findOr() {
     /* Duplicated word to ensure it's not delegated to findLastOr() */
     StringView a = "hello hello world";
 
     /* Verify the returned pointer vs the usual find() */
     {
+        CORRADE_IGNORE_DEPRECATED_PUSH
         StringView found = a.findOr("hello", a.begin());
+        CORRADE_IGNORE_DEPRECATED_POP
         CORRADE_COMPARE(found, "hello");
         CORRADE_COMPARE(found.data(), static_cast<const void*>(a.data()));
     } {
         StringView found = a.find("world!");
-        CORRADE_COMPARE(found.data(), static_cast<const void*>(nullptr));
+        CORRADE_COMPARE(found.data(), static_cast<const void*>(a.end()));
         CORRADE_VERIFY(found.isEmpty());
     } {
+        CORRADE_IGNORE_DEPRECATED_PUSH
         StringView found = a.findOr("world!", a.begin());
+        CORRADE_IGNORE_DEPRECATED_POP
         CORRADE_COMPARE(found.data(), static_cast<const void*>(a.begin()));
         CORRADE_VERIFY(found.isEmpty());
     }
 
     /* Single character */
     {
+        CORRADE_IGNORE_DEPRECATED_PUSH
         StringView found = a.findOr('o', a.begin());
+        CORRADE_IGNORE_DEPRECATED_POP
         CORRADE_COMPARE(found, "o");
         CORRADE_COMPARE(found.data(), static_cast<const void*>(a.data() + 4));
     } {
+        CORRADE_IGNORE_DEPRECATED_PUSH
         StringView found = a.find('p');
-        CORRADE_COMPARE(found.data(), static_cast<const void*>(nullptr));
+        CORRADE_IGNORE_DEPRECATED_POP
+        CORRADE_COMPARE(found.data(), static_cast<const void*>(a.end()));
         CORRADE_VERIFY(found.isEmpty());
     } {
+        CORRADE_IGNORE_DEPRECATED_PUSH
         StringView found = a.findOr('p', a.end());
+        CORRADE_IGNORE_DEPRECATED_POP
         CORRADE_COMPARE(found.data(), static_cast<const void*>(a.end()));
         CORRADE_VERIFY(found.isEmpty());
     }
 }
+#endif
 
 void StringViewTest::findLastString() {
     /* Mostly similar to findString(), except that it doesn't check contains()
@@ -2710,10 +2739,10 @@ void StringViewTest::findLastString() {
         CORRADE_COMPARE(found, "hello");
         CORRADE_COMPARE((static_cast<const void*>(found.data())), a.data());
 
-    /* Almost, but not quite */
+    /* Almost, but not quite, returns an empty view pointing to the begin */
     } {
         StringView found = a.findLast("world!!");
-        CORRADE_VERIFY(!found.data());
+        CORRADE_COMPARE(found.data(), static_cast<const void*>(a.begin()));
         CORRADE_VERIFY(found.isEmpty());
 
     /* Should accept a null terminator in the middle */
@@ -2725,13 +2754,13 @@ void StringViewTest::findLastString() {
     /* Should not stop comparing at it however */
     } {
         StringView found = a.findLast("cursed\0W"_s);
-        CORRADE_VERIFY(!found.data());
+        CORRADE_COMPARE(found.data(), static_cast<const void*>(a.begin()));
         CORRADE_VERIFY(found.isEmpty());
 
     /* And should not read the final null terminator either */
     } {
         StringView found = a.findLast("world!\0"_s);
-        CORRADE_VERIFY(!found.data());
+        CORRADE_COMPARE(found.data(), static_cast<const void*>(a.begin()));
         CORRADE_VERIFY(found.isEmpty());
     }
 }
@@ -2771,7 +2800,7 @@ void StringViewTest::findLastStringWhole() {
     /* But a larger string should fail */
     } {
         StringView found = a.findLast("hello");
-        CORRADE_VERIFY(!found.data());
+        CORRADE_COMPARE(found.data(), static_cast<const void*>(a.begin()));
         CORRADE_VERIFY(found.isEmpty());
     }
 }
@@ -2800,17 +2829,17 @@ void StringViewTest::findLastCharacter() {
         CORRADE_COMPARE(found, "h");
         CORRADE_COMPARE(static_cast<const void*>(found.data()), a.data());
 
-    /* No such character found */
+    /* No such character found, returns an empty view pointing to the begin */
     } {
         StringView found = a.findLast('a');
-        CORRADE_VERIFY(!found.data());
+        CORRADE_COMPARE(found.data(), static_cast<const void*>(a.begin()));
         CORRADE_VERIFY(found.isEmpty());
 
     /* Should not read the null terminator character either */
     } {
         /* There's a \0 in the middle, skip that */
         StringView found = a.exceptPrefix(15).findLast('\0');
-        CORRADE_VERIFY(!found.data());
+        CORRADE_COMPARE(found.data(), static_cast<const void*>(a.begin() + 15));
         CORRADE_VERIFY(found.isEmpty());
 
     /* Multiple character occurrences */
@@ -2905,16 +2934,16 @@ void StringViewTest::findLastFlags() {
         CORRADE_COMPARE(found.flags(), StringViewFlag::Global|StringViewFlag::NullTerminated);
 
     /* Not found should be no flags, as the failed view isn't meant to be used
-       for anything anyway */
+       for anything except the begin/end pointers anyway */
     } {
         StringView found = a.findLast("world!");
-        CORRADE_COMPARE(found.data(), static_cast<const void*>(nullptr));
+        CORRADE_COMPARE(found.data(), static_cast<const void*>(a.begin()));
         CORRADE_COMPARE(found.flags(), StringViewFlags{});
 
     /* Same for chars */
     } {
         StringView found = a.findLast('f');
-        CORRADE_COMPARE(found.data(), static_cast<const void*>(nullptr));
+        CORRADE_COMPARE(found.data(), static_cast<const void*>(a.begin()));
         CORRADE_COMPARE(found.flags(), StringViewFlags{});
 
     /* Empty view should be global & null-terminated */
@@ -2934,6 +2963,7 @@ void StringViewTest::findLastFlags() {
     }
 }
 
+#ifdef CORRADE_BUILD_DEPRECATED
 void StringViewTest::findLastOr() {
     /* Mostly similar to findOr(). Duplicated word to ensure it's not delegated
        to findOr(). */
@@ -2941,34 +2971,43 @@ void StringViewTest::findLastOr() {
 
     /* Verify the returned pointer vs the usual find() */
     {
+        CORRADE_IGNORE_DEPRECATED_PUSH
         StringView found = a.findLastOr("hello", a.begin());
+        CORRADE_IGNORE_DEPRECATED_POP
         CORRADE_COMPARE(found, "hello");
         CORRADE_COMPARE(found.data(), static_cast<const void*>(a.data() + 6));
     } {
         StringView found = a.findLast("world!");
-        CORRADE_COMPARE(found.data(), static_cast<const void*>(nullptr));
+        CORRADE_COMPARE(found.data(), static_cast<const void*>(a.begin()));
         CORRADE_VERIFY(found.isEmpty());
     } {
-        StringView found = a.findLastOr("world!", a.begin());
-        CORRADE_COMPARE(found.data(), static_cast<const void*>(a.begin()));
+        CORRADE_IGNORE_DEPRECATED_PUSH
+        StringView found = a.findLastOr("world!", a.end());
+        CORRADE_IGNORE_DEPRECATED_POP
+        CORRADE_COMPARE(found.data(), static_cast<const void*>(a.end()));
         CORRADE_VERIFY(found.isEmpty());
     }
 
     /* Single character */
     {
+        CORRADE_IGNORE_DEPRECATED_PUSH
         StringView found = a.findLastOr('o', a.begin());
+        CORRADE_IGNORE_DEPRECATED_POP
         CORRADE_COMPARE(found, "o");
         CORRADE_COMPARE(found.data(), static_cast<const void*>(a.data() + 13));
     } {
         StringView found = a.findLast('p');
-        CORRADE_COMPARE(found.data(), static_cast<const void*>(nullptr));
+        CORRADE_COMPARE(found.data(), static_cast<const void*>(a.begin()));
         CORRADE_VERIFY(found.isEmpty());
     } {
+        CORRADE_IGNORE_DEPRECATED_PUSH
         StringView found = a.findLastOr('p', a.end());
+        CORRADE_IGNORE_DEPRECATED_POP
         CORRADE_COMPARE(found.data(), static_cast<const void*>(a.end()));
         CORRADE_VERIFY(found.isEmpty());
     }
 }
+#endif
 
 void StringViewTest::findAny() {
     /* Duplicated characters to test it's not delegated to findLastAny() */
@@ -3007,12 +3046,13 @@ void StringViewTest::findAny() {
         CORRADE_COMPARE(found, "w");
         CORRADE_COMPARE((static_cast<const void*>(found.data())), a.data() + 6);
 
-    /* No character from the set found */
+    /* No character from the set found, returns an empty view pointing to the
+       end */
     } {
         CORRADE_VERIFY(!a.containsAny("pub"));
 
         StringView found = a.findAny("pub");
-        CORRADE_VERIFY(!found.data());
+        CORRADE_COMPARE(found.data(), static_cast<const void*>(found.end()));
         CORRADE_VERIFY(found.isEmpty());
 
     /* Sbould accept a null terminator */
@@ -3037,7 +3077,7 @@ void StringViewTest::findAny() {
         CORRADE_VERIFY(!a.exceptPrefix(8).containsAny("\0"_s));
 
         StringView found = a.exceptPrefix(8).findAny("\0"_s);
-        CORRADE_VERIFY(!found.data());
+        CORRADE_COMPARE(found.data(), static_cast<const void*>(found.end()));
         CORRADE_VERIFY(found.isEmpty());
     }
 }
@@ -3051,7 +3091,7 @@ void StringViewTest::findAnyEmpty() {
 
         StringView found = a.findAny("");
         CORRADE_VERIFY(found.isEmpty());
-        CORRADE_VERIFY(!found.data());
+        CORRADE_COMPARE(found.data(), static_cast<const void*>(found.end()));
 
     /* Finding anything in an empty string should behave the same as as if
        nothing was found at all */
@@ -3061,7 +3101,7 @@ void StringViewTest::findAnyEmpty() {
 
         StringView found = a.findAny("lel");
         CORRADE_VERIFY(found.isEmpty());
-        CORRADE_VERIFY(!found.data());
+        CORRADE_COMPARE(found.data(), static_cast<const void*>(found.end()));
 
     /* Finding a null view inside an empty string should behave the same as
        if nothing was found at all */
@@ -3071,7 +3111,7 @@ void StringViewTest::findAnyEmpty() {
 
         StringView found = a.findAny(nullptr);
         CORRADE_VERIFY(found.isEmpty());
-        CORRADE_VERIFY(!found.data());
+        CORRADE_COMPARE(found.data(), static_cast<const void*>(found.end()));
 
     /* Finding an empty string inside a null view should behave the same as
        if nothing was found at all */
@@ -3081,7 +3121,7 @@ void StringViewTest::findAnyEmpty() {
 
         StringView found = a.findAny("");
         CORRADE_VERIFY(found.isEmpty());
-        CORRADE_VERIFY(!found.data());
+        CORRADE_COMPARE(found.data(), static_cast<const void*>(found.end()));
     }
 }
 
@@ -3101,14 +3141,15 @@ void StringViewTest::findAnyFlags() {
         CORRADE_COMPARE(found.flags(), StringViewFlag::Global|StringViewFlag::NullTerminated);
 
     /* Not found should be no flags, as the failed view isn't meant to be used
-       for anything anyway */
+       for anything except the begin/end pointers anyway */
     } {
         StringView found = a.findAny("pub");
-        CORRADE_COMPARE(found.data(), static_cast<const void*>(nullptr));
+        CORRADE_COMPARE(found.data(), static_cast<const void*>(a.end()));
         CORRADE_COMPARE(found.flags(), StringViewFlags{});
     }
 }
 
+#ifdef CORRADE_BUILD_DEPRECATED
 void StringViewTest::findAnyOr() {
     /* Duplicated characters to test that it's not delegated to
        findLastAnyOr() */
@@ -3116,19 +3157,24 @@ void StringViewTest::findAnyOr() {
 
     /* Verify the returned pointer vs the usual findAny() */
     {
+        CORRADE_IGNORE_DEPRECATED_PUSH
         StringView found = a.findAnyOr("lol", a.begin());
+        CORRADE_IGNORE_DEPRECATED_POP
         CORRADE_COMPARE(found, "l");
         CORRADE_COMPARE(found.data(), static_cast<const void*>(a.data() + 2));
     } {
         StringView found = a.findAny("pub");
-        CORRADE_COMPARE(found.data(), static_cast<const void*>(nullptr));
+        CORRADE_COMPARE(found.data(), static_cast<const void*>(a.end()));
         CORRADE_VERIFY(found.isEmpty());
     } {
+        CORRADE_IGNORE_DEPRECATED_PUSH
         StringView found = a.findAnyOr("pub", a.begin());
+        CORRADE_IGNORE_DEPRECATED_POP
         CORRADE_COMPARE(found.data(), static_cast<const void*>(a.begin()));
         CORRADE_VERIFY(found.isEmpty());
     }
 }
+#endif
 
 void StringViewTest::findLastAny() {
     /* Mostly similar to findAny(), except that it doesn't check containsAny()
@@ -3161,10 +3207,11 @@ void StringViewTest::findLastAny() {
         CORRADE_COMPARE(found, "w");
         CORRADE_COMPARE((static_cast<const void*>(found.data())), a.data() + 6);
 
-    /* No character from the set found */
+    /* No character from the set found, returns an empty view pointing to the
+       begin */
     } {
         StringView found = a.findLastAny("pub");
-        CORRADE_VERIFY(!found.data());
+        CORRADE_COMPARE(found.data(), static_cast<const void*>(found.begin()));
         CORRADE_VERIFY(found.isEmpty());
 
     /* Sbould accept a null terminator */
@@ -3183,7 +3230,7 @@ void StringViewTest::findLastAny() {
     } {
         /* There's a \0 in the middle, skip that */
         StringView found = a.exceptPrefix(8).findLastAny("\0"_s);
-        CORRADE_VERIFY(!found.data());
+        CORRADE_COMPARE(found.data(), static_cast<const void*>(found.begin()));
         CORRADE_VERIFY(found.isEmpty());
     }
 }
@@ -3198,7 +3245,7 @@ void StringViewTest::findLastAnyEmpty() {
         StringView a = "hello";
         StringView found = a.findLastAny("");
         CORRADE_VERIFY(found.isEmpty());
-        CORRADE_VERIFY(!found.data());
+        CORRADE_COMPARE(found.data(), static_cast<const void*>(found.begin()));
 
     /* Finding anything in an empty string should behave the same as as if
        nothing was found at all */
@@ -3206,7 +3253,7 @@ void StringViewTest::findLastAnyEmpty() {
         StringView a = "";
         StringView found = a.findLastAny("lel");
         CORRADE_VERIFY(found.isEmpty());
-        CORRADE_VERIFY(!found.data());
+        CORRADE_COMPARE(found.data(), static_cast<const void*>(found.begin()));
 
     /* Finding a null view inside an empty string should behave the same as
        if nothing was found at all */
@@ -3214,7 +3261,7 @@ void StringViewTest::findLastAnyEmpty() {
         StringView a = "";
         StringView found = a.findLastAny(nullptr);
         CORRADE_VERIFY(found.isEmpty());
-        CORRADE_VERIFY(!found.data());
+        CORRADE_COMPARE(found.data(), static_cast<const void*>(found.begin()));
 
     /* Finding an empty string inside a null view should behave the same as
        if nothing was found at all */
@@ -3222,7 +3269,7 @@ void StringViewTest::findLastAnyEmpty() {
         StringView a{nullptr};
         StringView found = a.findLastAny("");
         CORRADE_VERIFY(found.isEmpty());
-        CORRADE_VERIFY(!found.data());
+        CORRADE_COMPARE(found.data(), static_cast<const void*>(found.begin()));
     }
 }
 
@@ -3244,14 +3291,15 @@ void StringViewTest::findLastAnyFlags() {
         CORRADE_COMPARE(found.flags(), StringViewFlag::Global|StringViewFlag::NullTerminated);
 
     /* Not found should be no flags, as the failed view isn't meant to be used
-       for anything anyway */
+       for anything except the begin/end pointers anyway */
     } {
         StringView found = a.findLastAny("pub");
-        CORRADE_COMPARE(found.data(), static_cast<const void*>(nullptr));
+        CORRADE_COMPARE(found.data(), static_cast<const void*>(a.begin()));
         CORRADE_COMPARE(found.flags(), StringViewFlags{});
     }
 }
 
+#ifdef CORRADE_BUILD_DEPRECATED
 void StringViewTest::findLastAnyOr() {
     /* Mostly similar to findAnyOr(). Duplicated characters to test that it's
        not delegated to findAnyOr(). */
@@ -3259,19 +3307,24 @@ void StringViewTest::findLastAnyOr() {
 
     /* Verify the returned pointer vs the usual findLastAny() */
     {
+        CORRADE_IGNORE_DEPRECATED_PUSH
         StringView found = a.findLastAnyOr("lol", a.begin());
+        CORRADE_IGNORE_DEPRECATED_POP
         CORRADE_COMPARE(found, "l");
         CORRADE_COMPARE(found.data(), static_cast<const void*>(a.data() + 9));
     } {
         StringView found = a.findLastAny("pub");
-        CORRADE_COMPARE(found.data(), static_cast<const void*>(nullptr));
+        CORRADE_COMPARE(found.data(), static_cast<const void*>(a.begin()));
         CORRADE_VERIFY(found.isEmpty());
     } {
-        StringView found = a.findLastAnyOr("pub", a.begin());
-        CORRADE_COMPARE(found.data(), static_cast<const void*>(a.begin()));
+        CORRADE_IGNORE_DEPRECATED_PUSH
+        StringView found = a.findLastAnyOr("pub", a.end());
+        CORRADE_IGNORE_DEPRECATED_POP
+        CORRADE_COMPARE(found.data(), static_cast<const void*>(a.end()));
         CORRADE_VERIFY(found.isEmpty());
     }
 }
+#endif
 
 void StringViewTest::countCharacter() {
     #ifdef CORRADE_UTILITY_FORCE_CPU_POINTER_DISPATCH

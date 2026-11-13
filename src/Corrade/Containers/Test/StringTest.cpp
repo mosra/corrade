@@ -216,15 +216,23 @@ struct StringTest: TestSuite::Tester {
 
     /* Tests also contains() */
     template<class T> void find();
+    #ifdef CORRADE_BUILD_DEPRECATED
     template<class T> void findOr();
+    #endif
     template<class T> void findLast();
+    #ifdef CORRADE_BUILD_DEPRECATED
     template<class T> void findLastOr();
+    #endif
 
     /* Tests also containsAny() */
     template<class T> void findAny();
+    #ifdef CORRADE_BUILD_DEPRECATED
     template<class T> void findAnyOr();
+    #endif
     template<class T> void findLastAny();
+    #ifdef CORRADE_BUILD_DEPRECATED
     template<class T> void findLastAnyOr();
+    #endif
 
     void count();
 
@@ -395,21 +403,29 @@ StringTest::StringTest() {
 
               &StringTest::find<String>,
               &StringTest::find<const String>,
+              #ifdef CORRADE_BUILD_DEPRECATED
               &StringTest::findOr<String>,
               &StringTest::findOr<const String>,
+              #endif
               &StringTest::findLast<String>,
               &StringTest::findLast<const String>,
+              #ifdef CORRADE_BUILD_DEPRECATED
               &StringTest::findLastOr<String>,
               &StringTest::findLastOr<const String>,
+              #endif
 
               &StringTest::findAny<String>,
               &StringTest::findAny<const String>,
+              #ifdef CORRADE_BUILD_DEPRECATED
               &StringTest::findAnyOr<String>,
               &StringTest::findAnyOr<const String>,
+              #endif
               &StringTest::findLastAny<String>,
               &StringTest::findLastAny<const String>,
+              #ifdef CORRADE_BUILD_DEPRECATED
               &StringTest::findLastAnyOr<String>,
               &StringTest::findLastAnyOr<const String>,
+              #endif
 
               &StringTest::count,
 
@@ -2686,7 +2702,7 @@ template<class T> void StringTest::find() {
 
         typename ConstTraits<T>::ViewType found = a.find("cursed");
         CORRADE_VERIFY(found.isEmpty());
-        CORRADE_COMPARE(found.data(), static_cast<const void*>(nullptr));
+        CORRADE_COMPARE(found.data(), static_cast<const void*>(a.end()));
     } {
         CORRADE_VERIFY(a.contains('h'));
 
@@ -2706,10 +2722,11 @@ template<class T> void StringTest::find() {
 
         typename ConstTraits<T>::ViewType found = a.find('c');
         CORRADE_VERIFY(found.isEmpty());
-        CORRADE_COMPARE(found.data(), static_cast<const void*>(nullptr));
+        CORRADE_COMPARE(found.data(), static_cast<const void*>(a.end()));
     }
 }
 
+#ifdef CORRADE_BUILD_DEPRECATED
 template<class T> void StringTest::findOr() {
     setTestCaseTemplateName(ConstTraits<T>::name());
 
@@ -2719,35 +2736,48 @@ template<class T> void StringTest::findOr() {
 
     T a{"hello hello world"};
     {
+        CORRADE_IGNORE_DEPRECATED_PUSH
         typename ConstTraits<T>::ViewType found = a.findOr("hello", a.end());
+        CORRADE_IGNORE_DEPRECATED_POP
         CORRADE_COMPARE(found, "hello"_s);
         CORRADE_COMPARE(found.data(), static_cast<const void*>(a.data()));
         CORRADE_COMPARE(found.flags(), StringViewFlags{});
     } {
+        CORRADE_IGNORE_DEPRECATED_PUSH
         typename ConstTraits<T>::ViewType found = a.findOr("world", a.end());
+        CORRADE_IGNORE_DEPRECATED_POP
         CORRADE_COMPARE(found, "world"_s);
         CORRADE_COMPARE(found.data(), static_cast<const void*>(a.data() + 12));
         CORRADE_COMPARE(found.flags(), StringViewFlag::NullTerminated);
     } {
+        CORRADE_IGNORE_DEPRECATED_PUSH
         typename ConstTraits<T>::ViewType found = a.findOr("cursed", a.end());
+        CORRADE_IGNORE_DEPRECATED_POP
         CORRADE_VERIFY(found.isEmpty());
         CORRADE_COMPARE(found.data(), static_cast<const void*>(a.end()));
     } {
+        CORRADE_IGNORE_DEPRECATED_PUSH
         typename ConstTraits<T>::ViewType found = a.findOr('h', a.end());
+        CORRADE_IGNORE_DEPRECATED_POP
         CORRADE_COMPARE(found, "h"_s);
         CORRADE_COMPARE(found.data(), static_cast<const void*>(a.data()));
         CORRADE_COMPARE(found.flags(), StringViewFlags{});
     } {
+        CORRADE_IGNORE_DEPRECATED_PUSH
         typename ConstTraits<T>::ViewType found = a.findOr('d', a.end());
+        CORRADE_IGNORE_DEPRECATED_POP
         CORRADE_COMPARE(found, "d"_s);
         CORRADE_COMPARE(found.data(), static_cast<const void*>(a.data() + 16));
         CORRADE_COMPARE(found.flags(), StringViewFlag::NullTerminated);
     } {
+        CORRADE_IGNORE_DEPRECATED_PUSH
         typename ConstTraits<T>::ViewType found = a.findOr('c', a.end());
+        CORRADE_IGNORE_DEPRECATED_POP
         CORRADE_VERIFY(found.isEmpty());
         CORRADE_COMPARE(found.data(), static_cast<const void*>(a.end()));
     }
 }
+#endif
 
 template<class T> void StringTest::findLast() {
     /* Mostly the same as find(), except that we don't test contains() which is
@@ -2773,7 +2803,7 @@ template<class T> void StringTest::findLast() {
     } {
         typename ConstTraits<T>::ViewType found = a.findLast("cursed");
         CORRADE_VERIFY(found.isEmpty());
-        CORRADE_COMPARE(found.data(), static_cast<const void*>(nullptr));
+        CORRADE_COMPARE(found.data(), static_cast<const void*>(a.begin()));
     } {
         typename ConstTraits<T>::ViewType found = a.findLast('h');
         CORRADE_COMPARE(found, "h"_s);
@@ -2787,10 +2817,11 @@ template<class T> void StringTest::findLast() {
     } {
         typename ConstTraits<T>::ViewType found = a.findLast('c');
         CORRADE_VERIFY(found.isEmpty());
-        CORRADE_COMPARE(found.data(), static_cast<const void*>(nullptr));
+        CORRADE_COMPARE(found.data(), static_cast<const void*>(a.begin()));
     }
 }
 
+#ifdef CORRADE_BUILD_DEPRECATED
 template<class T> void StringTest::findLastOr() {
     setTestCaseTemplateName(ConstTraits<T>::name());
 
@@ -2800,35 +2831,48 @@ template<class T> void StringTest::findLastOr() {
 
     T a{"hello world world"};
     {
+        CORRADE_IGNORE_DEPRECATED_PUSH
         typename ConstTraits<T>::ViewType found = a.findLastOr("hello", a.end());
+        CORRADE_IGNORE_DEPRECATED_POP
         CORRADE_COMPARE(found, "hello"_s);
         CORRADE_COMPARE(found.data(), static_cast<const void*>(a.data()));
         CORRADE_COMPARE(found.flags(), StringViewFlags{});
     } {
+        CORRADE_IGNORE_DEPRECATED_PUSH
         typename ConstTraits<T>::ViewType found = a.findLastOr("world", a.end());
+        CORRADE_IGNORE_DEPRECATED_POP
         CORRADE_COMPARE(found, "world"_s);
         CORRADE_COMPARE(found.data(), static_cast<const void*>(a.data() + 12));
         CORRADE_COMPARE(found.flags(), StringViewFlag::NullTerminated);
     } {
+        CORRADE_IGNORE_DEPRECATED_PUSH
         typename ConstTraits<T>::ViewType found = a.findLastOr("cursed", a.end());
+        CORRADE_IGNORE_DEPRECATED_POP
         CORRADE_VERIFY(found.isEmpty());
         CORRADE_COMPARE(found.data(), static_cast<const void*>(a.end()));
     } {
+        CORRADE_IGNORE_DEPRECATED_PUSH
         typename ConstTraits<T>::ViewType found = a.findLastOr('h', a.end());
+        CORRADE_IGNORE_DEPRECATED_POP
         CORRADE_COMPARE(found, "h"_s);
         CORRADE_COMPARE(found.data(), static_cast<const void*>(a.data()));
         CORRADE_COMPARE(found.flags(), StringViewFlags{});
     } {
+        CORRADE_IGNORE_DEPRECATED_PUSH
         typename ConstTraits<T>::ViewType found = a.findLastOr('d', a.end());
+        CORRADE_IGNORE_DEPRECATED_POP
         CORRADE_COMPARE(found, "d"_s);
         CORRADE_COMPARE(found.data(), static_cast<const void*>(a.data() + 16));
         CORRADE_COMPARE(found.flags(), StringViewFlag::NullTerminated);
     } {
+        CORRADE_IGNORE_DEPRECATED_PUSH
         typename ConstTraits<T>::ViewType found = a.findLastOr('c', a.end());
+        CORRADE_IGNORE_DEPRECATED_POP
         CORRADE_VERIFY(found.isEmpty());
         CORRADE_COMPARE(found.data(), static_cast<const void*>(a.end()));
     }
 }
+#endif
 
 template<class T> void StringTest::findAny() {
     setTestCaseTemplateName(ConstTraits<T>::name());
@@ -2857,10 +2901,11 @@ template<class T> void StringTest::findAny() {
 
         typename ConstTraits<T>::ViewType found = a.findAny("pub");
         CORRADE_VERIFY(found.isEmpty());
-        CORRADE_COMPARE(found.data(), static_cast<const void*>(nullptr));
+        CORRADE_COMPARE(found.data(), static_cast<const void*>(a.end()));
     }
 }
 
+#ifdef CORRADE_BUILD_DEPRECATED
 template<class T> void StringTest::findAnyOr() {
     setTestCaseTemplateName(ConstTraits<T>::name());
 
@@ -2870,21 +2915,28 @@ template<class T> void StringTest::findAnyOr() {
 
     T a{"hello world"};
     {
+        CORRADE_IGNORE_DEPRECATED_PUSH
         typename ConstTraits<T>::ViewType found = a.findAnyOr("eh!", a.end());
+        CORRADE_IGNORE_DEPRECATED_POP
         CORRADE_COMPARE(found, "h"_s);
         CORRADE_COMPARE(found.data(), static_cast<const void*>(a.data()));
         CORRADE_COMPARE(found.flags(), StringViewFlags{});
     } {
+        CORRADE_IGNORE_DEPRECATED_PUSH
         typename ConstTraits<T>::ViewType found = a.findAnyOr("bud", a.end());
+        CORRADE_IGNORE_DEPRECATED_POP
         CORRADE_COMPARE(found, "d"_s);
         CORRADE_COMPARE(found.data(), static_cast<const void*>(a.data() + 10));
         CORRADE_COMPARE(found.flags(), StringViewFlag::NullTerminated);
     } {
+        CORRADE_IGNORE_DEPRECATED_PUSH
         typename ConstTraits<T>::ViewType found = a.findAnyOr("pub", a.end());
+        CORRADE_IGNORE_DEPRECATED_POP
         CORRADE_VERIFY(found.isEmpty());
         CORRADE_COMPARE(found.data(), static_cast<const void*>(a.end()));
     }
 }
+#endif
 
 template<class T> void StringTest::findLastAny() {
     /* Mostly the same as findAny(), except that we don't test containsAny()
@@ -2911,10 +2963,11 @@ template<class T> void StringTest::findLastAny() {
     } {
         typename ConstTraits<T>::ViewType found = a.findLastAny("pub");
         CORRADE_VERIFY(found.isEmpty());
-        CORRADE_COMPARE(found.data(), static_cast<const void*>(nullptr));
+        CORRADE_COMPARE(found.data(), static_cast<const void*>(a.begin()));
     }
 }
 
+#ifdef CORRADE_BUILD_DEPRECATED
 template<class T> void StringTest::findLastAnyOr() {
     setTestCaseTemplateName(ConstTraits<T>::name());
 
@@ -2924,21 +2977,28 @@ template<class T> void StringTest::findLastAnyOr() {
 
     T a{"hello world"};
     {
+        CORRADE_IGNORE_DEPRECATED_PUSH
         typename ConstTraits<T>::ViewType found = a.findLastAnyOr("uhu", a.end());
+        CORRADE_IGNORE_DEPRECATED_POP
         CORRADE_COMPARE(found, "h"_s);
         CORRADE_COMPARE(found.data(), static_cast<const void*>(a.data()));
         CORRADE_COMPARE(found.flags(), StringViewFlags{});
     } {
+        CORRADE_IGNORE_DEPRECATED_PUSH
         typename ConstTraits<T>::ViewType found = a.findLastAnyOr("duh!", a.end());
+        CORRADE_IGNORE_DEPRECATED_POP
         CORRADE_COMPARE(found, "d"_s);
         CORRADE_COMPARE(found.data(), static_cast<const void*>(a.data() + 10));
         CORRADE_COMPARE(found.flags(), StringViewFlag::NullTerminated);
     } {
+        CORRADE_IGNORE_DEPRECATED_PUSH
         typename ConstTraits<T>::ViewType found = a.findLastAnyOr("pub", a.end());
+        CORRADE_IGNORE_DEPRECATED_POP
         CORRADE_VERIFY(found.isEmpty());
         CORRADE_COMPARE(found.data(), static_cast<const void*>(a.end()));
     }
 }
+#endif
 
 void StringTest::count() {
     /* It relies on StringView conversion and then delegates there so we don't
