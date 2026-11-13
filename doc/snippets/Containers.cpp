@@ -815,7 +815,10 @@ Containers::Function<int(int)> checksum = [salt](int value) {
 #ifndef CORRADE_MSVC2017_COMPATIBILITY
 {
 int seed = DOXYGEN_ELLIPSIS(0);
-CORRADE_UNUSED int state[8]{DOXYGEN_ELLIPSIS()};
+/* Present only to verify the commented-out code, CORRADE_UNUSED doesn't
+   suppress the warning on MSVC, static_cast<void>() does */
+int state[8]{DOXYGEN_ELLIPSIS()};
+static_cast<void>(state);
 /* [Function-usage-stateful-no-allocate] */
 Containers::Function<int(int)> hash{Containers::NoAllocateInit,
     [seed](int value) { DOXYGEN_ELLIPSIS(return seed ^ value;) }};
