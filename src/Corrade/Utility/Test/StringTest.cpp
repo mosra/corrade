@@ -739,7 +739,7 @@ const struct {
         "2a5", 0x2e0, 0x9e0, {},
         String::ParseState::Clamped, 0x2e0},
     {"less than negative min",
-        "-2d5", -0x2b0, 9e0, {},
+        "-2d5", -0x2b0, 0x9e0, {},
         String::ParseState::Clamped, -0x2b0},
     {"greater than positive max",
         "1bb3", 0x2e0, 0x9f0, {},
