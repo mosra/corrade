@@ -142,7 +142,7 @@ literal:
 
 @snippet Containers.cpp StringView-usage-literal
 
-While both expressions are *mostly* equivalent, the literal is
+While both expressions are *mostly* equivalent, the @cpp _s @ce literal is
 @cpp constexpr @ce so you can use it in a compile-time context (and on the
 other hand, the implicit conversion uses @ref std::strlen() which has some
 runtime impact). The main difference is however that the literal will annotate
@@ -166,9 +166,19 @@ This class is implicitly convertible from and to @ref ArrayView, however note
 that the conversion will not preserve the global / null-terminated annotations.
 
 @attention In order to allow the above-mentioned optimizations, on 32-bit
-    systems the size is limited to 1 GB. That should be more than enough for
-    real-world strings (as opposed to arbitrary binary data), if you need more
-    please use an @ref ArrayView instead.
+    systems the size is limited to 1 GB, with 2 bits out of the 32-bit size
+    used for @ref StringViewFlags. A gigabyte should still be more than enough
+    for real-world strings (as opposed to arbitrary binary data), if you need
+    more please use an @ref ArrayView instead.
+
+@subsection Containers-BasicStringView-usage-boolean-conversion Boolean conversion
+
+A string view is explicitly convertible to @cpp bool @ce, returning
+@cpp false @ce if it's a @cpp nullptr @ce or empty view. That makes it
+convenient for use in various conditions one doesn't need to explicitly query
+@ref size() or @ref isEmpty() to check if it's non-empty:
+
+@snippet Containers.cpp StringView-usage-boolean-conversion
 
 @subsection Containers-BasicStringView-usage-slicing String view slicing
 

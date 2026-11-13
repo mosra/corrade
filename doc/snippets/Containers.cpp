@@ -1417,6 +1417,14 @@ static_cast<void>(a);
 }
 
 {
+/* [StringView-usage-boolean-conversion] */
+Containers::StringView filename = DOXYGEN_ELLIPSIS({});
+if(!filename)
+    Utility::Fatal{} << "Filename cannot be empty";
+/* [StringView-usage-boolean-conversion] */
+}
+
+{
 /* [StringView-usage-slicing] */
 Containers::StringView file = "Master Of Puppets.mp3";
 Containers::StringView name = file.exceptSuffix(".mp3"); // "Master Of Puppets"
