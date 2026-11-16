@@ -883,18 +883,6 @@ namespace Corrade {
     consistent with @ref Utility::Path::read() and
     @ref Utility::Path::readString() --- once enough time passes after the
     deprecated API gets removed to avoid silent breakages in existing code.
--   @ref Utility::String::split() and
-    @ref Utility::String::splitWithoutEmptyParts() overloads taking
-    @ref Containers::BasicStringView are deprecated in favor of
-    @ref Containers::BasicStringView::split() and
-    @ref Containers::BasicStringView::splitWithoutEmptyParts();
-    the overloads taking @ref std::string are still kept
--   @cpp Utility::String::viewBeginsWith() @ce and
-    @cpp Utility::String::viewEndsWith() @ce variants of
-    @ref Utility::String::beginsWith() / @ref Utility::String::endsWith() are
-    deprecated in favor of @ref Containers::BasicStringView::hasPrefix() and
-    @ref Containers::BasicStringView::hasSuffix(); the overloads taking
-    @ref std::string are still kept
 -   All remaining @ref Utility::String APIs taking a @ref std::string are
     deprecated in favor of variants implemented directly on
     @ref Containers::BasicStringView
@@ -1511,8 +1499,9 @@ Released 2019-10-24, tagged as
     example if the file is missing) and to optionally not signal a change if
     the file is empty; @ref Utility::Tweakable is using these features for more
     robustness
--   Added @ref Utility::String::partition() and @ref Utility::String::rpartition() "rpartition()",
-    equivalent to Python's @cb{.py} str.partition() @ce
+-   Added @cpp Utility::String::partition() @ce and
+    @cpp Utility::String::rpartition() "rpartition()" @ce, equivalent to
+    Python's @cb{.py} str.partition() @ce
 -   New @ref CORRADE_FUNCTION utility macro for a portable C++11 @cpp __func__ @ce
 -   New @ref CORRADE_LINE_STRING utility macro for a stringified @cpp __LINE__ @ce
 -   New @ref CORRADE_THREAD_LOCAL macro for a portable @cpp thread_local @ce
@@ -1612,8 +1601,8 @@ Released 2019-10-24, tagged as
 -   @ref Utility::Resource internals now operate completely without heap
     access, its APIs now also have overloads taking plain C string literals
     instead of @ref std::string
--   @ref Utility::String::join() and
-    @ref Utility::String::joinWithoutEmptyParts() overloads taking a
+-   @cpp Utility::String::join() @ce and
+    @cpp Utility::String::joinWithoutEmptyParts() @ce overloads taking a
     @cb{.cpp} char @ce array and a @ref std::string for the delimiter in
     addition to a single @cb{.cpp} char @ce
 
@@ -2032,8 +2021,9 @@ Released 2018-10-23, tagged as
 -   @ref Utility::Arguments is now move-only to avoid accidental copies ---
     it's not meant to be used as a general storage for parsed arguments, only a
     parser
--   @ref Utility::String::stripPrefix() and @ref Utility::String::stripSuffix()
-    have now zero-allocation implementation
+-   @cpp Utility::String::stripPrefix() @ce and
+    @cpp Utility::String::stripSuffix() @ce have now a zero-allocation
+    implementation
 
 @subsection corrade-changelog-2018-10-buildsystem Build system
 
