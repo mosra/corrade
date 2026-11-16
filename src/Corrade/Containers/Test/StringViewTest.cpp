@@ -3022,19 +3022,19 @@ void StringViewTest::findAny() {
     /* Right at the start. Characters not part of the string should not cause
        it to fail. */
     {
-        CORRADE_VERIFY(a.containsAny("eh!"));
+        CORRADE_VERIFY(a.containsAny("oh!"));
 
-        StringView found = a.findAny("eh!");
+        StringView found = a.findAny("oh!");
         CORRADE_COMPARE(found, "h");
         CORRADE_COMPARE((static_cast<const void*>(found.data())), a.data());
 
     /* In the middle. Duplicate characters should not cause any issues. */
     } {
-        CORRADE_VERIFY(a.containsAny("olo"));
+        CORRADE_VERIFY(a.containsAny("owo"));
 
-        StringView found = a.findAny("olo");
-        CORRADE_COMPARE(found, "l");
-        CORRADE_COMPARE((static_cast<const void*>(found.data())), a.data() + 2);
+        StringView found = a.findAny("owo");
+        CORRADE_COMPARE(found, "o");
+        CORRADE_COMPARE((static_cast<const void*>(found.data())), a.data() + 4);
 
     /* Right at the end */
     } {
@@ -3085,6 +3085,53 @@ void StringViewTest::findAny() {
         StringView found = a.exceptPrefix(8).findAny("\0"_s);
         CORRADE_COMPARE(found.data(), static_cast<const void*>(found.end()));
         CORRADE_VERIFY(found.isEmpty());
+
+    /* Multiple consecutive characters right at the start */
+    } {
+        CORRADE_VERIFY(a.containsAny("hwel"));
+
+        StringView found = a.findAny("hwel");
+        CORRADE_COMPARE(found, "hell");
+        CORRADE_COMPARE((static_cast<const void*>(found.data())), a.data());
+
+    /* Multiple consecutive characters in the middle */
+    } {
+        CORRADE_VERIFY(a.containsAny("lowr\0"_s));
+
+        StringView found = a.findAny("lowr\0"_s);
+        CORRADE_COMPARE(found, "llo\0worl"_s);
+        CORRADE_COMPARE((static_cast<const void*>(found.data())), a.data() + 2);
+
+    /* Multiple consecutive characters in the middle but a different character
+       among them */
+    } {
+        CORRADE_VERIFY(a.containsAny("lor\0"_s));
+
+        StringView found = a.findAny("lor\0"_s);
+        CORRADE_COMPARE(found, "llo\0"_s);
+        CORRADE_COMPARE((static_cast<const void*>(found.data())), a.data() + 2);
+
+    /* Multiple consecutive characters in the middle, max count default */
+    } {
+        StringView found = a.findAny("lowr\0"_s, 0);
+        CORRADE_COMPARE(found, "llo\0worl"_s);
+        CORRADE_COMPARE((static_cast<const void*>(found.data())), a.data() + 2);
+
+    /* Multiple consecutive characters in the middle, max count 1 */
+    } {
+        StringView found = a.findAny("lowr\0"_s, 1);
+        CORRADE_COMPARE(found, "l");
+        CORRADE_COMPARE((static_cast<const void*>(found.data())), a.data() + 2);
+
+    /* Multiple consecutive characters at the end. Have to skip a prefix to not
+       match the earlier l or o. It also shouldn't expand over the trailing
+       null terminator. */
+    } {
+        CORRADE_VERIFY(a.exceptPrefix("hello\0"_s).containsAny("lo\0rd"_s));
+
+        StringView found = a.exceptPrefix("hello\0"_s).findAny("lo\0rd"_s);
+        CORRADE_COMPARE(found, "orld");
+        CORRADE_COMPARE((static_cast<const void*>(found.data())), a.data() + 7);
     }
 }
 
@@ -3140,10 +3187,11 @@ void StringViewTest::findAnyFlags() {
         CORRADE_COMPARE(found, "h");
         CORRADE_COMPARE(found.flags(), StringViewFlag::Global);
 
-    /* At the end also null-terminated */
+    /* At the end also null-terminated, even if not the very first found
+       char */
     } {
-        StringView found = a.findAny("ow");
-        CORRADE_COMPARE(found, "o");
+        StringView found = a.findAny("low");
+        CORRADE_COMPARE(found, "llo");
         CORRADE_COMPARE(found.flags(), StringViewFlag::Global|StringViewFlag::NullTerminated);
 
     /* Not found should preserve flags from the end */
@@ -3372,6 +3420,44 @@ void StringViewTest::findLastAny() {
         StringView found = a.exceptPrefix(8).findLastAny("\0"_s);
         CORRADE_COMPARE(found.data(), static_cast<const void*>(found.begin()));
         CORRADE_VERIFY(found.isEmpty());
+
+    /* Multiple consecutive characters right at the end */
+    } {
+        StringView found = a.findLastAny("lord");
+        CORRADE_COMPARE(found, "orld");
+        CORRADE_COMPARE((static_cast<const void*>(found.data())), a.data() + 7);
+
+    /* Multiple consecutive characters in the middle */
+    } {
+        StringView found = a.findLastAny("owr\0"_s);
+        CORRADE_COMPARE(found, "o\0wor"_s);
+        CORRADE_COMPARE((static_cast<const void*>(found.data())), a.data() + 4);
+
+    /* Multiple consecutive characters in the middle but a different character
+       among them */
+    } {
+        StringView found = a.findLastAny("or\0"_s);
+        CORRADE_COMPARE(found, "or");
+        CORRADE_COMPARE((static_cast<const void*>(found.data())), a.data() + 7);
+
+    /* Multiple consecutive characters in the middle, max count default */
+    } {
+        StringView found = a.findLastAny("owr\0"_s, 0);
+        CORRADE_COMPARE(found, "o\0wor"_s);
+        CORRADE_COMPARE((static_cast<const void*>(found.data())), a.data() + 4);
+
+    /* Multiple consecutive characters in the middle, max count 1 */
+    } {
+        StringView found = a.findLastAny("owr\0"_s, 1);
+        CORRADE_COMPARE(found, "r");
+        CORRADE_COMPARE((static_cast<const void*>(found.data())), a.data() + 8);
+
+    /* Multiple consecutive characters at the front. Have to skip a suffix to
+       not match the latter l. */
+    } {
+        StringView found = a.exceptSuffix(2).findLastAny("leh");
+        CORRADE_COMPARE(found, "hell");
+        CORRADE_COMPARE((static_cast<const void*>(found.data())), a.data());
     }
 }
 
@@ -3424,10 +3510,11 @@ void StringViewTest::findLastAnyFlags() {
         CORRADE_COMPARE(found, "h");
         CORRADE_COMPARE(found.flags(), StringViewFlag::Global);
 
-    /* At the end also null-terminated */
+    /* At the end also null-terminated, even if not the very first found
+       char */
     } {
-        StringView found = a.findLastAny("ow!");
-        CORRADE_COMPARE(found, "o");
+        StringView found = a.findLastAny("low!");
+        CORRADE_COMPARE(found, "llo");
         CORRADE_COMPARE(found.flags(), StringViewFlag::Global|StringViewFlag::NullTerminated);
 
     /* Not found should preserve flags from the begin */

@@ -2893,9 +2893,9 @@ template<class T> void StringTest::findAny() {
        findLastAny() */
     T a{"hello world"};
     {
-        CORRADE_VERIFY(a.containsAny("eh!"));
+        CORRADE_VERIFY(a.containsAny("oh!"));
 
-        typename ConstTraits<T>::ViewType found = a.findAny("eh!");
+        typename ConstTraits<T>::ViewType found = a.findAny("oh!");
         CORRADE_COMPARE(found, "h"_s);
         CORRADE_COMPARE(found.data(), static_cast<const void*>(a.data()));
         CORRADE_COMPARE(found.flags(), StringViewFlags{});
@@ -2912,6 +2912,20 @@ template<class T> void StringTest::findAny() {
         typename ConstTraits<T>::ViewType found = a.findAny("pub");
         CORRADE_VERIFY(found.isEmpty());
         CORRADE_COMPARE(found.data(), static_cast<const void*>(a.end()));
+
+    /* Verify also the maxCount argument. Expanding by default. */
+    } {
+        typename ConstTraits<T>::ViewType found = a.findAny("low");
+        CORRADE_COMPARE(found, "llo"_s);
+        CORRADE_COMPARE(found.data(), static_cast<const void*>(a.data() + 2));
+    } {
+        typename ConstTraits<T>::ViewType found = a.findAny("low", 0);
+        CORRADE_COMPARE(found, "llo"_s);
+        CORRADE_COMPARE(found.data(), static_cast<const void*>(a.data() + 2));
+    } {
+        typename ConstTraits<T>::ViewType found = a.findAny("low", 1);
+        CORRADE_COMPARE(found, "l"_s);
+        CORRADE_COMPARE(found.data(), static_cast<const void*>(a.data() + 2));
     }
 }
 
@@ -2973,6 +2987,23 @@ template<class T> void StringTest::findLastAny() {
         typename ConstTraits<T>::ViewType found = a.findLastAny("pub");
         CORRADE_VERIFY(found.isEmpty());
         CORRADE_COMPARE(found.data(), static_cast<const void*>(a.begin()));
+
+    /* Verify also the maxCount argument. Expanding by default. */
+    } {
+        typename ConstTraits<T>::ViewType found = a.findLastAny("row");
+        CORRADE_COMPARE(found, "wor"_s);
+        CORRADE_COMPARE(found.data(), static_cast<const void*>(a.data() + 6));
+        CORRADE_COMPARE(found.flags(), StringViewFlags{});
+    } {
+        typename ConstTraits<T>::ViewType found = a.findLastAny("row", 0);
+        CORRADE_COMPARE(found, "wor"_s);
+        CORRADE_COMPARE(found.data(), static_cast<const void*>(a.data() + 6));
+        CORRADE_COMPARE(found.flags(), StringViewFlags{});
+    } {
+        typename ConstTraits<T>::ViewType found = a.findLastAny("row", 1);
+        CORRADE_COMPARE(found, "r"_s);
+        CORRADE_COMPARE(found.data(), static_cast<const void*>(a.data() + 8));
+        CORRADE_COMPARE(found.flags(), StringViewFlags{});
     }
 }
 

@@ -1388,8 +1388,9 @@ class CORRADE_UTILITY_EXPORT String {
          *
          * Equivalent to @ref BasicStringView::findAny().
          */
-        MutableStringView findAny(StringView characters);
-        StringView findAny(StringView characters) const; /**< @overload */
+        MutableStringView findAny(StringView characters, std::size_t maxCount = 0);
+        /** @overload */
+        StringView findAny(StringView characters, std::size_t maxCount = 0) const;
 
         #ifdef CORRADE_BUILD_DEPRECATED
         /**
@@ -1427,8 +1428,9 @@ class CORRADE_UTILITY_EXPORT String {
          *
          * Equivalent to @ref BasicStringView::findLastAny().
          */
-        MutableStringView findLastAny(StringView characters);
-        StringView findLastAny(StringView characters) const; /**< @overload */
+        MutableStringView findLastAny(StringView characters, std::size_t maxCount = 0);
+        /** @overload */
+        StringView findLastAny(StringView characters, std::size_t maxCount = 0) const;
 
         #ifdef CORRADE_BUILD_DEPRECATED
         /**

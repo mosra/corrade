@@ -1473,6 +1473,30 @@ static_cast<void>(filename);
 }
 
 {
+/* [StringView-usage-findAny-sequence] */
+Containers::StringView row = "1.57\t\t  2.25";
+Containers::StringView whitespace = row.findAny(" \t");
+
+Containers::StringView first = row.prefix(whitespace.begin()); // "1.57"
+Containers::StringView second = row.suffix(whitespace.end());  // "2.25"
+/* [StringView-usage-findAny-sequence] */
+static_cast<void>(first);
+static_cast<void>(second);
+}
+
+{
+/* [StringView-usage-findAny-maxCount] */
+Containers::StringView entries = "alpha;gamma;,tau";
+Containers::StringView delimiter = entries.findAny(",;", 1);
+
+Containers::StringView head = entries.prefix(delimiter.begin());
+Containers::StringView tail = entries.suffix(delimiter.end());
+/* [StringView-usage-findAny-maxCount] */
+static_cast<void>(head);
+static_cast<void>(tail);
+}
+
+{
 /* [StringView-c-string-nullterminated] */
 Containers::StringView file = DOXYGEN_ELLIPSIS({});
 
