@@ -222,6 +222,7 @@ struct StringViewTest: TestSuite::Tester {
     void findLastOr();
     #endif
 
+    /* Tests also containsAny() */
     void findAny();
     void findAnyEmpty();
     void findAnyFlags();
@@ -3182,8 +3183,8 @@ void StringViewTest::findLastAny() {
        characters to test that it's not delegated to findAny(). */
     StringView a = "hello\0world"_s;
 
-    /* Right at the end. Characters not part of the string should not cause
-       it to fail. */
+    /* Right at the end. Characters not part of the string should not cause it
+       to fail. */
     {
         StringView found = a.findLastAny("duh!");
         CORRADE_COMPARE(found, "d");
@@ -3201,7 +3202,7 @@ void StringViewTest::findLastAny() {
         CORRADE_COMPARE(found, "h");
         CORRADE_COMPARE((static_cast<const void*>(found.data())), a.data());
 
-    /* Single character to search for, equivalent to just find(c) */
+    /* Single character to search for, equivalent to just findLast(c) */
     } {
         StringView found = a.findLastAny("w");
         CORRADE_COMPARE(found, "w");

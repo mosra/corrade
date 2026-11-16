@@ -1183,6 +1183,9 @@ BasicStringView {
          * using @ref find(char) const instead for single-byte substrings, see
          * also @ref count(char) const for counting the number of occurences.
          *
+         * If @p substring is empty, the function returns a zero-sized view
+         * pointing to @ref begin().
+         *
          * This function is equivalent to calling @relativeref{std::string,find()}
          * on a @ref std::string or a @ref std::string_view.
          * @see @ref contains(), @ref findLast(), @ref findAny()
@@ -1258,6 +1261,9 @@ BasicStringView {
          * alternatives. Consider using @ref findLast(char) const instead for
          * single-byte substrings.
          *
+         * If @p substring is empty, the function returns a zero-sized view
+         * pointing to @ref end().
+         *
          * This function is equivalent to calling @relativeref{std::string,rfind()}
          * on a @ref std::string or a @ref std::string_view.
          * @m_keywords{rfind()}
@@ -1320,9 +1326,10 @@ BasicStringView {
          * @brief Whether the view contains a substring
          *
          * A slightly lighter variant of @ref find() useful when you only want
-         * to know if a substring was found or not. Consider using
-         * @ref contains(char) const for single-byte substrings, see also
-         * @ref count(char) const for counting the number of occurences.
+         * to know if a substring was found or not, not its concrete position.
+         * Consider using @ref contains(char) const for single-byte substrings,
+         * see also @ref count(char) const for counting the number of
+         * occurences.
          * @see @ref containsAny()
          */
         bool contains(StringView substring) const;
@@ -1346,6 +1353,9 @@ BasicStringView {
          * except in case of a failure, where it always returns no
          * @ref StringViewFlags. See @ref Containers-BasicStringView-usage-find
          * for an introduction to the API.
+         *
+         * If @p characters are empty, the function returns a zero-sized view
+         * pointing to @ref end().
          *
          * This function is equivalent to calling @relativeref{std::string,find_first_of()}
          * on a @ref std::string or a @ref std::string_view.
@@ -1388,6 +1398,9 @@ BasicStringView {
          * @ref StringViewFlags. See @ref Containers-BasicStringView-usage-find
          * for an introduction to the API.
          *
+         * If @p characters are empty, the function returns an empty view
+         * pointing to @ref begin().
+         *
          * This function is equivalent to calling @relativeref{std::string,find_last_of()}
          * on a @ref std::string or a @ref std::string_view.
          * @m_keywords{find_last_of()}
@@ -1421,10 +1434,11 @@ BasicStringView {
          * @brief Whether the view contains any character from given set
          *
          * A slightly lighter variant of @ref findAny() useful when you only
-         * want to know if a character was found or not.
+         * want to know if the characters are present in a string, not their
+         * concrete position.
          * @see @ref contains()
          */
-        bool containsAny(StringView substring) const;
+        bool containsAny(StringView characters) const;
 
         /**
          * @brief Count of occurences of given character
