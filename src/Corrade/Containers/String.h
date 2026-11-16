@@ -1388,15 +1388,16 @@ class CORRADE_UTILITY_EXPORT String {
          *
          * Equivalent to @ref BasicStringView::findAny().
          */
-        MutableStringView findAny(StringView characters);
-        StringView findAny(StringView characters) const; /**< @overload */
+        MutableStringView findAny(StringView characters, std::size_t maxCount = 0);
+        /** @overload */
+        StringView findAny(StringView characters, std::size_t maxCount = 0) const;
 
         #ifdef CORRADE_BUILD_DEPRECATED
         /**
          * @brief Find any character from given set with a custom failure pointer
          *
          * Equivalent to @ref BasicStringView::findAnyOr().
-         * @m_deprecated_since_latest Use @ref findAny(StringView) const
+         * @m_deprecated_since_latest Use @ref findAny(StringView, std::size_t) const
          *      instead. If you need to use a different failure value than
          *      @ref end(), which should be rare, do it using a branch, for
          *      example:
@@ -1405,7 +1406,7 @@ class CORRADE_UTILITY_EXPORT String {
         CORRADE_DEPRECATED("use findAny() instead") MutableStringView findAnyOr(StringView characters, char* fail);
         /**
          * @overload
-         * @m_deprecated_since_latest Use @ref findAny(StringView) const
+         * @m_deprecated_since_latest Use @ref findAny(StringView, std::size_t) const
          *      instead. If you need to use a different failure value than
          *      @ref end(), which should be rare, do it using a branch, for
          *      example:
@@ -1427,15 +1428,16 @@ class CORRADE_UTILITY_EXPORT String {
          *
          * Equivalent to @ref BasicStringView::findLastAny().
          */
-        MutableStringView findLastAny(StringView characters);
-        StringView findLastAny(StringView characters) const; /**< @overload */
+        MutableStringView findLastAny(StringView characters, std::size_t maxCount = 0);
+        /** @overload */
+        StringView findLastAny(StringView characters, std::size_t maxCount = 0) const;
 
         #ifdef CORRADE_BUILD_DEPRECATED
         /**
          * @brief Find the last occurence of any character from given set with a custom failure pointer
          *
          * Equivalent to @ref BasicStringView::findLastAnyOr().
-         * @m_deprecated_since_latest Use @ref findLastAny(StringView) const
+         * @m_deprecated_since_latest Use @ref findLastAny(StringView, std::size_t) const
          *      instead. If you need to use a different failure value than
          *      @ref begin(), which should be rare, do it using a branch, for
          *      example:
@@ -1444,7 +1446,7 @@ class CORRADE_UTILITY_EXPORT String {
         CORRADE_DEPRECATED("use findLastAny() instead") MutableStringView findLastAnyOr(StringView characters, char* fail);
         /**
          * @overload
-         * @m_deprecated_since_latest Use @ref findLastAny(StringView) const
+         * @m_deprecated_since_latest Use @ref findLastAny(StringView, std::size_t) const
          *      instead. If you need to use a different failure value than
          *      @ref begin(), which should be rare, do it using a branch, for
          *      example:

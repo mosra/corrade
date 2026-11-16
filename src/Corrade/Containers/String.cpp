@@ -932,12 +932,12 @@ bool String::contains(const char character) const {
     return StringView{*this}.contains(character);
 }
 
-MutableStringView String::findAny(const StringView characters) {
-    return MutableStringView{*this}.findAny(characters);
+MutableStringView String::findAny(const StringView characters, const std::size_t maxCount) {
+    return MutableStringView{*this}.findAny(characters, maxCount);
 }
 
-StringView String::findAny(const StringView characters) const {
-    return StringView{*this}.findAny(characters);
+StringView String::findAny(const StringView characters, const std::size_t maxCount) const {
+    return StringView{*this}.findAny(characters, maxCount);
 }
 
 #ifdef CORRADE_BUILD_DEPRECATED
@@ -962,12 +962,12 @@ StringView String::findNotAny(const StringView characters) const {
     return StringView{*this}.findNotAny(characters);
 }
 
-MutableStringView String::findLastAny(const StringView characters) {
-    return MutableStringView{*this}.findLastAny(characters);
+MutableStringView String::findLastAny(const StringView characters, const std::size_t maxCount) {
+    return MutableStringView{*this}.findLastAny(characters, maxCount);
 }
 
-StringView String::findLastAny(const StringView characters) const {
-    return StringView{*this}.findLastAny(characters);
+StringView String::findLastAny(const StringView characters, const std::size_t maxCount) const {
+    return StringView{*this}.findLastAny(characters, maxCount);
 }
 
 #ifdef CORRADE_BUILD_DEPRECATED

@@ -808,43 +808,38 @@ const char* stringFindLastCharacter(const char* const data, const std::size_t si
     return {};
 }
 
-/* I don't want to include <algorithm> just for std::find_first_of() and
-   unfortunately there's no equivalent in the C string library. Coming close
-   are strpbrk() or strcspn() but both of them work with null-terminated
-   strings, which is absolutely useless here, not to mention that both do
-   *exactly* the same thing, with one returning a pointer but the other an
-   offset, so what's the point of having both? What the hell. And there's no
-   memcspn() or whatever which would take explicit lengths. Which means I'm
-   left to my own devices. Looking at how strpbrk() / strcspn() is done, it
-   ranges from trivial code:
-
-    https://github.com/bminor/newlib/blob/6497fdfaf41d47e835fdefc78ecb0a934875d7cf/newlib/libc/string/strcspn.c
-
-   to extremely optimized machine-specific code (don't look, it's GPL):
-
-    https://github.com/bminor/glibc/blob/43b1048ab9418e902aac8c834a7a9a88c501620a/sysdeps/x86_64/multiarch/strcspn-c.c
-
-   and the only trick I realized above the nested loop is using memchr() in an
-   inverse way. In all honesty, I think that'll still be *at least* as fast as
-   std::find_first_of() because I doubt STL implementations explicitly optimize
-   for that case. Yes, std::string::find_first_of() probably would have that,
-   but I'd first need to allocate to make use of that and FUCK NO. */
-const char* stringFindAny(const char* const data, const std::size_t size, const char* const characters, const std::size_t characterCount) {
-    for(const char* i = data, *end = data + size; i != end; ++i)
-        if(std::memchr(characters, *i, characterCount))
+const char* stringFindAny(const char* const data, const std::size_t size, const char* const characters, const std::size_t characterCount, const std::size_t maxFoundCount, std::size_t& foundCount) {
+    for(const char* i = data, *end = data + size; i != end; ++i) {
+        if(std::memchr(characters, *i, characterCount)) {
+            const char* j = i + 1;
+            for(const char* jEnd = maxFoundCount ? Utility::min(end, i + maxFoundCount) : end; j != jEnd; ++j) {
+                if(!std::memchr(characters, *j, characterCount))
+                    break;
+            }
+            foundCount = j - i;
             return i;
+        }
+    }
     return {};
 }
 
-/* Variants of the above. Not sure if those even have any vaguely corresponding
-   C lib API. Probably not. */
-
-const char* stringFindLastAny(const char* const data, const std::size_t size, const char* const characters, const std::size_t characterCount) {
-    for(const char* i = data + size; i != data; --i)
-        if(std::memchr(characters, *(i - 1), characterCount))
-            return i - 1;
+const char* stringFindLastAny(const char* const data, const std::size_t size, const char* const characters, const std::size_t characterCount, const std::size_t maxFoundCount, std::size_t& foundCount) {
+    for(const char* i = data + size; i != data; --i) {
+        if(std::memchr(characters, *(i - 1), characterCount)) {
+            const char* j = i;
+            for(const char* jEnd = maxFoundCount ? Utility::max(data, i - maxFoundCount) : data; j != jEnd; --j) {
+                if(!std::memchr(characters, *(j - 1), characterCount))
+                    break;
+            }
+            foundCount = i - j;
+            return i - foundCount;
+        }
+    }
     return {};
 }
+
+/* Inverse variants of the above, for those it makes no sense to try to find
+   the longest matching substring */
 
 const char* stringFindNotAny(const char* const data, const std::size_t size, const char* const characters, const std::size_t characterCount) {
     for(const char* i = data, *end = data + size; i != end; ++i)
@@ -1193,10 +1188,11 @@ template<class T> Array<BasicStringView<T>> BasicStringView<T>::splitOnAnyWithou
     T* const end = _data + size();
 
     while(oldpos < end) {
-        if(T* const pos = const_cast<T*>(Implementation::stringFindAny(oldpos, end - oldpos, characters, characterCount))) {
+        std::size_t foundCount;
+        if(T* const pos = const_cast<T*>(Implementation::stringFindAny(oldpos, end - oldpos, characters, characterCount, 0, foundCount))) {
             if(pos != oldpos)
                 arrayAppend(parts, slice(oldpos, pos));
-            oldpos = pos + 1;
+            oldpos = pos + foundCount;
         } else {
             arrayAppend(parts, slice(oldpos, end));
             break;

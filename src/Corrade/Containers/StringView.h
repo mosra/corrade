@@ -242,10 +242,22 @@ In addition to a general substring lookup, there are @ref find(char) const and
 @ref findLast(char) const overloads that perform much faster if you need to
 look up just a single byte (as was the case with @cpp '/' @ce above).
 Conversely, @ref findAny() and @ref findLastAny() look for any character out of
-given set; @ref findNotAny() and @ref findLastNotAny() then look for any
-character except for given set. Finally, @ref contains() / @ref containsAny() /
-@ref containsNotAny() is a more optimal API if only presence of a substring or
-characters, not a position, is needed, and @ref count() returns number of
+given set. As a common use case is finding a contiguous sequence of such
+characters, such as whitespace delimiters, they by default return a view
+spanning all of them:
+
+@snippet Containers.cpp StringView-usage-findAny-sequence
+
+If such behavior is undesirable, you can limit this using the second argument,
+for example here when splitting up by a list that can be delimited by either
+`,` or `;` and two delimiters next to each other mean an empty item:
+
+@snippet Containers.cpp StringView-usage-findAny-maxCount
+
+The @ref findNotAny() and @ref findLastNotAny() functions then look for any
+character except from given set. Finally, @ref contains() / @ref containsAny()
+/ @ref containsNotAny() is a more optimal API if only presence of a substring
+or characters, not a position, is needed, and @ref count() returns number of
 occurences.
 
 @subsection Containers-BasicStringView-usage-c-string-conversion Converting StringView instances to null-terminated C strings
@@ -1347,12 +1359,15 @@ BasicStringView {
         /**
          * @brief Find any character from given set
          *
-         * Returns a view pointing to the first found character from the set.
-         * If no characters from @p characters are found, an empty view
-         * pointing to @ref end() is returned. The function uses @ref slice()
-         * internally, meaning it propagates the @ref flags() as appropriate.
-         * See @ref Containers-BasicStringView-usage-find for an introduction
-         * to the API.
+         * Returns a view pointing to the first found sequence of characters
+         * from the set. If no characters from @p characters are found, an
+         * empty view pointing to @ref end() is returned. By default, the
+         * returned view extends until a character *not* from @p characters is
+         * found, set the @p maxCount argument to a non-zero value to limit the
+         * lookup. The function uses @ref slice() internally, meaning it
+         * propagates the @ref flags() as appropriate. See
+         * @ref Containers-BasicStringView-usage-find for an introduction to
+         * the API.
          *
          * If @p characters are empty, the function returns a zero-sized view
          * pointing to @ref end().
@@ -1363,15 +1378,16 @@ BasicStringView {
          * @see @ref containsAny(), @ref findNotAny(), @ref findLastAny(),
          *      @ref find()
          */
-        BasicStringView<T> findAny(StringView characters) const;
+        BasicStringView<T> findAny(StringView characters, std::size_t maxCount = 0) const;
 
         #ifdef CORRADE_BUILD_DEPRECATED
         /**
          * @brief Find any character from given set with a custom failure pointer
          *
-         * Like @ref findAny(StringView) const, but on failure returns an
-         * empty view pointing to the @p fail value instead of @ref end().
-         * @m_deprecated_since_latest Use @ref findAny(StringView) const
+         * Like @ref findAny(StringView, std::size_t) const, but on failure
+         * returns an empty view pointing to the @p fail value instead of
+         * @ref end().
+         * @m_deprecated_since_latest Use @ref findAny(StringView, std::size_t) const
          *      instead. If you need to use a different failure value than
          *      @ref end(), which should be rare, do it using a branch, for
          *      example:
@@ -1379,7 +1395,7 @@ BasicStringView {
          */
         CORRADE_DEPRECATED("use findAny() instead") BasicStringView<T> findAnyOr(StringView characters, T* fail) const {
             if(BasicStringView<T> found = findAny(characters))
-                return found;
+                return found.prefix(1); /* Original impl wasn't greedy */
             /* Using internal assert-less constructor, the public constructor
                asserts would be redundant. Since it's a zero-sized view, it
                doesn't really make sense to try to preserve any flags. */
@@ -1411,13 +1427,16 @@ BasicStringView {
         /**
          * @brief Find the last occurence of any character from given set
          *
-         * Returns a view pointing to the last found character from the set.
-         * If no characters from @p characters are found, an empty view
-         * pointing to @ref begin() is returned (i.e., opposite from what
-         * @ref findAny() returns on failure). The function uses @ref slice()
-         * internally, meaning it propagates the @ref flags() as appropriate.
-         * See @ref Containers-BasicStringView-usage-find for an introduction
-         * to the API.
+         * Returns a view pointing to the last found sequence of characters
+         * from the set. If no characters from @p characters are found, an
+         * empty view pointing to @ref begin() is returned (i.e., opposite from
+         * what @ref findAny() returns on failure). By default, the
+         * returned view extends until a character *not* from @p characters is
+         * found, set the @p maxCount argument to a non-zero value to limit the
+         * lookup. The function uses @ref slice() internally, meaning it
+         * propagates the @ref flags() as appropriate. See
+         * @ref Containers-BasicStringView-usage-find for an introduction to
+         * the API.
          *
          * If @p characters are empty, the function returns an empty view
          * pointing to @ref begin().
@@ -1427,15 +1446,16 @@ BasicStringView {
          * @m_keywords{find_last_of()}
          * @see @ref findLastNotAny(), @ref findLast()
          */
-        BasicStringView<T> findLastAny(StringView characters) const;
+        BasicStringView<T> findLastAny(StringView characters, std::size_t maxCount = 0) const;
 
         #ifdef CORRADE_BUILD_DEPRECATED
         /**
          * @brief Find the last occurence of any character from given set with a custom failure pointer
          *
-         * Like @ref findLastAny(StringView) const, but on failure returns an
-         * empty view pointing to the @p fail value instead of @ref begin(),
-         * @m_deprecated_since_latest Use @ref findLastAny(StringView) const
+         * Like @ref findLastAny(StringView, std::size_t) const, but on failure
+         * returns an empty view pointing to the @p fail value instead of
+         * @ref begin(),
+         * @m_deprecated_since_latest Use @ref findLastAny(StringView, std::size_t) const
          *      instead. If you need to use a different failure value than
          *      @ref begin(), which should be rare, do it using a branch, for
          *      example:
@@ -1443,7 +1463,7 @@ BasicStringView {
          */
         CORRADE_DEPRECATED("use findLastAny() instead") BasicStringView<T> findLastAnyOr(StringView characters, T* fail) const {
             if(BasicStringView<T> found = findLastAny(characters))
-                return found;
+                return found.prefix(1); /* Original impl wasn't greedy */
             /* Using internal assert-less constructor, the public constructor
                asserts would be redundant. Since it's a zero-sized view, it
                doesn't really make sense to try to preserve any flags. */
@@ -1732,8 +1752,8 @@ CORRADE_UTILITY_EXPORT const char* stringFindLastString(const char* data, std::s
 CORRADE_UTILITY_EXPORT extern const char* CORRADE_UTILITY_CPU_DISPATCHED_DECLARATION(stringFindCharacter)(const char* data, std::size_t size, char character);
 CORRADE_UTILITY_CPU_DISPATCHER_DECLARATION(stringFindCharacter)
 CORRADE_UTILITY_EXPORT const char* stringFindLastCharacter(const char* data, std::size_t size, char character);
-CORRADE_UTILITY_EXPORT const char* stringFindAny(const char* data, std::size_t size, const char* characters, std::size_t characterCount);
-CORRADE_UTILITY_EXPORT const char* stringFindLastAny(const char* data, std::size_t size, const char* characters, std::size_t characterCount);
+CORRADE_UTILITY_EXPORT const char* stringFindAny(const char* data, std::size_t size, const char* characters, std::size_t characterCount, std::size_t maxFoundCount, std::size_t& foundCount);
+CORRADE_UTILITY_EXPORT const char* stringFindLastAny(const char* data, std::size_t size, const char* characters, std::size_t characterCount, std::size_t maxFoundCount, std::size_t& foundCount);
 CORRADE_UTILITY_EXPORT const char* stringFindNotAny(const char* data, std::size_t size, const char* characters, std::size_t characterCount);
 CORRADE_UTILITY_EXPORT const char* stringFindLastNotAny(const char* data, std::size_t size, const char* characters, std::size_t characterCount);
 CORRADE_UTILITY_EXPORT extern std::size_t CORRADE_UTILITY_CPU_DISPATCHED_DECLARATION(stringCountCharacter)(const char* data, std::size_t size, char character);
@@ -1799,11 +1819,12 @@ template<class T> inline bool BasicStringView<T>::contains(const char character)
     return Implementation::stringFindCharacter(_data, size(), character);
 }
 
-template<class T> inline BasicStringView<T> BasicStringView<T>::findAny(const StringView characters) const {
+template<class T> inline BasicStringView<T> BasicStringView<T>::findAny(const StringView characters, const std::size_t maxCount) const {
     /* Cache the getters to speed up debug builds */
     const std::size_t size = this->size();
-    if(const char* const found = Implementation::stringFindAny(_data, size, characters._data, characters.size()))
-        return slice(const_cast<T*>(found), const_cast<T*>(found + 1));
+    std::size_t foundCount;
+    if(const char* const found = Implementation::stringFindAny(_data, size, characters._data, characters.size(), maxCount, foundCount))
+        return slice(const_cast<T*>(found), const_cast<T*>(found + foundCount));
 
     /* Use slice() also in case of a failure to preserve flags */
     return slice(_data + size, _data + size);
@@ -1819,9 +1840,10 @@ template<class T> inline BasicStringView<T> BasicStringView<T>::findNotAny(const
     return slice(_data + size, _data + size);
 }
 
-template<class T> inline BasicStringView<T> BasicStringView<T>::findLastAny(const StringView characters) const {
-    if(const char* const found = Implementation::stringFindLastAny(_data, size(), characters._data, characters.size()))
-        return slice(const_cast<T*>(found), const_cast<T*>(found + 1));
+template<class T> inline BasicStringView<T> BasicStringView<T>::findLastAny(const StringView characters, const std::size_t maxCount) const {
+    std::size_t foundCount;
+    if(const char* const found = Implementation::stringFindLastAny(_data, size(), characters._data, characters.size(), maxCount, foundCount))
+        return slice(const_cast<T*>(found), const_cast<T*>(found + foundCount));
 
     /* Use slice() also in case of a failure to preserve flags */
     return slice(_data, _data);
@@ -1836,7 +1858,8 @@ template<class T> inline BasicStringView<T> BasicStringView<T>::findLastNotAny(c
 }
 
 template<class T> inline bool BasicStringView<T>::containsAny(const StringView characters) const {
-    return Implementation::stringFindAny(_data, size(), characters._data, characters.size());
+    std::size_t foundCount; /* unused, becomes either 0 or 1 */
+    return Implementation::stringFindAny(_data, size(), characters._data, characters.size(), 1, foundCount);
 }
 
 template<class T> inline bool BasicStringView<T>::containsNotAny(const StringView characters) const {
