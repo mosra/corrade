@@ -1415,6 +1415,14 @@ class CORRADE_UTILITY_EXPORT String {
         #endif
 
         /**
+         * @brief Find any character not from given set
+         *
+         * Equivalent to @ref BasicStringView::findNotAny().
+         */
+        MutableStringView findNotAny(StringView characters);
+        StringView findNotAny(StringView characters) const; /**< @overload */
+
+        /**
          * @brief Find the last occurence of any character from given set
          *
          * Equivalent to @ref BasicStringView::findLastAny().
@@ -1446,11 +1454,26 @@ class CORRADE_UTILITY_EXPORT String {
         #endif
 
         /**
+         * @brief Find the last occurence of any character not from given set
+         *
+         * Equivalent to @ref BasicStringView::findLastNotAny().
+         */
+        MutableStringView findLastNotAny(StringView characters);
+        StringView findLastNotAny(StringView characters) const; /**< @overload */
+
+        /**
          * @brief Whether the string contains any character from given set
          *
          * Equivalent to @ref BasicStringView::containsAny().
          */
         bool containsAny(StringView substring) const;
+
+        /**
+         * @brief Whether the string doesn't contain any character from given set
+         *
+         * Equivalent to @ref BasicStringView::containsNotAny().
+         */
+        bool containsNotAny(StringView substring) const;
 
         /**
          * @brief Count of occurences of given character
