@@ -1168,9 +1168,8 @@ BasicStringView {
          * Returns a view pointing to the first found substring. If not found,
          * an empty view pointing to @ref end() is returned. The function uses
          * @ref slice() internally, meaning it propagates the @ref flags() as
-         * appropriate, except in case of a failure, where it always returns no
-         * @ref StringViewFlags. See @ref Containers-BasicStringView-usage-find
-         * for an introduction to the API.
+         * appropriate. See @ref Containers-BasicStringView-usage-find for an
+         * introduction to the API.
          *
          * Note that the function operates with a @f$ \mathcal{O}(nm) @f$
          * complexity and as such is meant mainly for one-time searches in
@@ -1250,9 +1249,8 @@ BasicStringView {
          * an empty view pointing to @ref begin() is returned (i.e., opposite
          * from what @ref find() returns on failure). The function uses
          * @ref slice() internally, meaning it propagates the @ref flags() as
-         * appropriate, except in case of a failure, where it always returns no
-         * @ref StringViewFlags. See @ref Containers-BasicStringView-usage-find
-         * for an introduction to the API.
+         * appropriate. See @ref Containers-BasicStringView-usage-find for an
+         * introduction to the API.
          *
          * Similarly as with @ref find(), note that the function operates with
          * a @f$ \mathcal{O}(nm) @f$ complexity and as such is meant mainly for
@@ -1349,10 +1347,9 @@ BasicStringView {
          * Returns a view pointing to the first found character from the set.
          * If no characters from @p characters are found, an empty view
          * pointing to @ref end() is returned. The function uses @ref slice()
-         * internally, meaning it propagates the @ref flags() as appropriate,
-         * except in case of a failure, where it always returns no
-         * @ref StringViewFlags. See @ref Containers-BasicStringView-usage-find
-         * for an introduction to the API.
+         * internally, meaning it propagates the @ref flags() as appropriate.
+         * See @ref Containers-BasicStringView-usage-find for an introduction
+         * to the API.
          *
          * If @p characters are empty, the function returns a zero-sized view
          * pointing to @ref end().
@@ -1393,10 +1390,9 @@ BasicStringView {
          * If no characters from @p characters are found, an empty view
          * pointing to @ref begin() is returned (i.e., opposite from what
          * @ref findAny() returns on failure). The function uses @ref slice()
-         * internally, meaning it propagates the @ref flags() as appropriate,
-         * except in case of a failure, where it always returns no
-         * @ref StringViewFlags. See @ref Containers-BasicStringView-usage-find
-         * for an introduction to the API.
+         * internally, meaning it propagates the @ref flags() as appropriate.
+         * See @ref Containers-BasicStringView-usage-find for an introduction
+         * to the API.
          *
          * If @p characters are empty, the function returns an empty view
          * pointing to @ref begin().
@@ -1707,10 +1703,8 @@ template<class T> inline BasicStringView<T> BasicStringView<T>::find(const Strin
     if(const char* const found = Implementation::stringFindString(_data, size, substring._data, substringSize))
         return slice(const_cast<T*>(found), const_cast<T*>(found + substringSize));
 
-    /* Using an internal assert-less constructor, the public constructor
-       asserts would be redundant. Since it's a zero-sized view, it doesn't
-       really make sense to try to preserve any flags. */
-    return BasicStringView<T>{_data + size, 0 /* empty, no flags */, nullptr};
+    /* Use slice() also in case of a failure to preserve flags */
+    return slice(_data + size, _data + size);
 }
 
 template<class T> inline BasicStringView<T> BasicStringView<T>::find(const char character) const {
@@ -1719,10 +1713,8 @@ template<class T> inline BasicStringView<T> BasicStringView<T>::find(const char 
     if(const char* const found = Implementation::stringFindCharacter(_data, size, character))
         return slice(const_cast<T*>(found), const_cast<T*>(found + 1));
 
-    /* Using an internal assert-less constructor, the public constructor
-       asserts would be redundant. Since it's a zero-sized view, it doesn't
-       really make sense to try to preserve any flags. */
-    return BasicStringView<T>{_data + size, 0 /* empty, no flags */, nullptr};
+    /* Use slice() also in case of a failure to preserve flags */
+    return slice(_data + size, _data + size);
 }
 
 template<class T> inline BasicStringView<T> BasicStringView<T>::findLast(const StringView substring) const {
@@ -1731,20 +1723,16 @@ template<class T> inline BasicStringView<T> BasicStringView<T>::findLast(const S
     if(const char* const found = Implementation::stringFindLastString(_data, size(), substring._data, substringSize))
         return slice(const_cast<T*>(found), const_cast<T*>(found + substringSize));
 
-    /* Using an internal assert-less constructor, the public constructor
-       asserts would be redundant. Since it's a zero-sized view, it doesn't
-       really make sense to try to preserve any flags. */
-    return BasicStringView<T>{_data, 0 /* empty, no flags */, nullptr};
+    /* Use slice() also in case of a failure to preserve flags */
+    return slice(_data, _data);
 }
 
 template<class T> inline BasicStringView<T> BasicStringView<T>::findLast(const char character) const {
     if(const char* const found = Implementation::stringFindLastCharacter(_data, size(), character))
         return slice(const_cast<T*>(found), const_cast<T*>(found + 1));
 
-    /* Using an internal assert-less constructor, the public constructor
-       asserts would be redundant. Since it's a zero-sized view, it doesn't
-       really make sense to try to preserve any flags. */
-    return BasicStringView<T>{_data, 0 /* empty, no flags */, nullptr};
+    /* Use slice() also in case of a failure to preserve flags */
+    return slice(_data, _data);
 }
 
 template<class T> inline bool BasicStringView<T>::contains(const StringView substring) const {
@@ -1761,20 +1749,16 @@ template<class T> inline BasicStringView<T> BasicStringView<T>::findAny(const St
     if(const char* const found = Implementation::stringFindAny(_data, size, characters._data, characters.size()))
         return slice(const_cast<T*>(found), const_cast<T*>(found + 1));
 
-    /* Using an internal assert-less constructor, the public constructor
-       asserts would be redundant. Since it's a zero-sized view, it doesn't
-       really make sense to try to preserve any flags. */
-    return BasicStringView<T>{_data + size, 0 /* empty, no flags */, nullptr};
+    /* Use slice() also in case of a failure to preserve flags */
+    return slice(_data + size, _data + size);
 }
 
 template<class T> inline BasicStringView<T> BasicStringView<T>::findLastAny(const StringView characters) const {
     if(const char* const found = Implementation::stringFindLastAny(_data, size(), characters._data, characters.size()))
         return slice(const_cast<T*>(found), const_cast<T*>(found + 1));
 
-    /* Using an internal assert-less constructor, the public constructor
-       asserts would be redundant. Since it's a zero-sized view, it doesn't
-       really make sense to try to preserve any flags. */
-    return BasicStringView<T>{_data, 0 /* empty, no flags */, nullptr};
+    /* Use slice() also in case of a failure to preserve flags */
+    return slice(_data, _data);
 }
 
 template<class T> inline bool BasicStringView<T>::containsAny(const StringView characters) const {

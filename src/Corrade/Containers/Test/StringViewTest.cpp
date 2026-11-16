@@ -2639,18 +2639,17 @@ void StringViewTest::findFlags() {
         CORRADE_COMPARE(found, "d");
         CORRADE_COMPARE(found.flags(), StringViewFlag::Global|StringViewFlag::NullTerminated);
 
-    /* Not found should be no flags, as the failed view isn't meant to be used
-       for anything except the begin/end pointers anyway */
+    /* Not found should preserve flags from the end */
     } {
         StringView found = a.find("world!");
         CORRADE_COMPARE(found.data(), static_cast<const void*>(found.end()));
-        CORRADE_COMPARE(found.flags(), StringViewFlags{});
+        CORRADE_COMPARE(found.flags(), StringViewFlag::Global|StringViewFlag::NullTerminated);
 
     /* Same for chars */
     } {
         StringView found = a.find('f');
         CORRADE_COMPARE(found.data(), static_cast<const void*>(found.end()));
-        CORRADE_COMPARE(found.flags(), StringViewFlag{});
+        CORRADE_COMPARE(found.flags(), StringViewFlag::Global|StringViewFlag::NullTerminated);
 
     /* Empty view should be global & null-terminated */
     } {
@@ -2659,13 +2658,12 @@ void StringViewTest::findFlags() {
         CORRADE_COMPARE(found.data(), static_cast<const void*>(empty.data()));
         CORRADE_COMPARE(found.flags(), StringViewFlag::Global|StringViewFlag::NullTerminated);
 
-    /* Null view should be no flags, as the failed view isn't meant to be used
-       for anything anyway */
+    /* Null view should be just global */
     } {
         StringView null = nullptr;
         StringView found = null.find("");
         CORRADE_COMPARE(found.data(), static_cast<const void*>(nullptr));
-        CORRADE_COMPARE(found.flags(), StringViewFlags{});
+        CORRADE_COMPARE(found.flags(), StringViewFlag::Global);
     }
 }
 
@@ -2934,18 +2932,17 @@ void StringViewTest::findLastFlags() {
         CORRADE_COMPARE(found, "d");
         CORRADE_COMPARE(found.flags(), StringViewFlag::Global|StringViewFlag::NullTerminated);
 
-    /* Not found should be no flags, as the failed view isn't meant to be used
-       for anything except the begin/end pointers anyway */
+    /* Not found should preserve flags from the begin */
     } {
         StringView found = a.findLast("world!");
         CORRADE_COMPARE(found.data(), static_cast<const void*>(a.begin()));
-        CORRADE_COMPARE(found.flags(), StringViewFlags{});
+        CORRADE_COMPARE(found.flags(), StringViewFlag::Global);
 
     /* Same for chars */
     } {
         StringView found = a.findLast('f');
         CORRADE_COMPARE(found.data(), static_cast<const void*>(a.begin()));
-        CORRADE_COMPARE(found.flags(), StringViewFlags{});
+        CORRADE_COMPARE(found.flags(), StringViewFlag::Global);
 
     /* Empty view should be global & null-terminated */
     } {
@@ -2954,13 +2951,12 @@ void StringViewTest::findLastFlags() {
         CORRADE_COMPARE(found.data(), static_cast<const void*>(empty.data()));
         CORRADE_COMPARE(found.flags(), StringViewFlag::Global|StringViewFlag::NullTerminated);
 
-    /* Null view should be no flags, as the failed view isn't meant to be used
-       for anything anyway */
+    /* Null view should be just global */
     } {
         StringView null = nullptr;
         StringView found = null.findLast("");
         CORRADE_COMPARE(found.data(), static_cast<const void*>(nullptr));
-        CORRADE_COMPARE(found.flags(), StringViewFlags{});
+        CORRADE_COMPARE(found.flags(), StringViewFlag::Global);
     }
 }
 
@@ -3141,12 +3137,25 @@ void StringViewTest::findAnyFlags() {
         CORRADE_COMPARE(found, "o");
         CORRADE_COMPARE(found.flags(), StringViewFlag::Global|StringViewFlag::NullTerminated);
 
-    /* Not found should be no flags, as the failed view isn't meant to be used
-       for anything except the begin/end pointers anyway */
+    /* Not found should preserve flags from the end */
     } {
         StringView found = a.findAny("pub");
         CORRADE_COMPARE(found.data(), static_cast<const void*>(a.end()));
-        CORRADE_COMPARE(found.flags(), StringViewFlags{});
+        CORRADE_COMPARE(found.flags(), StringViewFlag::Global|StringViewFlag::NullTerminated);
+
+    /* Empty view should be global & null-terminated */
+    } {
+        StringView empty = ""_s;
+        StringView found = empty.findAny("hey");
+        CORRADE_COMPARE(found.data(), static_cast<const void*>(empty.data()));
+        CORRADE_COMPARE(found.flags(), StringViewFlag::Global|StringViewFlag::NullTerminated);
+
+    /* Null view should be just global */
+    } {
+        StringView null = nullptr;
+        StringView found = null.findAny("hey");
+        CORRADE_COMPARE(found.data(), static_cast<const void*>(nullptr));
+        CORRADE_COMPARE(found.flags(), StringViewFlag::Global);
     }
 }
 
@@ -3291,12 +3300,25 @@ void StringViewTest::findLastAnyFlags() {
         CORRADE_COMPARE(found, "o");
         CORRADE_COMPARE(found.flags(), StringViewFlag::Global|StringViewFlag::NullTerminated);
 
-    /* Not found should be no flags, as the failed view isn't meant to be used
-       for anything except the begin/end pointers anyway */
+    /* Not found should preserve flags from the begin */
     } {
         StringView found = a.findLastAny("pub");
         CORRADE_COMPARE(found.data(), static_cast<const void*>(a.begin()));
-        CORRADE_COMPARE(found.flags(), StringViewFlags{});
+        CORRADE_COMPARE(found.flags(), StringViewFlag::Global);
+
+    /* Empty view should be global & null-terminated */
+    } {
+        StringView empty = ""_s;
+        StringView found = empty.findLastAny("hey");
+        CORRADE_COMPARE(found.data(), static_cast<const void*>(empty.data()));
+        CORRADE_COMPARE(found.flags(), StringViewFlag::Global|StringViewFlag::NullTerminated);
+
+    /* Null view should be just global */
+    } {
+        StringView null = nullptr;
+        StringView found = null.findLastAny("hey");
+        CORRADE_COMPARE(found.data(), static_cast<const void*>(nullptr));
+        CORRADE_COMPARE(found.flags(), StringViewFlag::Global);
     }
 }
 
