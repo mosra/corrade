@@ -1183,6 +1183,9 @@ BasicStringView {
          * using @ref find(char) const instead for single-byte substrings, see
          * also @ref count(char) const for counting the number of occurences.
          *
+         * If @p substring is empty, the function returns a zero-sized view
+         * pointing to @ref begin().
+         *
          * This function is equivalent to calling @relativeref{std::string,find()}
          * on a @ref std::string or a @ref std::string_view.
          * @see @ref contains(), @ref findLast(), @ref findAny()
@@ -1203,8 +1206,9 @@ BasicStringView {
         /**
          * @brief Find a substring with a custom failure pointer
          *
-         * Like @ref find(StringView) const, but returns an empty view pointing
-         * to the @p fail value instead of @ref end(). Consider using
+         * Like @ref find(StringView) const, but on failure returns an empty
+         * view pointing to the @p fail value instead of @ref end(). Consider
+         * using
          * @ref findOr(char, T*) const for single-byte substrings.
          * @m_deprecated_since_latest Use @ref find(StringView) const instead.
          *      If you need to use a different failure value than @ref end(),
@@ -1258,6 +1262,9 @@ BasicStringView {
          * alternatives. Consider using @ref findLast(char) const instead for
          * single-byte substrings.
          *
+         * If @p substring is empty, the function returns a zero-sized view
+         * pointing to @ref end().
+         *
          * This function is equivalent to calling @relativeref{std::string,rfind()}
          * on a @ref std::string or a @ref std::string_view.
          * @m_keywords{rfind()}
@@ -1278,9 +1285,10 @@ BasicStringView {
         /**
          * @brief Find the last occurence a substring with a custom failure pointer
          *
-         * Like @ref findLast(StringView) const, but returns an empty view
-         * pointing to the @p fail value instead of @ref begin(). Consider
-         * using @ref findLastOr(char, T*) const for single-byte substrings.
+         * Like @ref findLast(StringView) const, but on failure returns an
+         * empty view pointing to the @p fail value instead of @ref begin().
+         * Consider using @ref findLastOr(char, T*) const for single-byte
+         * substrings.
          * @m_deprecated_since_latest Use @ref findLast(StringView) const
          *      instead. If you need to use a different failure value than
          *      @ref begin(), which should be rare, do it using a branch, for
@@ -1320,9 +1328,10 @@ BasicStringView {
          * @brief Whether the view contains a substring
          *
          * A slightly lighter variant of @ref find() useful when you only want
-         * to know if a substring was found or not. Consider using
-         * @ref contains(char) const for single-byte substrings, see also
-         * @ref count(char) const for counting the number of occurences.
+         * to know if a substring was found or not, not its concrete position.
+         * Consider using @ref contains(char) const for single-byte substrings,
+         * see also @ref count(char) const for counting the number of
+         * occurences.
          * @see @ref containsAny()
          */
         bool contains(StringView substring) const;
@@ -1347,6 +1356,9 @@ BasicStringView {
          * @ref StringViewFlags. See @ref Containers-BasicStringView-usage-find
          * for an introduction to the API.
          *
+         * If @p characters are empty, the function returns a zero-sized view
+         * pointing to @ref end().
+         *
          * This function is equivalent to calling @relativeref{std::string,find_first_of()}
          * on a @ref std::string or a @ref std::string_view.
          * @m_keywords{find_first_of()}
@@ -1358,8 +1370,8 @@ BasicStringView {
         /**
          * @brief Find any character from given set with a custom failure pointer
          *
-         * Like @ref findAny(StringView) const, but returns an empty view
-         * pointing to the @p fail value instead of @ref end().
+         * Like @ref findAny(StringView) const, but on failure returns an
+         * empty view pointing to the @p fail value instead of @ref end().
          * @m_deprecated_since_latest Use @ref findAny(StringView) const
          *      instead. If you need to use a different failure value than
          *      @ref end(), which should be rare, do it using a branch, for
@@ -1388,6 +1400,9 @@ BasicStringView {
          * @ref StringViewFlags. See @ref Containers-BasicStringView-usage-find
          * for an introduction to the API.
          *
+         * If @p characters are empty, the function returns an empty view
+         * pointing to @ref begin().
+         *
          * This function is equivalent to calling @relativeref{std::string,find_last_of()}
          * on a @ref std::string or a @ref std::string_view.
          * @m_keywords{find_last_of()}
@@ -1399,8 +1414,8 @@ BasicStringView {
         /**
          * @brief Find the last occurence of any character from given set with a custom failure pointer
          *
-         * Like @ref findLastAny(StringView) const, but returns an empty view
-         * pointing to the @p fail value instead of @ref begin(),
+         * Like @ref findLastAny(StringView) const, but on failure returns an
+         * empty view pointing to the @p fail value instead of @ref begin(),
          * @m_deprecated_since_latest Use @ref findLastAny(StringView) const
          *      instead. If you need to use a different failure value than
          *      @ref begin(), which should be rare, do it using a branch, for
@@ -1421,10 +1436,11 @@ BasicStringView {
          * @brief Whether the view contains any character from given set
          *
          * A slightly lighter variant of @ref findAny() useful when you only
-         * want to know if a character was found or not.
+         * want to know if the characters are present in a string, not their
+         * concrete position.
          * @see @ref contains()
          */
-        bool containsAny(StringView substring) const;
+        bool containsAny(StringView characters) const;
 
         /**
          * @brief Count of occurences of given character

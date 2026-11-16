@@ -2880,7 +2880,8 @@ template<class T> void StringTest::findAny() {
     /* These rely on StringView conversion and then delegate there so we don't
        need to verify SSO behavior, only the basics and flag propagation */
 
-    /* Duplicated characters to test that it's not delegated to findAnyOr() */
+    /* Duplicated characters to test that it's not delegated to
+       findLastAny() */
     T a{"hello world"};
     {
         CORRADE_VERIFY(a.containsAny("eh!"));
@@ -2947,8 +2948,7 @@ template<class T> void StringTest::findLastAny() {
     /* These rely on StringView conversion and then delegate there so we don't
        need to verify SSO behavior, only the basics and flag propagation */
 
-    /* Duplicated characters to test that it's not delegated to
-       findLastAnyOr() */
+    /* Duplicated characters to test that it's not delegated to findAny() */
     T a{"hello world"};
     {
         typename ConstTraits<T>::ViewType found = a.findLastAny("uhu");
