@@ -242,11 +242,11 @@ In addition to a general substring lookup, there are @ref find(char) const and
 @ref findLast(char) const overloads that perform much faster if you need to
 look up just a single byte (as was the case with @cpp '/' @ce above).
 Conversely, @ref findAny() and @ref findLastAny() look for any character out of
-given set. Finally, @ref contains() / @ref containsAny() is a more optimal API
-if only presence of a substring or characters, not a position, is needed, and
-@ref count() returns number of occurences.
-
-@todoc ref also the findNotAny() and findLastNotAny() variants once they exist
+given set; @ref findNotAny() and @ref findLastNotAny() then look for any
+character except for given set. Finally, @ref contains() / @ref containsAny() /
+@ref containsNotAny() is a more optimal API if only presence of a substring or
+characters, not a position, is needed, and @ref count() returns number of
+occurences.
 
 @subsection Containers-BasicStringView-usage-c-string-conversion Converting StringView instances to null-terminated C strings
 
@@ -1187,7 +1187,8 @@ BasicStringView {
          *
          * This function is equivalent to calling @relativeref{std::string,find()}
          * on a @ref std::string or a @ref std::string_view.
-         * @see @ref contains(), @ref findLast(), @ref findAny()
+         * @see @ref contains(), @ref findLast(), @ref findAny(),
+         *      @ref findNotAny()
          */
         BasicStringView<T> find(StringView substring) const;
 
@@ -1266,7 +1267,7 @@ BasicStringView {
          * This function is equivalent to calling @relativeref{std::string,rfind()}
          * on a @ref std::string or a @ref std::string_view.
          * @m_keywords{rfind()}
-         * @see @ref findLastAny()
+         * @see @ref findLastAny(), @ref findLastNotAny()
          */
         BasicStringView<T> findLast(StringView substring) const;
 
@@ -1330,7 +1331,7 @@ BasicStringView {
          * Consider using @ref contains(char) const for single-byte substrings,
          * see also @ref count(char) const for counting the number of
          * occurences.
-         * @see @ref containsAny()
+         * @see @ref containsAny(), @ref containsNotAny()
          */
         bool contains(StringView substring) const;
 
@@ -1359,7 +1360,8 @@ BasicStringView {
          * This function is equivalent to calling @relativeref{std::string,find_first_of()}
          * on a @ref std::string or a @ref std::string_view.
          * @m_keywords{find_first_of()}
-         * @see @ref containsAny(), @ref findLastAny(), @ref find()
+         * @see @ref containsAny(), @ref findNotAny(), @ref findLastAny(),
+         *      @ref find()
          */
         BasicStringView<T> findAny(StringView characters) const;
 
@@ -1386,6 +1388,27 @@ BasicStringView {
         #endif
 
         /**
+         * @brief Find any character not from given set
+         *
+         * Returns a view pointing to the first found character that isn't from
+         * the set. If the string contains only characters from @p characters,
+         * an empty view pointing to @ref end() is returned. The function uses
+         * @ref slice() internally, meaning it propagates the @ref flags() as
+         * appropriate. See @ref Containers-BasicStringView-usage-find for an
+         * introduction to the API.
+         *
+         * If @p characters are empty, the function returns a view onto the
+         * first byte, if there's any.
+         *
+         * This function is equivalent to calling @relativeref{std::string,find_first_not_of()}
+         * on a @ref std::string or a @ref std::string_view.
+         * @m_keywords{find_first_not_of()}
+         * @see @ref containsNotAny(), @ref findAny(), @ref findLastNotAny(),
+         *      @ref find()
+         */
+        BasicStringView<T> findNotAny(StringView characters) const;
+
+        /**
          * @brief Find the last occurence of any character from given set
          *
          * Returns a view pointing to the last found character from the set.
@@ -1402,7 +1425,7 @@ BasicStringView {
          * This function is equivalent to calling @relativeref{std::string,find_last_of()}
          * on a @ref std::string or a @ref std::string_view.
          * @m_keywords{find_last_of()}
-         * @see @ref findLast()
+         * @see @ref findLastNotAny(), @ref findLast()
          */
         BasicStringView<T> findLastAny(StringView characters) const;
 
@@ -1429,14 +1452,45 @@ BasicStringView {
         #endif
 
         /**
+         * @brief Find the last occurence of any character not from given set
+         *
+         * Returns a view pointing to the last found character that isn't from
+         * the set. If the string contains only characters from @p characters,
+         * an empty view pointing to @ref begin() is returned (i.e., opposite
+         * from what @ref findNotAny() returns on failure). The function uses
+         * @ref slice() internally, meaning it propagates the @ref flags() as
+         * appropriate. See @ref Containers-BasicStringView-usage-find for an
+         * introduction to the API.
+         *
+         * If @p characters are empty, the function returns a view onto the
+         * last byte, if there's any.
+         *
+         * This function is equivalent to calling @relativeref{std::string,find_last_not_of()}
+         * on a @ref std::string or a @ref std::string_view.
+         * @m_keywords{find_last_not_of()}
+         * @see @ref findLastAny(), @ref findNotAny(), @ref findLast()
+         */
+        BasicStringView<T> findLastNotAny(StringView characters) const;
+
+        /**
          * @brief Whether the view contains any character from given set
          *
          * A slightly lighter variant of @ref findAny() useful when you only
          * want to know if the characters are present in a string, not their
          * concrete position.
-         * @see @ref contains()
+         * @see @ref contains(), @ref containsNotAny()
          */
         bool containsAny(StringView characters) const;
+
+        /**
+         * @brief Whether the view doesn't contain any character from given set
+         *
+         * A slightly lighter variant of @ref findNotAny() useful when you only
+         * want to know if the characters are present in a string, not their
+         * concrete position.
+         * @see @ref containsAny(), @ref contains()
+         */
+        bool containsNotAny(StringView characters) const;
 
         /**
          * @brief Count of occurences of given character
@@ -1755,6 +1809,16 @@ template<class T> inline BasicStringView<T> BasicStringView<T>::findAny(const St
     return slice(_data + size, _data + size);
 }
 
+template<class T> inline BasicStringView<T> BasicStringView<T>::findNotAny(const StringView characters) const {
+    /* Cache the getters to speed up debug builds */
+    const std::size_t size = this->size();
+    if(const char* const found = Implementation::stringFindNotAny(_data, size, characters._data, characters.size()))
+        return slice(const_cast<T*>(found), const_cast<T*>(found + 1));
+
+    /* Use slice() also in case of a failure to preserve flags */
+    return slice(_data + size, _data + size);
+}
+
 template<class T> inline BasicStringView<T> BasicStringView<T>::findLastAny(const StringView characters) const {
     if(const char* const found = Implementation::stringFindLastAny(_data, size(), characters._data, characters.size()))
         return slice(const_cast<T*>(found), const_cast<T*>(found + 1));
@@ -1763,8 +1827,20 @@ template<class T> inline BasicStringView<T> BasicStringView<T>::findLastAny(cons
     return slice(_data, _data);
 }
 
+template<class T> inline BasicStringView<T> BasicStringView<T>::findLastNotAny(const StringView characters) const {
+    if(const char* const found = Implementation::stringFindLastNotAny(_data, size(), characters._data, characters.size()))
+        return slice(const_cast<T*>(found), const_cast<T*>(found + 1));
+
+    /* Use slice() also in case of a failure to preserve flags */
+    return slice(_data, _data);
+}
+
 template<class T> inline bool BasicStringView<T>::containsAny(const StringView characters) const {
     return Implementation::stringFindAny(_data, size(), characters._data, characters.size());
+}
+
+template<class T> inline bool BasicStringView<T>::containsNotAny(const StringView characters) const {
+    return Implementation::stringFindNotAny(_data, size(), characters._data, characters.size());
 }
 
 template<class T> inline std::size_t BasicStringView<T>::count(const char character) const {

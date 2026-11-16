@@ -954,6 +954,14 @@ StringView String::findAnyOr(const StringView characters, const char* fail) cons
 }
 #endif
 
+MutableStringView String::findNotAny(const StringView characters) {
+    return MutableStringView{*this}.findNotAny(characters);
+}
+
+StringView String::findNotAny(const StringView characters) const {
+    return StringView{*this}.findNotAny(characters);
+}
+
 MutableStringView String::findLastAny(const StringView characters) {
     return MutableStringView{*this}.findLastAny(characters);
 }
@@ -976,8 +984,20 @@ StringView String::findLastAnyOr(const StringView characters, const char* fail) 
 }
 #endif
 
+MutableStringView String::findLastNotAny(const StringView characters) {
+    return MutableStringView{*this}.findLastNotAny(characters);
+}
+
+StringView String::findLastNotAny(const StringView characters) const {
+    return StringView{*this}.findLastNotAny(characters);
+}
+
 bool String::containsAny(const StringView substring) const {
     return StringView{*this}.containsAny(substring);
+}
+
+bool String::containsNotAny(const StringView substring) const {
+    return StringView{*this}.containsNotAny(substring);
 }
 
 std::size_t String::count(const char character) const {

@@ -234,6 +234,10 @@ struct StringTest: TestSuite::Tester {
     template<class T> void findLastAnyOr();
     #endif
 
+    /* Tests also containsNotAny() */
+    template<class T> void findNotAny();
+    template<class T> void findLastNotAny();
+
     void count();
 
     void release();
@@ -426,6 +430,11 @@ StringTest::StringTest() {
               &StringTest::findLastAnyOr<String>,
               &StringTest::findLastAnyOr<const String>,
               #endif
+
+              &StringTest::findNotAny<String>,
+              &StringTest::findNotAny<const String>,
+              &StringTest::findLastNotAny<String>,
+              &StringTest::findLastNotAny<const String>,
 
               &StringTest::count,
 
@@ -2999,6 +3008,67 @@ template<class T> void StringTest::findLastAnyOr() {
     }
 }
 #endif
+
+template<class T> void StringTest::findNotAny() {
+    setTestCaseTemplateName(ConstTraits<T>::name());
+
+    /* These rely on StringView conversion and then delegate there so we don't
+       need to verify SSO behavior, only the basics and flag propagation */
+
+    /* Duplicated characters to test that it's not delegated to
+       findLastAny() */
+    T a{"hello world"};
+    {
+        CORRADE_VERIFY(a.containsNotAny("lowe!"));
+
+        typename ConstTraits<T>::ViewType found = a.findNotAny("lowe!");
+        CORRADE_COMPARE(found, "h"_s);
+        CORRADE_COMPARE(found.data(), static_cast<const void*>(a.data()));
+        CORRADE_COMPARE(found.flags(), StringViewFlags{});
+    } {
+        CORRADE_VERIFY(a.containsNotAny("wohl er"));
+
+        typename ConstTraits<T>::ViewType found = a.findNotAny("wohl er");
+        CORRADE_COMPARE(found, "d"_s);
+        CORRADE_COMPARE(found.data(), static_cast<const void*>(a.data() + 10));
+        CORRADE_COMPARE(found.flags(), StringViewFlag::NullTerminated);
+    } {
+        CORRADE_VERIFY(!a.containsNotAny("woh lerd"));
+
+        typename ConstTraits<T>::ViewType found = a.findNotAny("woh lerd");
+        CORRADE_VERIFY(found.isEmpty());
+        CORRADE_COMPARE(found.data(), static_cast<const void*>(a.end()));
+    }
+}
+
+template<class T> void StringTest::findLastNotAny() {
+    /* Mostly the same as findNotAny(), except that we don't test
+       containsNotAny() which is implemented with the same algorithm as
+       findNotAny() */
+
+    setTestCaseTemplateName(ConstTraits<T>::name());
+
+    /* These rely on StringView conversion and then delegate there so we don't
+       need to verify SSO behavior, only the basics and flag propagation */
+
+    /* Duplicated characters to test that it's not delegated to findAny() */
+    T a{"hello world"};
+    {
+        typename ConstTraits<T>::ViewType found = a.findLastNotAny("wo dler");
+        CORRADE_COMPARE(found, "h"_s);
+        CORRADE_COMPARE(found.data(), static_cast<const void*>(a.data()));
+        CORRADE_COMPARE(found.flags(), StringViewFlags{});
+    } {
+        typename ConstTraits<T>::ViewType found = a.findLastNotAny("lowe!");
+        CORRADE_COMPARE(found, "d"_s);
+        CORRADE_COMPARE(found.data(), static_cast<const void*>(a.data() + 10));
+        CORRADE_COMPARE(found.flags(), StringViewFlag::NullTerminated);
+    } {
+        typename ConstTraits<T>::ViewType found = a.findLastNotAny("woh lerd");
+        CORRADE_VERIFY(found.isEmpty());
+        CORRADE_COMPARE(found.data(), static_cast<const void*>(a.begin()));
+    }
+}
 
 void StringTest::count() {
     /* It relies on StringView conversion and then delegates there so we don't
