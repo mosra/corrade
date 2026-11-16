@@ -1258,58 +1258,23 @@ template<class T> Array<BasicStringView<T>> BasicStringView<T>::splitWithoutEmpt
 #endif
 
 template<class T> Array3<BasicStringView<T>> BasicStringView<T>::partition(const char separator) const {
-    /** @todo use findOr(char) for this, this has an awful lot of branches */
-
-    const std::size_t size = this->size();
-    T* const pos = const_cast<T*>(Implementation::stringFindCharacter(_data, size, separator));
-    return {
-        pos ? prefix(pos) : *this,
-        pos ? slice(pos, pos + 1) : exceptPrefix(size),
-        pos ? suffix(pos + 1) : exceptPrefix(size)
-    };
+    const BasicStringView<T> found = find(separator);
+    return {prefix(found.begin()), found, suffix(found.end())};
 }
 
 template<class T> Array3<BasicStringView<T>> BasicStringView<T>::partition(const StringView separator) const {
-    /** @todo use findOr(StringView) for this, this has an awful lot of
-        branches */
-
-    const char* const separatorData = separator.data();
-    const std::size_t separatorSize = separator.size();
-    const std::size_t size = this->size();
-    T* const pos = const_cast<T*>(Implementation::stringFindString(_data, size, separatorData, separatorSize));
-    return {
-        pos ? prefix(pos) : *this,
-        pos ? slice(pos, pos + separatorSize) : exceptPrefix(size),
-        pos ? suffix(pos + separatorSize) : exceptPrefix(size)
-    };
+    const BasicStringView<T> found = find(separator);
+    return {prefix(found.begin()), found, suffix(found.end())};
 }
 
 template<class T> Array3<BasicStringView<T>> BasicStringView<T>::partitionLast(const char separator) const {
-    /** @todo use findLastOr(char) for this, this has an awful lot of
-        branches */
-
-    const std::size_t size = this->size();
-    T* const pos = const_cast<T*>(Implementation::stringFindLastCharacter(_data, size, separator));
-    return {
-        pos ? prefix(pos) : prefix(0),
-        pos ? slice(pos, pos + 1) : prefix(0),
-        pos ? suffix(pos + 1) : *this
-    };
+    const BasicStringView<T> found = findLast(separator);
+    return {prefix(found.begin()), found, suffix(found.end())};
 }
 
 template<class T> Array3<BasicStringView<T>> BasicStringView<T>::partitionLast(const StringView separator) const {
-    /** @todo use findLastOr(StringView) for this, this has an awful lot of
-        branches */
-
-    const char* const separatorData = separator.data();
-    const std::size_t separatorSize = separator.size();
-    const std::size_t size = this->size();
-    T* const pos = const_cast<T*>(Implementation::stringFindLastString(_data, size, separatorData, separatorSize));
-    return {
-        pos ? prefix(pos) : prefix(0),
-        pos ? slice(pos, pos + separatorSize) : prefix(0),
-        pos ? suffix(pos + separatorSize) : *this
-    };
+    const BasicStringView<T> found = findLast(separator);
+    return {prefix(found.begin()), found, suffix(found.end())};
 }
 
 /* On Windows (MSVC, clang-cl and MinGw) it needs an explicit export otherwise
