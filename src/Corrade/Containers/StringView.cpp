@@ -110,7 +110,7 @@ template<class T> Array<BasicStringView<T>> BasicStringView<T>::split(const char
     T* const end = this->end();
     T* oldpos = _data;
     T* pos;
-    while(oldpos < end && (pos = static_cast<T*>(std::memchr(oldpos, delimiter, end - oldpos)))) {
+    while(oldpos < end && (pos = const_cast<T*>(Implementation::stringFindCharacter(oldpos, end - oldpos, delimiter)))) {
         arrayAppend(parts, slice(oldpos, pos));
         oldpos = pos + 1;
     }
@@ -126,9 +126,7 @@ template<class T> Array<BasicStringView<T>> BasicStringView<T>::splitWithoutEmpt
     T* const end = this->end();
     T* oldpos = _data;
     while(oldpos < end) {
-        T* pos = static_cast<T*>(std::memchr(oldpos, delimiter, end - oldpos));
-        /* Not sure why memchr can't just do this, it would make much more
-           sense */
+        T* pos = const_cast<T*>(Implementation::stringFindCharacter(oldpos, end - oldpos, delimiter));
         if(!pos)
             pos = end;
 
@@ -1263,7 +1261,7 @@ template<class T> Array3<BasicStringView<T>> BasicStringView<T>::partition(const
     /** @todo use findOr(char) for this, this has an awful lot of branches */
 
     const std::size_t size = this->size();
-    T* const pos = static_cast<T*>(std::memchr(_data, separator, size));
+    T* const pos = const_cast<T*>(Implementation::stringFindCharacter(_data, size, separator));
     return {
         pos ? prefix(pos) : *this,
         pos ? slice(pos, pos + 1) : exceptPrefix(size),
