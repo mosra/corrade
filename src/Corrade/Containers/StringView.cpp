@@ -1291,8 +1291,8 @@ template<class T> Array3<BasicStringView<T>> BasicStringView<T>::partitionLast(c
     const std::size_t size = this->size();
     T* const pos = const_cast<T*>(Implementation::stringFindLastCharacter(_data, size, separator));
     return {
-        pos ? prefix(pos) : exceptPrefix(size),
-        pos ? slice(pos, pos + 1) : exceptPrefix(size),
+        pos ? prefix(pos) : prefix(0),
+        pos ? slice(pos, pos + 1) : prefix(0),
         pos ? suffix(pos + 1) : *this
     };
 }
@@ -1306,8 +1306,8 @@ template<class T> Array3<BasicStringView<T>> BasicStringView<T>::partitionLast(c
     const std::size_t size = this->size();
     T* const pos = const_cast<T*>(Implementation::stringFindLastString(_data, size, separatorData, separatorSize));
     return {
-        pos ? prefix(pos) : exceptPrefix(size),
-        pos ? slice(pos, pos + separatorSize) : exceptPrefix(size),
+        pos ? prefix(pos) : prefix(0),
+        pos ? slice(pos, pos + separatorSize) : prefix(0),
         pos ? suffix(pos + separatorSize) : *this
     };
 }
