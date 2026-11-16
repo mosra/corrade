@@ -173,8 +173,6 @@ struct StringViewTest: TestSuite::Tester {
     void partitionString();
     void partitionFlagsCharacter();
     void partitionFlagsString();
-    void partitionNullViewCharacter();
-    void partitionNullViewString();
 
     /* join() tested in StringTest */
 
@@ -411,8 +409,6 @@ StringViewTest::StringViewTest() {
               &StringViewTest::partitionString,
               &StringViewTest::partitionFlagsCharacter,
               &StringViewTest::partitionFlagsString,
-              &StringViewTest::partitionNullViewCharacter,
-              &StringViewTest::partitionNullViewString,
 
               &StringViewTest::hasPrefix,
               &StringViewTest::hasPrefixEmpty,
@@ -1732,14 +1728,18 @@ void StringViewTest::partitionFlagsCharacter() {
         CORRADE_COMPARE(a1[2].flags(), StringViewFlag::Global|StringViewFlag::NullTerminated);
         CORRADE_COMPARE(a2[2].flags(), StringViewFlag::Global|StringViewFlag::NullTerminated);
 
-    /* Found at the end -- last two null-terminated */
+    /* Found at the end -- last two null-terminated, the empty view points to
+       the end */
     } {
-        Array3<StringView> a1 = "ab="_s.partition('=');
-        Array3<StringView> a2 = "ab="_s.partitionLast('=');
+        StringView a = "ab="_s;
+        Array3<StringView> a1 = a.partition('=');
+        Array3<StringView> a2 = a.partitionLast('=');
         CORRADE_COMPARE_AS(a1, (Array3<StringView>{"ab", "=", ""}),
             TestSuite::Compare::Container);
         CORRADE_COMPARE_AS(a2, (Array3<StringView>{"ab", "=", ""}),
             TestSuite::Compare::Container);
+        CORRADE_COMPARE(a1[2].data(), static_cast<const void*>(a.data() + 3));
+        CORRADE_COMPARE(a2[2].data(), static_cast<const void*>(a.data() + 3));
         CORRADE_COMPARE(a1[0].flags(), StringViewFlag::Global);
         CORRADE_COMPARE(a2[0].flags(), StringViewFlag::Global);
         CORRADE_COMPARE(a1[1].flags(), StringViewFlag::Global|StringViewFlag::NullTerminated);
@@ -1747,35 +1747,45 @@ void StringViewTest::partitionFlagsCharacter() {
         CORRADE_COMPARE(a1[2].flags(), StringViewFlag::Global|StringViewFlag::NullTerminated);
         CORRADE_COMPARE(a2[2].flags(), StringViewFlag::Global|StringViewFlag::NullTerminated);
 
-    /* Not found -- all three null-terminated */
+    /* Not found -- all three null-terminated in the forward case, only the
+       last null-terminated in the backward case. The empty views point to
+       either the begin or end, which dictates the null termination. */
     } {
-        Array3<StringView> a1 = "ab"_s.partition('=');
-        Array3<StringView> a2 = "ab"_s.partitionLast('=');
+        StringView a = "ab"_s;
+        Array3<StringView> a1 = a.partition('=');
+        Array3<StringView> a2 = a.partitionLast('=');
         CORRADE_COMPARE_AS(a1, (Array3<StringView>{"ab", "", ""}),
             TestSuite::Compare::Container);
         CORRADE_COMPARE_AS(a2, (Array3<StringView>{"", "", "ab"}),
             TestSuite::Compare::Container);
+        CORRADE_COMPARE(a1[1].data(), static_cast<const void*>(a.data() + 2));
+        CORRADE_COMPARE(a1[2].data(), static_cast<const void*>(a.data() + 2));
+        CORRADE_COMPARE(a2[0].data(), static_cast<const void*>(a.data()));
+        CORRADE_COMPARE(a2[1].data(), static_cast<const void*>(a.data()));
         CORRADE_COMPARE(a1[0].flags(), StringViewFlag::Global|StringViewFlag::NullTerminated);
-        CORRADE_COMPARE(a2[0].flags(), StringViewFlag::Global|StringViewFlag::NullTerminated);
+        CORRADE_COMPARE(a2[0].flags(), StringViewFlag::Global);
         CORRADE_COMPARE(a1[1].flags(), StringViewFlag::Global|StringViewFlag::NullTerminated);
-        CORRADE_COMPARE(a2[1].flags(), StringViewFlag::Global|StringViewFlag::NullTerminated);
+        CORRADE_COMPARE(a2[1].flags(), StringViewFlag::Global);
         CORRADE_COMPARE(a1[2].flags(), StringViewFlag::Global|StringViewFlag::NullTerminated);
         CORRADE_COMPARE(a2[2].flags(), StringViewFlag::Global|StringViewFlag::NullTerminated);
 
-    /* Empty -- all three null-terminated as well */
+    /* Empty -- all three null-terminated in both cases, with the views
+       pointing to the begin */
     } {
-        Array3<StringView> a1 = ""_s.partition('=');
-        Array3<StringView> a2 = ""_s.partitionLast('=');
+        StringView a = ""_s;
+        Array3<StringView> a1 = a.partition('=');
+        Array3<StringView> a2 = a.partitionLast('=');
         CORRADE_COMPARE_AS(a1, (Array3<StringView>{"", "", ""}),
             TestSuite::Compare::Container);
         CORRADE_COMPARE_AS(a2, (Array3<StringView>{"", "", ""}),
             TestSuite::Compare::Container);
-        CORRADE_COMPARE(a1[0].flags(), StringViewFlag::Global|StringViewFlag::NullTerminated);
-        CORRADE_COMPARE(a2[0].flags(), StringViewFlag::Global|StringViewFlag::NullTerminated);
-        CORRADE_COMPARE(a1[1].flags(), StringViewFlag::Global|StringViewFlag::NullTerminated);
-        CORRADE_COMPARE(a2[1].flags(), StringViewFlag::Global|StringViewFlag::NullTerminated);
-        CORRADE_COMPARE(a1[2].flags(), StringViewFlag::Global|StringViewFlag::NullTerminated);
-        CORRADE_COMPARE(a2[2].flags(), StringViewFlag::Global|StringViewFlag::NullTerminated);
+        for(std::size_t i = 0; i != 3; ++i) {
+            CORRADE_ITERATION(i);
+            CORRADE_COMPARE(a1[i].data(), static_cast<const void*>(a.data()));
+            CORRADE_COMPARE(a2[i].data(), static_cast<const void*>(a.data()));
+            CORRADE_COMPARE(a1[i].flags(), StringViewFlag::Global|StringViewFlag::NullTerminated);
+            CORRADE_COMPARE(a2[i].flags(), StringViewFlag::Global|StringViewFlag::NullTerminated);
+        }
 
     /* Null pointer -- all are null as well and thus inherit the Global flag */
     } {
@@ -1785,12 +1795,13 @@ void StringViewTest::partitionFlagsCharacter() {
             TestSuite::Compare::Container);
         CORRADE_COMPARE_AS(a2, (Array3<StringView>{"", "", ""}),
             TestSuite::Compare::Container);
-        CORRADE_COMPARE(a1[0].flags(), StringViewFlag::Global);
-        CORRADE_COMPARE(a2[0].flags(), StringViewFlag::Global);
-        CORRADE_COMPARE(a1[1].flags(), StringViewFlag::Global);
-        CORRADE_COMPARE(a2[1].flags(), StringViewFlag::Global);
-        CORRADE_COMPARE(a1[2].flags(), StringViewFlag::Global);
-        CORRADE_COMPARE(a2[2].flags(), StringViewFlag::Global);
+        for(std::size_t i = 0; i != 3; ++i) {
+            CORRADE_ITERATION(i);
+            CORRADE_COMPARE(a1[i].data(), static_cast<const void*>(nullptr));
+            CORRADE_COMPARE(a2[i].data(), static_cast<const void*>(nullptr));
+            CORRADE_COMPARE(a1[i].flags(), StringViewFlag::Global);
+            CORRADE_COMPARE(a2[i].flags(), StringViewFlag::Global);
+        }
     }
 }
 
@@ -1828,35 +1839,68 @@ void StringViewTest::partitionFlagsString() {
         CORRADE_COMPARE(a1[2].flags(), StringViewFlag::Global|StringViewFlag::NullTerminated);
         CORRADE_COMPARE(a2[2].flags(), StringViewFlag::Global|StringViewFlag::NullTerminated);
 
-    /* Not found -- all three null-terminated */
+    /* Not found -- all three null-terminated in the forward case, only the
+       last null-terminated in the backward case. The empty views point to
+       either the begin or end, which dictates the null termination. */
     } {
-        Array3<StringView> a1 = "ab"_s.partition("::");
-        Array3<StringView> a2 = "ab"_s.partitionLast("::");
+        StringView a = "ab"_s;
+        Array3<StringView> a1 = a.partition("::");
+        Array3<StringView> a2 = a.partitionLast("::");
         CORRADE_COMPARE_AS(a1, (Array3<StringView>{"ab", "", ""}),
             TestSuite::Compare::Container);
         CORRADE_COMPARE_AS(a2, (Array3<StringView>{"", "", "ab"}),
             TestSuite::Compare::Container);
+        CORRADE_COMPARE(a1[1].data(), static_cast<const void*>(a.data() + 2));
+        CORRADE_COMPARE(a1[2].data(), static_cast<const void*>(a.data() + 2));
+        CORRADE_COMPARE(a2[0].data(), static_cast<const void*>(a.data()));
+        CORRADE_COMPARE(a2[1].data(), static_cast<const void*>(a.data()));
         CORRADE_COMPARE(a1[0].flags(), StringViewFlag::Global|StringViewFlag::NullTerminated);
-        CORRADE_COMPARE(a2[0].flags(), StringViewFlag::Global|StringViewFlag::NullTerminated);
+        CORRADE_COMPARE(a2[0].flags(), StringViewFlag::Global);
         CORRADE_COMPARE(a1[1].flags(), StringViewFlag::Global|StringViewFlag::NullTerminated);
+        CORRADE_COMPARE(a2[1].flags(), StringViewFlag::Global);
+        CORRADE_COMPARE(a1[2].flags(), StringViewFlag::Global|StringViewFlag::NullTerminated);
+        CORRADE_COMPARE(a2[2].flags(), StringViewFlag::Global|StringViewFlag::NullTerminated);
+
+    /* Empty delimiter -- inverse of the not found case, i.e. only the last
+       null-terminated in the forward case, all three null-terminated in the
+       backward case. The empty views point to either the end or begin, which
+       dictates the null termination. */
+    } {
+        StringView a = "ab"_s;
+        Array3<StringView> a1 = a.partition("");
+        Array3<StringView> a2 = a.partitionLast("");
+        CORRADE_COMPARE_AS(a1, (Array3<StringView>{"", "", "ab"}),
+            TestSuite::Compare::Container);
+        CORRADE_COMPARE_AS(a2, (Array3<StringView>{"ab", "", ""}),
+            TestSuite::Compare::Container);
+        CORRADE_COMPARE(a1[0].data(), static_cast<const void*>(a.data()));
+        CORRADE_COMPARE(a1[1].data(), static_cast<const void*>(a.data()));
+        CORRADE_COMPARE(a2[1].data(), static_cast<const void*>(a.data() + 2));
+        CORRADE_COMPARE(a2[2].data(), static_cast<const void*>(a.data() + 2));
+        CORRADE_COMPARE(a1[0].flags(), StringViewFlag::Global);
+        CORRADE_COMPARE(a2[0].flags(), StringViewFlag::Global|StringViewFlag::NullTerminated);
+        CORRADE_COMPARE(a1[1].flags(), StringViewFlag::Global);
         CORRADE_COMPARE(a2[1].flags(), StringViewFlag::Global|StringViewFlag::NullTerminated);
         CORRADE_COMPARE(a1[2].flags(), StringViewFlag::Global|StringViewFlag::NullTerminated);
         CORRADE_COMPARE(a2[2].flags(), StringViewFlag::Global|StringViewFlag::NullTerminated);
 
-    /* Empty -- all three null-terminated as well */
+    /* Empty -- all three null-terminated in both cases, with the views
+       pointing to the begin */
     } {
-        Array3<StringView> a1 = ""_s.partition("::");
-        Array3<StringView> a2 = ""_s.partitionLast("::");
+        StringView a = ""_s;
+        Array3<StringView> a1 = a.partition("::");
+        Array3<StringView> a2 = a.partitionLast("::");
         CORRADE_COMPARE_AS(a1, (Array3<StringView>{"", "", ""}),
             TestSuite::Compare::Container);
         CORRADE_COMPARE_AS(a2, (Array3<StringView>{"", "", ""}),
             TestSuite::Compare::Container);
-        CORRADE_COMPARE(a1[0].flags(), StringViewFlag::Global|StringViewFlag::NullTerminated);
-        CORRADE_COMPARE(a2[0].flags(), StringViewFlag::Global|StringViewFlag::NullTerminated);
-        CORRADE_COMPARE(a1[1].flags(), StringViewFlag::Global|StringViewFlag::NullTerminated);
-        CORRADE_COMPARE(a2[1].flags(), StringViewFlag::Global|StringViewFlag::NullTerminated);
-        CORRADE_COMPARE(a1[2].flags(), StringViewFlag::Global|StringViewFlag::NullTerminated);
-        CORRADE_COMPARE(a2[2].flags(), StringViewFlag::Global|StringViewFlag::NullTerminated);
+        for(std::size_t i = 0; i != 3; ++i) {
+            CORRADE_ITERATION(i);
+            CORRADE_COMPARE(a1[i].data(), static_cast<const void*>(a.data()));
+            CORRADE_COMPARE(a2[i].data(), static_cast<const void*>(a.data()));
+            CORRADE_COMPARE(a1[i].flags(), StringViewFlag::Global|StringViewFlag::NullTerminated);
+            CORRADE_COMPARE(a2[i].flags(), StringViewFlag::Global|StringViewFlag::NullTerminated);
+        }
 
     /* Null pointer -- all are null as well and thus inherit the Global flag */
     } {
@@ -1866,65 +1910,14 @@ void StringViewTest::partitionFlagsString() {
             TestSuite::Compare::Container);
         CORRADE_COMPARE_AS(a2, (Array3<StringView>{"", "", ""}),
             TestSuite::Compare::Container);
-        CORRADE_COMPARE(a1[0].flags(), StringViewFlag::Global);
-        CORRADE_COMPARE(a2[0].flags(), StringViewFlag::Global);
-        CORRADE_COMPARE(a1[1].flags(), StringViewFlag::Global);
-        CORRADE_COMPARE(a2[1].flags(), StringViewFlag::Global);
-        CORRADE_COMPARE(a1[2].flags(), StringViewFlag::Global);
-        CORRADE_COMPARE(a2[2].flags(), StringViewFlag::Global);
+        for(std::size_t i = 0; i != 3; ++i) {
+            CORRADE_ITERATION(i);
+            CORRADE_COMPARE(a1[i].data(), static_cast<const void*>(nullptr));
+            CORRADE_COMPARE(a2[i].data(), static_cast<const void*>(nullptr));
+            CORRADE_COMPARE(a1[i].flags(), StringViewFlag::Global);
+            CORRADE_COMPARE(a2[i].flags(), StringViewFlag::Global);
+        }
     }
-}
-
-void StringViewTest::partitionNullViewCharacter() {
-    /* Empty string -- all are non-null */
-    CORRADE_COMPARE_AS(""_s.partition('='),
-        (Array3<StringView>{"", "", ""}),
-        TestSuite::Compare::Container);
-    CORRADE_COMPARE_AS(""_s.partitionLast('='),
-        (Array3<StringView>{"", "", ""}),
-        TestSuite::Compare::Container);
-    for(StringView a: ""_s.partition('='))
-        CORRADE_VERIFY(a.data());
-    for(StringView a: ""_s.partitionLast('='))
-        CORRADE_VERIFY(a.data());
-
-    /* Nullptr string -- all are null */
-    CORRADE_COMPARE_AS(StringView{}.partition('='),
-        (Array3<StringView>{"", "", ""}),
-        TestSuite::Compare::Container);
-    CORRADE_COMPARE_AS(StringView{}.partitionLast('='),
-        (Array3<StringView>{"", "", ""}),
-        TestSuite::Compare::Container);
-    for(StringView a: StringView{}.partition('='))
-        CORRADE_VERIFY(!a.data());
-    for(StringView a: StringView{}.partitionLast('='))
-        CORRADE_VERIFY(!a.data());
-}
-
-void StringViewTest::partitionNullViewString() {
-    /* Empty string -- all are non-null */
-    CORRADE_COMPARE_AS(""_s.partition("::"),
-        (Array3<StringView>{"", "", ""}),
-        TestSuite::Compare::Container);
-    CORRADE_COMPARE_AS(""_s.partitionLast("::"),
-        (Array3<StringView>{"", "", ""}),
-        TestSuite::Compare::Container);
-    for(StringView a: ""_s.partition("::"))
-        CORRADE_VERIFY(a.data());
-    for(StringView a: ""_s.partitionLast("::"))
-        CORRADE_VERIFY(a.data());
-
-    /* Nullptr string -- all are null */
-    CORRADE_COMPARE_AS(StringView{}.partition("::"),
-        (Array3<StringView>{"", "", ""}),
-        TestSuite::Compare::Container);
-    CORRADE_COMPARE_AS(StringView{}.partitionLast("::"),
-        (Array3<StringView>{"", "", ""}),
-        TestSuite::Compare::Container);
-    for(StringView a: StringView{}.partition("::"))
-        CORRADE_VERIFY(!a.data());
-    for(StringView a: StringView{}.partitionLast("::"))
-        CORRADE_VERIFY(!a.data());
 }
 
 void StringViewTest::hasPrefix() {
