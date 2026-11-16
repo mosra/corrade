@@ -3092,7 +3092,7 @@ void StringViewTest::findAnyEmpty() {
 
         StringView found = a.findAny("");
         CORRADE_VERIFY(found.isEmpty());
-        CORRADE_COMPARE(found.data(), static_cast<const void*>(found.end()));
+        CORRADE_COMPARE(found.data(), static_cast<const void*>(a.end()));
 
     /* Finding anything in an empty string should behave the same as as if
        nothing was found at all */
@@ -3102,7 +3102,7 @@ void StringViewTest::findAnyEmpty() {
 
         StringView found = a.findAny("lel");
         CORRADE_VERIFY(found.isEmpty());
-        CORRADE_COMPARE(found.data(), static_cast<const void*>(found.end()));
+        CORRADE_COMPARE(found.data(), static_cast<const void*>(a.end()));
 
     /* Finding a null view inside an empty string should behave the same as
        if nothing was found at all */
@@ -3112,7 +3112,7 @@ void StringViewTest::findAnyEmpty() {
 
         StringView found = a.findAny(nullptr);
         CORRADE_VERIFY(found.isEmpty());
-        CORRADE_COMPARE(found.data(), static_cast<const void*>(found.end()));
+        CORRADE_COMPARE(found.data(), static_cast<const void*>(a.end()));
 
     /* Finding an empty string inside a null view should behave the same as
        if nothing was found at all */
@@ -3122,7 +3122,7 @@ void StringViewTest::findAnyEmpty() {
 
         StringView found = a.findAny("");
         CORRADE_VERIFY(found.isEmpty());
-        CORRADE_COMPARE(found.data(), static_cast<const void*>(found.end()));
+        CORRADE_VERIFY(!found.data());
     }
 }
 
@@ -3246,7 +3246,7 @@ void StringViewTest::findLastAnyEmpty() {
         StringView a = "hello";
         StringView found = a.findLastAny("");
         CORRADE_VERIFY(found.isEmpty());
-        CORRADE_COMPARE(found.data(), static_cast<const void*>(found.begin()));
+        CORRADE_COMPARE(found.data(), static_cast<const void*>(a.begin()));
 
     /* Finding anything in an empty string should behave the same as as if
        nothing was found at all */
@@ -3254,7 +3254,7 @@ void StringViewTest::findLastAnyEmpty() {
         StringView a = "";
         StringView found = a.findLastAny("lel");
         CORRADE_VERIFY(found.isEmpty());
-        CORRADE_COMPARE(found.data(), static_cast<const void*>(found.begin()));
+        CORRADE_COMPARE(found.data(), static_cast<const void*>(a.begin()));
 
     /* Finding a null view inside an empty string should behave the same as
        if nothing was found at all */
@@ -3262,7 +3262,7 @@ void StringViewTest::findLastAnyEmpty() {
         StringView a = "";
         StringView found = a.findLastAny(nullptr);
         CORRADE_VERIFY(found.isEmpty());
-        CORRADE_COMPARE(found.data(), static_cast<const void*>(found.begin()));
+        CORRADE_COMPARE(found.data(), static_cast<const void*>(a.begin()));
 
     /* Finding an empty string inside a null view should behave the same as
        if nothing was found at all */
@@ -3270,7 +3270,7 @@ void StringViewTest::findLastAnyEmpty() {
         StringView a{nullptr};
         StringView found = a.findLastAny("");
         CORRADE_VERIFY(found.isEmpty());
-        CORRADE_COMPARE(found.data(), static_cast<const void*>(found.begin()));
+        CORRADE_VERIFY(!found.data());
     }
 }
 
